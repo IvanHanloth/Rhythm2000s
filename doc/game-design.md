@@ -34,7 +34,7 @@
 ## 判定（待细化）
 
 - 判定等级初步设想：Perfect / Good / Miss，具体时间窗口待原型测试后确定。
-- MVP 暂用 Perfect ±45 毫秒、Good ±100 毫秒，见 [prototypes/mvp.md](prototypes/mvp.md)。
+- MVP 暂用 Perfect ±45 毫秒、Good ±100 毫秒；目标前 100–200 毫秒提前按下算 Miss，防止连按蒙中，见 [prototypes/mvp.md](prototypes/mvp.md#判定规则)。
 - 判定以音频播放时间为准。
 - 需要提供输入延迟校准（《节奏天国》系列也有类似设置）。
 
