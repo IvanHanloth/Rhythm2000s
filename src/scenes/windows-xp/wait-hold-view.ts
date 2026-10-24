@@ -1,6 +1,7 @@
 // 一局里下载进度窗（progress-download）和音量控制（volume-mute）的画面
 // （doc/scenes/windows-xp-levels.md「等待与长按」）。
-// 两个动作在示范段和跟打段都要「从头做一遍」：下载窗两段各弹出一次、各走 2 拍；音量小窗两段各掉一次、各拖回一次。
+// 两个动作在示范段和跟打段都要做一遍：下载窗两段各弹出一次、各走 3 拍；
+// 音量小窗示范段由电脑把音量从原位拖到 0，跟打段由玩家从 0 拖回原位。
 // 所以每个事件建两份部件，示范一份、跟打一份。音量控制只是画面，不改游戏的实际音量。
 // 画面每帧只根据拍位置计算，不累加帧间隔。坐标都是虚拟 XP 屏幕坐标。
 
@@ -13,6 +14,7 @@ import { WORK_AREA_HEIGHT, XP_SCREEN_WIDTH } from './components/screen.ts';
 import type { XpTaskbar } from './components/taskbar.ts';
 import { XpVolumeControl } from './components/volume-control.ts';
 import type { PopupSession, PopupWindowState } from './popup-session.ts';
+import type { Turn } from './virtual-mouse.ts';
 
 type Point = { x: number; y: number };
 
@@ -28,7 +30,7 @@ const DOWNLOADS = [
 ];
 const DOWNLOAD_HOST = 'www.example-files.com';
 
-/** 音量被调低之前的位置（0～1），玩家要把滑块拖回这里 */
+/** 音量原来的位置（0～1）：示范段从这里拖到 0，玩家要把滑块拖回这里 */
 const ORIGINAL_VOLUME = 0.7;
 /** Miss 后左右抖动的时长（拍）和幅度（像素），之后收起 */
 const SHAKE_BEATS = 0.25;
@@ -40,7 +42,7 @@ const FADE_BEATS = 0.25;
 
 /** 一次演出（示范段或跟打段）的时间点，都是全曲拍 */
 interface Run {
-  /** 事件拍位置：下载窗弹出到位 / 音量掉到底、按下的拍点 */
+  /** 事件拍位置：下载窗弹出到位 / 音量按下滑块的拍点 */
   start: number;
   /** 下载窗点「Open」或音量松开的时间；还没有时为 null */
   done: number | null;
@@ -121,7 +123,7 @@ export class WaitHoldView {
   }
 
   /** 虚拟鼠标每一下要点的位置；不是这里画的事件返回 null */
-  clickPoints(event: number): Point[] | null {
+  clickPoints(event: number, turn: Turn): Point[] | null {
     const target = this.targets.get(event);
     if (!target) return null;
     if (target.kind === 'download') {
@@ -132,8 +134,10 @@ export class WaitHoldView {
       const p = target.response.thumbCenter(volume);
       return { x: target.origin.x + p.x, y: target.origin.y + p.y };
     };
-    // 按下：掉到底的滑块；松开：拖回原来的位置
-    return [thumb(0), thumb(ORIGINAL_VOLUME)];
+    // 示范段从原位按下、拖到底松开；跟打段从底部按下、拖回原位松开
+    return turn === 'call'
+      ? [thumb(ORIGINAL_VOLUME), thumb(0)]
+      : [thumb(0), thumb(ORIGINAL_VOLUME)];
   }
 
   /** 判定字样的位置：部件上沿的中点 */
@@ -152,13 +156,14 @@ export class WaitHoldView {
     for (const target of this.targets.values()) {
       const state = this.session.windows[target.event]!;
       const call = this.callRun(state, beat);
-      const response = this.responseRun(state, target.event);
+      const response = this.responseRun(state);
       if (target.kind === 'download') {
         this.renderDownload(target.call, call, beat);
         this.renderDownload(target.response, response, beat);
       } else {
-        if (this.renderVolume(target, target.call, call, beat, pointer)) muted = true;
-        if (this.renderVolume(target, target.response, response, beat, pointer)) muted = true;
+        this.renderVolume(target, target.call, call, 'call', beat, pointer);
+        this.renderVolume(target, target.response, response, 'response', beat, pointer);
+        if (this.volumeMuted(state, response, beat)) muted = true;
       }
     }
     this.taskbar.setMuted(muted);
@@ -179,13 +184,14 @@ export class WaitHoldView {
   }
 
   /** 跟打段：看玩家的判定 */
-  private responseRun(state: PopupWindowState, event: number): Run {
+  private responseRun(state: PopupWindowState): Run {
     const toBeat = (time: number | null) => (time === null ? null : this.session.beatAt(time));
     return {
       start: state.response.beat,
       done: toBeat(state.closedAt),
       missed: toBeat(state.missedAt),
-      held: this.session.heldEvent === event,
+      // 只判定按下：按下命中后滑块跟着鼠标走，到自动松开为止
+      held: state.clicks[0]?.hitAt != null,
     };
   }
 
@@ -218,7 +224,7 @@ export class WaitHoldView {
 
     view.visible = visible;
     if (!visible) return;
-    // 进度条走 2 拍（progress-download 的判定点在事件后 2 拍）
+    // 进度条走 3 拍（progress-download 的判定点在事件后 3 拍）
     const wait = actionTapOffsets('progress-download')[0]!;
     dialog.setProgress((beat - run.start) / wait);
     dialog.setOpenPressed(pressed);
@@ -229,60 +235,64 @@ export class WaitHoldView {
 
   // ---------- 音量控制 ----------
 
-  /** 画一份音量小窗；返回此刻是否处于「被调成静音」的状态（托盘小喇叭据此显示静音标记） */
+  /**
+   * 画一份音量小窗。示范段电脑把滑块从原位拖到 0，跟打段玩家把它从 0 拖回原位；
+   * 按住期间滑块跟着鼠标走，不超出 0～原位。
+   */
   private renderVolume(
     target: VolumeTarget,
     control: XpVolumeControl,
     run: Run,
+    turn: Turn,
     beat: number,
     pointer: Point,
-  ): boolean {
+  ): void {
     const view = control.view;
     const appear = run.start - BEATS.windowOpen;
-    const bottom = target.origin.y + control.height;
-    let visible = beat >= appear;
-    let open = 1;
-    let shake = 0;
-    let volume = 0;
-    let dragging = false;
-    let muted = true;
-
-    if (!visible) {
+    if (beat < appear) {
       view.visible = false;
-      return false;
+      return;
     }
-    if (run.done !== null && beat >= run.done) {
-      // 松开：滑块回到原位、取消静音，小窗收起
-      volume = ORIGINAL_VOLUME;
-      muted = false;
-      open = 1 - clamp01((beat - run.done) / BEATS.windowClose);
+    const from = turn === 'call' ? ORIGINAL_VOLUME : 0;
+    const to = turn === 'call' ? 0 : ORIGINAL_VOLUME;
+    const done = run.done !== null && beat >= run.done;
+    let open = easeOutCubic(clamp01((beat - appear) / BEATS.windowOpen));
+    let shake = 0;
+    let volume = from;
+    let dragging = false;
+
+    if (done) {
+      // 松开：滑块停在终点，小窗收起
+      volume = to;
+      open = 1 - clamp01((beat - run.done!) / BEATS.windowClose);
     } else if (run.missed !== null && beat >= run.missed) {
-      // Miss：滑块掉回底部，抖一下再收起
+      // Miss（只有跟打段会有）：滑块掉回底部，抖一下再收起
       const since = beat - run.missed;
       if (since < SHAKE_BEATS) {
         shake = Math.sin(since * Math.PI * 16) * SHAKE_PIXELS * (1 - since / SHAKE_BEATS);
       }
       open = 1 - clamp01((since - SHAKE_BEATS) / FADE_BEATS);
-    } else if (beat < run.start) {
-      // 弹出：小窗往上展开，滑块从原位掉到底
-      const p = clamp01((beat - appear) / BEATS.windowOpen);
-      open = easeOutCubic(p);
-      volume = ORIGINAL_VOLUME * (1 - p);
-      muted = false;
     } else if (run.held) {
-      // 按住：滑块跟着鼠标走
       dragging = true;
       volume = Math.min(ORIGINAL_VOLUME, control.volumeAtY(pointer.y - target.origin.y));
     }
 
-    visible = open > 0;
-    view.visible = visible;
-    if (!visible) return false;
-    view.position.set(target.origin.x + shake, bottom);
+    view.visible = open > 0;
+    if (!view.visible) return;
+    view.position.set(target.origin.x + shake, target.origin.y + control.height);
     view.scale.set(1, Math.max(0.01, open));
     control.setVolume(volume, dragging);
-    control.setMuted(muted);
-    return muted;
+    // 「Mute」：示范段松开时勾上，跟打段松开时取消
+    control.setMuted(turn === 'call' ? done : !done);
+  }
+
+  /** 托盘小喇叭显示静音：从示范段松开起，到跟打段松开或 Miss 后小窗收起为止 */
+  private volumeMuted(state: PopupWindowState, response: Run, beat: number): boolean {
+    const mutedFrom = state.call.beat + actionTapOffsets(state.call.action).at(-1)!;
+    const mutedUntil =
+      response.done ??
+      (response.missed !== null ? response.missed + SHAKE_BEATS + FADE_BEATS : Infinity);
+    return beat >= mutedFrom && beat < mutedUntil;
   }
 
   /** 音量小窗的左上角：托盘小喇叭正上方，不超出屏幕右边 */

@@ -57,7 +57,7 @@ const HINTS: Record<string, TutorialHint> = {
   'start-menu': { name: 'Start menu', how: 'Start, then a program half a beat later' },
   'recycle-bin': { name: 'Recycle Bin', how: 'Throw the file away on the beat' },
   'progress-download': { name: 'File download', how: 'Wait for the bar, click Open as it fills' },
-  'volume-mute': { name: 'Volume', how: 'Press on the beat, release one beat later' },
+  'volume-mute': { name: 'Volume', how: 'Grab the slider on the beat' },
   'alert-note': { name: 'Alert', how: 'Click OK on the beat' },
   'alert-caution': { name: 'Caution alert', how: 'Click OK on the beat' },
   'alert-stop': { name: 'Stop alert', how: 'Click OK on the beat' },

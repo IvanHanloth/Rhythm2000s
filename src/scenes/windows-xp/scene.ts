@@ -41,7 +41,7 @@ import { EXPLORER_TITLE, XpLevelSelect } from './level-select.ts';
 import { XpResultsWindow } from './results-window.ts';
 import { ShellTargetsView, windowSlotIndex } from './shell-targets-view.ts';
 import { createPopupSounds, type PopupSounds } from './song.ts';
-import { VirtualMouse } from './virtual-mouse.ts';
+import { VirtualMouse, type Turn } from './virtual-mouse.ts';
 import { WaitHoldView } from './wait-hold-view.ts';
 
 const theme = THEMES.xp;
@@ -265,11 +265,6 @@ class WindowsXpScene implements Scene {
     else if (this.state === 'ready' && this.chart) void this.start(this.chart);
   }
 
-  /** 松开：只有一局进行中、正按住 volume-mute 时才有意义 */
-  onRelease({ audioTime }: TapInfo): void {
-    if (this.state === 'playing') this.session?.release(audioTime);
-  }
-
   /** 关卡里、结果框上按 Esc 回到关卡列表；关卡列表上交给游戏入口回网吧 */
   onEscape(): boolean {
     if (this.state === 'select') return false;
@@ -376,10 +371,9 @@ class WindowsXpScene implements Scene {
     const tutorial = this.tutorial;
     const chart = this.chart;
     if (!tutorial || !chart) return;
-    const targets = session.windows.reduce((n, state) => n + state.clicks.length, 0);
     const passed = tutorialPassed(
       session.judgements.map((j) => j.level),
-      targets,
+      session.targetCount,
     );
     if (passed) tutorial.index++;
     tutorial.retry = !passed;
@@ -419,8 +413,8 @@ class WindowsXpScene implements Scene {
     );
     this.waitHoldView = new WaitHoldView({ session, taskbar: this.taskbar });
     this.screen.addChildAt(this.waitHoldView.layer, this.screen.getChildIndex(this.pointerLayer));
-    this.virtualMouse = new VirtualMouse(this.session, this.desktop, (state, event) =>
-      this.clickPoints(state, event),
+    this.virtualMouse = new VirtualMouse(this.session, this.desktop, (state, event, turn) =>
+      this.clickPoints(state, event, turn),
     );
     this.pointerLayer.addChild(this.virtualMouse.view);
     this.cursorCover.eventMode = 'static';
@@ -612,14 +606,18 @@ class WindowsXpScene implements Scene {
    * 虚拟鼠标要点的位置（虚拟屏幕坐标），每一下一个。消息框点默认按钮的中心。
    * desktop-refresh 的位置由 VirtualMouse 自己算；新动作在这里补上自己的位置。
    */
-  private clickPoints(state: PopupWindowState, event: number): { x: number; y: number }[] {
+  private clickPoints(
+    state: PopupWindowState,
+    event: number,
+    turn: Turn,
+  ): { x: number; y: number }[] {
     const popup = this.popups[event];
     if (popup) {
       const button = popup.buttonCenter();
       return [{ x: popup.view.x + button.x, y: popup.view.y + button.y }];
     }
-    // 下载窗点「Open」，音量控制按下、松开在滑块上
-    const waitHold = this.waitHoldView?.clickPoints(event);
+    // 下载窗点「Open」，音量控制按下、松开在滑块上（两段拖的方向相反）
+    const waitHold = this.waitHoldView?.clickPoints(event, turn);
     if (waitHold) return waitHold;
     // 气泡点关闭、程序窗口点最小化、开始菜单点「开始」和菜单项、文件点它自己
     const shell = this.shellView?.clickPoints(event);

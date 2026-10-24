@@ -53,21 +53,25 @@ export const ACTION_LABELS: Record<ActionType, string> = {
  * 一个动作要按几下：每一下相对事件拍位置的偏移（拍）。大多数动作只按一下（[0]）；
  * desktop-refresh 先右键、0.5 拍后点「刷新」（doc/chart-format.md，2026-10-24 用户定为固定间隔）；
  * start-menu 先按「开始」、0.5 拍后点菜单项（doc/scenes/windows-xp-levels.md）；
- * progress-download 要等进度条走 2 拍，走满那一拍才点；volume-mute 拍点上按下、1 拍后松开。
+ * progress-download 要等进度条走 3 拍（整小节当休止），走满那一拍才点；volume-mute 拍点上按下，1 拍后自动松开（不判定）。
  */
 const TAP_OFFSETS: Partial<Record<ActionType, readonly number[]>> = {
   'desktop-refresh': [0, 0.5],
   'start-menu': [0, 0.5],
   // Mac 苹果菜单：先点苹果、0.5 拍后点菜单项（doc/scenes/mac-2000.md）
   'menu-apple': [0, 0.5],
-  'progress-download': [2],
+  'progress-download': [3],
   'volume-mute': [0, 1],
 };
 
-/** 每一下是按下还是松开。只有长按的动作有「松开」，玩家要从上一下一直按住 */
-export type TapKind = 'press' | 'release';
+/**
+ * 每一下是什么：press 是按下；release 是松开，玩家要从上一下一直按住，松开也判定；
+ * auto 是上一下命中后由游戏自己完成（画面和声音照常），不判定、不计分。
+ * volume-mute 只判定按下，松开是 auto（2026-10-24 用户要求）。
+ */
+export type TapKind = 'press' | 'release' | 'auto';
 const TAP_KINDS: Partial<Record<ActionType, readonly TapKind[]>> = {
-  'volume-mute': ['press', 'release'],
+  'volume-mute': ['press', 'auto'],
 };
 
 /** 这个动作第 step 下是按下还是松开 */

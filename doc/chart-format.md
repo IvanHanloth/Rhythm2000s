@@ -96,7 +96,7 @@ public/charts/
 
 同一小节里的事件必须按 `beat` 从小到大排列，不能重复。
 
-有的动作要按两下（见下面动作表的「跟打段」一列，例如 `desktop-refresh`），或者判定点不在事件拍位置上（`progress-download` 要等 2 拍）。这种事件从 `beat` 一直占到最后一下：
+有的动作要按两下（见下面动作表的「跟打段」一列，例如 `desktop-refresh`），或者判定点不在事件拍位置上（`progress-download` 要等 3 拍）。这种事件从 `beat` 一直占到最后一下：
 
 - 下一个事件的 `beat` 必须在这个事件的最后一下之后；
 - 最后一下也必须落在小节之内（小于 `beatsPerBar`）。
@@ -120,8 +120,8 @@ public/charts/
 | `window-minimize` | 程序窗口的最小化按钮（`SC_MINIMIZE`） | `windows-xp` | 在拍点上弹出记事本、画图等程序窗口，任务栏多一个按钮，响 `Windows XP Restore.wav` | 在拍点上把它最小化到任务栏，响 `Windows XP Minimize.wav` |
 | `start-menu` | 开始菜单 | `windows-xp` | 虚拟鼠标在拍点上按「开始」弹出菜单；**0.5 拍后**点一个程序，菜单收起 | 按两下：拍点上一下（开始），0.5 拍后再一下（菜单项） |
 | `recycle-bin` | 回收站（`SHFileOperation` 的 `FO_DELETE`） | `windows-xp` | 在拍点上桌面落下一个文件，响 `Windows XP Default.wav`（暂定） | 在拍点上把它扔进回收站，响 `Windows XP Recycle.wav` |
-| `progress-download` | IE6 文件下载进度窗（`msctls_progress32`） | `windows-xp` | 在拍点上弹出，进度条走 **2 拍**，走满时虚拟鼠标点「Open」 | 下载窗同一拍自动弹出；在**拍点后 2 拍**（进度条走满）点一下 |
-| `volume-mute` | 托盘音量控制（`msctls_trackbar32`），只是画面，不改实际音量 | `windows-xp` | 拍点前滑块掉到底；虚拟鼠标在拍点上按住滑块，**1 拍**后在拍点上松开 | 长按：拍点上按下，按住 1 拍，在拍点上松开；按下、松开各判一次 |
+| `progress-download` | IE6 文件下载进度窗（`msctls_progress32`） | `windows-xp` | 在拍点上弹出，进度条走 **3 拍**，走满时虚拟鼠标点「Open」 | 下载窗同一拍自动弹出；在**拍点后 3 拍**（进度条走满）点一下 |
+| `volume-mute` | 托盘音量控制（`msctls_trackbar32`），只是画面，不改实际音量 | `windows-xp` | 拍点前小窗弹出；虚拟鼠标在拍点上按住滑块，**1 拍**里把音量拖到 0，在拍点上松开 | 小窗弹出时滑块在 0；拍点上按下（只判定这一下），之后 1 拍里滑块自动拖回原位、自动松开 |
 | `alert-note` | Mac 提示框（`kAlertNoteAlert`，程序图标） | `mac-2000` | 在拍点上弹出，响 `Glass` | 在拍点上按「好」关掉 |
 | `alert-caution` | Mac 警告提示框（`kAlertCautionAlert`，黄色三角） | `mac-2000` | 在拍点上弹出，响 `Funk` | 同上 |
 | `alert-stop` | Mac 停止提示框（`kAlertStopAlert`） | `mac-2000` | 在拍点上弹出，响 `Basso` | 同上 |
@@ -131,7 +131,7 @@ public/charts/
 | `menu-apple` | Mac 苹果菜单（`NSMenu`，菜单栏最左边的苹果） | `mac-2000` | 虚拟鼠标在拍点上点苹果，菜单落下，响 `Morse`；**0.5 拍后**点一个菜单项，响 `Tink`，菜单收起 | 按两下：拍点上一下（苹果），0.5 拍后再一下（菜单项） |
 | `dock-trash` | Dock 上的废纸篓（`NSWorkspaceRecycleOperation`） | `mac-2000` | 在拍点上 Dock 上方落下一个文件，响 `Purr` | 在拍点上把它扔进废纸篓，响 `Blow`，废纸篓由空变满 |
 
-四种消息框玩法相同，只是图标、按钮和提示音不同，同一乐句里可以混用。`desktop-refresh` 也可以和消息框混用；它的第二下固定在第一下之后 0.5 拍（2026-10-24 用户选定：一个事件、固定间隔），谱面里只写第一下的拍位置。`balloon-info`、`window-minimize`、`start-menu`、`recycle-bin` 是 2026-10-24 加的四个 XP 动作，同样可以和其他 XP 动作混用，`start-menu` 的两下和 `desktop-refresh` 一样固定相隔 0.5 拍，设计见 [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md)。`progress-download`、`volume-mute` 同样是固定间隔（判定点分别在 +2 拍和 0、+1 拍），设计见 [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md#等待与长按下载进度窗音量控制2026-10-24)；`volume-mute` 的第二下是「松开」，玩家要从第一下一直按住。Mac 场景的动作也一样，玩法相同，同一乐句里可以混用（Mac 提示音的选择见 [scenes/mac-2000.md](scenes/mac-2000.md#音效)）；`menu-apple` 的两下和 `start-menu` 一样固定相隔 0.5 拍。设计文档里的其他动作（XP 的收邮件等）实现后再按同样规则加入此表。谱面用了所在场景不支持的动作，视为错误。
+四种消息框玩法相同，只是图标、按钮和提示音不同，同一乐句里可以混用。`desktop-refresh` 也可以和消息框混用；它的第二下固定在第一下之后 0.5 拍（2026-10-24 用户选定：一个事件、固定间隔），谱面里只写第一下的拍位置。`balloon-info`、`window-minimize`、`start-menu`、`recycle-bin` 是 2026-10-24 加的四个 XP 动作，同样可以和其他 XP 动作混用，`start-menu` 的两下和 `desktop-refresh` 一样固定相隔 0.5 拍，设计见 [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md)。`progress-download`、`volume-mute` 同样是固定间隔（判定点分别在 +3 拍和 0、+1 拍），设计见 [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md#等待与长按下载进度窗音量控制2026-10-24)；`volume-mute` 的第二下是「松开」，由游戏在第一下命中后自动完成，只判定第一下。Mac 场景的动作也一样，玩法相同，同一乐句里可以混用（Mac 提示音的选择见 [scenes/mac-2000.md](scenes/mac-2000.md#音效)）；`menu-apple` 的两下和 `start-menu` 一样固定相隔 0.5 拍。设计文档里的其他动作（XP 的收邮件等）实现后再按同样规则加入此表。谱面用了所在场景不支持的动作，视为错误。
 
 ## 官方关卡的要求
 
@@ -146,7 +146,7 @@ public/charts/
 
 ## 时间上的限制
 
-「Follow me / Your turn」提示会在示范小节、跟打小节结束前半拍切换（见 [prototypes/mvp.md](prototypes/mvp.md#轮次提示2026-10-24-用户要求加入)），所以这两种小节里最后一下的 Good 判定窗口必须在小节结束前半拍之前关闭。120 BPM、Good ±100 毫秒时，最后一下最晚在第 3.25 拍；要按两下的 `desktop-refresh`、`start-menu`、`menu-apple` 最晚放在第 2.75 拍（第二下在 3.25 拍），`volume-mute` 最晚放在第 2.25 拍，`progress-download` 最晚放在第 1.25 拍。加载谱面时会检查，不满足的谱面视为错误。
+「Follow me / Your turn」提示会在示范小节、跟打小节结束前半拍切换（见 [prototypes/mvp.md](prototypes/mvp.md#轮次提示2026-10-24-用户要求加入)），所以这两种小节里最后一下的 Good 判定窗口必须在小节结束前半拍之前关闭。120 BPM、Good ±100 毫秒时，最后一下最晚在第 3.25 拍；要按两下的 `desktop-refresh`、`start-menu`、`menu-apple` 最晚放在第 2.75 拍（第二下在 3.25 拍），`volume-mute` 最晚放在第 2.25 拍，`progress-download` 最晚放在第 0.25 拍。加载谱面时会检查，不满足的谱面视为错误。
 
 ## 校验与报错
 

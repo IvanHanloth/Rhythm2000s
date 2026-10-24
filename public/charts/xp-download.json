@@ -17,12 +17,7 @@
         { "beat": 2, "action": "dialog-info" }
       ]
     },
-    {
-      "call": [
-        { "beat": 0, "action": "progress-download" },
-        { "beat": 3, "action": "dialog-info" }
-      ]
-    },
+    { "call": [{ "beat": 0, "action": "progress-download" }] },
     {
       "call": [
         { "beat": 0, "action": "dialog-info" },
@@ -30,12 +25,7 @@
         { "beat": 3, "action": "dialog-info" }
       ]
     },
-    {
-      "call": [
-        { "beat": 0, "action": "dialog-info" },
-        { "beat": 1, "action": "progress-download" }
-      ]
-    },
+    { "call": [{ "beat": 0, "action": "progress-download" }] },
     {
       "call": [
         { "beat": 0, "action": "dialog-info" },
@@ -46,7 +36,8 @@
     {
       "call": [
         { "beat": 0, "action": "balloon-info" },
-        { "beat": 1, "action": "progress-download" }
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "dialog-info" }
       ]
     },
     {
@@ -56,12 +47,7 @@
         { "beat": 2.5, "action": "dialog-info" }
       ]
     },
-    {
-      "call": [
-        { "beat": 0.5, "action": "progress-download" },
-        { "beat": 3, "action": "balloon-info" }
-      ]
-    },
+    { "call": [{ "beat": 0.25, "action": "progress-download" }] },
     {
       "call": [
         { "beat": 0, "action": "dialog-info" },
@@ -77,17 +63,12 @@
         { "beat": 1.5, "action": "volume-mute" }
       ]
     },
-    {
-      "call": [
-        { "beat": 0, "action": "volume-mute" },
-        { "beat": 1.25, "action": "progress-download" }
-      ]
-    },
+    { "call": [{ "beat": 0, "action": "progress-download" }] },
     {
       "call": [
         { "beat": 0, "action": "balloon-info" },
         { "beat": 0.5, "action": "balloon-info" },
-        { "beat": 1, "action": "progress-download" },
+        { "beat": 2, "action": "dialog-info" },
         { "beat": 3.25, "action": "dialog-info" }
       ]
     },
@@ -98,12 +79,6 @@
         { "beat": 2, "action": "volume-mute" }
       ]
     },
-    {
-      "call": [
-        { "beat": 0, "action": "progress-download" },
-        { "beat": 2.5, "action": "dialog-info" },
-        { "beat": 3, "action": "dialog-info" }
-      ]
-    }
+    { "call": [{ "beat": 0, "action": "progress-download" }] }
   ]
 }

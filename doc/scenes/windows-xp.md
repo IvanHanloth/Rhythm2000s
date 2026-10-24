@@ -129,7 +129,7 @@
 - 收邮件
 - 点击刷新（右键桌面 → 刷新，动作 ID `desktop-refresh`，2026-10-24 实现）
 - 托盘气泡、最小化程序窗口、开始菜单、扔进回收站（`balloon-info`、`window-minimize`、`start-menu`、`recycle-bin`，2026-10-24 用户选定并实现），设计和配套的关卡见 [windows-xp-levels.md](windows-xp-levels.md)
-- 文件下载进度窗（等进度条走满再点）、音量控制（长按把滑块拖回原位，不改实际音量）（`progress-download`、`volume-mute`，2026-10-24 用户要求），设计见 [windows-xp-levels.md](windows-xp-levels.md#等待与长按下载进度窗音量控制2026-10-24)
+- 文件下载进度窗（等进度条走满再点）、音量控制（拍点上按下滑块，滑块自动拖回原位，不改实际音量）（`progress-download`、`volume-mute`，2026-10-24 用户要求），设计见 [windows-xp-levels.md](windows-xp-levels.md#等待与长按下载进度窗音量控制2026-10-24)
 
 ## 候选 / 待讨论
 

@@ -1,8 +1,8 @@
 // 一局里的虚拟鼠标和右键菜单（doc/scenes/windows-xp.md「虚拟鼠标」「桌面右键菜单与刷新」）。
 // 示范段：鼠标自己示范（滑到新弹出的消息框上；desktop-refresh 在拍点上右键、0.5 拍后点「刷新」）。
 // 跟打段：提前滑到下一个目标上停好，玩家按键时在原地点下去，判定完才离开。
-// progress-download 示范段在进度条走满那一拍点「Open」；volume-mute 示范段按住滑块 1 拍再松开，
-// 跟打段从按下命中一直按到松开，鼠标从掉到底的滑块移到原位，滑块跟着它走（wait-hold-view.ts）。
+// progress-download 示范段在进度条走满那一拍点「Open」；volume-mute 示范段按住滑块 1 拍，从原位拖到底再松开，
+// 跟打段从按下命中一直按到松开，鼠标从底部拖回原位，滑块跟着它走（wait-hold-view.ts）。
 // 画面每帧只根据拍位置计算。坐标都是虚拟 XP 屏幕坐标。
 
 import { Container, Sprite } from 'pixi.js';
@@ -39,8 +39,14 @@ const FLICKER_BEATS = 1 / 8;
 /** 示范段点完以后停多久再走（拍） */
 const HOLD_BEATS = 1 / 16;
 
-/** 一个谱面事件每一下要点的位置（虚拟屏幕坐标）。新动作在场景的 clickPoints 里补上自己的位置 */
-export type ClickPoints = (state: PopupWindowState, event: number) => Point[];
+/** 示范段还是跟打段 */
+export type Turn = 'call' | 'response';
+
+/**
+ * 一个谱面事件每一下要点的位置（虚拟屏幕坐标）。新动作在场景的 clickPoints 里补上自己的位置。
+ * 大多数动作两段点同样的位置；volume-mute 两段拖的方向相反，所以按 turn 分开给。
+ */
+export type ClickPoints = (state: PopupWindowState, event: number, turn: Turn) => Point[];
 
 interface StopSource {
   stop: CursorStop;
@@ -54,7 +60,8 @@ export class VirtualMouse {
   private readonly menu = new XpContextMenu(DESKTOP_MENU);
   private readonly session: PopupSession;
   private readonly desktop: XpDesktop;
-  private readonly points: Point[][];
+  /** 示范段、跟打段每个事件每一下的位置 */
+  private readonly points: Record<Turn, Point[][]>;
   private readonly stops: StopSource[];
   /** 提前多少拍到位：Good 判定窗口 + 1/16 拍，保证最早的有效输入也点在目标上 */
   private readonly leadBeats: number;
@@ -73,11 +80,13 @@ export class VirtualMouse {
     this.view.addChild(this.menu.view, this.pointer);
 
     // desktop-refresh 的两下（右键位置、「刷新」条目）由这里算；其余动作由场景给出
-    this.points = session.windows.map((state, event) =>
-      state.call.action === 'desktop-refresh'
-        ? this.refreshPoints(state)
-        : clickPoints(state, event),
-    );
+    const pointsFor = (turn: Turn) =>
+      session.windows.map((state, event) =>
+        state.call.action === 'desktop-refresh'
+          ? this.refreshPoints(state)
+          : clickPoints(state, event, turn),
+      );
+    this.points = { call: pointsFor('call'), response: pointsFor('response') };
     this.stops = this.buildStops();
   }
 
@@ -128,14 +137,18 @@ export class VirtualMouse {
   private buildStops(): StopSource[] {
     const stops: StopSource[] = [{ stop: { beat: -Infinity, ...HOME } }];
     this.session.windows.forEach((state, event) => {
-      const points = this.points[event]!;
+      const callPoints = this.points.call[event]!;
+      const responsePoints = this.points.response[event]!;
       // 示范段：消息框只有一个停靠点（在它弹出的拍点上停在默认按钮上）；要按几下的动作每一下一个
       const callOffsets = state.clicks.map((c) => c.beat - state.response.beat);
       callOffsets.forEach((offset, step) => {
-        stops.push({ stop: { beat: state.call.beat + offset, ...points[step]! } });
+        stops.push({ stop: { beat: state.call.beat + offset, ...callPoints[step]! } });
       });
       state.clicks.forEach((click, step) => {
-        stops.push({ stop: { beat: click.beat, ...points[step]! }, click: { event, step } });
+        stops.push({
+          stop: { beat: click.beat, ...responsePoints[step]! },
+          click: { event, step },
+        });
       });
     });
     // 示范完回到屏幕中央，跟打段再出发去目标
@@ -191,7 +204,7 @@ export class VirtualMouse {
 
     session.windows.forEach((state, event) => {
       if (state.call.action !== 'desktop-refresh') return;
-      const [spot, item] = this.points[event]!;
+      const [spot, item] = this.points.call[event]!;
       const [first, second] = state.clicks;
       if (!spot || !item || !first || !second) return;
       const gap = second.beat - first.beat;
