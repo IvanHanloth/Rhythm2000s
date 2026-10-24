@@ -6,3 +6,4 @@
 - [不放 Claude 专用文件](feedback-vendor-neutral-agent-files.md) — 只用 AGENTS.md 和 .agents/，不提交 CLAUDE.md、.claude/
 - [字体 PP NeueBit](project-font-pp-neuebit.md) — 用户指定的像素字体，已提交但仅个人授权，商用前需购买
 - [大厅美术要求](feedback-hub-art-direction.md) — 不要方块人和代码拼的造型，场景写实，场景内只用英文，主角是 DeepSeek 鲸鱼娘 GLB
+- [英国黑客松](project-uk-hackathon.md) — 项目是英国黑客松作品，街区用 2000 年英国商业街元素，界面语言改不改先问用户
