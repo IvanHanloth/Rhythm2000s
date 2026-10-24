@@ -1,118 +1,107 @@
-# Windows XP 场景：新动作与关卡
+# Windows XP scene: further actions and levels
 
-> 状态：草稿（2026-10-24）。动作玩法由用户选定，拍数、音效、文案、上限都是暂定值，等试玩后调整。
+> Status: Draft. The actions were chosen by the user; beats, sounds, texts and limits are provisional until play-tested.
 
-XP 场景最早只有「弹出消息框 → 关掉」一种玩法，桌面上已经画好的托盘气泡、开始菜单、窗口最小化按钮、回收站都没进玩法。2026-10-24 用户选定再加四个动作，每个动作配一首谱面，最后出一首把全部动作混在一起的混音关。
+Beyond popping up and closing message boxes, the XP scene uses the tray balloon, Start menu, minimise button, Recycle Bin, a download window and the volume control, each with a chart, plus a remix level mixing everything. The widgets' look is in [windows-xp.md](windows-xp.md); how to write them in charts in [chart-format.md](../chart-format.md#action-ids).
 
-部件本身的样子见 [windows-xp.md](windows-xp.md) 的「界面部件」；谱面里怎么写见 [chart-format.md](../chart-format.md#动作-id)。
+## Shell actions
 
-## 新动作
+Action IDs follow the original widgets ([ADR 0006](../decisions/0006-actions-named-after-ui-classes.md)). As with message boxes, the computer does it in the call and the player handles it on the same beats in the response; the n-th target to appear is handled by the n-th press.
 
-动作 ID 按原版部件命名（[ADR 0006](../decisions/0006-actions-named-after-ui-classes.md)）。玩法和消息框一样：示范段电脑做一遍，跟打段玩家在同样的拍点上处理掉；第几个出现的目标由第几下处理。
-
-| 动作 ID | 部件（原版对应） | 示范段 | 跟打段 | 按几下 |
+| Action ID | Widget (original) | Call | Response | Presses |
 | --- | --- | --- | --- | --- |
-| `balloon-info` | 托盘气泡（`Shell_NotifyIcon` 的 `NIIF_INFO`） | 在拍点上从托盘图标冒出气泡，响 `Windows XP Balloon.wav` | 在拍点上点气泡右上角的关闭按钮，气泡收起 | 1 |
-| `window-minimize` | 程序窗口的最小化按钮（`SC_MINIMIZE`） | 在拍点上弹出一个程序窗口（记事本、画图、IE……），任务栏多出它的按钮，响 `Windows XP Restore.wav` | 在拍点上点最小化，窗口缩进自己的任务栏按钮，响 `Windows XP Minimize.wav` | 1 |
-| `start-menu` | 开始菜单 | 拍点上按「start」弹出开始菜单（点击声）；**0.5 拍后**点菜单里的一个程序，菜单收起，响 `Windows XP Menu Command.wav` | 同样按两下：拍点上一下（start），0.5 拍后一下（菜单项） | 2 |
-| `recycle-bin` | 回收站（`SHFileOperation` 的 `FO_DELETE`，允许撤销） | 在拍点上桌面落下一个文件图标，响 `Windows XP Default.wav`（暂定） | 在拍点上把文件扔进右下角的回收站，回收站图标由空变满，响 `Windows XP Recycle.wav` | 1 |
+| `balloon-info` | Tray balloon (`Shell_NotifyIcon`, `NIIF_INFO`) | A balloon rises from a tray icon on the beat with `Windows XP Balloon.wav` | Click its close button on the beat | 1 |
+| `window-minimize` | Program window minimise button (`SC_MINIMIZE`) | A program window (Notepad, Paint, IE…) opens on the beat with a taskbar button and `Windows XP Restore.wav` | Click minimise on the beat; it shrinks into its taskbar button with `Windows XP Minimize.wav` | 1 |
+| `start-menu` | Start menu | Start is clicked on the beat and the menu opens; **half a beat later** a program is clicked, the menu closes with `Windows XP Menu Command.wav` | The same two presses | 2 |
+| `recycle-bin` | Recycle Bin (`SHFileOperation`, `FO_DELETE`) | A file lands on the desktop on the beat with `Windows XP Default.wav` (provisional) | Throw it into the Recycle Bin on the beat; the bin turns full with `Windows XP Recycle.wav` | 1 |
 
-- `start-menu` 和 `desktop-refresh` 一样是「一个事件、固定间隔」的两下，谱面里只写第一下的拍位置；最后一下最晚在第 3.25 拍，所以 `start-menu` 最晚放在第 2.75 拍（120 BPM 时）。
-- 消息框、程序窗口、`desktop-refresh` 是「点到窗口上」，气泡、开始菜单、回收站是「点到任务栏和桌面上」，画面上的位置互不重叠，同一乐句里可以随便混用。
+Windows sit on the desktop while balloons, the Start menu and files sit by the taskbar, so they don't overlap and can be mixed freely.
 
-### 画面细节
+### Look
 
-| 动作 | 位置 | 示范段 | 跟打段 · 命中 | 跟打段 · Miss |
+| Action | Where | Call | Response hit | Response Miss |
 | --- | --- | --- | --- | --- |
-| `balloon-info` | 第 1、2、3 个气泡依次指向托盘的网络连接、Messenger、音量图标，从下往上叠 | 拍点上从尖角处弹开 | 缩小淡出 | 气泡左右抖一下，留到乐句结束再淡出 |
-| `window-minimize` | 和消息框共用屏幕上的 6 个位置；任务栏按钮排在「My Levels」按钮右边 | 从自己的任务栏按钮处放大弹出，标题栏是活动色 | 缩小飞向自己的任务栏按钮，按钮由按下变弹起 | 标题栏闪几下，留到乐句结束再淡出 |
-| `start-menu` | 开始菜单贴着「start」按钮向上展开 | 第一下：「start」按钮按下，菜单弹出；第二下：菜单项蓝底高亮，菜单收起 | 同示范 | 第一下 Miss：菜单不弹出；第二下 Miss：菜单停在原处，到乐句结束收起 |
-| `recycle-bin` | 文件图标排在任务栏上方一行（最多 6 个），从左往右 | 从上方落下，轻弹一下 | 沿弧线飞进回收站，回收站变满 | 图标左右抖一下，留到乐句结束再淡出 |
+| `balloon-info` | Balloons 1–3 point at the network, Messenger and volume tray icons, stacked upwards | Springs out of its tail on the beat | Shrinks and fades | Shakes, stays until the phrase ends, fades |
+| `window-minimize` | Shares the 6 screen slots with message boxes; taskbar buttons right of "My Levels" | Grows out of its taskbar button, active title bar | Shrinks into its taskbar button, which pops up | Title bar flashes, stays until the phrase ends, fades |
+| `start-menu` | The menu opens upwards from Start | First press: Start pressed, menu opens; second: the item highlights, menu closes | Same | First press missed: no menu; second missed: the menu stays until the phrase ends |
+| `recycle-bin` | Files in a row above the taskbar (up to 6), left to right | Drops from above with a small bounce | Arcs into the bin, which turns full | Shakes, stays until the phrase ends, fades |
 
-每个乐句开始时回收站清空、任务栏上的程序按钮收起。
+Each phrase starts with an empty bin and no program buttons.
 
-### 每个乐句的上限
+### Per-phrase limits
 
-画面上的位置就这么多，加载谱面时检查（[chart-format.md 场景附加规则](../chart-format.md#场景附加规则)）：
+There is only so much room on screen; validation checks these ([chart-format.md](../chart-format.md#scene-rules)):
 
-| 目标 | 每个乐句最多 | 原因 |
+| Targets | Max per phrase | Why |
 | --- | --- | --- |
-| 消息框 + 程序窗口 | 6 | 屏幕上 6 个位置 |
-| `window-minimize` | 4 | 任务栏上除「My Levels」外只放得下 4 个程序按钮 |
-| `balloon-info` | 3 | 托盘里只有 3 个图标 |
-| `recycle-bin` | 6 | 桌面那一行只摆得下 6 个文件 |
+| Message boxes + program windows | 6 | 6 screen slots |
+| `window-minimize` | 4 | Room for 4 program buttons besides "My Levels" |
+| `balloon-info` | 3 | 3 tray icons |
+| `recycle-bin` | 6 | Room for 6 files in the row |
 
-### 文案
+### Texts
 
-全部原创，模仿当年英文版系统提示的腔调（2026-10-24 起玩家看到的文字一律用英文）。
+All original, in the voice of English XP notices:
 
-- 气泡：「Found New Hardware / USB Mass Storage Device」「Windows Messenger / Jamie has just signed in.」「Automatic Updates / New updates are ready to download.」「Local Area Connection / A network cable is unplugged.」「Security Center / Your computer might be at risk.」
-- 程序窗口（标题栏 / 任务栏按钮）：「Untitled - Notepad」「untitled - Paint」「about:blank - Microsoft Internet Explorer」（标题栏放不下时截断成「...」，任务栏按钮上是「about:blank - Micr...」）「Minesweeper」
-- 开始菜单里轮流点到的程序：「Notepad」「Paint」「Minesweeper」「Calculator」「Windows Media Player」「Windows Messenger」
-- 回收站的文件：「New Text Document.txt」「Hey Ya!.mp3」「setup.exe」「untitled.bmp」「New Folder」「homework(1).doc」
+- Balloons: "Found New Hardware / USB Mass Storage Device", "Windows Messenger / Jamie has just signed in.", "Automatic Updates / New updates are ready to download.", "Local Area Connection / A network cable is unplugged.", "Security Center / Your computer might be at risk."
+- Program windows: "Untitled - Notepad", "untitled - Paint", "about:blank - Microsoft Internet Explorer" (cut off with "..." where it doesn't fit), "Minesweeper"
+- Start menu picks in rotation: Notepad, Paint, Minesweeper, Calculator, Windows Media Player, Windows Messenger
+- Files: "New Text Document.txt", "Hey Ya!.mp3", "setup.exe", "untitled.bmp", "New Folder", "homework(1).doc"
 
-## 等待与长按：下载进度窗、音量控制（2026-10-24）
+## Waits and holds: download window and volume control
 
-用户要求再加两个部件：一个是「文件传输」，要等一段时间才能点；一个是「音量调控」，长按一段时间把音量恢复原样，**不会真的改游戏音量**。用户选定：只做 XP 场景；传输窗在进度条走满的那一拍点；长按的按下和松开各判一次；两者都是固定拍数，谱面格式不变。
+A download that must be waited for, and a volume slider held to restore the volume (**visual only; the game's volume never changes**). XP only, fixed beat counts, no chart format change.
 
-| 动作 ID | 部件（原版对应） | 示范段 | 跟打段 | 判定点（相对事件拍位置） |
+| Action ID | Widget (original) | Call | Response | Judged at (from the event beat) |
 | --- | --- | --- | --- | --- |
-| `progress-download` | IE6 的文件下载进度窗（进度条是 `msctls_progress32`） | 拍点上弹出下载窗，进度条走 **3 拍**；走满时「Open」按钮由灰变亮，虚拟鼠标在那一拍点「Open」，窗口关闭 | 下载窗在同一拍自动弹出、同样走 3 拍，玩家在走满的那一拍点 | 1 下：+3 拍 |
-| `volume-mute` | 托盘音量控制小窗（滑块是 `msctls_trackbar32`） | 拍点前小窗弹出，滑块在原来的音量；虚拟鼠标在拍点上按住滑块，**1 拍**里把它拖到 0，在拍点上松开，托盘小喇叭出现静音标记 | 小窗在拍点前弹出，滑块停在 0（示范段调成的静音）；玩家在拍点上按下，之后 1 拍里滑块自动拖回原来的音量、自动松开 | 判定 1 下：按下 0；松开在 +1 拍，自动完成、不判定 |
+| `progress-download` | IE6 download window (`msctls_progress32` bar) | Opens on the beat; the bar fills over **3 beats**, Open lights up and the virtual mouse clicks it as the bar fills; the window closes | The window opens by itself on the beat and fills the same way; the player clicks as it fills | One press at +3 |
+| `volume-mute` | Tray volume pop-up (`msctls_trackbar32` slider) | Opens before the beat at the original volume; the virtual mouse grabs the slider on the beat, drags it to 0 over **1 beat** and releases on the beat; the tray speaker shows muted | Opens before the beat at 0 (muted by the call); the player presses on the beat, then the slider returns to the original volume over 1 beat and releases by itself | One judged press at 0; the release at +1 is automatic and unjudged |
 
-- 两个动作都是「一个事件、固定间隔」，和 `desktop-refresh`、`start-menu` 一样谱面里只写事件的拍位置。事件从拍位置一直占到最后一个判定点，期间不能放别的事件；按「最后一下最晚在第 3.25 拍」（120 BPM 时，见 [chart-format.md](../chart-format.md#时间上的限制)），`progress-download` 最晚放在第 0.25 拍，`volume-mute` 最晚放在第 2.25 拍。
-- 下载窗起休止符的作用（2026-10-24 用户要求，进度条从 2 拍加长到 3 拍）：它从小节开头一直占到第 4 拍，同一小节里放不下别的动作，整小节就是一段「等」。
-- 音量控制只是画面：滑块怎么动都不改变游戏的实际音量。
-- 只判定按下（2026-10-24 用户要求）：玩家在拍点上按下就算完成这一下，什么时候松手都不判定；按下命中后，滑块在 1 拍里自动回到原位，到 +1 拍自动松开、响松开的声音。事件仍然占到 +1 拍，最晚位置不变。
-- 示范和跟打方向相反（2026-10-24 用户纠正）：示范段电脑把音量从原位拖到 0，跟打段玩家把它从 0 拖回原位。托盘小喇叭从示范段松开起一直显示静音，到跟打段松开（或 Miss 后小窗收起）为止。
+- Both are one event with fixed spacing and occupy the bar until their last press; at 120 BPM `progress-download` starts by beat 0.25 and `volume-mute` by 2.25 ([chart-format.md](../chart-format.md#timing-limits)).
+- The download window works as a rest: it fills the whole bar, leaving no room for other actions.
+- Only the volume press is judged; when the player lets go doesn't matter.
+- Call and response drag in opposite directions: the computer mutes, the player restores. The tray speaker shows muted from the call's release until the response's release (or the pop-up closing after a Miss).
 
-### 输入：松开
+### Judging (provisional)
 
-输入里有「松开」：松开空格键，或鼠标 / 触摸在任何地方抬起，都算一次松开。XP 场景的 `volume-mute` 改成只判定按下以后，XP 场景不再用松开；Mac 的 `menu-volume` 也照同样的规则只判定按下（见 [mac-2000.md](mac-2000.md)），所以目前没有动作用到松开。
-
-### 判定（暂定）
-
-| 情况 | 结果 |
+| Case | Result |
 | --- | --- |
-| `progress-download` 进度条走满之前点 | 和其他动作一样：比判定点早超过 Good 窗口、但在提前范围以内算 Miss，更早的点不算（灰掉的按钮点了没反应） |
-| `volume-mute` 按下命中 | 记 1 次判定；滑块在 1 拍里自动回到原位，+1 拍自动松开。玩家松手早晚都不影响 |
-| `volume-mute` 按下 Miss | 记 1 次 Miss，滑块停在底部，小窗抖一下后收起 |
+| Clicking the download before it fills | As any action: earlier than Good but within the early range is a Miss; earlier still does nothing (the disabled button ignores it) |
+| `volume-mute` press hit | One judgement; the slider returns over 1 beat and releases at +1 regardless of the player |
+| `volume-mute` press missed | One Miss; the slider stays at the bottom and the pop-up shakes and closes |
 
-### 画面细节（暂定）
+### Look (provisional)
 
-| 动作 | 位置 | 示范段 | 跟打段 · 命中 | 跟打段 · Miss |
+| Action | Where | Call | Response hit | Response Miss |
 | --- | --- | --- | --- | --- |
-| `progress-download` | 屏幕中间偏下，盖在消息框之上 | 拍点上弹出；标题「N% of setup.exe Completed」随进度变，绿色方块进度条；走满时标题变「Download complete」、「Open」亮起，虚拟鼠标点下后缩小关闭 | 同示范 | 标题栏闪几下后淡出 |
-| `volume-mute` | 托盘小喇叭正上方 | 拍点前 1/4 拍弹出，滑块在原位；按住期间滑块跟着鼠标往下走，松开时滑块在底部、勾上「Mute」、小喇叭出现静音标记，小窗收起 | 拍点前 1/4 拍弹出，滑块在底部、「Mute」已勾上；按下命中后滑块跟着虚拟鼠标往上回，+1 拍自动松开、取消静音，小窗收起 | 滑块掉回底部，小窗左右抖一下后收起 |
+| `progress-download` | Below the screen centre, over the message boxes | Opens on the beat; the title "N% of setup.exe Completed" follows the green block bar; when full it reads "Download complete", Open lights up, is clicked and the window shrinks away | Same | Title bar flashes, then fades |
+| `volume-mute` | Right above the tray speaker | Opens 1/4 beat early at the setting; while held the slider follows the mouse down; on release it is at the bottom, "Mute" ticked, the speaker muted, and the pop-up closes | Opens 1/4 beat early at the bottom with "Mute" ticked; after a hit the slider follows the virtual mouse up, releases at +1, unmutes and closes | The slider drops to the bottom; the pop-up shakes and closes |
 
-文案只用英文（2026-10-24 起新增的显示内容一律英文）：
+Texts: the download window reads "37% of setup.exe Completed" → "Download complete", "setup.exe from www.example-files.com", "Estimated time left: 2 sec", "Download to: C:\\Documents and Settings\\...\\Desktop", with "Open", "Open Folder" and "Cancel" (then "Close"); file names rotate by phrase: `setup.exe`, `song.mp3`, `photos.zip`, `homework.doc`, `game_demo.exe`. The volume control reads "Volume" and "Mute".
 
-- 下载窗：标题「37% of setup.exe Completed」→「Download complete」；正文「setup.exe from www.example-files.com」「Estimated time left: 2 sec」「Download to: C:\\Documents and Settings\\...\\Desktop」；按钮「Open」「Open Folder」「Cancel」（完成后变「Close」）。被下载的文件名按乐句轮换：`setup.exe`、`song.mp3`、`photos.zip`、`homework.doc`、`game_demo.exe`。
-- 音量控制：「Volume」「Mute」。
+### Sounds (provisional)
 
-### 音效（暂定）
-
-| 时机 | 文件 |
+| When | File |
 | --- | --- |
-| `progress-download` 弹出（示范段、跟打段都响） | `Windows XP Hardware Insert.wav` |
-| `progress-download` 点「Open」（示范段按拍点预约，跟打段命中时播放） | `Windows XP Notify.wav` |
-| `volume-mute` 按下 | `Windows XP Start.wav`（点击声） |
-| `volume-mute` 松开（示范段按拍点预约；跟打段按下命中后预约在 1 拍后） | `chord.wav`。原版滑块松开响的是 `Windows XP Ding.wav`，但游戏里 Ding 已经是 Miss 的声音，换一个免得混淆 |
+| `progress-download` opens (call and response) | `Windows XP Hardware Insert.wav` |
+| `progress-download` Open clicked | `Windows XP Notify.wav` |
+| `volume-mute` press | `Windows XP Start.wav` (the click) |
+| `volume-mute` release | `chord.wav` — the original slider release is Ding, which is the Miss sound here |
 
-## 关卡（谱面）
+## Levels (charts)
 
-列表里的顺序就是 `public/charts/index.json` 里的顺序。前四首只用消息框。2026-10-24 合并远端时，远端也加了两首只用消息框的谱面，和这里原有的「错误连环」「是还是否」很像，用户选了留远端的两首。曲名 2026-10-24 起改成英文（玩家看到的文字一律用英文）。
+In `public/charts/index.json` order:
 
-| 谱面 | 曲名 | BPM | 用到的动作 | 设计意图 |
+| Chart | Title | BPM | Actions | Intent |
 | --- | --- | --- | --- | --- |
-| `xp-popup-mvp` | Pop-up Sweep | 120 | `dialog-info` | 原有的 MVP，只练节奏 |
-| `xp-error-storm` | Error Storm | 128 | 错误、警告、询问消息框 | 远端加的，混着来，带反拍 |
-| `xp-yes-no` | Yes or No? | 104 | 询问消息框为主 | 远端加的，切分和反拍 |
-| `xp-crash` | Before the Blue Screen | 138 | 四种消息框 | 快速，单个乐句最多 6 个消息框 |
-| `xp-desktop-refresh` | Right-Click Refresh | 120 | `desktop-refresh` 和消息框 | 另一个会话做的右键刷新关卡，见 [windows-xp.md](windows-xp.md) 的「桌面右键菜单与刷新」 |
-| `xp-tray` | Tray Balloons | 120 | `balloon-info`、`dialog-info` | 气泡声音很短，练干脆的点；后半段和消息框交替 |
-| `xp-minimize` | Minimize All | 112 | `window-minimize`、`dialog-warning` | 窗口弹出有一个上扬的声音，后半段混入警告框 |
-| `xp-start-menu` | Start Me Up | 116 | `start-menu`、`dialog-info` | 练「一下 + 半拍后一下」的两下动作 |
-| `xp-recycle` | Empty the Bin | 124 | `recycle-bin`、`dialog-question` | 询问框和扔文件交替 |
-| `xp-download` | Download Complete | 112 | `progress-download`、`volume-mute`、`dialog-info`、`balloon-info` | 按[官方关卡规范](../level-design.md)写的第一首：16 个乐句、约 73 秒。前两句各只练一种新动作；中段加入反拍、在长按前后插消息框；后段两次长按连着来，下载窗挪到反拍（第 0.25 拍）弹出。下载窗加长到 3 拍后，每个下载乐句只有下载窗一个动作，和前后的密集乐句交替，当作休止气泡和音量小窗都在托盘附近，同一乐句里不混用，免得叠在一起 |
-| `xp-remix-1` | XP Remix 1 | 128 | 全部 XP 动作 | 每个乐句换一种组合，最后两句全部混用 |
+| `xp-popup-mvp` | Pop-up Sweep | 120 | `dialog-info` | The MVP, rhythm only |
+| `xp-error-storm` | Error Storm | 128 | Error, warning, question boxes | Mixed, with off-beats |
+| `xp-yes-no` | Yes or No? | 104 | Mostly question boxes | Syncopation and off-beats |
+| `xp-crash` | Before the Blue Screen | 138 | All four boxes | Fast, up to 6 boxes in a phrase |
+| `xp-desktop-refresh` | Right-Click Refresh | 120 | `desktop-refresh`, boxes | The right-click refresh level ([windows-xp.md](windows-xp.md#desktop-context-menu-and-refresh)) |
+| `xp-tray` | Tray Balloons | 120 | `balloon-info`, `dialog-info` | Short balloon sounds for crisp clicks; alternating with boxes later |
+| `xp-minimize` | Minimize All | 112 | `window-minimize`, `dialog-warning` | A rising window sound; warning boxes join later |
+| `xp-start-menu` | Start Me Up | 116 | `start-menu`, `dialog-info` | Practises the press, half-beat, press action |
+| `xp-recycle` | Empty the Bin | 124 | `recycle-bin`, `dialog-question` | Question boxes and files alternate |
+| `xp-download` | Download Complete | 112 | `progress-download`, `volume-mute`, `dialog-info`, `balloon-info` | The first chart written to the [level design guidelines](../level-design.md): 16 phrases, about 73 s. The first two phrases each practise one new action; the middle adds off-beats and boxes around the holds; the end chains two holds and moves the download to beat 0.25. Download phrases hold only the download, alternating with dense phrases as rests; balloons and the volume pop-up never share a phrase since both sit by the tray |
+| `xp-remix-1` | XP Remix 1 | 128 | Every XP action | A new combination each phrase, everything mixed in the last two |
