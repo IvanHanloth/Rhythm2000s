@@ -73,7 +73,7 @@ Web 优先，以浏览器为主要运行平台；需要上架 Steam 时再用 El
 | 工具链 | [Vite+](https://viteplus.dev/guide)（npm 包名 `vite-plus`） | 统一提供开发服务器（Vite）、构建（Rolldown）、测试（Vitest）、代码检查（Oxlint）、格式化（Oxfmt）；所有配置写在根目录 `vite.config.ts`，从 `vite-plus` 导入 `defineConfig`。不要再单独安装 ESLint、Prettier、Jest 等同类工具 |
 | 渲染 | PixiJS（npm 包名 `pixi.js`） | 负责游戏画面；菜单、设置等界面可用 DOM |
 | 音频 | 原生 Web Audio API | 自写「指挥」模块，负责拍点换算、预约播放和判定；不用 Howler.js 之类的播放封装 |
-| 包管理器 | pnpm 10 | 版本写在 `package.json` 的 `devEngines.packageManager`；Vite+ 据此和锁文件自动调用。使用 `nodeLinker: hoisted` 布局，原因见 `pnpm-workspace.yaml` 注释 |
+| 包管理器 | pnpm 12 | 版本写在 `package.json` 的 `devEngines.packageManager`；Vite+ 据此和锁文件自动调用。使用 `nodeLinker: hoisted` 布局，原因见 `pnpm-workspace.yaml` 注释 |
 | 运行环境 | Node.js 24 | 2026-10-24 本机版本 |
 
 音频与输入时序的实现原则（详见 [doc/tech-research.md](doc/tech-research.md) 第 2 节）：
