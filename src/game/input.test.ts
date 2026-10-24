@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vite-plus/test';
 import { resolveTimeStamp } from './input.ts';
 
 describe('resolveTimeStamp', () => {
-  it('正常的事件时间直接使用', () => {
+  it('uses a normal event time as is', () => {
     expect(resolveTimeStamp(990, 1000)).toBe(990);
   });
 
-  it('事件时间为 0 或是纪元时间时，退回当前时间', () => {
+  it('falls back to now when the event time is 0 or an epoch time', () => {
     expect(resolveTimeStamp(0, 1000)).toBe(1000);
     expect(resolveTimeStamp(1_700_000_000_000, 1000)).toBe(1000);
   });

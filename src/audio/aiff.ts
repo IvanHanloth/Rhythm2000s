@@ -1,15 +1,15 @@
-// AIFF 解码：Mac OS X 的系统提示音是 AIFF，Chrome 的 decodeAudioData 不支持这种格式，所以自己解。
-// 只支持未压缩的 PCM（AIFF，或压缩类型为 NONE 的 AIFF-C），8 / 16 / 24 / 32 位，大端序。
+// AIFF decoding: Mac OS X alert sounds are AIFF, which Chrome's decodeAudioData can't handle, so we decode them ourselves.
+// Uncompressed PCM only (AIFF, or AIFF-C with compression NONE), 8 / 16 / 24 / 32-bit, big-endian.
 
 import { prepareSample, type SampleOptions } from './samples.ts';
 
 export interface DecodedAudio {
   sampleRate: number;
-  /** 每个声道一组 -1～1 的采样 */
+  /** One array of -1…1 samples per channel */
   channels: Float32Array<ArrayBuffer>[];
 }
 
-/** 80 位扩展精度浮点数（AIFF 用它存采样率） */
+/** 80-bit extended float (AIFF stores the sample rate this way) */
 function readExtended(view: DataView, offset: number): number {
   const exponent = view.getUint16(offset) & 0x7fff;
   const sign = view.getUint16(offset) & 0x8000 ? -1 : 1;
@@ -30,14 +30,14 @@ function readId(view: DataView, offset: number): string {
 
 export function decodeAiff(data: ArrayBuffer): DecodedAudio {
   const view = new DataView(data);
-  if (view.byteLength < 12 || readId(view, 0) !== 'FORM') throw new Error('不是 AIFF 文件');
+  if (view.byteLength < 12 || readId(view, 0) !== 'FORM') throw new Error('Not an AIFF file');
   const form = readId(view, 8);
-  if (form !== 'AIFF' && form !== 'AIFC') throw new Error(`不是 AIFF 文件（${form}）`);
+  if (form !== 'AIFF' && form !== 'AIFC') throw new Error(`Not an AIFF file (${form})`);
 
   let format: { channels: number; frames: number; bits: number; sampleRate: number } | null = null;
   let sound: { offset: number; length: number } | null = null;
 
-  // 逐个读块；块长度为奇数时后面补一个字节
+  // Read chunk by chunk; odd-length chunks are padded with one byte
   let offset = 12;
   while (offset + 8 <= view.byteLength) {
     const id = readId(view, offset);
@@ -51,7 +51,7 @@ export function decodeAiff(data: ArrayBuffer): DecodedAudio {
         sampleRate: readExtended(view, body + 8),
       };
       if (form === 'AIFC' && readId(view, body + 18) !== 'NONE') {
-        throw new Error(`不支持压缩的 AIFF-C（${readId(view, body + 18)}）`);
+        throw new Error(`Compressed AIFF-C is not supported (${readId(view, body + 18)})`);
       }
     } else if (id === 'SSND') {
       const dataOffset = view.getUint32(body);
@@ -60,10 +60,10 @@ export function decodeAiff(data: ArrayBuffer): DecodedAudio {
     offset = body + size + (size % 2);
   }
 
-  if (!format) throw new Error('AIFF 文件缺少 COMM 块');
-  if (!sound) throw new Error('AIFF 文件缺少 SSND 块');
+  if (!format) throw new Error('AIFF file has no COMM chunk');
+  if (!sound) throw new Error('AIFF file has no SSND chunk');
   const { channels: channelCount, bits, sampleRate } = format;
-  if (![8, 16, 24, 32].includes(bits)) throw new Error(`不支持 ${bits} 位的 AIFF`);
+  if (![8, 16, 24, 32].includes(bits)) throw new Error(`${bits}-bit AIFF is not supported`);
 
   const bytes = bits / 8;
   const frames = Math.min(format.frames, Math.floor(sound.length / (bytes * channelCount)));
@@ -83,14 +83,14 @@ export function decodeAiff(data: ArrayBuffer): DecodedAudio {
   return { sampleRate, channels };
 }
 
-/** 下载一个 AIFF 文件，解码后按 prepareSample 切掉开头静音、统一峰值。 */
+/** Downloads and decodes an AIFF file, then trims leading silence and normalises the peak via prepareSample. */
 export async function loadAiffSample(
   context: BaseAudioContext,
   url: string,
   options?: SampleOptions,
 ): Promise<AudioBuffer> {
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`音效 ${url} 下载失败（HTTP ${response.status}）`);
+  if (!response.ok) throw new Error(`Sound ${url} failed to download (HTTP ${response.status})`);
   const { sampleRate, channels } = decodeAiff(await response.arrayBuffer());
   const buffer = context.createBuffer(
     channels.length,

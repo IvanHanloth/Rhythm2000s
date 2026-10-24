@@ -1,4 +1,4 @@
-/* 关卡开场页（结算用场景里的结算窗口，见 doc/results.md）。颜色都是 screen-theme.ts 注入的 --screen-* 变量，XP 关卡用 Luna、Mac 关卡用 Aqua */
+/* Level intro (results live in the scenes' own results window, see doc/results.md). Colours are the --screen-* variables injected by screen-theme.ts: Luna for XP, Aqua for Mac */
 
 .level-intro {
   position: fixed;
@@ -19,7 +19,7 @@
   display: none;
 }
 
-/* ---------- 窗口外框：两套主题共用结构 ---------- */
+/* ---------- Window frame: same structure for both themes ---------- */
 
 .screen-window {
   width: min(860px, 100%);
@@ -84,7 +84,7 @@
   outline-offset: 2px;
 }
 
-/* ---------- 关卡开场 ---------- */
+/* ---------- Level intro ---------- */
 
 .level-intro {
   background: rgb(0 0 0 / 0.55);

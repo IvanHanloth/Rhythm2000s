@@ -1,24 +1,24 @@
-// Windows XP Luna（蓝色）主题的原版配色，用于贴近原版的 XP 界面部件（ADR 0004、doc/scenes/windows-xp.md）。
-// 本地没有 luna.msstyles 位图，颜色按原版截图和常见的 Luna 复刻样式整理，渐变写成 [位置 0～1, 颜色] 列表。
-// 与 tokens.ts 的 THEMES.xp（设计系统提案）分开：那一套仍给轮次横幅等游戏界面用。
+// Original Windows XP Luna (blue) colours for the authentic XP widgets (ADR 0004, doc/scenes/windows-xp.md).
+// Without the luna.msstyles bitmaps, colours come from original screenshots and common Luna recreations; gradients are [offset 0…1, colour] lists.
+// Separate from tokens.ts THEMES.xp (design-system proposal), which still styles game UI such as the turn banner.
 
 export type GradientStops = readonly (readonly [offset: number, color: string])[];
 
 export const LUNA = {
-  /** 窗口底色、按钮面（「3D 对象」颜色） */
+  /** Window and button face (the "3D objects" colour) */
   face: '#ece9d8',
   ink: '#000000',
   inkDisabled: '#aca899',
   white: '#ffffff',
-  /** 3D 边框：亮边、阴影、深阴影（Luna 的 ButtonHighlight / ButtonShadow / ButtonDkShadow） */
+  /** 3D edges: highlight, shadow, dark shadow (Luna ButtonHighlight / ButtonShadow / ButtonDkShadow) */
   edgeHighlight: '#ffffff',
   edgeShadow: '#aca899',
   edgeDarkShadow: '#716f64',
-  /** 选中项、菜单高亮的蓝底 */
+  /** Blue behind selected items and highlighted menu items */
   selection: '#316ac5',
-  /** 文本框、复选框等控件的边框 */
+  /** Border of text boxes, check boxes and similar controls */
   controlBorder: '#1c5180',
-  /** 桌面图标文字的阴影 */
+  /** Shadow under desktop icon labels */
   desktopTextShadow: '#000000',
 
   window: {
@@ -43,10 +43,10 @@ export const LUNA = {
     captionText: '#ffffff',
     captionTextShadow: '#0f1089',
     captionTextInactive: '#d8e4f8',
-    /** 标题栏上沿、左沿的亮边 */
+    /** Highlight along the top and left of the title bar */
     captionEdgeLight: '#0831d9',
     captionEdgeLightInactive: '#9fb4ea',
-    /** 边框三圈，从外到内：左上方向、右下方向各一组 */
+    /** Three frame rings, outside in: one set for top-left, one for bottom-right */
     frameLight: ['#0831d9', '#166aee', '#0855dd'],
     frameDark: ['#00138c', '#001ea0', '#003bda'],
     frameLightInactive: ['#8ea6e6', '#a6baf0', '#9fb4ea'],
@@ -64,7 +64,7 @@ export const LUNA = {
     glyph: '#ffffff',
   },
 
-  /** 标题栏上的最小化、最大化按钮：白色细边、蓝色渐变、白色图形 */
+  /** Title bar minimise / maximise buttons: thin white edge, blue gradient, white glyph */
   captionButton: {
     border: '#ffffff',
     fill: [
@@ -89,12 +89,12 @@ export const LUNA = {
       [0.94, '#e5e4de'],
       [1, '#f2f1ec'],
     ] as GradientStops,
-    /** 默认按钮（回车键对应的按钮）的蓝色内框：内圈 1、内圈 2，各为 上、左右、下 */
+    /** Blue inner rings of the default (Enter) button: ring 1, ring 2, each top, sides, bottom */
     defaultRings: [
       ['#cee7ff', '#bcd4f6', '#89ade4'],
       ['#bcd4f6', '#98b8ea', '#89ade4'],
     ],
-    /** 鼠标悬停的橙色内框 */
+    /** Orange inner rings on hover */
     hotRings: [
       ['#fff0cf', '#fbc761', '#e5a01a'],
       ['#fdd889', '#fbc761', '#e5a01a'],
@@ -168,7 +168,7 @@ export const LUNA = {
       [0.97, '#137ed7'],
       [1, '#095bc9'],
     ] as GradientStops,
-    /** 任务栏上的程序按钮：普通（窗口在后面或最小化）和按下（窗口在最前面） */
+    /** Taskbar program buttons: normal (window behind or minimised) and pressed (window in front) */
     taskButton: [
       [0, '#5a9bf7'],
       [0.12, '#3c81f3'],
@@ -196,7 +196,7 @@ export const LUNA = {
       [0.94, '#2f8732'],
       [1, '#1f6a22'],
     ] as GradientStops,
-    /** 右侧弧边的深色描边 */
+    /** Dark outline of the right-hand curved edge */
     edge: '#1d5f1d',
     text: '#ffffff',
     textShadow: '#184d18',
@@ -235,7 +235,7 @@ export const LUNA = {
       [0.83, '#1165d4'],
       [1, '#0f61cb'],
     ] as GradientStops,
-    /** 用户栏下方的橙色分隔线（中间最亮，两端透明） */
+    /** Orange divider under the user bar (brightest in the middle, transparent at the ends) */
     accentLine: [
       [0, '#da884a00'],
       [0.5, '#da884aff'],
@@ -267,13 +267,13 @@ export const LUNA = {
     ] as GradientStops,
   },
 
-  /** 资源管理器（CabinetWClass）：菜单栏、工具栏、地址栏、任务窗格、平铺视图、状态栏 */
+  /** Explorer (CabinetWClass): menu bar, toolbar, address bar, task pane, tiles view, status bar */
   explorer: {
-    /** 工具栏、地址栏之间的分隔线：一暗一亮 */
+    /** Divider between toolbar and address bar: one dark, one light */
     bandDark: '#d0d0bf',
     bandLight: '#ffffff',
     toolbarSeparator: '#c5c2b2',
-    /** 工具栏按钮悬停时的凸起边 */
+    /** Raised edge of toolbar buttons on hover */
     hotEdgeLight: '#ffffff',
     hotEdgeDark: '#aca899',
     disabledInk: '#aca899',
@@ -285,7 +285,7 @@ export const LUNA = {
     ] as GradientStops,
     comboButtonEdge: '#b9cdf6',
     comboArrow: '#4d6185',
-    /** 后退、转到等绿色圆形箭头 */
+    /** Green round arrows for Back, Go and similar */
     go: '#3aa63a',
     goEdge: '#1d6a1d',
     goDisabled: '#c9c7ba',
@@ -302,7 +302,7 @@ export const LUNA = {
     groupBody: '#d6dff7',
     link: '#215dc6',
     linkHot: '#428eff',
-    /** 平铺视图「在组中显示」的组标题和下面渐隐的线 */
+    /** Group header in "Show in groups" tiles view, with a line fading out underneath */
     viewGroupTitle: '#0e3ea4',
     viewGroupLine: [
       [0, '#8ba8e0ff'],
@@ -310,17 +310,17 @@ export const LUNA = {
       [1, '#8ba8e000'],
     ] as GradientStops,
     subText: '#7a7a7a',
-    /** 选中的图标蒙一层蓝 */
+    /** Blue tint over selected icons */
     selectedIconTint: '#9db8ec',
   },
 
-  /** 信息提示（气泡、工具提示）的浅黄底 */
+  /** Pale yellow of info tips (balloons, tooltips) */
   tooltip: {
     fill: '#ffffe1',
     border: '#000000',
   },
 
-  /** 托盘小喇叭静音时的红色禁止符号 */
+  /** Red no-entry sign on the muted tray speaker */
   speaker: {
     mute: '#e0301e',
   },

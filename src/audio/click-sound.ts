@@ -1,17 +1,17 @@
-// 程序合成的节拍器点击音，不依赖任何音频素材。
+// Synthesised metronome click; no audio assets needed.
 
 export interface ClickOptions {
-  /** 音高（Hz） */
+  /** Pitch (Hz) */
   frequency: number;
-  /** 时长（秒） */
+  /** Duration (s) */
   duration?: number;
-  /** 音量（0～1） */
+  /** Volume (0…1) */
   gain?: number;
 }
 
 /**
- * 生成一个短促的点击音：起音在第一个采样就开始（只做 1 毫秒的淡入防爆音），
- * 这样预约的播放时间就是听感上的拍点。
+ * A short click whose attack starts on the very first sample (only a 1 ms fade-in to avoid pops),
+ * so the scheduled time is where the beat is heard.
  */
 export function createClickBuffer(
   context: BaseAudioContext,

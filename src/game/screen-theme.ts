@@ -1,5 +1,5 @@
-// 关卡开场页的配色：跟着场景走，XP 关卡用 Luna，Mac 关卡用 Aqua（ADR 0004）。
-// 颜色只从 src/theme 取，注入成 CSS 变量（--screen-*），screens.css 里只引用变量。
+// Level intro colours follow the scene: Luna for XP levels, Aqua for Mac levels (ADR 0004).
+// Colours come only from src/theme, injected as CSS variables (--screen-*); screens.css only references the variables.
 
 import { AQUA, AQUA_FONT } from '../theme/aqua.ts';
 import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS } from '../theme/tokens.ts';
@@ -18,7 +18,7 @@ function gradient(stops: readonly (readonly [number, string])[]): string {
 const SHARED: Record<string, string> = {
   '--screen-good': JUDGEMENT_COLORS.good,
   '--screen-font-display': cssFontFamily(FONT_FAMILIES.display),
-  // 玩法说明用 XP 的黄色提示气泡，两套主题共用
+  // How-to-play uses the XP yellow tooltip in both themes
   '--screen-tip': LUNA.tooltip.fill,
   '--screen-tip-edge': LUNA.tooltip.border,
 };
@@ -64,7 +64,7 @@ const THEME_VARS: Record<ScreenTheme, Record<string, string>> = {
   },
 };
 
-/** 给界面根元素换上某个场景的配色 */
+/** Applies a scene's colours to a UI root element */
 export function applyScreenTheme(element: HTMLElement, theme: ScreenTheme): void {
   element.dataset.theme = theme;
   for (const [name, value] of Object.entries({ ...SHARED, ...THEME_VARS[theme] })) {

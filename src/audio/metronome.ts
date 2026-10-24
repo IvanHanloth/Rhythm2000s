@@ -1,6 +1,6 @@
-// 节拍器：按音频时钟预约每一拍的点击音。
-// 调度方式：每帧调用 schedule()，把未来 lookAhead 秒内的拍子用 start(when) 预约好。
-// 帧本身只负责「提前排队」，声音何时响完全由音频时钟决定。
+// Metronome: schedules a click on every beat against the audio clock.
+// Call schedule() every frame; it books the beats within the next lookAhead seconds with start(when).
+// Frames only queue ahead; when a sound plays is decided entirely by the audio clock.
 
 import { beatToTime } from '../rhythm/beat.ts';
 import type { AudioClock } from './audio-clock.ts';
@@ -8,9 +8,9 @@ import { createClickBuffer } from './click-sound.ts';
 
 export interface MetronomeOptions {
   beatsPerBar?: number;
-  /** 提前预约的时长（秒），要大于最长可能的掉帧时间 */
+  /** How far ahead to schedule (s); must exceed the longest likely frame stall */
   lookAhead?: number;
-  /** 按下开始后，第 0 拍延后多久（秒） */
+  /** Delay of beat 0 after pressing start (s) */
   startDelay?: number;
 }
 
@@ -46,7 +46,7 @@ export class Metronome {
     return this._bpm;
   }
 
-  /** 第 0 拍的音频时间 */
+  /** Audio time of beat 0 */
   get startTime(): number {
     return this._startTime;
   }
@@ -81,7 +81,6 @@ export class Metronome {
     return beat % this.beatsPerBar === 0;
   }
 
-  /** 每帧调用一次。 */
   schedule(): void {
     if (!this._running) return;
     const ctx = this.clock.context;
@@ -89,7 +88,7 @@ export class Metronome {
 
     while (this.beatTime(this.nextBeat) < horizon) {
       const when = this.beatTime(this.nextBeat);
-      // 掉帧太久导致已经过时的拍直接跳过，避免一次性补放一串
+      // After a long stall, skip beats already in the past instead of playing a burst
       if (when >= ctx.currentTime) {
         const source = ctx.createBufferSource();
         source.buffer = this.isAccent(this.nextBeat) ? this.accent : this.normal;

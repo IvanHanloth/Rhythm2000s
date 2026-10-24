@@ -1,52 +1,52 @@
-// 谱面：把谱面文件（ChartSource）展开成游戏用的时间表。
-// 时间一律以拍为单位，第 0 拍是全曲第一拍（预备拍的开头）。
+// Charts: expands a chart file (ChartSource) into the timeline the game uses.
+// All times are in beats; beat 0 is the first beat of the song (the start of the count-in).
 
 import type { ActionType } from './actions.ts';
 import type { ChartEventSource, ChartSource } from './chart-file.ts';
 
 export interface ChartCue {
-  /** 全曲拍位置 */
+  /** Beat position in the song */
   beat: number;
-  /** 属于第几个乐句（从 0 开始） */
+  /** Phrase index (from 0) */
   phrase: number;
-  /** 在乐句的示范 / 跟打小节里是第几个事件（从 0 开始） */
+  /** Index within the phrase's call / response bar (from 0) */
   index: number;
   action: ActionType;
 }
 
 export interface ChartPhrase {
-  /** 示范小节开头的拍位置 */
+  /** Beat where the call bar starts */
   callStart: number;
-  /** 示范小节结束（空档开始）的拍位置 */
+  /** Beat where the call bar ends (and the gap starts) */
   callEnd: number;
-  /** 跟打小节开头的拍位置（空档结束） */
+  /** Beat where the response bar starts (the gap ends) */
   responseStart: number;
-  /** 跟打小节结束的拍位置 */
+  /** Beat where the response bar ends */
   end: number;
 }
 
 export interface Chart {
   id: string;
   title: string;
-  /** 所属场景 id */
+  /** Scene id */
   scene: string;
   bpm: number;
   beatsPerBar: number;
   phrases: ChartPhrase[];
-  /** 示范事件，按时间排序 */
+  /** Call events, in time order */
   calls: ChartCue[];
-  /** 跟打目标（玩家要按的），按时间排序 */
+  /** Response targets (what the player presses), in time order */
   responses: ChartCue[];
-  /** 全曲结束的拍位置 */
+  /** Beat where the song ends */
   endBeat: number;
 }
 
-/** 谱面没写 responseGapBeats 时，示范与跟打之间空几拍（2026-10-24 先定为 0.5 拍，同日用户改为 0：跟打紧接着示范） */
+/** Gap between call and response when a chart sets no responseGapBeats (0.5 at first on 2026-10-24, changed to 0 the same day: the response follows the call directly) */
 export const DEFAULT_RESPONSE_GAP_BEATS = 0;
 
 /**
- * 展开谱面：每个乐句依次是示范小节、空档（responseGapBeats 拍）、跟打小节，乐句之间没有间隔；
- * 乐句没写 response 时，跟打与示范相同。输入应已通过 parseChartFile 校验。
+ * Expands a chart: each phrase is a call bar, a gap (responseGapBeats), then a response bar, with no space between phrases.
+ * A phrase without response repeats its call. The input must already have passed parseChartFile.
  */
 export function buildChart(source: ChartSource): Chart {
   const { beatsPerBar, countInBars, outroBars } = source;

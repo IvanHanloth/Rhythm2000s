@@ -1,4 +1,4 @@
-// 音频时钟：游戏里所有「现在是第几拍」「这次输入在哪一刻」都以它为准。
+// Audio clock: the single source of truth for "which beat is it" and "when did this input happen".
 
 import {
   heardTimeFromCurrentTime,
@@ -14,19 +14,19 @@ export class AudioClock {
     this.context = context;
   }
 
-  /** 浏览器要求在用户操作（点击、按键）里调用一次，之后才能出声。 */
+  /** Browsers require this inside a user gesture (click, key press) before any sound plays. */
   async resume(): Promise<void> {
     if (this.context.state !== 'running') {
       await this.context.resume();
     }
   }
 
-  /** 音频图内部的处理延迟（秒）；旧浏览器没有这个属性时为 0。 */
+  /** Internal processing latency of the audio graph (s); 0 on old browsers without it. */
   get baseLatency(): number {
     return this.context.baseLatency ?? 0;
   }
 
-  /** 浏览器估计的硬件输出延迟（秒）；不支持时为 0。 */
+  /** The browser's estimate of hardware output latency (s); 0 when unsupported. */
   get outputLatency(): number {
     return this.context.outputLatency ?? 0;
   }
@@ -35,20 +35,20 @@ export class AudioClock {
     return typeof this.context.getOutputTimestamp === 'function';
   }
 
-  /** 读取 getOutputTimestamp()；不支持或音频还没开始流动时返回 null。 */
+  /** Reads getOutputTimestamp(); null when unsupported or before audio starts flowing. */
   readOutputStamp(): OutputStamp | null {
     if (!this.supportsOutputTimestamp) return null;
     const stamp = this.context.getOutputTimestamp();
     return isUsableStamp(stamp) ? stamp : null;
   }
 
-  /** 方法 A：把 performance.now() 时间轴上的时刻换算成当时听到的音频时间。 */
+  /** Method A: converts a performance.now() instant to the audio time heard then. */
   heardTimeA(eventPerfMs: number): number | null {
     const stamp = this.readOutputStamp();
     return stamp ? heardTimeFromStamp(stamp, eventPerfMs) : null;
   }
 
-  /** 方法 B：用 currentTime 回推并扣除浏览器报告的延迟。必须在事件回调里尽快调用。 */
+  /** Method B: works back from currentTime minus reported latency. Call as early as possible in the event handler. */
   heardTimeB(eventPerfMs: number): number {
     return heardTimeFromCurrentTime(
       this.context.currentTime,
@@ -58,7 +58,7 @@ export class AudioClock {
     );
   }
 
-  /** 此刻扬声器正在播放的音频时间：优先方法 A，不可用时退回方法 B。用于驱动画面。 */
+  /** Audio time the speakers are playing now: method A, falling back to B. Drives the visuals. */
   heardNow(): number {
     const now = performance.now();
     return this.heardTimeA(now) ?? this.heardTimeB(now);

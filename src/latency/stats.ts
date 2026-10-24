@@ -1,10 +1,10 @@
-// 输入偏差的统计。数值单位由调用方决定（原型里用毫秒）。
+// Statistics on input offsets. Units are up to the caller (the prototype uses ms).
 
 export interface Summary {
   count: number;
   mean: number;
   median: number;
-  /** 总体标准差 */
+  /** Population standard deviation */
   stdDev: number;
 }
 
@@ -25,7 +25,7 @@ export function summarize(values: readonly number[]): Summary {
   return { count, mean, median: median(values), stdDev: Math.sqrt(variance) };
 }
 
-/** 排序后去掉最小和最大各 fraction 比例的值。 */
+/** Sorts, then drops the smallest and largest `fraction` of values. */
 export function trim(values: readonly number[], fraction: number): number[] {
   const sorted = [...values].sort((a, b) => a - b);
   const cut = Math.floor(sorted.length * fraction);
@@ -33,17 +33,17 @@ export function trim(values: readonly number[], fraction: number): number[] {
 }
 
 export interface CalibrationOptions {
-  /** 跳过最早的几次输入（刚开始找节奏） */
+  /** Skip the earliest inputs (finding the beat) */
   skipFirst?: number;
-  /** 两端各去掉的比例 */
+  /** Fraction dropped from each end */
   trimFraction?: number;
-  /** 去掉之后至少要剩几个样本才给出建议 */
+  /** Minimum samples left after dropping before suggesting anything */
   minSamples?: number;
 }
 
 /**
- * 建议校准值：按时间顺序的偏差，跳过开头几次、去掉两端极值后取中位数。
- * 样本不够时返回 null。
+ * Suggested calibration: from offsets in time order, skip the first few, drop the extremes, take the median.
+ * Returns null without enough samples.
  */
 export function suggestCalibration(
   offsetsInOrder: readonly number[],

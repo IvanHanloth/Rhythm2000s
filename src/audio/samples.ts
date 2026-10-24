@@ -1,20 +1,20 @@
-// 音频素材（wav 等）：下载、解码，再整理成能踩在拍点上的样子。
-// 原版系统音效开头常有几毫秒到上百毫秒的静音，按拍点预约播放时会听起来偏晚，
-// 所以加载时切掉开头的静音，并把峰值统一到同一音量。
+// Audio assets (wav etc.): download, decode, and tidy them so they land on the beat.
+// Original OS sounds often start with milliseconds to over 100 ms of silence, which sounds late when scheduled on a beat,
+// so loading trims the leading silence and normalises every sound to the same peak.
 
 export interface SampleOptions {
-  /** 整理后的峰值（0～1），默认 0.7 */
+  /** Peak after processing (0…1), default 0.7 */
   peak?: number;
-  /** 是否切掉开头的静音，默认是 */
+  /** Trim leading silence, default true */
   trim?: boolean;
 }
 
-/** 低于峰值这个比例的采样算作静音 */
+/** Samples below this fraction of the peak count as silence */
 const ONSET_RATIO = 0.05;
-/** 起音点之前保留的时长（秒），留住起音的前沿 */
+/** How much to keep before the attack (s), to preserve its leading edge */
 const PRE_ROLL = 0.001;
 
-/** 所有声道里绝对值最大的采样 */
+/** Largest absolute sample across all channels */
 export function peakOf(channels: readonly Float32Array[]): number {
   let peak = 0;
   for (const data of channels) {
@@ -23,7 +23,7 @@ export function peakOf(channels: readonly Float32Array[]): number {
   return peak;
 }
 
-/** 第一个「不算静音」的采样位置；全是静音时返回 0。 */
+/** Position of the first non-silent sample; 0 for pure silence. */
 export function findOnset(channels: readonly Float32Array[], peak = peakOf(channels)): number {
   if (peak === 0) return 0;
   const threshold = peak * ONSET_RATIO;
@@ -36,7 +36,7 @@ export function findOnset(channels: readonly Float32Array[], peak = peakOf(chann
   return 0;
 }
 
-/** 切掉开头静音、统一峰值，返回新的 AudioBuffer。 */
+/** Trims leading silence and normalises the peak, returning a new AudioBuffer. */
 export function prepareSample(
   context: BaseAudioContext,
   buffer: AudioBuffer,
@@ -59,14 +59,14 @@ export function prepareSample(
   return result;
 }
 
-/** 下载并解码一个音频文件，再按 prepareSample 整理。 */
+/** Downloads and decodes an audio file, then tidies it with prepareSample. */
 export async function loadSample(
   context: BaseAudioContext,
   url: string,
   options?: SampleOptions,
 ): Promise<AudioBuffer> {
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`音效 ${url} 下载失败（HTTP ${response.status}）`);
+  if (!response.ok) throw new Error(`Sound ${url} failed to download (HTTP ${response.status})`);
   const decoded = await context.decodeAudioData(await response.arrayBuffer());
   return prepareSample(context, decoded, options);
 }

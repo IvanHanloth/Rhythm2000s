@@ -1,15 +1,15 @@
-// 谱面摘要：选关界面「详细信息」里显示的内容（doc/level-select.md）。不依赖 PixiJS。
+// Chart summary: what the level select's "Details" panel shows (doc/level-select.md). No PixiJS.
 
 import type { ActionType } from './actions.ts';
 import type { Chart } from './chart.ts';
 
 export interface ChartSummary {
-  /** 谱面里出现过的动作，按第一次出现的顺序 */
+  /** Actions used in the chart, in order of first appearance */
   actions: ActionType[];
-  /** 出现次数最多的动作；次数相同时取先出现的。用来挑关卡图标 */
+  /** The most common action; ties go to the first. Used to pick the level icon */
   mainAction: ActionType | null;
   phrases: number;
-  /** 全曲时长（秒），含预备拍和结尾 */
+  /** Length of the whole song in seconds, including count-in and outro */
   seconds: number;
 }
 
@@ -28,9 +28,9 @@ export function summarizeChart(chart: Chart): ChartSummary {
   };
 }
 
-/** 时长写成「38 秒」「1 分 05 秒」 */
+/** Duration as m:ss, e.g. "0:38", "1:05" */
 export function formatDuration(seconds: number): string {
   const total = Math.round(seconds);
-  if (total < 60) return `${total} 秒`;
-  return `${Math.floor(total / 60)} 分 ${String(total % 60).padStart(2, '0')} 秒`;
+  if (total < 60) return `0:${String(total).padStart(2, '0')}`;
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 }

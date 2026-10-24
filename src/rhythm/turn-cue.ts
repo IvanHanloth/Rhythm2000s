@@ -1,5 +1,5 @@
-// 轮次提示：Follow me（示范小节）/ Your turn（跟打小节）什么时候显示（doc/prototypes/mvp.md）。
-// 时间以拍为单位，和谱面一致。
+// Turn cues: when Follow me (call bar) and Your turn (response bar) show (doc/prototypes/mvp.md).
+// Times are in beats, like the chart.
 
 import { secondsPerBeat } from './beat.ts';
 import { lastTapOffset } from './actions.ts';
@@ -9,21 +9,21 @@ export type Turn = 'call' | 'response';
 
 export interface TurnCue {
   turn: Turn;
-  /** 属于第几个乐句 */
+  /** Phrase index */
   phrase: number;
-  /** 开始显示的拍位置 */
+  /** Beat where it starts showing */
   start: number;
-  /** 停止显示的拍位置（不含） */
+  /** Beat where it stops showing (exclusive) */
   end: number;
 }
 
-/** 提示比切换点提前多少拍出现（MVP 暂定） */
+/** How many beats before the switch the cue appears (provisional, MVP) */
 export const TURN_CUE_LEAD_BEATS = 0.5;
 
 /**
- * 每个乐句两条提示：示范小节开头前 lead 拍显示 Follow me；示范小节结束前 lead 拍换成 Your turn，
- * 经过空档再进入跟打小节，让玩家有准备时间。
- * Your turn 显示到乐句结束；紧接着有下一个乐句时，提前 lead 拍让位给下一个 Follow me。
+ * Two cues per phrase: Follow me from `lead` beats before the call bar; Your turn from `lead` beats before the call bar ends,
+ * through the gap and into the response bar, so the player has time to get ready.
+ * Your turn lasts until the phrase ends; if another phrase follows, it gives way to the next Follow me `lead` beats early.
  */
 export function buildTurnCues(chart: Chart, lead = TURN_CUE_LEAD_BEATS): TurnCue[] {
   const cues: TurnCue[] = [];
@@ -38,14 +38,14 @@ export function buildTurnCues(chart: Chart, lead = TURN_CUE_LEAD_BEATS): TurnCue
   return cues;
 }
 
-/** 某一拍应显示的提示；不在任何提示的时间段内时返回 null。 */
+/** The cue to show on a beat; null outside every cue. */
 export function turnCueAt(cues: readonly TurnCue[], beat: number): TurnCue | null {
   return cues.find((cue) => beat >= cue.start && beat < cue.end) ?? null;
 }
 
 /**
- * 检查谱面能否配合轮次提示：每个事件的 Good 判定窗口必须在提示切走之前关闭，
- * 否则玩家还在按，横幅就已经换了。返回错误说明，空数组表示没问题。
+ * Checks that a chart works with the turn cues: every event's Good window must close before the cue switches,
+ * otherwise the banner changes while the player is still pressing. Returns error messages; empty means fine.
  */
 export function checkTurnCueSpacing(
   chart: Chart,
@@ -62,7 +62,7 @@ export function checkTurnCueSpacing(
   ] as const) {
     for (const cue of list) {
       const shown = cues.find((c) => c.turn === turn && c.phrase === cue.phrase);
-      // 要按两下的动作看最后一下
+      // Two-press actions go by the last press
       const lastTap = cue.beat + lastTapOffset(cue.action);
       if (!shown || lastTap + goodBeats < shown.end) continue;
       const barStart =
@@ -71,8 +71,8 @@ export function checkTurnCueSpacing(
           : chart.phrases[cue.phrase]!.responseStart;
       const latest = shown.end - barStart - goodBeats - (lastTap - cue.beat);
       errors.push(
-        `phrases[${cue.phrase}].${key}[${cue.index}]：第 ${cue.beat - barStart} 拍太靠后，` +
-          `提示会在判定结束前切走；${chart.bpm} BPM 下要早于第 ${Number(latest.toFixed(2))} 拍`,
+        `phrases[${cue.phrase}].${key}[${cue.index}]: beat ${cue.beat - barStart} is too late; ` +
+          `the cue would switch before judging ends. At ${chart.bpm} BPM it must be before beat ${Number(latest.toFixed(2))}`,
       );
     }
   }

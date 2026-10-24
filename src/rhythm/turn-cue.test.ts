@@ -3,7 +3,7 @@ import { chartFromPatterns } from './test-charts.ts';
 import { buildTurnCues, checkTurnCueSpacing, turnCueAt } from './turn-cue.ts';
 
 describe('buildTurnCues', () => {
-  it('连续的乐句：提前半拍切换，前后衔接没有空档', () => {
+  it('back-to-back phrases: switch half a beat early, no gap between cues', () => {
     const chart = chartFromPatterns([[0], [0]]);
 
     expect(buildTurnCues(chart)).toEqual([
@@ -14,7 +14,7 @@ describe('buildTurnCues', () => {
     ]);
   });
 
-  it('最后一个 Your turn 显示到乐句结束', () => {
+  it('the last Your turn lasts until the phrase ends', () => {
     const chart = chartFromPatterns([[0]]);
     const cues = buildTurnCues(chart);
 
@@ -23,8 +23,8 @@ describe('buildTurnCues', () => {
   });
 });
 
-describe('有空档时', () => {
-  it('Your turn 在示范小节结束前半拍出现，持续整个空档和跟打小节', () => {
+describe('with a gap', () => {
+  it('Your turn appears half a beat before the call bar ends and lasts through the gap and the response bar', () => {
     const chart = chartFromPatterns([[0], [0]], { responseGapBeats: 4 });
 
     expect(buildTurnCues(chart)).toEqual([
@@ -40,31 +40,31 @@ describe('turnCueAt', () => {
   const chart = chartFromPatterns([[0]]);
   const cues = buildTurnCues(chart);
 
-  it('预备小节前半段没有提示，最后半拍开始显示 Follow me', () => {
+  it('nothing in the first half of the count-in; Follow me shows for the last half beat', () => {
     expect(turnCueAt(cues, 3)).toBeNull();
     expect(turnCueAt(cues, 3.5)?.turn).toBe('call');
   });
 
-  it('跟打小节开头前半拍换成 Your turn', () => {
+  it('switches to Your turn half a beat before the response bar', () => {
     expect(turnCueAt(cues, 7.49)?.turn).toBe('call');
     expect(turnCueAt(cues, 7.5)?.turn).toBe('response');
   });
 });
 
 describe('checkTurnCueSpacing', () => {
-  it('最后一个事件的判定窗口在提示切换前关闭时没有错误', () => {
+  it("no error when the last event's window closes before the cue switches", () => {
     expect(checkTurnCueSpacing(chartFromPatterns([[0, 3.25]]), 0.1)).toEqual([]);
   });
 
-  it('事件太靠后时，示范和跟打都报出路径和允许的拍位置', () => {
-    // 第二个乐句只用来让第一个乐句的 Your turn 提前切走
+  it('events too late report the path and the latest allowed beat, for both call and response', () => {
+    // The second phrase only exists to make the first phrase's Your turn switch away early
     expect(checkTurnCueSpacing(chartFromPatterns([[0, 3.5], [0]]), 0.1)).toEqual([
-      'phrases[0].call[1]：第 3.5 拍太靠后，提示会在判定结束前切走；120 BPM 下要早于第 3.3 拍',
-      'phrases[0].response[1]：第 3.5 拍太靠后，提示会在判定结束前切走；120 BPM 下要早于第 3.3 拍',
+      'phrases[0].call[1]: beat 3.5 is too late; the cue would switch before judging ends. At 120 BPM it must be before beat 3.3',
+      'phrases[0].response[1]: beat 3.5 is too late; the cue would switch before judging ends. At 120 BPM it must be before beat 3.3',
     ]);
   });
 
-  it('要按两下的动作看第二下：右键刷新最晚放在第 2.75 拍', () => {
+  it('two-press actions go by the second press: right-click refresh can be at most beat 2.75', () => {
     const ok = chartFromPatterns([[0, 2.75], [0]], {
       phrases: [
         { call: [{ beat: 2.75, action: 'desktop-refresh' }] },
@@ -80,12 +80,12 @@ describe('checkTurnCueSpacing', () => {
       ],
     });
     expect(checkTurnCueSpacing(late, 0.1)[0]).toBe(
-      'phrases[0].call[0]：第 3 拍太靠后，提示会在判定结束前切走；120 BPM 下要早于第 2.8 拍',
+      'phrases[0].call[0]: beat 3 is too late; the cue would switch before judging ends. At 120 BPM it must be before beat 2.8',
     );
   });
 
-  it('最后一个乐句的 Your turn 显示到乐句结束，跟打可以更靠后', () => {
+  it("the last phrase's Your turn lasts until the phrase ends, so its response can be later", () => {
     const errors = checkTurnCueSpacing(chartFromPatterns([[0, 3.5]]), 0.1);
-    expect(errors.map((e) => e.split('：')[0])).toEqual(['phrases[0].call[1]']);
+    expect(errors.map((e) => e.split(':')[0])).toEqual(['phrases[0].call[1]']);
   });
 });

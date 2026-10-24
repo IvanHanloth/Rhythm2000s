@@ -3,7 +3,7 @@ import { buildChart } from './chart.ts';
 import { chartFromPatterns, sourceFromPatterns } from './test-charts.ts';
 
 describe('buildChart', () => {
-  it('没写 response 时，跟打与示范相同、晚整整 1 小节', () => {
+  it('without response, the response repeats the call exactly one bar later', () => {
     const chart = chartFromPatterns([[0, 1, 2]]);
 
     expect(chart.calls.map((c) => c.beat)).toEqual([4, 5, 6]);
@@ -11,7 +11,7 @@ describe('buildChart', () => {
     expect(chart.phrases).toEqual([{ callStart: 4, callEnd: 8, responseStart: 8, end: 12 }]);
   });
 
-  it('顶层 responseGapBeats 在示范和跟打之间插入空档，乐句可以单独覆盖', () => {
+  it('a top-level responseGapBeats inserts a gap, and phrases can override it', () => {
     const source = sourceFromPatterns([[0], [0], [0]], { responseGapBeats: 4 });
     source.phrases[1]!.responseGapBeats = 2;
     source.phrases[2]!.responseGapBeats = 0;
@@ -26,7 +26,7 @@ describe('buildChart', () => {
     expect(chart.endBeat).toBe(34 + 4);
   });
 
-  it('不写 responseGapBeats 时没有空档，跟打紧接着示范', () => {
+  it('without responseGapBeats there is no gap: the response follows the call directly', () => {
     const source = sourceFromPatterns([[0]]);
     delete source.responseGapBeats;
     expect(buildChart(source).phrases).toEqual([
@@ -34,7 +34,7 @@ describe('buildChart', () => {
     ]);
   });
 
-  it('写了 response 时按 response 排跟打目标', () => {
+  it('uses response for the targets when it is written', () => {
     const source = sourceFromPatterns([[0, 1]]);
     source.phrases[0]!.response = [{ beat: 0.5, action: 'dialog-info' }];
     const chart = buildChart(source);
@@ -42,7 +42,7 @@ describe('buildChart', () => {
     expect(chart.responses).toEqual([{ beat: 8.5, phrase: 0, index: 0, action: 'dialog-info' }]);
   });
 
-  it('乐句依次排列，记录乐句序号、乐句内序号和动作', () => {
+  it('lays phrases out in order, recording phrase index, index within the phrase and action', () => {
     const chart = chartFromPatterns([[0], [0.5, 3]]);
 
     expect(chart.calls).toEqual([
@@ -52,12 +52,12 @@ describe('buildChart', () => {
     ]);
   });
 
-  it('全曲长度 = 预备 + 每个乐句 2 小节 + 结尾', () => {
+  it('song length = count-in + 2 bars per phrase + outro', () => {
     expect(chartFromPatterns([[0], [0], [0]]).endBeat).toBe((1 + 3 * 2 + 1) * 4);
   });
 
-  it('保留 id、标题和场景', () => {
-    const chart = chartFromPatterns([[0]], { id: 'abc', title: '曲名', scene: 'mac-2000' });
-    expect([chart.id, chart.title, chart.scene]).toEqual(['abc', '曲名', 'mac-2000']);
+  it('keeps id, title and scene', () => {
+    const chart = chartFromPatterns([[0]], { id: 'abc', title: 'Song', scene: 'mac-2000' });
+    expect([chart.id, chart.title, chart.scene]).toEqual(['abc', 'Song', 'mac-2000']);
   });
 });

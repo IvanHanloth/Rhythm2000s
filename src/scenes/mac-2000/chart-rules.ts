@@ -19,14 +19,14 @@ export function checkMacChart(chart: Chart): string[] {
     const responses = chart.responses.filter((c) => c.phrase === phrase);
     if (calls.length !== responses.length) {
       errors.push(
-        `phrases[${phrase}]：Mac 场景要求跟打与示范的事件个数相同（示范 ${calls.length} 个，跟打 ${responses.length} 个）`,
+        `phrases[${phrase}]: the Mac scene needs as many response events as call events (${calls.length} call, ${responses.length} response)`,
       );
     } else {
       responses.forEach((response, i) => {
         const expected = calls[i]!.action;
         if (response.action !== expected) {
           errors.push(
-            `phrases[${phrase}].response[${i}]：Mac 场景要求动作与示范的第 ${i + 1} 个事件相同（${expected}）`,
+            `phrases[${phrase}].response[${i}]: the Mac scene needs the same action as call event ${i + 1} (${expected})`,
           );
         }
       });
@@ -36,25 +36,25 @@ export function checkMacChart(chart: Chart): string[] {
     const windows = kinds.filter((k) => k !== null && usesWindowSlot(k)).length;
     if (windows > MAX_WINDOWS_PER_PHRASE) {
       errors.push(
-        `phrases[${phrase}]：提示框和文稿窗口合计 ${windows} 个，Mac 场景每个乐句最多 ${MAX_WINDOWS_PER_PHRASE} 个`,
+        `phrases[${phrase}]: ${windows} alerts and windows, the Mac scene allows at most ${MAX_WINDOWS_PER_PHRASE} per phrase`,
       );
     }
     const bounces = kinds.filter((k) => k === 'dock').length;
     if (bounces > MAX_BOUNCES_PER_PHRASE) {
       errors.push(
-        `phrases[${phrase}]：dock-bounce 有 ${bounces} 个，Mac 场景每个乐句最多 ${MAX_BOUNCES_PER_PHRASE} 个`,
+        `phrases[${phrase}]: ${bounces} dock-bounce, the Mac scene allows at most ${MAX_BOUNCES_PER_PHRASE} per phrase`,
       );
     }
     const chats = kinds.filter((k) => k === 'chat').length;
     if (chats > MAX_CHATS_PER_PHRASE) {
       errors.push(
-        `phrases[${phrase}]：ichat-message 有 ${chats} 个，Mac 场景每个乐句最多 ${MAX_CHATS_PER_PHRASE} 个`,
+        `phrases[${phrase}]: ${chats} ichat-message, the Mac scene allows at most ${MAX_CHATS_PER_PHRASE} per phrase`,
       );
     }
     const files = kinds.filter((k) => k === 'file').length;
     if (files > MAX_FILES_PER_PHRASE) {
       errors.push(
-        `phrases[${phrase}]：dock-trash 有 ${files} 个，Mac 场景每个乐句最多 ${MAX_FILES_PER_PHRASE} 个`,
+        `phrases[${phrase}]: ${files} dock-trash, the Mac scene allows at most ${MAX_FILES_PER_PHRASE} per phrase`,
       );
     }
   });

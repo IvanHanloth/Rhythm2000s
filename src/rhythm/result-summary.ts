@@ -1,8 +1,8 @@
-// 结算：把一局的判定整理成得分、评级、偏差分布和评语（doc/results.md，规则都是暂定）。不依赖 PixiJS。
+// Results: turns a round's judgements into score, rating, offset histogram and comments (doc/results.md; all rules provisional). No PixiJS.
 
 import type { JudgementLevel } from './judge.ts';
 
-/** 一下的判定：等级、偏差（秒，正数表示晚，Miss 为 null）、属于第几个乐句（从 0 开始） */
+/** One press's judgement: grade, offset (s, positive is late, null for Miss), phrase index (from 0) */
 export interface HitResult {
   level: JudgementLevel;
   offset: number | null;
@@ -12,37 +12,36 @@ export interface HitResult {
 export type Rank = 'superb' | 'ok' | 'tryAgain';
 
 export const RANK_LABELS: Record<Rank, string> = {
-  superb: '优秀',
-  ok: '及格',
-  tryAgain: '再试一次',
+  superb: 'Superb',
+  ok: 'OK',
+  tryAgain: 'Try again',
 };
 
-/** 满分 */
 export const MAX_SCORE = 10000;
-/** 评级的得分下限 */
+/** Lowest score for each rating */
 const RANK_THRESHOLDS: [Rank, number][] = [
   ['superb', 8000],
   ['ok', 6000],
 ];
 
-/** 偏差分布：11 格，每格 20 毫秒，中间一格是拍点 */
+/** Offset histogram: 11 bins of 20 ms, the middle bin is on the beat */
 export const OFFSET_BINS = 11;
 export const OFFSET_BIN_MS = 20;
-/** 平均偏差超过它才提示偏早 / 偏晚 */
+/** Only mention early / late when the mean offset is beyond this */
 const DRIFT_HINT_MS = 20;
 const DRIFT_MIN_HITS = 4;
-/** 评语里最多列几个出错的乐句 */
+/** At most this many phrases with mistakes are listed */
 const MAX_LISTED_PHRASES = 3;
 
 export interface ResultSummary {
   counts: Record<JudgementLevel, number>;
   score: number;
   rank: Rank;
-  /** 命中的平均偏差（毫秒，正数表示晚）；没有命中时为 null */
+  /** Mean offset of hits (ms, positive is late); null with no hits */
   meanOffsetMs: number | null;
-  /** 每格命中次数，从「早 100 毫秒」到「晚 100 毫秒」 */
+  /** Hits per bin, from "100 ms early" to "100 ms late" */
   bins: number[];
-  /** 有 Miss 的乐句，从 1 开始数，从小到大 */
+  /** Phrases with a Miss, counted from 1, ascending */
   missedPhrases: number[];
   comments: string[];
 }
@@ -89,33 +88,33 @@ function buildComments(
 ): string[] {
   const comments = [
     {
-      superb: '节奏很稳，干得漂亮。',
-      ok: '大体跟上了节奏。',
-      tryAgain: '还没找到节奏，再仔细听一遍示范。',
+      superb: 'Rock-steady rhythm. Well played.',
+      ok: 'You mostly kept up with the beat.',
+      tryAgain: "You haven't found the beat yet. Listen to the call again.",
     }[rank],
   ];
 
   if (missedPhrases.length === 0) {
-    comments.push('没有失误。');
+    comments.push('No mistakes.');
   } else {
-    const listed = missedPhrases.slice(0, MAX_LISTED_PHRASES).join('、');
-    const more = missedPhrases.length > MAX_LISTED_PHRASES ? ' 等' : ' ';
-    comments.push(`第 ${listed}${more}乐句有失误。`);
+    const listed = missedPhrases.slice(0, MAX_LISTED_PHRASES).join(', ');
+    const more = missedPhrases.length > MAX_LISTED_PHRASES ? ' and more' : '';
+    comments.push(`Phrases ${listed}${more} had mistakes.`);
   }
 
   if (meanOffsetMs !== null && hitCount >= DRIFT_MIN_HITS) {
     const ms = Math.round(Math.abs(meanOffsetMs));
     if (ms >= DRIFT_HINT_MS) {
-      const side = meanOffsetMs > 0 ? '偏晚' : '偏早';
-      comments.push(`整体${side} ${ms} 毫秒，可以试试重新校准。`);
+      const side = meanOffsetMs > 0 ? 'late' : 'early';
+      comments.push(`You were ${ms} ms ${side} on average. Try recalibrating.`);
     } else {
-      comments.push('按键时机没有明显偏早或偏晚。');
+      comments.push('Your timing was neither early nor late.');
     }
   }
   return comments;
 }
 
-/** 得分写成五位数，如 08250 */
+/** Score as five digits, e.g. 08250 */
 export function formatScore(score: number): string {
   return String(Math.max(0, Math.round(score))).padStart(5, '0');
 }

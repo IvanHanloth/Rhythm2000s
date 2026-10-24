@@ -2,7 +2,7 @@
 
 > 状态：草稿（2026-10-24）
 >
-> 结论摘要：**浏览器完全能支撑《节奏天国》式玩法**，建议「Web 优先，需要上架 Steam 时再套桌面壳」。2026-10-24 已采纳 TypeScript + PixiJS + Vite+，见 [ADR 0001](decisions/0001-技术栈选型.md)。
+> 结论摘要：**浏览器完全能支撑《节奏天国》式玩法**，建议「Web 优先，需要上架 Steam 时再套桌面壳」。2026-10-24 已采纳 TypeScript + PixiJS + Vite+，见 [ADR 0001](decisions/0001-tech-stack.md)。
 
 ## 1. 这款游戏对技术的真实要求
 

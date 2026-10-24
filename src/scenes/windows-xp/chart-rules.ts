@@ -12,7 +12,7 @@ export function checkWindowsXpChart(chart: Chart): string[] {
     const responses = chart.responses.filter((c) => c.phrase === phrase);
     if (calls.length !== responses.length) {
       errors.push(
-        `phrases[${phrase}]：XP 场景要求跟打与示范的事件个数相同（示范 ${calls.length} 个，跟打 ${responses.length} 个）`,
+        `phrases[${phrase}]: the XP scene needs as many response events as call events (${calls.length} call, ${responses.length} response)`,
       );
       return;
     }
@@ -20,7 +20,7 @@ export function checkWindowsXpChart(chart: Chart): string[] {
       const expected = calls[i]!.action;
       if (response.action !== expected) {
         errors.push(
-          `phrases[${phrase}].response[${i}]：XP 场景要求动作与示范的第 ${i + 1} 个事件相同（${expected}）`,
+          `phrases[${phrase}].response[${i}]: the XP scene needs the same action as call event ${i + 1} (${expected})`,
         );
       }
     });
@@ -34,12 +34,19 @@ function checkPhraseLimits(phrase: number, calls: readonly ChartCue[]): string[]
   const count = (test: (action: string) => boolean) => calls.filter((c) => test(c.action)).length;
   const programs = count((a) => a === 'window-minimize');
   const limits: [string, number, number][] = [
-    ['消息框和程序窗口合计', count((a) => isDialogKind(a)) + programs, PHRASE_LIMITS.windows],
+    [
+      'message boxes and program windows',
+      count((a) => isDialogKind(a)) + programs,
+      PHRASE_LIMITS.windows,
+    ],
     ['window-minimize', programs, PHRASE_LIMITS.programs],
     ['balloon-info', count((a) => a === 'balloon-info'), PHRASE_LIMITS.balloons],
     ['recycle-bin', count((a) => a === 'recycle-bin'), PHRASE_LIMITS.files],
   ];
   return limits
     .filter(([, n, max]) => n > max)
-    .map(([name, n, max]) => `phrases[${phrase}]：${name} ${n} 个，XP 场景每个乐句最多 ${max} 个`);
+    .map(
+      ([name, n, max]) =>
+        `phrases[${phrase}]: ${n} ${name}, the XP scene allows at most ${max} per phrase`,
+    );
 }

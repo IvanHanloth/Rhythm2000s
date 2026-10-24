@@ -14,7 +14,7 @@
   1. Windows XP 桌面 → [scenes/windows-xp.md](scenes/windows-xp.md)
   2. 2000 年前后的 Mac 桌面 → [scenes/mac-2000.md](scenes/mac-2000.md)
 - **动作示例**：弹出窗口、关闭窗口、收邮件、点击刷新等。
-- **画布与场景**：所有场景共用一块 1280×720（16:9）的游戏画布，同一时间只显示一个场景，见 [ADR 0002](decisions/0002-游戏画布与场景结构.md)。
+- **画布与场景**：所有场景共用一块 1280×720（16:9）的游戏画布，同一时间只显示一个场景，见 [ADR 0002](decisions/0002-game-canvas-and-scenes.md)。
 
 ## 核心循环
 
@@ -46,11 +46,11 @@
 
 ## 待讨论问题
 
-- [x] 技术栈与目标平台：Web 优先（TypeScript + PixiJS + Vite+），需要时用 Electron 套壳上桌面，见 [ADR 0001](decisions/0001-技术栈选型.md)。移动端是否作为正式目标仍待定
+- [x] 技术栈与目标平台：Web 优先（TypeScript + PixiJS + Vite+），需要时用 Electron 套壳上桌面，见 [ADR 0001](decisions/0001-tech-stack.md)。移动端是否作为正式目标仍待定
 - [ ] 输入方式：键盘还是鼠标？是否需要移动定位？
 - [ ] 判定窗口的具体数值
 - [ ] 音乐来源：原创配乐的风格（2000 年代电子乐 / 流行乐 / 系统音效采样拼贴）
-- [x] 美术风格：界面贴近原版，可以直接使用原版系统素材（项目仅作学术用途），见 [ADR 0004](decisions/0004-界面贴近原版.md)
+- [x] 美术风格：界面贴近原版，可以直接使用原版系统素材（项目仅作学术用途），见 [ADR 0004](decisions/0004-authentic-os-look.md)
   - 2026-10-24 有一份[设计系统提案](https://claude.ai/artifact/YTAfdQKAfiofe7o2vbNz5K)，**尚未定稿**：配色、字体、动效拍数、示例文案都只是候选。Mac 场景的铂金（OS 9）和水晶（早期 Aqua）两套主题并列，供选定参照版本时对比。
   - 2026-10-24 Mac 场景的参照版本定为 Mac OS X 10.0–10.2 的早期 Aqua，见 [scenes/mac-2000.md](scenes/mac-2000.md)。
   - 2026-10-24 主要界面（开始、选关、载入、暂停、结算、设置）的近原版设计稿：[设计画布](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB)，**尚未定稿**。

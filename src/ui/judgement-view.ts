@@ -1,5 +1,5 @@
-// 判定字样：Perfect! / Good / Miss，三套主题外观相同（设计系统提案的 Judgement 组件）。
-// 等级必须靠文字读出来，颜色只是加强。
+// Judgement words: Perfect! / Good / Miss, identical in every theme (the Judgement component of the design-system proposal).
+// The grade must be readable from the word itself; colour only reinforces it.
 
 import { Container, Graphics, Text } from 'pixi.js';
 import type { JudgementLevel } from '../rhythm/judge.ts';
@@ -20,12 +20,12 @@ const COLORS: Record<JudgementLevel, { fill: string; text: string }> = {
 const PADDING_X = 20;
 const HEIGHT = 56;
 
-/** 以中心为原点的判定字样，挤压、淡出由使用方按拍计算。 */
+/** Judgement word centred on the origin; the user animates squash and fade by beats. */
 export function createJudgementView(level: JudgementLevel): Container {
   const view = new Container({ label: `judgement-${level}` });
   const { fill, text: textColor } = COLORS[level];
 
-  // 字号与字重取自设计系统的 judgement 字样
+  // Size and weight from the design system's judgement style
   const text = new Text({
     text: LABELS[level],
     style: { fontFamily: FONT_FAMILIES.display, fontSize: 40, fontWeight: '800', fill: textColor },

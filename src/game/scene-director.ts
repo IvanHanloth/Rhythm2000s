@@ -1,9 +1,9 @@
-// 场景切换器：登记所有场景，同一时间只显示其中一个。
-// 切换时旧场景整个销毁，不在后台继续运行。
+// Scene director: registers every scene and shows one at a time.
+// Switching destroys the old scene entirely; nothing keeps running in the background.
 
 import type { FrameInfo, Scene, SceneContext, SceneEntry, TapInfo } from './scene.ts';
 
-/** 场景画面挂在哪里。只需要这两个方法，便于测试。 */
+/** Where scene views attach. Only these two methods, to keep it testable. */
 export interface SceneHost {
   addChild(view: Scene['view']): unknown;
   removeChild(view: Scene['view']): unknown;
@@ -18,7 +18,7 @@ export class SceneDirector {
   constructor(host: SceneHost, entries: readonly SceneEntry[], context: SceneContext) {
     const ids = new Set<string>();
     for (const entry of entries) {
-      if (ids.has(entry.id)) throw new Error(`场景 ${entry.id} 重复登记`);
+      if (ids.has(entry.id)) throw new Error(`Scene registered twice: ${entry.id}`);
       ids.add(entry.id);
     }
     this.host = host;
@@ -26,21 +26,21 @@ export class SceneDirector {
     this.context = context;
   }
 
-  /** 开始一关前显示开场页的处理，之后创建的场景都会拿到 */
+  /** Shows the intro before a level; every scene created afterwards gets it */
   setIntroduce(introduce: SceneContext['introduce']): void {
     this.context = { ...this.context, introduce };
   }
 
-  /** 当前场景的标识；还没有显示任何场景时为 null。 */
+  /** Current scene id; null before any scene is shown. */
   get currentId(): string | null {
     return this.current?.id ?? null;
   }
 
-  /** 切换到指定场景，可以指定要打的谱面。已经在这个场景、这首谱面时什么都不做。 */
+  /** Switches to a scene, optionally with a chart. Does nothing when already on that scene and chart. */
   show(id: string, chartId?: string): void {
     if (this.current?.id === id && this.current.chartId === chartId) return;
     const entry = this.entries.find((e) => e.id === id);
-    if (!entry) throw new Error(`没有登记场景 ${id}`);
+    if (!entry) throw new Error(`Scene not registered: ${id}`);
 
     this.clear();
     const scene = entry.create({ ...this.context, chartId });
@@ -48,27 +48,24 @@ export class SceneDirector {
     this.current = { id, chartId, scene };
   }
 
-  /** 每帧调用，转给当前场景。 */
   update(frame: FrameInfo): void {
     this.current?.scene.update(frame);
   }
 
-  /** 玩家输入，转给当前场景。 */
   tap(tap: TapInfo): void {
     this.current?.scene.onTap?.(tap);
   }
 
-  /** 玩家松开，转给当前场景。 */
+  /** The player released; forwarded to the current scene. */
   release(tap: TapInfo): void {
     this.current?.scene.onRelease?.(tap);
   }
 
-  /** 玩家按了 Esc，转给当前场景；场景自己处理了返回 true。 */
+  /** The player pressed Esc; forwarded to the current scene, true when the scene handled it. */
   escape(): boolean {
     return this.current?.scene.onEscape?.() ?? false;
   }
 
-  /** 销毁当前场景。 */
   clear(): void {
     if (!this.current) return;
     const { scene } = this.current;

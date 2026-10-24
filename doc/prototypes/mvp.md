@@ -82,7 +82,7 @@
 | 7 | 0、0.5、1、1.5、2 |
 | 8 | 0、0.5、1、2、3 |
 
-每个乐句的示范与跟打之间没有空档（谱面里写的是 `"responseGapBeats": 0`，与默认值相同，2026-10-24 用户要求所有谱面都改成 0）。全曲 1 小节预备 + 8 个乐句（每句 2 小节）+ 1 小节结尾，共 72 拍，约 36 秒。所有动作都是 `dialog-info`（2026-10-24 由 `close-window` 改名，见 [ADR 0006](../decisions/0006-动作按界面部件类名命名.md)），跟打与示范相同。
+每个乐句的示范与跟打之间没有空档（谱面里写的是 `"responseGapBeats": 0`，与默认值相同，2026-10-24 用户要求所有谱面都改成 0）。全曲 1 小节预备 + 8 个乐句（每句 2 小节）+ 1 小节结尾，共 72 拍，约 36 秒。所有动作都是 `dialog-info`（2026-10-24 由 `close-window` 改名，见 [ADR 0006](../decisions/0006-actions-named-after-ui-classes.md)），跟打与示范相同。
 
 谱面数据存放在 `public/charts/xp-popup-mvp.json`，格式见 [chart-format.md](../chart-format.md)。
 

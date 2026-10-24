@@ -1,10 +1,10 @@
-// 动画缓动函数。输入是 0～1 的进度，按音频时钟算出来，不依赖帧数。
+// Easing functions. Input is 0…1 progress computed from the audio clock, never from frame counts.
 
 export function clamp01(value: number): number {
   return Math.min(1, Math.max(0, value));
 }
 
-/** 先冲过头再回弹，用于窗口弹出。 */
+/** Overshoots then settles, for windows popping up. */
 export function easeOutBack(progress: number): number {
   const p = clamp01(progress);
   const c1 = 1.70158;

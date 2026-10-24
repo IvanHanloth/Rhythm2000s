@@ -75,7 +75,7 @@ describe('checkMacChart', () => {
       macChart([beats.map((b, i) => [b, i % 2 ? 'alert-note' : 'window-miniaturize'])]),
     );
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toContain('最多 6 个');
+    expect(errors[0]).toContain('at most 6');
   });
 
   it('同一乐句的 dock-trash 超过 6 个时报错', () => {

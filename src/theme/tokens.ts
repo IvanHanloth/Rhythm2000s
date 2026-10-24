@@ -1,7 +1,7 @@
-// 场景主题颜色，取自设计系统提案的 tokens.json（2026-10-24 版本，未定稿）：
+// Scene theme colours from the design-system proposal's tokens.json (2026-10-24 version, not final):
 // https://claude.ai/artifact/YTAfdQKAfiofe7o2vbNz5K
-// 每个 token 的用法说明见提案；这里只保留颜色值。改颜色时以提案为准，两边一起改。
-// 提案里的 Mac 铂金主题暂不使用（ADR 0002），需要时再从提案里加进来。
+// Usage of each token is described in the proposal; only the values live here. The proposal is the source of truth; change both together.
+// The proposal's Mac Platinum theme is unused for now (ADR 0002); add it from the proposal when needed.
 
 export type ThemeId = 'xp' | 'aqua';
 
@@ -84,20 +84,20 @@ export const THEMES: Record<ThemeId, ThemeColors> = {
   },
 };
 
-/** 字体族。字体文件尚未加载，暂时会落到系统字体（ADR 0002）。 */
+/** Font families. Font files aren't loaded yet, so they fall back to system fonts for now (ADR 0002). */
 export const FONT_FAMILIES = {
   ui: ['PT Sans', 'Noto Sans SC', 'sans-serif'],
   display: ['Baloo 2', 'Noto Sans SC', 'sans-serif'],
   pixel: ['Pixelify Sans', 'Noto Sans SC', 'monospace'],
 };
 
-/** 字体列表拼成 CSS 的 font-family 值：名字里有空格或数字的要加引号（不加时「Baloo 2」会让整条声明失效） */
+/** Joins a font list into a CSS font-family value, quoting names (unquoted, "Baloo 2" invalidates the whole declaration) */
 export function cssFontFamily(families: readonly string[]): string {
   const generic = new Set(['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui']);
   return families.map((f) => (generic.has(f) ? f : `"${f}"`)).join(', ');
 }
 
-/** 判定颜色：三套主题共用，保证判定反馈跨场景一致。on-* 是落在对应底色上的文字颜色 */
+/** Judgement colours, shared by every theme so feedback is consistent across scenes. on-* is the text colour on each */
 export const JUDGEMENT_COLORS = {
   perfect: '#f2b705',
   onPerfect: '#1b1b1b',
@@ -107,14 +107,14 @@ export const JUDGEMENT_COLORS = {
   onMiss: '#ffffff',
 };
 
-/** 动画时长，单位是拍。运行时乘以当前曲子的拍长，并按音频时钟计算每帧位置 */
+/** Animation durations in beats. Multiplied by the song's beat length at runtime, positions computed from the audio clock */
 export const BEATS = {
-  /** 窗口弹出，在目标拍点完成 */
+  /** Window pop-up, completing on the target beat */
   windowOpen: 0.25,
-  /** 窗口关闭 */
+  /** Window close */
   windowClose: 0.125,
-  /** 命中时的挤压回弹 */
+  /** Squash-and-bounce on a hit */
   squash: 0.125,
-  /** 判定字样停留时长 */
+  /** How long a judgement word stays */
   judgementHold: 1,
 };

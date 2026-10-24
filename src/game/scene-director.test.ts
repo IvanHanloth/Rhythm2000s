@@ -3,7 +3,7 @@ import type { Container } from 'pixi.js';
 import type { FrameInfo, Scene, SceneContext, SceneEntry } from './scene.ts';
 import { SceneDirector, type SceneHost } from './scene-director.ts';
 
-/** 记录调用顺序的假场景，不依赖 PixiJS 渲染。 */
+/** Fake scene that logs calls, no PixiJS rendering. */
 function fakeEntry(id: string, log: string[]): SceneEntry {
   return {
     id: id as SceneEntry['id'],
@@ -20,7 +20,7 @@ function fakeEntry(id: string, log: string[]): SceneEntry {
   };
 }
 
-/** 假场景用不到音频时钟 */
+/** Fake scenes don't need the audio clock */
 const context = { calibration: () => 0, charts: [], leave() {} } as unknown as SceneContext;
 
 function fakeHost(log: string[]): SceneHost {
@@ -31,7 +31,7 @@ function fakeHost(log: string[]): SceneHost {
 }
 
 describe('SceneDirector', () => {
-  it('切换场景时先移除并销毁旧场景，再创建新场景', () => {
+  it('removes and destroys the old scene before creating the new one', () => {
     const log: string[] = [];
     const director = new SceneDirector(
       fakeHost(log),
@@ -46,7 +46,7 @@ describe('SceneDirector', () => {
     expect(log).toEqual(['create a', 'add a', 'remove a', 'destroy a', 'create b', 'add b']);
   });
 
-  it('已经在目标场景时不重建', () => {
+  it('does not rebuild when already on the target scene', () => {
     const log: string[] = [];
     const director = new SceneDirector(fakeHost(log), [fakeEntry('a', log)], context);
 
@@ -56,7 +56,7 @@ describe('SceneDirector', () => {
     expect(log).toEqual(['create a', 'add a']);
   });
 
-  it('同一场景换一首谱面时重建，并把谱面 id 交给场景', () => {
+  it('rebuilds for a different chart in the same scene and passes the chart id', () => {
     const log: string[] = [];
     const director = new SceneDirector(fakeHost(log), [fakeEntry('a', log)], context);
 
@@ -67,7 +67,7 @@ describe('SceneDirector', () => {
     expect(log).toEqual(['create a x', 'add a', 'remove a', 'destroy a', 'create a y', 'add a']);
   });
 
-  it('每帧只更新当前场景', () => {
+  it('updates only the current scene each frame', () => {
     const log: string[] = [];
     const director = new SceneDirector(
       fakeHost(log),
@@ -82,7 +82,7 @@ describe('SceneDirector', () => {
     expect(log.filter((line) => line.startsWith('update'))).toEqual(['update b 1.5']);
   });
 
-  it('输入只转给当前场景', () => {
+  it('forwards input only to the current scene', () => {
     const log: string[] = [];
     const director = new SceneDirector(fakeHost(log), [fakeEntry('a', log)], context);
 
@@ -93,7 +93,7 @@ describe('SceneDirector', () => {
     expect(log.filter((line) => line.startsWith('tap'))).toEqual(['tap a 2']);
   });
 
-  it('Esc 转给当前场景；场景没处理或没有场景时返回 false', () => {
+  it('forwards Esc to the current scene; false when it is unhandled or there is no scene', () => {
     const handled: SceneEntry = {
       id: 'a' as SceneEntry['id'],
       label: 'a',
@@ -113,18 +113,18 @@ describe('SceneDirector', () => {
     expect(director.escape()).toBe(false);
   });
 
-  it('切换到没登记的场景时报错，并保留当前场景', () => {
+  it('throws on an unregistered scene and keeps the current one', () => {
     const log: string[] = [];
     const director = new SceneDirector(fakeHost(log), [fakeEntry('a', log)], context);
     director.show('a');
 
-    expect(() => director.show('missing')).toThrow('没有登记场景 missing');
+    expect(() => director.show('missing')).toThrow('Scene not registered: missing');
     expect(director.currentId).toBe('a');
   });
 
-  it('不允许重复登记同一个场景标识', () => {
+  it('rejects registering the same scene id twice', () => {
     expect(
       () => new SceneDirector(fakeHost([]), [fakeEntry('a', []), fakeEntry('a', [])], context),
-    ).toThrow('场景 a 重复登记');
+    ).toThrow('Scene registered twice: a');
   });
 });

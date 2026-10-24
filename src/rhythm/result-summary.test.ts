@@ -6,26 +6,26 @@ const good = (offset: number, phrase = 0): HitResult => ({ level: 'good', offset
 const miss = (phrase = 0): HitResult => ({ level: 'miss', offset: null, phrase });
 
 describe('summarizeResult', () => {
-  it('Perfect 1 分、Good 半分、Miss 0 分，换算成满分 10000', () => {
+  it('Perfect 1 point, Good half, Miss 0, scaled to 10000', () => {
     const summary = summarizeResult([perfect(0), perfect(0), good(0.06), miss()]);
     expect(summary.counts).toEqual({ perfect: 2, good: 1, miss: 1 });
     expect(summary.score).toBe(6250);
     expect(summary.rank).toBe('ok');
   });
 
-  it('8000 分以上优秀，6000 分以下再试一次', () => {
+  it('8000 and up is Superb, below 6000 is Try again', () => {
     expect(summarizeResult([perfect(0), perfect(0), perfect(0), perfect(0), good(0.06)]).rank).toBe(
       'superb',
     );
     expect(summarizeResult([perfect(0), miss()]).rank).toBe('tryAgain');
   });
 
-  it('偏差按 20 毫秒分格，超出 ±100 毫秒的归到两端', () => {
+  it('buckets offsets by 20 ms; beyond ±100 ms goes to the ends', () => {
     const { bins } = summarizeResult([perfect(0), perfect(0.009), good(-0.061), good(0.15)]);
     expect(bins).toEqual([0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 1]);
   });
 
-  it('评语：总体评价、出错的乐句、整体偏晚提示', () => {
+  it('comments: overall verdict, phrases with mistakes, a hint when consistently late', () => {
     const summary = summarizeResult([
       perfect(0.03, 0),
       perfect(0.03, 0),
@@ -37,28 +37,31 @@ describe('summarizeResult', () => {
     expect(summary.missedPhrases).toEqual([4, 7]);
     expect(summary.meanOffsetMs).toBeCloseTo(30, 6);
     expect(summary.comments).toEqual([
-      '大体跟上了节奏。',
-      '第 4、7 乐句有失误。',
-      '整体偏晚 30 毫秒，可以试试重新校准。',
+      'You mostly kept up with the beat.',
+      'Phrases 4, 7 had mistakes.',
+      'You were 30 ms late on average. Try recalibrating.',
     ]);
   });
 
-  it('没有失误、时机居中时这么说；命中太少时不评价时机', () => {
+  it('says so when there are no mistakes and timing is centred; too few hits gets no timing comment', () => {
     const steady = summarizeResult([perfect(0.01), perfect(-0.01), perfect(0), perfect(0)]);
-    expect(steady.comments.slice(1)).toEqual(['没有失误。', '按键时机没有明显偏早或偏晚。']);
+    expect(steady.comments.slice(1)).toEqual([
+      'No mistakes.',
+      'Your timing was neither early nor late.',
+    ]);
     expect(summarizeResult([perfect(0.05)]).comments).toHaveLength(2);
   });
 
-  it('一个乐句以上的失误最多列 3 个', () => {
+  it('lists at most 3 phrases with mistakes', () => {
     const summary = summarizeResult([miss(0), miss(1), miss(2), miss(3)]);
-    expect(summary.comments[1]).toBe('第 1、2、3 等乐句有失误。');
+    expect(summary.comments[1]).toBe('Phrases 1, 2, 3 and more had mistakes.');
     expect(summary.score).toBe(0);
     expect(summary.meanOffsetMs).toBeNull();
   });
 });
 
 describe('formatScore', () => {
-  it('补成五位数', () => {
+  it('pads to five digits', () => {
     expect(formatScore(8250)).toBe('08250');
     expect(formatScore(10000)).toBe('10000');
   });

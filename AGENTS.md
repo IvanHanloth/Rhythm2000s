@@ -16,7 +16,7 @@
 
 ## 当前阶段
 
-**开始开发游戏本体**。技术栈见 [ADR 0001](doc/decisions/0001-技术栈选型.md)；游戏画布和场景结构已搭好（[ADR 0002](doc/decisions/0002-游戏画布与场景结构.md)）。Windows XP 场景有一个可玩的 [MVP「弹窗 → 关窗」](doc/prototypes/mvp.md)，输入、判定窗口、谱面都是暂定值，等试玩后调整；Mac 场景按 Mac OS X 10.0–10.2 的早期 Aqua 还原了桌面和界面部件，有提示框、Dock 弹跳、新邮件、最小化、苹果菜单、废纸篓六类动作和 7 首谱面，一局里也有虚拟鼠标，玩法与 XP 相同（[doc/scenes/mac-2000.md](doc/scenes/mac-2000.md)）。进电脑后先在 XP 资源管理器 / Mac Finder 里用鼠标选关（[doc/level-select.md](doc/level-select.md)），一局结束弹出结算窗口（[doc/results.md](doc/results.md)）。谱面已与游戏代码分离，以 JSON 存放在 `public/charts/`（[ADR 0003](doc/decisions/0003-谱面数据格式.md)，格式见 [doc/chart-format.md](doc/chart-format.md)）。开始界面和选关是一个写实风格的 3D 街区（[ADR 0005](doc/decisions/0005-街区大厅用Three.js.md)，设计见 [doc/hub.md](doc/hub.md)），在网吧里坐到电脑前进入关卡；年代道具的模型等用户用 Tripo / Blender 制作，规格见 [doc/hub-assets.md](doc/hub-assets.md)。
+**开始开发游戏本体**。技术栈见 [ADR 0001](doc/decisions/0001-tech-stack.md)；游戏画布和场景结构已搭好（[ADR 0002](doc/decisions/0002-game-canvas-and-scenes.md)）。Windows XP 场景有一个可玩的 [MVP「弹窗 → 关窗」](doc/prototypes/mvp.md)，输入、判定窗口、谱面都是暂定值，等试玩后调整；Mac 场景按 Mac OS X 10.0–10.2 的早期 Aqua 还原了桌面和界面部件，有提示框、Dock 弹跳、新邮件、最小化、苹果菜单、废纸篓六类动作和 7 首谱面，一局里也有虚拟鼠标，玩法与 XP 相同（[doc/scenes/mac-2000.md](doc/scenes/mac-2000.md)）。进电脑后先在 XP 资源管理器 / Mac Finder 里用鼠标选关（[doc/level-select.md](doc/level-select.md)），一局结束弹出结算窗口（[doc/results.md](doc/results.md)）。谱面已与游戏代码分离，以 JSON 存放在 `public/charts/`（[ADR 0003](doc/decisions/0003-chart-data-format.md)，格式见 [doc/chart-format.md](doc/chart-format.md)）。开始界面和选关是一个写实风格的 3D 街区（[ADR 0005](doc/decisions/0005-3d-street-hub-with-threejs.md)，设计见 [doc/hub.md](doc/hub.md)），在网吧里坐到电脑前进入关卡；年代道具的模型等用户用 Tripo / Blender 制作，规格见 [doc/hub-assets.md](doc/hub-assets.md)。
 
 - 只使用已确定的技术栈；要引入新的运行时依赖（尤其是音频、渲染、状态管理类库）前，先向用户说明理由和取舍。
 - 已完成[延迟测试原型](doc/prototypes/latency-test.md)，下一步是在不同设备、浏览器、耳机上实测，把结果登记到该文档的「测试记录」。
@@ -68,14 +68,14 @@
 
 ## 技术栈
 
-Web 优先，以浏览器为主要运行平台；需要上架 Steam 时再用 Electron 套壳。详见 [ADR 0001](doc/decisions/0001-技术栈选型.md)。
+Web 优先，以浏览器为主要运行平台；需要上架 Steam 时再用 Electron 套壳。详见 [ADR 0001](doc/decisions/0001-tech-stack.md)。
 
 | 部分 | 选择 | 说明 |
 | --- | --- | --- |
 | 语言 | TypeScript | |
 | 工具链 | [Vite+](https://viteplus.dev/guide)（npm 包名 `vite-plus`） | 统一提供开发服务器（Vite）、构建（Rolldown）、测试（Vitest）、代码检查（Oxlint）、格式化（Oxfmt）；所有配置写在根目录 `vite.config.ts`，从 `vite-plus` 导入 `defineConfig`。不要再单独安装 ESLint、Prettier、Jest 等同类工具 |
 | 渲染 | PixiJS（npm 包名 `pixi.js`） | 负责游戏画面；菜单、设置等界面可用 DOM |
-| 3D 大厅 | Three.js（npm 包名 `three`） | 只用于开始界面和选关的 3D 街区（`src/hub/`），见 [ADR 0005](doc/decisions/0005-街区大厅用Three.js.md)；GLB 模型放在 `public/models/` |
+| 3D 大厅 | Three.js（npm 包名 `three`） | 只用于开始界面和选关的 3D 街区（`src/hub/`），见 [ADR 0005](doc/decisions/0005-3d-street-hub-with-threejs.md)；GLB 模型放在 `public/models/` |
 | 音频 | 原生 Web Audio API | 自写「指挥」模块，负责拍点换算、预约播放和判定；不用 Howler.js 之类的播放封装 |
 | 包管理器 | pnpm 12 | 版本写在 `package.json` 的 `devEngines.packageManager`；Vite+ 据此和锁文件自动调用。使用 `nodeLinker: hoisted` 布局，原因见 `pnpm-workspace.yaml` 注释 |
 | 运行环境 | Node.js 24 | 2026-10-24 本机版本 |
@@ -111,7 +111,7 @@ vp add <包名>  # 添加依赖
 | 示范段（call） | 游戏演示动作与节奏的段落，玩家只听和看 |
 | 跟打段（response） | 玩家重复示范动作与节奏的段落 |
 | 拍（beat） | 以 BPM 为基础的时间单位；谱面时间一律以拍为单位记录，不直接写毫秒 |
-| 动作（action） | 谱面里的一个事件：示范段出现的界面部件，跟打段玩家要处理它。动作 ID 按原版类名命名，如 `dialog-info`（[ADR 0006](doc/decisions/0006-动作按界面部件类名命名.md)） |
+| 动作（action） | 谱面里的一个事件：示范段出现的界面部件，跟打段玩家要处理它。动作 ID 按原版类名命名，如 `dialog-info`（[ADR 0006](doc/decisions/0006-actions-named-after-ui-classes.md)） |
 | 判定窗口 | 输入时间与目标拍点之间允许的误差范围，分 Perfect / Good / Miss 等级别 |
 | 谱面（chart） | 一首曲子中所有示范与跟打事件的时间表 |
 | 场景（scene） | 一个主题小游戏，如「Windows XP 桌面」 |
@@ -127,7 +127,7 @@ vp add <包名>  # 添加依赖
 
 ## 素材
 
-本项目仅作学术用途，界面以贴近原版 Windows XP 与 Mac OS 为目标，见 [ADR 0004](doc/decisions/0004-界面贴近原版.md)。
+本项目仅作学术用途，界面以贴近原版 Windows XP 与 Mac OS 为目标，见 [ADR 0004](doc/decisions/0004-authentic-os-look.md)。
 
 - 原版系统素材放在 `assets/reference/`，游戏和宣发视频都可以直接使用。
 - 新增素材时，在 `assets/README.md` 登记来源。

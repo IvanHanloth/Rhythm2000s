@@ -1,13 +1,13 @@
-// 双击判断：选关界面里图标「单击选中、双击打开」，和原版系统一样。
-// 只用于界面操作，不参与节奏判定，所以用 performance.now() 就够了。
+// Double-click detection: icons in the level select are "click to select, double-click to open", like the real OS.
+// UI only, not part of rhythm judging, so performance.now() is fine.
 
-/** Windows 和 Mac OS X 的默认双击间隔都在 500 毫秒左右 */
+/** Windows' and Mac OS X's default double-click interval is about 500 ms */
 export const DOUBLE_CLICK_MS = 500;
 
 export class DoubleClick {
   private last: { key: string; time: number } | null = null;
 
-  /** 记录一次单击；和上一次点的是同一个东西且间隔够短时返回 true（之后重新计数） */
+  /** Records a click; true when it is on the same thing as the last one and soon enough (then the count resets) */
   click(key: string, time: number): boolean {
     const last = this.last;
     if (last && last.key === key && time - last.time <= DOUBLE_CLICK_MS) {

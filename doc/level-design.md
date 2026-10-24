@@ -2,7 +2,7 @@
 
 > 状态：草稿（2026-10-24）。三条规则由用户确定；标「暂定」的细节和「候选 / 待讨论」里的内容还没定。
 >
-> 决策记录见 [ADR 0007](decisions/0007-官方关卡设计规范.md)。
+> 决策记录见 [ADR 0007](decisions/0007-official-level-design-guidelines.md)。
 
 「官方关卡」指随游戏发布、放在 `public/charts/` 并登记在 `index.json` 里的谱面。新写或修改官方关卡时，必须满足下面三条规则。
 

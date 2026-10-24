@@ -79,13 +79,13 @@ describe('每个乐句的上限', () => {
 
   it('超过上限时报错', () => {
     expect(checkWindowsXpChart(chartWith(repeat('balloon-info', 4)))).toEqual([
-      'phrases[0]：balloon-info 4 个，XP 场景每个乐句最多 3 个',
+      'phrases[0]: 4 balloon-info, the XP scene allows at most 3 per phrase',
     ]);
     expect(checkWindowsXpChart(chartWith(repeat('window-minimize', 5)))).toEqual([
-      'phrases[0]：window-minimize 5 个，XP 场景每个乐句最多 4 个',
+      'phrases[0]: 5 window-minimize, the XP scene allows at most 4 per phrase',
     ]);
     expect(checkWindowsXpChart(chartWith(repeat('recycle-bin', 7)))).toEqual([
-      'phrases[0]：recycle-bin 7 个，XP 场景每个乐句最多 6 个',
+      'phrases[0]: 7 recycle-bin, the XP scene allows at most 6 per phrase',
     ]);
   });
 
@@ -97,7 +97,7 @@ describe('每个乐句的上限', () => {
       [3, 'window-minimize'],
     ];
     expect(checkWindowsXpChart(chartWith(events))).toEqual([
-      'phrases[0]：消息框和程序窗口合计 7 个，XP 场景每个乐句最多 6 个',
+      'phrases[0]: 7 message boxes and program windows, the XP scene allows at most 6 per phrase',
     ]);
   });
 });

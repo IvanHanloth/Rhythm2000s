@@ -1,6 +1,6 @@
-// 动作 ID：示范段出现的界面部件，按原版系统的类名或常量名取名（doc/chart-format.md、ADR 0006）。
-// 写成「部件-变体」，例如 XP 消息框的 MB_ICONINFORMATION → dialog-info，Mac 的 kAlertNoteAlert → alert-note。
-// 玩家在跟打段要对它做什么由部件决定；每个场景声明自己支持哪些动作。
+// Action IDs: the UI widget shown in the call, named after the original OS class or constant (doc/chart-format.md, ADR 0006).
+// Written as `widget-variant`, e.g. XP's MB_ICONINFORMATION → dialog-info, Mac's kAlertNoteAlert → alert-note.
+// What the player does to it in the response is up to the widget; each scene declares which actions it supports.
 
 export const ACTION_TYPES = [
   'dialog-info',
@@ -30,24 +30,23 @@ export const ACTION_TYPES = [
 export type ActionType = (typeof ACTION_TYPES)[number];
 
 export const ACTION_LABELS: Record<ActionType, string> = {
-  'dialog-info': '信息消息框',
-  'dialog-warning': '警告消息框',
-  'dialog-error': '错误消息框',
-  'dialog-question': '询问消息框',
-  'desktop-refresh': '右键刷新',
-  'balloon-info': '托盘气泡',
-  'window-minimize': '最小化程序窗口',
-  'start-menu': '开始菜单',
-  'recycle-bin': '扔进回收站',
-  // 2026-10-24 起新增的显示文字只用英文
+  'dialog-info': 'Information box',
+  'dialog-warning': 'Warning box',
+  'dialog-error': 'Error box',
+  'dialog-question': 'Question box',
+  'desktop-refresh': 'Right-click refresh',
+  'balloon-info': 'Tray balloon',
+  'window-minimize': 'Minimise window',
+  'start-menu': 'Start menu',
+  'recycle-bin': 'Drag to Recycle Bin',
   'progress-download': 'File download',
   'volume-mute': 'Volume control',
-  'alert-note': 'Mac 提示框',
-  'alert-caution': 'Mac 警告提示框',
-  'alert-stop': 'Mac 停止提示框',
-  'dock-bounce': 'Dock 图标弹跳',
-  'mail-new': '新邮件',
-  'window-miniaturize': '最小化窗口',
+  'alert-note': 'Mac note alert',
+  'alert-caution': 'Mac caution alert',
+  'alert-stop': 'Mac stop alert',
+  'dock-bounce': 'Dock icon bounce',
+  'mail-new': 'New mail',
+  'window-miniaturize': 'Minimise to Dock',
   'menu-apple': 'Apple menu',
   'dock-trash': 'Trash',
   'sheet-save': 'Save sheet',
@@ -56,17 +55,19 @@ export const ACTION_LABELS: Record<ActionType, string> = {
 };
 
 /**
- * 一个动作要按几下：每一下相对事件拍位置的偏移（拍）。大多数动作只按一下（[0]）；
- * desktop-refresh 先右键、0.5 拍后点「刷新」（doc/chart-format.md，2026-10-24 用户定为固定间隔）；
- * start-menu 先按「开始」、0.5 拍后点菜单项（doc/scenes/windows-xp-levels.md）；
- * progress-download 要等进度条走 3 拍（整小节当休止），走满那一拍才点；volume-mute 拍点上按下，1 拍后自动松开（不判定）。
+ * How many presses an action takes: each press's offset (in beats) from the event's beat. Most actions take one ([0]);
+ * desktop-refresh is right-click, then "Refresh" half a beat later (doc/chart-format.md, fixed interval set by the user on 2026-10-24);
+ * start-menu is "start", then a menu item half a beat later (doc/scenes/windows-xp-levels.md);
+ * progress-download waits 3 beats for the bar to fill (the bar works as a rest) and is clicked on the beat it fills;
+ * volume-mute is pressed on the beat and released automatically 1 beat later (the release is not judged).
  */
 const TAP_OFFSETS: Partial<Record<ActionType, readonly number[]>> = {
   'desktop-refresh': [0, 0.5],
   'start-menu': [0, 0.5],
-  // Mac 苹果菜单：先点苹果、0.5 拍后点菜单项（doc/scenes/mac-2000.md）
+  // Mac Apple menu: the Apple, then a menu item half a beat later (doc/scenes/mac-2000.md)
   'menu-apple': [0, 0.5],
-  // Mac 存储表单：先点关闭按钮、0.5 拍后点「Don't Save」；菜单栏音量：和 volume-mute 一样，1 拍后自动松开
+  // Mac save sheet: the close button, then "Don't Save" half a beat later;
+  // Mac volume menu: like volume-mute, released automatically 1 beat later
   'sheet-save': [0, 0.5],
   'menu-volume': [0, 1],
   'progress-download': [3],
@@ -74,9 +75,9 @@ const TAP_OFFSETS: Partial<Record<ActionType, readonly number[]>> = {
 };
 
 /**
- * 每一下是什么：press 是按下；release 是松开，玩家要从上一下一直按住，松开也判定；
- * auto 是上一下命中后由游戏自己完成（画面和声音照常），不判定、不计分。
- * volume-mute 只判定按下，松开是 auto（2026-10-24 用户要求）。
+ * What each press is: press is a press; release is a release, held from the previous press and judged too;
+ * auto is completed by the game after the previous press hits (visuals and sound as normal), not judged or scored.
+ * volume-mute and menu-volume only judge the press; the release is auto (user request, 2026-10-24).
  */
 export type TapKind = 'press' | 'release' | 'auto';
 const TAP_KINDS: Partial<Record<ActionType, readonly TapKind[]>> = {
@@ -84,7 +85,7 @@ const TAP_KINDS: Partial<Record<ActionType, readonly TapKind[]>> = {
   'menu-volume': ['press', 'auto'],
 };
 
-/** 这个动作第 step 下是按下还是松开 */
+/** What the action's step-th press is */
 export function actionTapKind(action: ActionType, step: number): TapKind {
   return TAP_KINDS[action]?.[step] ?? 'press';
 }
@@ -94,7 +95,7 @@ export function actionTapOffsets(action: ActionType): readonly number[] {
   return TAP_OFFSETS[action] ?? SINGLE_TAP;
 }
 
-/** 这个动作最后一下相对事件拍位置的偏移（拍） */
+/** Offset (beats) of the action's last press from the event's beat */
 export function lastTapOffset(action: ActionType): number {
   return actionTapOffsets(action).at(-1)!;
 }

@@ -1,4 +1,4 @@
-// 检查 public/charts/ 下真实的谱面文件：清单列全了、每个谱面都能通过加载时的全部校验。
+// Checks the real chart files in public/charts/: the index lists them all and every chart passes the load-time checks.
 
 import { describe, expect, it } from 'vite-plus/test';
 import { parseChartIndex } from '../rhythm/chart-file.ts';
@@ -16,7 +16,7 @@ const byName = Object.fromEntries(
 describe('public/charts', () => {
   const index = parseChartIndex(byName[CHART_INDEX_FILE]);
 
-  it('清单格式正确，并列出了目录下的全部谱面文件', () => {
+  it('the index is valid and lists every chart file in the folder', () => {
     expect(index.ok).toBe(true);
     const listed = index.ok ? [...index.value.charts].sort() : [];
     const present = Object.keys(byName)
@@ -26,7 +26,7 @@ describe('public/charts', () => {
   });
 
   it.each(Object.keys(byName).filter((name) => name !== CHART_INDEX_FILE))(
-    '%s 通过校验',
+    '%s passes validation',
     (name) => {
       const result = checkChartData(byName[name], name.replace(/\.json$/, ''));
       expect(result.errors).toEqual([]);

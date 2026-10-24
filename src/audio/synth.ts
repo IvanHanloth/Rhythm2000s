@@ -1,7 +1,7 @@
-// 程序合成的鼓点和音效，不依赖素材文件。
-// 每个声音都从第一个采样起音（只做极短的淡入防爆音），预约时间就是听感上的拍点。
+// Synthesised drums and effects; no asset files.
+// Every sound attacks on its first sample (only a tiny fade-in against pops), so the scheduled time is the heard beat.
 
-/** 按采样逐个生成单声道 AudioBuffer。sample(t) 的 t 是秒。 */
+/** Builds a mono AudioBuffer sample by sample. t in sample(t) is in seconds. */
 export function renderBuffer(
   context: BaseAudioContext,
   duration: number,
@@ -19,12 +19,12 @@ export function renderBuffer(
   return buffer;
 }
 
-/** 指数衰减包络，tau 是衰减到 1/e 的时间（秒） */
+/** Exponential decay envelope; tau is the time to fall to 1/e (s) */
 function decay(t: number, tau: number): number {
   return Math.exp(-t / tau);
 }
 
-/** 底鼓：音高从 150Hz 快速滑到 50Hz 的正弦。 */
+/** Kick: a sine sweeping quickly from 150 Hz to 50 Hz. */
 export function createKick(context: BaseAudioContext): AudioBuffer {
   let phase = 0;
   const dt = 1 / context.sampleRate;
@@ -35,7 +35,7 @@ export function createKick(context: BaseAudioContext): AudioBuffer {
   });
 }
 
-/** 白噪声，用一阶差分简单去掉低频，听起来更「沙」。 */
+/** White noise with a first-order difference to cut the lows, so it sounds sandier. */
 function highNoise(): () => number {
   let previous = 0;
   return () => {
@@ -46,7 +46,7 @@ function highNoise(): () => number {
   };
 }
 
-/** 军鼓：噪声 + 180Hz 的短促鼓皮音。 */
+/** Snare: noise plus a short 180 Hz body. */
 export function createSnare(context: BaseAudioContext): AudioBuffer {
   const noise = highNoise();
   return renderBuffer(context, 0.2, (t) => {
@@ -55,24 +55,24 @@ export function createSnare(context: BaseAudioContext): AudioBuffer {
   });
 }
 
-/** 闭合踩镲：很短的高频噪声。 */
+/** Closed hi-hat: very short high-frequency noise. */
 export function createHat(context: BaseAudioContext): AudioBuffer {
   const noise = highNoise();
   return renderBuffer(context, 0.05, (t) => 0.35 * decay(t, 0.012) * noise());
 }
 
 export interface BlipOptions {
-  /** 起始音高（Hz） */
+  /** Start pitch (Hz) */
   from: number;
-  /** 结束音高（Hz）；与 from 不同时在时长内线性滑音 */
+  /** End pitch (Hz); slides linearly over the duration when it differs from `from` */
   to?: number;
   duration: number;
   gain?: number;
-  /** 方波更「电子」，正弦更柔和 */
+  /** Square sounds more electronic, sine softer */
   wave?: 'sine' | 'square';
 }
 
-/** 短促的电子提示音，用于弹窗、关窗、出错等界面音效。 */
+/** Short electronic blip for UI sounds such as pop-ups, closing and errors. */
 export function createBlip(
   context: BaseAudioContext,
   { from, to = from, duration, gain = 0.4, wave = 'sine' }: BlipOptions,
@@ -84,7 +84,7 @@ export function createBlip(
     phase += 2 * Math.PI * frequency * dt;
     const s = Math.sin(phase);
     const shaped = wave === 'square' ? Math.sign(s) * 0.5 : s;
-    // 尾部 20% 线性淡出，避免截断爆音
+    // Linear fade-out over the last 20% to avoid a click
     const tail = Math.min(1, (duration - t) / (duration * 0.2));
     return gain * tail * shaped;
   });

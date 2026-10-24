@@ -1,7 +1,8 @@
-// 玩家设置：输入校准值、跳过操作演示（doc/settings.md），保存在浏览器本地；读写失败（隐私模式等）时退回默认值。
+// Player settings: input calibration and skipping the tutorial (doc/settings.md), kept in browser storage;
+// read / write failures (private mode etc.) fall back to defaults.
 
 const CALIBRATION_KEY = 'rhythm2000s.calibrationMs';
-/** 校准值允许的范围（毫秒） */
+/** Allowed calibration range (ms) */
 export const CALIBRATION_LIMIT_MS = 300;
 
 export function clampCalibrationMs(value: number): number {
@@ -21,7 +22,7 @@ export function saveCalibrationMs(value: number): void {
   try {
     localStorage.setItem(CALIBRATION_KEY, String(value));
   } catch {
-    // 保存失败只影响下次打开，不影响本次游戏
+    // A failed save only affects the next visit, not this one
   }
 }
 

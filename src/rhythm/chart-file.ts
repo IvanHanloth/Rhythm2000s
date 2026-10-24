@@ -1,21 +1,21 @@
-// 谱面文件（JSON）的校验：把下载来的未知数据检查成 ChartSource。
-// 格式说明见 doc/chart-format.md。报错带字段路径，一次列出所有问题。
+// Validates chart files (JSON): turns downloaded unknown data into a ChartSource.
+// Format: doc/chart-format.md. Errors carry field paths and are all listed at once.
 
 import { ACTION_TYPES, isActionType, lastTapOffset, type ActionType } from './actions.ts';
 
 export const CHART_FORMAT_VERSION = 1;
 
 export interface ChartEventSource {
-  /** 相对所在小节开头的拍位置 */
+  /** Beat position from the start of its bar */
   beat: number;
   action: ActionType;
 }
 
 export interface ChartPhraseSource {
   call: ChartEventSource[];
-  /** 不写时与 call 相同 */
+  /** Same as call when omitted */
   response?: ChartEventSource[];
-  /** 这个乐句示范与跟打之间空几拍；不写时用谱面顶层的值 */
+  /** Gap in beats between call and response for this phrase; falls back to the chart's value */
   responseGapBeats?: number;
 }
 
@@ -28,15 +28,15 @@ export interface ChartSource {
   beatsPerBar: number;
   countInBars: number;
   outroBars: number;
-  /** 示范小节结束后、跟打小节开始前空几拍；不写时用 DEFAULT_RESPONSE_GAP_BEATS（0 拍） */
+  /** Gap in beats after the call bar and before the response bar; DEFAULT_RESPONSE_GAP_BEATS (0) when omitted */
   responseGapBeats?: number;
   phrases: ChartPhraseSource[];
 }
 
 export interface ChartFileOptions {
-  /** 每个场景支持的动作，键是场景 id */
+  /** Actions each scene supports, keyed by scene id */
   scenes: Readonly<Record<string, readonly ActionType[]>>;
-  /** 文件名推出的谱面 id；给出时要求与 id 字段一致 */
+  /** Chart id derived from the file name; when given, the id field must match */
   expectedId?: string;
 }
 
@@ -60,7 +60,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-/** 可选的空档拍数：不写，或不小于 0 的有限数字 */
+/** Optional gap: absent, or a finite number ≥ 0 */
 function isOptionalGap(value: unknown): boolean {
   return value === undefined || (typeof value === 'number' && Number.isFinite(value) && value >= 0);
 }
@@ -72,23 +72,23 @@ function isInteger(value: unknown, min: number): value is number {
 function unknownKeys(value: Record<string, unknown>, allowed: readonly string[], path: string) {
   return Object.keys(value)
     .filter((key) => !allowed.includes(key))
-    .map((key) => `${path}${path ? '.' : ''}${key} 是未定义的字段`);
+    .map((key) => `${path}${path ? '.' : ''}${key} is not a known field`);
 }
 
 export function parseChartFile(data: unknown, options: ChartFileOptions): ParseResult<ChartSource> {
-  if (!isRecord(data)) return { ok: false, errors: ['谱面必须是一个 JSON 对象'] };
+  if (!isRecord(data)) return { ok: false, errors: ['a chart must be a JSON object'] };
   const errors = unknownKeys(data, CHART_KEYS, '');
 
   if (data.format !== CHART_FORMAT_VERSION) {
-    errors.push(`format 必须是 ${CHART_FORMAT_VERSION}，收到 ${JSON.stringify(data.format)}`);
+    errors.push(`format must be ${CHART_FORMAT_VERSION}, got ${JSON.stringify(data.format)}`);
   }
   if (typeof data.id !== 'string' || !ID_PATTERN.test(data.id)) {
-    errors.push('id 必须是由小写字母、数字和连字符组成的字符串');
+    errors.push('id must be a string of lowercase letters, digits and hyphens');
   } else if (options.expectedId !== undefined && data.id !== options.expectedId) {
-    errors.push(`id「${data.id}」必须与文件名「${options.expectedId}」一致`);
+    errors.push(`id "${data.id}" must match the file name "${options.expectedId}"`);
   }
   if (typeof data.title !== 'string' || data.title.trim() === '') {
-    errors.push('title 必须是非空字符串');
+    errors.push('title must be a non-empty string');
   }
 
   const sceneActions =
@@ -96,33 +96,33 @@ export function parseChartFile(data: unknown, options: ChartFileOptions): ParseR
       ? options.scenes[data.scene]!
       : null;
   if (!sceneActions) {
-    const known = Object.keys(options.scenes).join('、');
-    errors.push(`scene 必须是已有场景之一（${known}），收到 ${JSON.stringify(data.scene)}`);
+    const known = Object.keys(options.scenes).join(', ');
+    errors.push(`scene must be a known scene (${known}), got ${JSON.stringify(data.scene)}`);
   }
 
   if (typeof data.bpm !== 'number' || !(data.bpm > 0) || !Number.isFinite(data.bpm)) {
-    errors.push('bpm 必须是大于 0 的数字');
+    errors.push('bpm must be a number greater than 0');
   }
   const beatsPerBar = isInteger(data.beatsPerBar, 1) ? data.beatsPerBar : null;
-  if (beatsPerBar === null) errors.push('beatsPerBar 必须是大于 0 的整数');
-  if (!isInteger(data.countInBars, 0)) errors.push('countInBars 必须是不小于 0 的整数');
-  if (!isInteger(data.outroBars, 0)) errors.push('outroBars 必须是不小于 0 的整数');
+  if (beatsPerBar === null) errors.push('beatsPerBar must be an integer greater than 0');
+  if (!isInteger(data.countInBars, 0)) errors.push('countInBars must be an integer ≥ 0');
+  if (!isInteger(data.outroBars, 0)) errors.push('outroBars must be an integer ≥ 0');
   if (!isOptionalGap(data.responseGapBeats)) {
-    errors.push('responseGapBeats 必须是不小于 0 的数字');
+    errors.push('responseGapBeats must be a number ≥ 0');
   }
 
   if (!Array.isArray(data.phrases) || data.phrases.length === 0) {
-    errors.push('phrases 必须是至少有一个乐句的数组');
+    errors.push('phrases must be an array with at least one phrase');
   } else {
     data.phrases.forEach((phrase, i) => {
       const path = `phrases[${i}]`;
       if (!isRecord(phrase)) {
-        errors.push(`${path} 必须是对象`);
+        errors.push(`${path} must be an object`);
         return;
       }
       errors.push(...unknownKeys(phrase, ['call', 'response', 'responseGapBeats'], path));
       if (!isOptionalGap(phrase.responseGapBeats)) {
-        errors.push(`${path}.responseGapBeats 必须是不小于 0 的数字`);
+        errors.push(`${path}.responseGapBeats must be a number ≥ 0`);
       }
       errors.push(
         ...checkEvents(phrase.call, `${path}.call`, beatsPerBar, sceneActions, data.scene),
@@ -153,17 +153,17 @@ function checkEvents(
   scene: unknown,
 ): string[] {
   if (!Array.isArray(events) || events.length === 0) {
-    return [`${path} 必须是至少有一个事件的数组`];
+    return [`${path} must be an array with at least one event`];
   }
   const errors: string[] = [];
   let previousBeat = -Infinity;
-  /** 上一个事件最后一下的拍位置（要按两下的动作占到第二下） */
+  /** Beat of the previous event's last press (two-press actions end on the second press) */
   let previousEnd = -Infinity;
 
   events.forEach((event, j) => {
     const eventPath = `${path}[${j}]`;
     if (!isRecord(event)) {
-      errors.push(`${eventPath} 必须是对象`);
+      errors.push(`${eventPath} must be an object`);
       return;
     }
     errors.push(...unknownKeys(event, ['beat', 'action'], eventPath));
@@ -171,19 +171,21 @@ function checkEvents(
     const { beat, action } = event;
     const last = isActionType(action) ? lastTapOffset(action) : 0;
     if (typeof beat !== 'number' || !Number.isFinite(beat) || beat < 0) {
-      errors.push(`${eventPath}.beat 必须是不小于 0 的数字`);
+      errors.push(`${eventPath}.beat must be a number ≥ 0`);
     } else {
       if (beatsPerBar !== null && beat >= beatsPerBar) {
-        errors.push(`${eventPath}.beat 必须小于每小节拍数 ${beatsPerBar}`);
+        errors.push(`${eventPath}.beat must be less than beats per bar (${beatsPerBar})`);
       } else if (beatsPerBar !== null && beat + last >= beatsPerBar) {
         errors.push(
-          `${eventPath}.beat：${String(action)} 的最后一下在第 ${beat + last} 拍，必须小于每小节拍数 ${beatsPerBar}`,
+          `${eventPath}.beat: the last press of ${String(action)} lands on beat ${beat + last}, which must be less than beats per bar (${beatsPerBar})`,
         );
       }
       if (beat <= previousBeat) {
-        errors.push(`${eventPath}.beat 必须大于上一个事件的拍位置`);
+        errors.push(`${eventPath}.beat must be after the previous event`);
       } else if (beat <= previousEnd) {
-        errors.push(`${eventPath}.beat 必须在上一个事件的最后一下（第 ${previousEnd} 拍）之后`);
+        errors.push(
+          `${eventPath}.beat must be after the previous event's last press (beat ${previousEnd})`,
+        );
       }
       previousBeat = beat;
       previousEnd = beat + last;
@@ -191,10 +193,10 @@ function checkEvents(
 
     if (!isActionType(action)) {
       errors.push(
-        `${eventPath}.action 必须是已有动作之一（${ACTION_TYPES.join('、')}），收到 ${JSON.stringify(action)}`,
+        `${eventPath}.action must be a known action (${ACTION_TYPES.join(', ')}), got ${JSON.stringify(action)}`,
       );
     } else if (sceneActions && !sceneActions.includes(action)) {
-      errors.push(`${eventPath}.action：场景 ${String(scene)} 不支持动作 ${action}`);
+      errors.push(`${eventPath}.action: scene ${String(scene)} does not support action ${action}`);
     }
   });
   return errors;
@@ -202,28 +204,30 @@ function checkEvents(
 
 export interface ChartIndex {
   format: typeof CHART_FORMAT_VERSION;
-  /** 谱面文件名，如 "xp-popup-mvp.json" */
+  /** Chart file names, e.g. "xp-popup-mvp.json" */
   charts: string[];
 }
 
 const FILE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*\.json$/;
 
-/** 校验谱面清单 index.json */
+/** Validates the chart index (index.json) */
 export function parseChartIndex(data: unknown): ParseResult<ChartIndex> {
-  if (!isRecord(data)) return { ok: false, errors: ['谱面清单必须是一个 JSON 对象'] };
+  if (!isRecord(data)) return { ok: false, errors: ['the chart index must be a JSON object'] };
   const errors = unknownKeys(data, ['format', 'charts'], '');
   if (data.format !== CHART_FORMAT_VERSION) {
-    errors.push(`format 必须是 ${CHART_FORMAT_VERSION}，收到 ${JSON.stringify(data.format)}`);
+    errors.push(`format must be ${CHART_FORMAT_VERSION}, got ${JSON.stringify(data.format)}`);
   }
   if (!Array.isArray(data.charts)) {
-    errors.push('charts 必须是文件名数组');
+    errors.push('charts must be an array of file names');
   } else {
     const seen = new Set<unknown>();
     data.charts.forEach((file, i) => {
       if (typeof file !== 'string' || !FILE_PATTERN.test(file)) {
-        errors.push(`charts[${i}] 必须是「小写字母、数字、连字符 + .json」的文件名`);
+        errors.push(
+          `charts[${i}] must be a file name of lowercase letters, digits and hyphens + .json`,
+        );
       } else if (seen.has(file)) {
-        errors.push(`charts[${i}]「${file}」重复`);
+        errors.push(`charts[${i}] "${file}" is listed twice`);
       }
       seen.add(file);
     });

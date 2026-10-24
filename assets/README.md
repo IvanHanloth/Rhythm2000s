@@ -51,7 +51,7 @@ archive.org 和 RW Designer 上的条目都是网友上传的，文件是否原�
 
 ## 授权与用途限制
 
-- **reference/**：版权属于微软、苹果。项目仅作学术用途，游戏和宣发视频可以直接使用（见 [ADR 0004](../doc/decisions/0004-界面贴近原版.md)）。
+- **reference/**：版权属于微软、苹果。项目仅作学术用途，游戏和宣发视频可以直接使用（见 [ADR 0004](../doc/decisions/0004-authentic-os-look.md)）。
 - **Poly Haven 素材**：CC0，可以随意使用和修改，不需要署名。
 - **鲸鱼娘 3D 模型**：CC BY 4.0，允许修改和商用，但游戏里要保留署名（作者、项目链接、许可链接）并注明做过修改。角色是 DeepSeek 的同人形象，不代表官方授权。
 - **PP NeueBit / PP Mondwest**：befonts 标注「Personal Use Only」。游戏发行和公开发布的宣发视频属于商用，正式使用前要从 Pangram Pangram 官网购买授权。
