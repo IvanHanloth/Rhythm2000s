@@ -2,7 +2,7 @@
 // Broken charts are skipped without affecting the others; errors are collected for the caller to show.
 
 import { buildChart, type Chart } from '@/rhythm/chart.ts';
-import { parseChartFile, parseChartIndex } from '@/rhythm/chart-file.ts';
+import { parseChartFile, parseChartIndex, type ChartSource } from '@/rhythm/chart-file.ts';
 import { JUDGE_WINDOWS } from '@/rhythm/judge.ts';
 import { checkTurnCueSpacing } from '@/rhythm/turn-cue.ts';
 import { sceneActions, SCENE_CATALOG, type SceneId } from '@/scenes/catalog.ts';
@@ -12,8 +12,14 @@ export const CHART_INDEX_FILE = 'index.json';
 /** Downloads a file from charts/ and parses it as JSON; throws on failure */
 export type FetchChartJson = (file: string) => Promise<unknown>;
 
+/** A validated chart with the JSON it was built from (kept for export, doc/chart-import-export.md) */
+export interface LoadedChart {
+  chart: Chart;
+  source: ChartSource;
+}
+
 export interface ChartLoadResult {
-  charts: Chart[];
+  charts: LoadedChart[];
   /** One per line, file name included */
   errors: string[];
 }
@@ -43,7 +49,7 @@ export async function loadCharts(fetchJson: FetchChartJson): Promise<ChartLoadRe
     }),
   );
 
-  const charts: Chart[] = [];
+  const charts: LoadedChart[] = [];
   for (const result of results) {
     const prefix = `Chart ${result.file}: `;
     if ('error' in result) {
@@ -51,8 +57,8 @@ export async function loadCharts(fetchJson: FetchChartJson): Promise<ChartLoadRe
       continue;
     }
     const problems = checkChartData(result.data, result.file.replace(/\.json$/, ''));
-    if (problems.chart) {
-      charts.push(problems.chart);
+    if (problems.loaded) {
+      charts.push(problems.loaded);
     } else {
       errors.push(...problems.errors.map((e) => prefix + e));
     }
@@ -64,9 +70,9 @@ export async function loadCharts(fetchJson: FetchChartJson): Promise<ChartLoadRe
 export function checkChartData(
   data: unknown,
   expectedId?: string,
-): { chart: Chart; errors: [] } | { chart: null; errors: string[] } {
+): { loaded: LoadedChart; errors: [] } | { loaded: null; errors: string[] } {
   const parsed = parseChartFile(data, { scenes: sceneActions(), expectedId });
-  if (!parsed.ok) return { chart: null, errors: parsed.errors };
+  if (!parsed.ok) return { loaded: null, errors: parsed.errors };
 
   const chart = buildChart(parsed.value);
   const scene = SCENE_CATALOG[chart.scene as SceneId];
@@ -74,7 +80,9 @@ export function checkChartData(
     ...(scene.checkChart?.(chart) ?? []),
     ...checkTurnCueSpacing(chart, JUDGE_WINDOWS.good),
   ];
-  return errors.length > 0 ? { chart: null, errors } : { chart, errors: [] };
+  return errors.length > 0
+    ? { loaded: null, errors }
+    : { loaded: { chart, source: parsed.value }, errors: [] };
 }
 
 function describe(error: unknown): string {

@@ -3,10 +3,12 @@
 
 import './style.css';
 import { AudioClock } from '@/audio/audio-clock.ts';
-import { Hub } from '@/hub/hub.ts';
+import { Hub, type LevelInfo } from '@/hub/hub.ts';
 import { mac2000Scene } from '@/scenes/mac-2000/scene.ts';
 import { windowsXpScene } from '@/scenes/windows-xp/scene.ts';
+import { browserChartStore, ChartLibrary } from './chart-library.ts';
 import { fetchChartFromSite, loadCharts } from './chart-loader.ts';
+import { browserChartFiles } from './chart-transfer.ts';
 import { GameCanvas } from './game-canvas.ts';
 import { listenForTaps } from './input.ts';
 import { LevelIntro } from './level-intro.ts';
@@ -20,11 +22,14 @@ if (!host) throw new Error('Game container #game not found');
 
 const clock = new AudioClock();
 // Prepare the canvas and charts together; charts are downloaded from public/charts/ at runtime (ADR 0003)
-const [canvas, { charts, errors: chartErrors }] = await Promise.all([
+const [canvas, { charts: builtInCharts, errors: chartErrors }] = await Promise.all([
   GameCanvas.create(host),
   loadCharts(fetchChartFromSite(import.meta.env.BASE_URL)),
 ]);
 for (const error of chartErrors) console.error(error);
+/** Built-in charts plus the player's imported ones (doc/chart-import-export.md) */
+const library = new ChartLibrary(builtInCharts, browserChartStore());
+for (const error of library.loadErrors) console.error(error);
 /** Calibration, "Skip tutorial" and the beat guide (doc/settings.md); the in-game settings window and H change them */
 const settings = new PlayerSettings();
 
@@ -39,7 +44,8 @@ const director = new SceneDirector(canvas.stage, scenes, {
   clock,
   calibration: () => settings.values.calibrationMs / 1000,
   settings,
-  charts,
+  library,
+  chartFiles: browserChartFiles,
   leave: () => {
     location.hash = HUB_ROUTE;
   },
@@ -55,20 +61,27 @@ canvas.onFrame(() => director.update({ audioTime: clock.heardNow() }));
 
 const sceneIds = director.entries.map((e) => e.id);
 
-/** All levels: one per chart, by scene then index order; picked in Explorer / Finder after sitting down (doc/level-select.md) */
-const levels = buildLevels(director.entries, charts);
+/**
+ * All levels: one per chart, by scene then index order, imports last; picked in Explorer / Finder after sitting down
+ * (doc/level-select.md). Rebuilt when the level list imports or deletes a chart.
+ */
+let levels = buildLevels(director.entries, library.charts);
 
 /** This level was entered by sitting down in the café. Opened from a URL, Esc also goes to the café, but the hub starts at the title screen */
 let cameFromHub = false;
 
-// One computer per scene in the café: the card after sitting down lists that computer's levels
-const hub = new Hub({
-  levels: director.entries.map(({ id, label }) => {
+/** One computer per scene in the café: the card after sitting down lists that computer's levels */
+function computerCards(): LevelInfo[] {
+  return director.entries.map(({ id, label }) => {
     const own = levels.filter((level) => level.sceneId === id);
     const details = own.map((level) => `Level ${level.number}: ${level.title} (${level.bpm} BPM)`);
     if (details.length === 0) details.push('No playable levels on this machine yet.');
     return { id, sceneId: id, label, details, playable: own.length > 0 };
-  }),
+  });
+}
+
+const hub = new Hub({
+  levels: computerCards(),
   recordOf: (sceneId) => {
     const own = levels.filter((level) => level.sceneId === sceneId);
     const played = own.filter((level) => loadBestScore(level.id) !== null).length;
@@ -83,6 +96,11 @@ const hub = new Hub({
 });
 document.body.append(hub.element);
 document.querySelector('#boot')?.remove();
+
+library.onChange(() => {
+  levels = buildLevels(director.entries, library.charts);
+  hub.setLevels(computerCards());
+});
 
 const intro = new LevelIntro();
 document.body.append(intro.element);

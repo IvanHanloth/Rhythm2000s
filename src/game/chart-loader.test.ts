@@ -23,7 +23,7 @@ describe('loadCharts', () => {
       }),
     );
     expect(result.errors).toEqual([]);
-    expect(result.charts.map((c) => c.id)).toEqual(['good']);
+    expect(result.charts.map((c) => c.chart.id)).toEqual(['good']);
   });
 
   it('no charts and an error when the index fails to download', async () => {
@@ -42,7 +42,7 @@ describe('loadCharts', () => {
         'good.json': good,
       }),
     );
-    expect(result.charts.map((c) => c.id)).toEqual(['good']);
+    expect(result.charts.map((c) => c.chart.id)).toEqual(['good']);
     expect(result.errors).toEqual([
       'Chart missing.json: download failed (HTTP 404)',
       'Chart broken.json: not valid JSON (Unexpected token)',

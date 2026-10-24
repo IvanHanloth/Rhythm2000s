@@ -29,13 +29,14 @@ Seated in café ── E ──► level list on the computer ── double-clic
 | Start | Double-click the icon, or "Play this level" in the task pane | Double-click the icon, or "Start" in the Info window |
 | Back to the café | Toolbar "Back" | Toolbar "Back", or "Back" in the Info window |
 | Settings ([settings.md](settings.md)) | "start" → "Control Panel" | Apple menu → "System Preferences…" |
+| Import / export / delete a chart ([chart-import-export.md](chart-import-export.md)) | "Import a level", "Export this level", "Delete this level" in the task pane | Toolbar "Import", "Export", "Delete" |
 | Keyboard | Arrow keys select, Enter starts | Same |
 
 Clicks on the level list never count as rhythm input, and Space doesn't start a level, to avoid accidents. Once a round starts, Space or a click anywhere is rhythm input as usual.
 
 ## Provisional (first version, all adjustable)
 
-- **The level list is every chart of the computer's scene** (charts in `public/charts/` with that `scene`, in `index.json` order). The design's locked "???" levels, best rating and high score are placeholders: unlocking and records aren't decided ([hub.md](hub.md) "Open questions"), so they aren't shown.
+- **The level list is every chart of the computer's scene** (charts in `public/charts/` with that `scene`, in `index.json` order, then the player's imported charts, see [chart-import-export.md](chart-import-export.md)). The design's locked "???" levels, best rating and high score are placeholders: unlocking and records aren't decided ([hub.md](hub.md) "Open questions"), so they aren't shown.
 - The design's task pane links "View best scores" and "Calibrate latency" are not built; settings open from the system menu, see [settings.md](settings.md).
 - Level details: song title, actions used, tempo (BPM), phrase count, length.
 - Icons follow the chart's actions: one action's icon when it uses one, a "remix" icon when it mixes several (a program window on XP, iTunes on Mac).

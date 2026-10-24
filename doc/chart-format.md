@@ -10,7 +10,7 @@ public/charts/
 └── xp-popup-mvp.json   # One file per chart, named <chart id>.json
 ```
 
-The game downloads `index.json` at start-up, then every chart it lists, and validates them. Edited charts take effect on reload, without a rebuild.
+The game downloads `index.json` at start-up, then every chart it lists, and validates them. Edited charts take effect on reload, without a rebuild. Players can also import chart files into their browser and export any chart from the level list ([chart-import-export.md](chart-import-export.md)).
 
 ### index.json
 

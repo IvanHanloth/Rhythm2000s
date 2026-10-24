@@ -21,7 +21,7 @@ function fakeEntry(id: string, log: string[]): SceneEntry {
 }
 
 /** Fake scenes don't need the audio clock */
-const context = { calibration: () => 0, charts: [], leave() {} } as unknown as SceneContext;
+const context = { calibration: () => 0, leave() {} } as unknown as SceneContext;
 
 function fakeHost(log: string[]): SceneHost {
   return {

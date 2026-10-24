@@ -13,6 +13,7 @@ import { SCENE_CATALOG } from '@/scenes/catalog.ts';
 import {
   type LatencyTestWindowOptions,
   LevelScene,
+  type MessageWindowOptions,
   type ResultsWindowOptions,
   type SettingsWindowOptions,
 } from '@/scenes/shared/level-scene.ts';
@@ -24,6 +25,7 @@ import { APPLE_MENU, AquaMenu, SYSTEM_PREFERENCES } from './components/menu.ts';
 import { APPLE_MENU_LEFT, MENU_BAR_HEIGHT, MenuBar } from './components/menu-bar.ts';
 import { MacLatencyTestWindow } from './latency-test-window.ts';
 import { MacLevelSelect } from './level-select.ts';
+import { MacMessageWindow } from './message-window.ts';
 import { MacResultsWindow } from './results-window.ts';
 import { MacSession } from './session.ts';
 import { MacSettingsWindow } from './settings-window.ts';
@@ -59,7 +61,7 @@ const DIALOG_Y = 250;
 const RESULTS_Y = 266;
 
 class Mac2000Scene extends LevelScene<MacSession> {
-  protected readonly levelList: MacLevelSelect;
+  protected levelList: MacLevelSelect;
   private readonly sounds: MacSongSounds;
   private readonly menuBar = new MenuBar({ width: SCREEN_WIDTH, appName: 'Finder', menus: MENUS });
   private readonly dock = new Dock(DOCK_ITEMS);
@@ -83,11 +85,7 @@ class Mac2000Scene extends LevelScene<MacSession> {
       Math.round((SCREEN_WIDTH - this.dock.width) / 2),
       SCREEN_HEIGHT - DOCK_HEIGHT,
     );
-    this.levelList = new MacLevelSelect({
-      charts: this.charts,
-      onStart: (index) => this.openLevel(index),
-      onBack: () => context.leave(),
-    });
+    this.levelList = this.createLevelList();
 
     this.screen.scale.set(SCREEN_SCALE);
     this.screen.addChild(
@@ -120,6 +118,35 @@ class Mac2000Scene extends LevelScene<MacSession> {
 
     if (this.charts.length === 0) this.showNoCharts();
     this.openRequestedLevel();
+  }
+
+  private createLevelList(): MacLevelSelect {
+    return new MacLevelSelect({
+      charts: this.charts,
+      onStart: (index) => this.openLevel(index),
+      onBack: () => this.context.leave(),
+      isImported: (chart) => this.isImported(chart),
+      onImport: () => this.importChart(),
+      onExport: (index) => this.exportChart(index),
+      onDelete: (index) => this.deleteChart(index),
+    });
+  }
+
+  protected rebuildLevelList(): void {
+    const old = this.levelList;
+    this.levelList = this.createLevelList();
+    this.screen.addChildAt(this.levelList.view, this.screen.getChildIndex(old.view));
+    old.destroy();
+  }
+
+  /** Alert in the middle of the screen, with the Mac alert sound of its kind */
+  protected openMessageWindow(options: MessageWindowOptions): MacMessageWindow {
+    const message = new MacMessageWindow(options);
+    message.view.position.set(SCREEN_WIDTH / 2, DIALOG_Y);
+    this.dialogLayer.addChild(message.view);
+    const sound = { info: 'Glass', error: 'Basso', question: 'Funk' } as const;
+    this.playNow(this.sounds.byName[sound[options.kind]]);
+    return message;
   }
 
   protected override updateDesktop(audioTime: number): void {

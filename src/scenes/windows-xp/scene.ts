@@ -14,6 +14,7 @@ import type { Turn } from '@/scenes/shared/cursor-path.ts';
 import {
   type LatencyTestWindowOptions,
   LevelScene,
+  type MessageWindowOptions,
   type ResultsWindowOptions,
   type SettingsWindowOptions,
 } from '@/scenes/shared/level-scene.ts';
@@ -32,6 +33,7 @@ import { XpTaskbar } from './components/taskbar.ts';
 import { isDialogKind, type DialogKind } from './dialog-kinds.ts';
 import { XpLatencyTestWindow } from './latency-test-window.ts';
 import { EXPLORER_TITLE, XpLevelSelect } from './level-select.ts';
+import { XpMessageWindow } from './message-window.ts';
 import { XpResultsWindow } from './results-window.ts';
 import { XpSession, type XpTarget } from './session.ts';
 import { XpSettingsWindow } from './settings-window.ts';
@@ -110,7 +112,7 @@ interface ActiveJudgement {
 }
 
 class WindowsXpScene extends LevelScene<XpSession> {
-  protected readonly levelList: XpLevelSelect;
+  protected levelList: XpLevelSelect;
   private readonly sounds: XpSongSounds;
   private readonly desktop = new XpDesktop();
   private readonly taskbar = new XpTaskbar({
@@ -137,14 +139,7 @@ class WindowsXpScene extends LevelScene<XpSession> {
   constructor(context: SceneContext) {
     super(context, { id: windowsXpScene.id, theme: THEMES.xp, bannerY: BANNER_Y });
     this.sounds = createXpSongSounds(context.clock.context, xpAssets().sounds);
-    this.levelList = new XpLevelSelect({
-      charts: this.charts,
-      width: EXPLORER.width,
-      height: EXPLORER.height,
-      onStart: (index) => this.openLevel(index),
-      onBack: () => context.leave(),
-    });
-    this.levelList.view.position.set(EXPLORER.x, EXPLORER.y);
+    this.levelList = this.createLevelList();
     this.taskbar.setTaskActive(0, true);
 
     this.screen.scale.set(XP_SCALE);
@@ -170,6 +165,43 @@ class WindowsXpScene extends LevelScene<XpSession> {
 
     if (this.charts.length === 0) this.showNoCharts();
     this.openRequestedLevel();
+  }
+
+  private createLevelList(): XpLevelSelect {
+    const list = new XpLevelSelect({
+      charts: this.charts,
+      width: EXPLORER.width,
+      height: EXPLORER.height,
+      onStart: (index) => this.openLevel(index),
+      onBack: () => this.context.leave(),
+      isImported: (chart) => this.isImported(chart),
+      onImport: () => this.importChart(),
+      onExport: (index) => this.exportChart(index),
+      onDelete: (index) => this.deleteChart(index),
+    });
+    list.view.position.set(EXPLORER.x, EXPLORER.y);
+    return list;
+  }
+
+  protected rebuildLevelList(): void {
+    const old = this.levelList;
+    this.levelList = this.createLevelList();
+    this.screen.addChildAt(this.levelList.view, this.screen.getChildIndex(old.view));
+    old.destroy();
+  }
+
+  /** Message box in the middle of the work area, with the XP alert sound of its icon */
+  protected openMessageWindow(options: MessageWindowOptions): XpMessageWindow {
+    const message = new XpMessageWindow(options);
+    message.view.position.set(XP_SCREEN_WIDTH / 2, WORK_AREA_HEIGHT / 2);
+    this.dialogLayer.addChild(message.view);
+    const sound = {
+      info: 'dialog-info',
+      error: 'dialog-error',
+      question: 'dialog-warning',
+    } as const;
+    this.playNow(this.sounds.dialogs[sound[options.kind]]);
+    return message;
   }
 
   protected override updateDesktop(): void {

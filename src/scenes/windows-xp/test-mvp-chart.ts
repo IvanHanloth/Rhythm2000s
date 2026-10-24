@@ -6,6 +6,6 @@ import type { Chart } from '@/rhythm/chart.ts';
 
 export function loadMvpChart(): Chart {
   const result = checkChartData(JSON.parse(mvpText), 'xp-popup-mvp');
-  if (!result.chart) throw new Error(result.errors.join('\n'));
-  return result.chart;
+  if (!result.loaded) throw new Error(result.errors.join('\n'));
+  return result.loaded.chart;
 }

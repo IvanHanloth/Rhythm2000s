@@ -2,8 +2,9 @@
 
 import type { Container } from 'pixi.js';
 import type { AudioClock } from '@/audio/audio-clock.ts';
-import type { Chart } from '@/rhythm/chart.ts';
 import type { SceneId } from '@/scenes/catalog.ts';
+import type { ChartLibrary } from './chart-library.ts';
+import type { ChartFiles } from './chart-transfer.ts';
 import type { PlayerSettings } from './settings.ts';
 
 export interface FrameInfo {
@@ -27,8 +28,13 @@ export interface SceneContext {
    * window changes them. Calibration is read through calibration() above.
    */
   settings: PlayerSettings;
-  /** Every loaded, validated chart; scenes pick theirs by chart.scene */
-  charts: readonly Chart[];
+  /**
+   * Every validated chart, built-in and imported; scenes pick theirs by chart.scene. The level list imports,
+   * exports and deletes through it (doc/chart-import-export.md)
+   */
+  library: ChartLibrary;
+  /** The browser's file picker and downloads, for importing and exporting charts */
+  chartFiles: ChartFiles;
   /** Leave the scene and go back to the street hub ("Back" in the level select) */
   leave(): void;
   /** The chart to play (when #scene/chart opens a level directly); without it the scene shows its level list first */

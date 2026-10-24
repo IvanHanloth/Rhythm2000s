@@ -1,6 +1,7 @@
 // Level select: the "My Levels" folder in an XP Explorer window (CabinetWClass) (doc/level-select.md).
 // Menu bar, standard toolbar, address bar, task pane on the left, tiles on the right and a status bar, at original size.
 // Click an icon to select it; double-click or "Play this level" starts; "Back" returns to the café. Origin at the top left.
+// The task pane also imports, exports and deletes charts (doc/chart-import-export.md); its links follow the selection.
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
 import { ACTION_LABELS } from '@/rhythm/actions.ts';
@@ -50,6 +51,14 @@ export interface XpLevelSelectOptions {
   onStart(index: number): void;
   /** Back to the café (toolbar "Back", task pane "Back to the café") */
   onBack(): void;
+  /** The chart was imported by the player, so "Delete this level" is offered */
+  isImported(chart: Chart): boolean;
+  /** "Import a level" */
+  onImport(): void;
+  /** "Export this level" for level `index` */
+  onExport(index: number): void;
+  /** "Delete this level" for level `index` */
+  onDelete(index: number): void;
 }
 
 interface Tile {
@@ -64,7 +73,8 @@ export class XpLevelSelect {
   readonly frame: XpWindowFrame;
   private readonly options: XpLevelSelectOptions;
   private readonly tiles: Tile[] = [];
-  private readonly details = new Container({ label: 'details' });
+  /** "Level Tasks" and "Details", rebuilt on every selection */
+  private readonly taskGroups = new Container({ label: 'task-groups' });
   private readonly doubleClick = new DoubleClick();
   private selected = 0;
 
@@ -119,7 +129,7 @@ export class XpLevelSelect {
   select(index: number): void {
     const count = this.options.charts.length;
     if (count === 0) {
-      this.renderDetails(null);
+      this.renderTaskGroups(null);
       return;
     }
     this.selected = Math.min(count - 1, Math.max(0, index));
@@ -129,7 +139,7 @@ export class XpLevelSelect {
       tile.labelBack.visible = on;
       tile.label.style.fill = on ? LUNA.white : LUNA.ink;
     });
-    this.renderDetails(this.options.charts[this.selected]!);
+    this.renderTaskGroups(this.options.charts[this.selected]!);
   }
 
   /** Arrow keys: left and right by one tile, up and down by a row */
@@ -215,40 +225,89 @@ export class XpLevelSelect {
         .fill(verticalGradient(LUNA.explorer.taskPane)),
     );
 
-    const tasks = taskGroup('Level Tasks', [
-      { icon: drawPlayIcon(), label: 'Play this level', onTap: () => this.startSelected() },
-      { icon: drawBackIcon(16), label: 'Back to the café', onTap: () => this.options.onBack() },
-    ]);
+    pane.addChild(this.taskGroups);
+    return pane;
+  }
+
+  /** Like XP's "File and Folder Tasks", the links depend on the selection: delete only for imported levels */
+  private renderTaskGroups(chart: Chart | null): void {
+    for (const child of this.taskGroups.removeChildren()) child.destroy({ children: true });
+    const { options } = this;
+    const links: TaskLink[] = [];
+    if (chart) {
+      links.push({
+        icon: drawPlayIcon(),
+        label: 'Play this level',
+        onTap: () => this.startSelected(),
+      });
+    }
+    links.push({
+      icon: iconSprite('folder-open', 16),
+      label: 'Import a level',
+      onTap: () => options.onImport(),
+    });
+    if (chart) {
+      links.push({
+        icon: iconSprite('text-document', 16),
+        label: 'Export this level',
+        onTap: () => options.onExport(this.selected),
+      });
+    }
+    if (chart && options.isImported(chart)) {
+      links.push({
+        icon: iconSprite('delete', 16),
+        label: 'Delete this level',
+        onTap: () => options.onDelete(this.selected),
+      });
+    }
+    links.push({
+      icon: drawBackIcon(16),
+      label: 'Back to the café',
+      onTap: () => options.onBack(),
+    });
+    const tasks = taskGroup('Level Tasks', links);
     tasks.view.position.set(GROUP_MARGIN, GROUP_MARGIN);
 
-    const detailsHeight = 112;
-    const details = taskGroupFrame('Details', detailsHeight);
+    const details = this.detailsGroup(chart);
     details.position.set(GROUP_MARGIN, GROUP_MARGIN + tasks.height + GROUP_MARGIN);
-    this.details.position.set(10, GROUP_HEADER_HEIGHT + 8);
-    details.addChild(this.details);
-
-    pane.addChild(tasks.view, details);
-    return pane;
+    this.taskGroups.addChild(tasks.view, details);
   }
 
   private startSelected(): void {
     if (this.options.charts.length > 0) this.options.onStart(this.selected);
   }
 
-  private renderDetails(chart: Chart | null): void {
-    for (const child of this.details.removeChildren()) child.destroy();
+  /** "Details", as tall as its text */
+  private detailsGroup(chart: Chart | null): Container {
+    const content = new Container({ label: 'details' });
+    content.position.set(10, GROUP_HEADER_HEIGHT + 8);
     const wrap = TASK_PANE_WIDTH - GROUP_MARGIN * 2 - 20;
-    if (!chart) {
-      this.details.addChild(
+    if (chart) {
+      this.fillDetails(content, chart, wrap);
+    } else {
+      content.addChild(
         xpText('There are no levels on this computer yet.', {
           wordWrap: true,
           wordWrapWidth: wrap,
         }),
       );
-      return;
     }
+    const group = taskGroupFrame('Details', Math.ceil(content.height) + 18);
+    group.addChild(content);
+    return group;
+  }
+
+  private fillDetails(content: Container, chart: Chart, wrap: number): void {
     const summary = summarizeChart(chart);
-    const name = xpText(chart.title, { fontWeight: '700' });
+    const name = xpText(chart.title, { fontWeight: '700', wordWrap: true, wordWrapWidth: wrap });
+    content.addChild(name);
+    let y = Math.ceil(name.height) + 2;
+    if (this.options.isImported(chart)) {
+      const kind = xpText('Imported level', { fill: LUNA.explorer.subText });
+      kind.y = y;
+      content.addChild(kind);
+      y += 17;
+    }
     const lines = xpText(
       [
         `Actions: ${summary.actions.map((a) => ACTION_LABELS[a]).join(', ')}`,
@@ -258,8 +317,8 @@ export class XpLevelSelect {
       ].join('\n'),
       { wordWrap: true, wordWrapWidth: wrap, breakWords: true, lineHeight: 17 },
     );
-    lines.y = 20;
-    this.details.addChild(name, lines);
+    lines.y = y;
+    content.addChild(lines);
   }
 
   // ---------- Toolbar ----------

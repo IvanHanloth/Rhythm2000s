@@ -7,10 +7,12 @@
 // States: select (choosing in the level list); ready (the shell shows the intro and waits for the first press);
 // starting (waiting for audio to resume); playing (a round is running); result (the results window is up).
 // Outside `playing` and `ready`, clicks and Space are not rhythm input; only buttons, icons and keys respond.
-// On the list the desktop's system menu opens the settings window (doc/settings.md), a modal like the results.
+// On the list the desktop's system menu opens the settings window (doc/settings.md), a modal like the results,
+// and the list imports, exports and deletes charts (doc/chart-import-export.md), reporting in message boxes.
 
 import { Container, Rectangle } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
+import { listErrors } from '@/game/chart-library.ts';
 import { recordScore } from '@/game/records.ts';
 import type { FrameInfo, Scene, SceneContext, TapInfo } from '@/game/scene.ts';
 import type { AudioClock } from '@/audio/audio-clock.ts';
@@ -31,7 +33,7 @@ import { BEAT_GUIDE_POSITION, BeatGuideView } from '@/ui/beat-guide-view.ts';
 import { clamp01 } from '@/ui/easing.ts';
 import { TurnBanner } from '@/ui/turn-banner.ts';
 import { TutorialCaption } from '@/ui/tutorial-caption.ts';
-import type { SceneId } from '@/scenes/catalog.ts';
+import { SCENE_CATALOG, type SceneId } from '@/scenes/catalog.ts';
 import type { RoundSession } from './round-session.ts';
 
 /** How long after the results appear before Retry / Next accept input (ms), against mashing through */
@@ -108,6 +110,22 @@ export interface LatencyTestWindowOptions {
   onBack: () => void;
 }
 
+/** What a scene's message box (XP message box, Mac alert) is given, for chart import and delete */
+export interface MessageWindowOptions {
+  /** Icon and sound: information, an error, or a question needing confirmation */
+  kind: 'info' | 'error' | 'question';
+  /** XP title bar; Mac alerts have none */
+  title: string;
+  /** The main sentence (bold on the Mac) */
+  message: string;
+  /** More text under it */
+  detail?: string;
+  /** Two buttons: XP "Yes" / "No", Mac "Cancel" / `verb`. Without it a single "OK" closes the box */
+  confirm?: { verb: string; onConfirm: () => void };
+  /** OK, No, Cancel or the close button */
+  onClose: () => void;
+}
+
 /** A modal window on the desktop: a message box, an alert, the results or the settings window */
 export interface ModalWindow {
   destroy(): void;
@@ -131,14 +149,15 @@ export interface LevelSceneOptions {
 export abstract class LevelScene<S extends RoundSession> implements Scene {
   readonly view: Container;
   protected readonly context: SceneContext;
-  /** Every chart on this computer */
-  protected readonly charts: Chart[];
+  /** Every chart on this computer, built-in then imported; replaced after an import or delete */
+  protected charts: Chart[];
   /** The scene's desktop, drawn in its own virtual screen coordinates; subclasses set its scale */
   protected readonly screen = new Container({ label: 'screen' });
   /** Judgement labels, in canvas coordinates */
   protected readonly judgementLayer = new Container({ label: 'judgements' });
   protected session: S | null = null;
-  protected abstract readonly levelList: LevelList;
+  /** Replaced by rebuildLevelList after an import or delete */
+  protected abstract levelList: LevelList;
 
   private readonly turnBanner: TurnBanner;
   private readonly caption: TutorialCaption;
@@ -148,6 +167,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   private readonly cursorCover = new Container({ label: 'cursor-cover' });
   /** Scene sounds outside a round (clicks, the results jingle); a round plays through its session */
   private readonly output: GainNode;
+  private readonly sceneId: SceneId;
   private state: State = 'select';
   /** The chosen level's chart (the session plays a demo chart or a piece of this one) */
   private chart: Chart | null = null;
@@ -162,7 +182,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   constructor(context: SceneContext, options: LevelSceneOptions) {
     this.context = context;
     this.view = new Container({ label: options.id });
-    this.charts = context.charts.filter((chart) => chart.scene === options.id);
+    this.sceneId = options.id;
+    this.charts = this.ownCharts();
     const { theme, bannerY } = options;
     // Call: raised face like a button; response: the accent colour
     this.turnBanner = new TurnBanner({
@@ -216,6 +237,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   protected abstract setListVisible(visible: boolean): void;
   /** Sound played when a round's results appear */
   protected abstract resultSound(): AudioBuffer;
+  /** Opens a message box on the desktop, playing the system's alert sound */
+  protected abstract openMessageWindow(options: MessageWindowOptions): ModalWindow;
+  /** Replaces the level list with one built from `this.charts`, in the same place */
+  protected abstract rebuildLevelList(): void;
 
   /** Desktop decoration that runs regardless of state (clocks, list animations) */
   protected updateDesktop(_audioTime: number): void {}
@@ -256,6 +281,119 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
         onBack: () => this.openSettings(),
       }),
     );
+  }
+
+  /** The chart is imported (not built-in), so the list offers to delete it */
+  protected isImported(chart: Chart): boolean {
+    return this.context.library.isImported(chart.id);
+  }
+
+  /** "Import a level": the browser's file picker, then the chart joins the library (doc/chart-import-export.md) */
+  protected importChart(): void {
+    this.closeMenus();
+    if (!this.desktopIdle) return;
+    this.context.chartFiles.pick(
+      ({ name, text }) => {
+        if (this.destroyed || !this.desktopIdle) return;
+        const result = this.context.library.import(text);
+        if (!result.ok) {
+          for (const error of result.errors) console.error(`Import ${name}: ${error}`);
+          this.importFailed(`"${name}"`, result.errors);
+          return;
+        }
+        const { chart, replaced } = result;
+        const here = chart.scene === this.sceneId;
+        this.refreshList(here ? chart.id : this.selectedChartId());
+        const notes: string[] = [];
+        if (replaced) notes.push('It replaced the imported level with the same id.');
+        if (!here) {
+          const label = SCENE_CATALOG[chart.scene as SceneId].label;
+          notes.push(
+            `It is a ${label} level, so it was added to the ${label} computer. Sit at that computer in the café to play it.`,
+          );
+        }
+        this.showMessage({
+          kind: 'info',
+          title: 'Level Imported',
+          message: `Imported "${chart.title}".`,
+          ...(notes.length > 0 && { detail: notes.join(' ') }),
+        });
+      },
+      (error) => {
+        if (this.destroyed || !this.desktopIdle) return;
+        console.error(`Import: ${error}`);
+        this.importFailed('The file', [error]);
+      },
+    );
+  }
+
+  /** "Export this level": downloads the selected chart as <id>.json */
+  protected exportChart(index: number): void {
+    this.closeMenus();
+    const chart = this.charts[index];
+    if (!chart || !this.desktopIdle) return;
+    this.context.chartFiles.save(`${chart.id}.json`, this.context.library.exportText(chart.id));
+  }
+
+  /** "Delete this level": imported levels only, after a confirmation */
+  protected deleteChart(index: number): void {
+    this.closeMenus();
+    const chart = this.charts[index];
+    if (!chart || !this.isImported(chart) || !this.desktopIdle) return;
+    this.showMessage({
+      kind: 'question',
+      title: 'Confirm Level Delete',
+      message: `Are you sure you want to delete "${chart.title}"?`,
+      detail: "This can't be undone. Export the level first to keep a copy.",
+      confirm: {
+        verb: 'Delete',
+        onConfirm: () => {
+          const result = this.context.library.remove(chart.id);
+          if (!result.ok) {
+            this.showMessage({
+              kind: 'error',
+              title: 'Delete Failed',
+              message: `"${chart.title}" could not be deleted.`,
+              detail: listErrors(result.errors),
+            });
+            return;
+          }
+          this.closeModal();
+          this.refreshList(null, index);
+        },
+      },
+    });
+  }
+
+  /** `what` is the quoted file name, or "The file" when its name isn't known */
+  private importFailed(what: string, errors: readonly string[]): void {
+    this.showMessage({
+      kind: 'error',
+      title: 'Import Failed',
+      message: `${what} could not be imported.`,
+      detail: listErrors(errors),
+    });
+  }
+
+  private showMessage(options: Omit<MessageWindowOptions, 'onClose'>): void {
+    this.showModal(this.openMessageWindow({ ...options, onClose: () => this.closeModal() }));
+  }
+
+  private ownCharts(): Chart[] {
+    return this.context.library.charts.filter((chart) => chart.scene === this.sceneId);
+  }
+
+  private selectedChartId(): string | null {
+    return this.charts[this.levelList.selectedIndex]?.id ?? null;
+  }
+
+  /** Rebuilds the list from the library, selecting chart `selectId`, or else position `fallback` */
+  private refreshList(selectId: string | null, fallback = 0): void {
+    this.charts = this.ownCharts();
+    this.rebuildLevelList();
+    const index = this.charts.findIndex((chart) => chart.id === selectId);
+    this.levelList.select(index >= 0 ? index : fallback);
+    this.levelList.setActive(!this.modal);
   }
 
   update({ audioTime }: FrameInfo): void {

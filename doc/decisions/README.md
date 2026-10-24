@@ -41,3 +41,4 @@ What follows from it, its costs, and the work it creates.
 | [0008](0008-demos-before-each-new-action.md) | Demos before the phrase that introduces each action | Accepted |
 | [0009](0009-settings-in-system-menus.md) | Settings in the in-game system menus, no dev panel | Accepted |
 | [0010](0010-latency-test-in-game.md) | The latency test moves into the game, one per system | Accepted |
+| [0011](0011-chart-import-export.md) | Chart import and export in the level list | Accepted |

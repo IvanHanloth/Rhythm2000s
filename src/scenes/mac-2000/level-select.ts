@@ -1,6 +1,7 @@
 // Level select: Jaguar Finder's "My Levels" window (icon view) with a Get Info window beside it
 // (doc/level-select.md, doc/scenes/mac-2000.md "Level select"), at original pixel size.
 // Click an icon to select it; double-click or "Start" in the info window starts; "Back" returns to the café. Origin at the screen's top left.
+// The toolbar's "Import", "Export" and "Delete" handle chart files (doc/chart-import-export.md); Delete only works on imported levels.
 
 import { Container, Graphics, Rectangle, type Text } from 'pixi.js';
 import type { Chart } from '@/rhythm/chart.ts';
@@ -9,7 +10,7 @@ import { AQUA } from '@/theme/aqua.ts';
 import { DoubleClick } from '@/ui/double-click.ts';
 import { isMacAction, MAC_ACTIONS, type MacTargetKind } from './action-kinds.ts';
 import { appIcon, type AppIconName } from './assets.ts';
-import { drawCautionIcon, drawTrashIcon } from './components/icons.ts';
+import { drawCautionIcon, drawDocumentIcon, drawTrashIcon } from './components/icons.ts';
 import { aquaText, drawGelPill } from './components/paint.ts';
 import { PUSH_BUTTON_HEIGHT, PushButton } from './components/push-button.ts';
 import { AquaWindow, TITLE_BAR_HEIGHT } from './components/window.ts';
@@ -60,6 +61,14 @@ export interface MacLevelSelectOptions {
   onStart(index: number): void;
   /** Back to the café (the toolbar's or the info window's "Back") */
   onBack(): void;
+  /** The chart was imported by the player, so "Delete" works on it */
+  isImported(chart: Chart): boolean;
+  /** Toolbar "Import" */
+  onImport(): void;
+  /** Toolbar "Export" for level `index` */
+  onExport(index: number): void;
+  /** Toolbar "Delete" for level `index` */
+  onDelete(index: number): void;
 }
 
 interface IconItem {
@@ -74,6 +83,8 @@ export class MacLevelSelect {
   private readonly finder: AquaWindow;
   private readonly items: IconItem[] = [];
   private readonly doubleClick = new DoubleClick();
+  /** Toolbar "Delete", dimmed unless an imported level is selected */
+  private readonly deleteItem: Container;
   private info: InfoWindow | null = null;
   private selected = 0;
 
@@ -89,7 +100,9 @@ export class MacLevelSelect {
       statusText: `${charts.length} ${charts.length === 1 ? 'item' : 'items'}, double-click a level to start`,
     });
     this.finder.view.position.set(FINDER.x + FINDER.width / 2, FINDER.y + FINDER.height / 2);
-    this.finder.toolbar.addChild(this.toolbar());
+    const toolbar = this.toolbar();
+    this.deleteItem = toolbar.deleteItem;
+    this.finder.toolbar.addChild(toolbar.view);
     this.finder.content.addChild(this.grid(this.finder.contentWidth));
     this.view.addChild(this.finder.view);
     this.select(0);
@@ -108,7 +121,11 @@ export class MacLevelSelect {
       item.labelBack.visible = on;
       item.label.style.fill = on ? AQUA.white : AQUA.ink;
     });
-    this.showInfo(this.options.charts[this.selected] ?? null);
+    const chart = this.options.charts[this.selected] ?? null;
+    const deletable = chart !== null && this.options.isImported(chart);
+    this.deleteItem.alpha = deletable ? 1 : 0.4;
+    this.deleteItem.eventMode = deletable ? 'static' : 'none';
+    this.showInfo(chart);
   }
 
   /** Arrow keys: left and right by one icon, up and down by a row */
@@ -133,7 +150,8 @@ export class MacLevelSelect {
 
   private showInfo(chart: Chart | null): void {
     this.info?.destroy();
-    this.info = new InfoWindow(chart, {
+    const imported = chart !== null && this.options.isImported(chart);
+    this.info = new InfoWindow(chart, imported, {
       onStart: () => {
         if (chart) this.options.onStart(this.selected);
       },
@@ -183,7 +201,7 @@ export class MacLevelSelect {
 
   // ---------- Toolbar ----------
 
-  private toolbar(): Container {
+  private toolbar(): { view: Container; deleteItem: Container } {
     const bar = new Container({ label: 'finder-toolbar' });
     let x = 12;
     const add = (icon: Container, iconWidth: number, label: string, onTap?: () => void) => {
@@ -208,11 +226,17 @@ export class MacLevelSelect {
       }
       bar.addChild(item);
       x += width + 8;
+      return item;
     };
-    add(drawBackButton(), 32, 'Back', () => this.options.onBack());
+    const { options } = this;
+    add(drawBackButton(), 32, 'Back', () => options.onBack());
     add(drawViewButtons(), 90, 'View');
-    add(drawComputerIcon(), 32, 'Computer');
-    add(drawHomeIcon(), 32, 'Home');
+    // Import, Export and Delete took the places of the decorative Computer and Home items
+    add(drawTransferIcon('in'), 32, 'Import', () => options.onImport());
+    add(drawTransferIcon('out'), 32, 'Export', () => {
+      if (options.charts.length > 0) options.onExport(this.selected);
+    });
+    const deleteItem = add(drawTrashIcon(32), 32, 'Delete', () => options.onDelete(this.selected));
     add(drawFolderIcon(), 32, 'Rhythm 2000s');
 
     // Search field on the right
@@ -232,7 +256,7 @@ export class MacLevelSelect {
     search.addChild(field, hint);
     search.position.set(FINDER.width - 120 - 14, 14);
     bar.addChild(search);
-    return bar;
+    return { view: bar, deleteItem };
   }
 }
 
@@ -260,7 +284,11 @@ class InfoWindow {
   private readonly window: AquaWindow;
   private readonly buttons: PushButton[] = [];
 
-  constructor(chart: Chart | null, handlers: { onStart: () => void; onBack: () => void }) {
+  constructor(
+    chart: Chart | null,
+    imported: boolean,
+    handlers: { onStart: () => void; onBack: () => void },
+  ) {
     const name = chart?.title ?? 'No Levels';
     this.window = new AquaWindow({
       title: `${name} Info`,
@@ -276,7 +304,10 @@ class InfoWindow {
     if (chart) content.addChild(levelIcon(chart, 48)).position.set(14, 12);
     const title = aquaText(name, { size: 14, bold: true });
     title.position.set(72, 16);
-    const kind = aquaText('Rhythm 2000s level', { size: 11, color: AQUA.inkSoft });
+    const kind = aquaText(imported ? 'Imported level' : 'Rhythm 2000s level', {
+      size: 11,
+      color: AQUA.inkSoft,
+    });
     kind.position.set(72, 36);
     content.addChild(title, kind);
 
@@ -399,31 +430,23 @@ function drawViewButtons(): Container {
   return root;
 }
 
-/** Computer: a grey monitor with a blue screen */
-function drawComputerIcon(): Graphics {
-  return new Graphics()
-    .roundRect(3, 3, 26, 19, 2)
-    .fill('#e8e8e8')
-    .stroke({ width: 1, color: '#666666' })
-    .rect(5, 5, 22, 14)
-    .fill('#3b7fd4')
-    .poly([11, 29, 21, 29, 20, 22, 12, 22])
-    .fill('#cfcfcf')
-    .stroke({ width: 1, color: '#666666' });
-}
-
-/** Home: a small house with a red roof */
-function drawHomeIcon(): Graphics {
-  return new Graphics()
-    .poly([4, 16, 16, 5, 28, 16, 28, 29, 4, 29])
-    .fill('#f2f2f2')
-    .stroke({ width: 1, color: '#666666' })
-    .rect(13, 19, 6, 10)
-    .fill('#b07b3c')
-    .moveTo(2, 17)
-    .lineTo(16, 4)
-    .lineTo(30, 17)
-    .stroke({ width: 2.4, color: '#b5261b', join: 'round' });
+/** Import / Export: a document with a blue arrow going into it or coming out of it */
+function drawTransferIcon(direction: 'in' | 'out'): Container {
+  const root = new Container();
+  const page = drawDocumentIcon(30);
+  page.position.set(1, 1);
+  // The arrow points down onto the page for Import and up off it for Export
+  const [from, to] = direction === 'in' ? [5, 21] : [21, 5];
+  const head = direction === 'in' ? -5 : 5;
+  const arrow = new Graphics()
+    .moveTo(16, from)
+    .lineTo(16, to)
+    .moveTo(11, to + head)
+    .lineTo(16, to)
+    .lineTo(21, to + head)
+    .stroke({ width: 3, color: AQUA.selection, cap: 'round', join: 'round' });
+  root.addChild(page, arrow);
+  return root;
 }
 
 /** Levels folder: an Aqua blue folder */

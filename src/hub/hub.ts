@@ -126,6 +126,8 @@ function smoothstep(t: number): number {
 export class Hub {
   readonly element = document.createElement('div');
   private readonly options: HubOptions;
+  /** The computers' cards; replaced when charts are imported or deleted (setLevels) */
+  private levels: readonly LevelInfo[];
   private readonly renderer = new WebGLRenderer({
     antialias: true,
     powerPreference: 'high-performance',
@@ -177,6 +179,7 @@ export class Hub {
 
   constructor(options: HubOptions) {
     this.options = options;
+    this.levels = options.levels;
     this.element.className = 'hub';
     this.element.hidden = true;
     this.element.append(this.renderer.domElement);
@@ -361,8 +364,20 @@ export class Hub {
     );
   }
 
+  /**
+   * New card contents after charts were imported or deleted (doc/chart-import-export.md). The computers stay:
+   * there is one per scene, so `levels` must have the same ids as at construction.
+   */
+  setLevels(levels: readonly LevelInfo[]): void {
+    const ids = (list: readonly LevelInfo[]) => list.map((level) => level.id).join(',');
+    if (ids(levels) !== ids(this.levels)) {
+      throw new Error(`Hub levels changed from [${ids(this.levels)}] to [${ids(levels)}]`);
+    }
+    this.levels = levels;
+  }
+
   private levelOf(spot: LevelSpot): LevelInfo | null {
-    return this.options.levels.find((level) => level.id === spot.levelId) ?? null;
+    return this.levels.find((level) => level.id === spot.levelId) ?? null;
   }
 
   private recordOf(spot: LevelSpot): string | null {
