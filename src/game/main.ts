@@ -4,6 +4,7 @@ import './style.css';
 import { AudioClock } from '../audio/audio-clock.ts';
 import { mac2000Scene } from '../scenes/mac-2000/scene.ts';
 import { windowsXpScene } from '../scenes/windows-xp/scene.ts';
+import { fetchChartFromSite, loadCharts } from './chart-loader.ts';
 import { createDevPanel } from './dev-panel.ts';
 import { GameCanvas } from './game-canvas.ts';
 import { listenForTaps } from './input.ts';
@@ -14,12 +15,18 @@ const host = document.querySelector<HTMLElement>('#game');
 if (!host) throw new Error('找不到游戏容器 #game');
 
 const clock = new AudioClock();
-const canvas = await GameCanvas.create(host);
+// 画布和谱面同时准备；谱面从 public/charts/ 运行时下载（ADR 0003）
+const [canvas, { charts, errors: chartErrors }] = await Promise.all([
+  GameCanvas.create(host),
+  loadCharts(fetchChartFromSite(import.meta.env.BASE_URL)),
+]);
+for (const error of chartErrors) console.error(error);
 let calibrationMs = loadCalibrationMs();
 
 const director = new SceneDirector(canvas.stage, [windowsXpScene, mac2000Scene], {
   clock,
   calibration: () => calibrationMs / 1000,
+  charts,
 });
 
 // 浏览器要求在用户操作里恢复音频；恢复之前音频时间不走

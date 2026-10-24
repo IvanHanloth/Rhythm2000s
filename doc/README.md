@@ -5,6 +5,7 @@
 | [game-design.md](game-design.md) | 游戏设计总览：核心玩法、判定、场景列表、待定问题 | 草稿 |
 | [scenes/windows-xp.md](scenes/windows-xp.md) | 场景：Windows XP 桌面 | 草稿 |
 | [scenes/mac-2000.md](scenes/mac-2000.md) | 场景：2000 年前后的 Mac 桌面 | 草稿 |
+| [chart-format.md](chart-format.md) | 谱面 JSON 格式：文件位置、字段、动作 ID、校验规则 | 草稿 |
 | [tech-research.md](tech-research.md) | 技术调研：浏览器能力、候选技术栈对比、待验证风险 | 草稿 |
 | [prototypes/latency-test.md](prototypes/latency-test.md) | 原型：延迟测试（要回答的问题、时间换算方法、测试记录） | 草稿 |
 | [prototypes/mvp.md](prototypes/mvp.md) | MVP：XP 场景「弹窗 → 关窗」，暂定的输入、判定窗口、谱面与音效 | 草稿 |

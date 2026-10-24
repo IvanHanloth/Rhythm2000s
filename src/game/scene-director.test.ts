@@ -6,7 +6,7 @@ import { SceneDirector, type SceneHost } from './scene-director.ts';
 /** 记录调用顺序的假场景，不依赖 PixiJS 渲染。 */
 function fakeEntry(id: string, log: string[]): SceneEntry {
   return {
-    id,
+    id: id as SceneEntry['id'],
     label: id,
     create(): Scene {
       log.push(`create ${id}`);
@@ -21,7 +21,7 @@ function fakeEntry(id: string, log: string[]): SceneEntry {
 }
 
 /** 假场景用不到音频时钟 */
-const context = { calibration: () => 0 } as unknown as SceneContext;
+const context = { calibration: () => 0, charts: [] } as unknown as SceneContext;
 
 function fakeHost(log: string[]): SceneHost {
   return {

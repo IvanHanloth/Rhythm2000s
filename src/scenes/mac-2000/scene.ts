@@ -5,6 +5,7 @@ import { Container, FillGradient, Graphics, Text } from 'pixi.js';
 import type { Scene, SceneEntry } from '../../game/scene.ts';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../../game/layout.ts';
 import { FONT_FAMILIES, THEMES } from '../../theme/tokens.ts';
+import { SCENE_CATALOG } from '../catalog.ts';
 import { createPlaceholderLabel } from '../placeholder-label.ts';
 
 const theme = THEMES.aqua;
@@ -67,6 +68,6 @@ class Mac2000Scene implements Scene {
 
 export const mac2000Scene: SceneEntry = {
   id: 'mac-2000',
-  label: 'Mac 桌面（水晶）',
+  label: SCENE_CATALOG['mac-2000'].label,
   create: () => new Mac2000Scene(),
 };

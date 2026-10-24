@@ -1,0 +1,77 @@
+{
+  "format": 1,
+  "id": "xp-popup-mvp",
+  "title": "弹窗大扫除",
+  "scene": "windows-xp",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "close-window" },
+        { "beat": 1, "action": "close-window" },
+        { "beat": 2, "action": "close-window" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "close-window" },
+        { "beat": 1, "action": "close-window" },
+        { "beat": 2, "action": "close-window" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "close-window" },
+        { "beat": 1, "action": "close-window" },
+        { "beat": 2, "action": "close-window" },
+        { "beat": 3, "action": "close-window" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "close-window" },
+        { "beat": 0.5, "action": "close-window" },
+        { "beat": 1, "action": "close-window" },
+        { "beat": 2, "action": "close-window" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "close-window" },
+        { "beat": 1, "action": "close-window" },
+        { "beat": 1.5, "action": "close-window" },
+        { "beat": 2, "action": "close-window" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "close-window" },
+        { "beat": 1, "action": "close-window" },
+        { "beat": 2, "action": "close-window" },
+        { "beat": 2.5, "action": "close-window" },
+        { "beat": 3, "action": "close-window" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "close-window" },
+        { "beat": 0.5, "action": "close-window" },
+        { "beat": 1, "action": "close-window" },
+        { "beat": 1.5, "action": "close-window" },
+        { "beat": 2, "action": "close-window" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "close-window" },
+        { "beat": 0.5, "action": "close-window" },
+        { "beat": 1, "action": "close-window" },
+        { "beat": 2, "action": "close-window" },
+        { "beat": 3, "action": "close-window" }
+      ]
+    }
+  ]
+}

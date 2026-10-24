@@ -16,7 +16,7 @@
 
 ## 当前阶段
 
-**开始开发游戏本体**。技术栈见 [ADR 0001](doc/decisions/0001-技术栈选型.md)；游戏画布和场景结构已搭好（[ADR 0002](doc/decisions/0002-游戏画布与场景结构.md)）。Windows XP 场景有一个可玩的 [MVP「弹窗 → 关窗」](doc/prototypes/mvp.md)，输入、判定窗口、谱面都是暂定值，等试玩后调整；Mac 场景还只是占位画面。
+**开始开发游戏本体**。技术栈见 [ADR 0001](doc/decisions/0001-技术栈选型.md)；游戏画布和场景结构已搭好（[ADR 0002](doc/decisions/0002-游戏画布与场景结构.md)）。Windows XP 场景有一个可玩的 [MVP「弹窗 → 关窗」](doc/prototypes/mvp.md)，输入、判定窗口、谱面都是暂定值，等试玩后调整；Mac 场景还只是占位画面。谱面已与游戏代码分离，以 JSON 存放在 `public/charts/`（[ADR 0003](doc/decisions/0003-谱面数据格式.md)，格式见 [doc/chart-format.md](doc/chart-format.md)）。
 
 - 只使用已确定的技术栈；要引入新的运行时依赖（尤其是音频、渲染、状态管理类库）前，先向用户说明理由和取舍。
 - 已完成[延迟测试原型](doc/prototypes/latency-test.md)，下一步是在不同设备、浏览器、耳机上实测，把结果登记到该文档的「测试记录」。
@@ -29,15 +29,16 @@
 ├── README.md
 ├── index.html         # 游戏入口页：游戏画布 + 开发面板（切换场景、打开原型）
 ├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/index.html
+├── public/charts/     # 谱面 JSON：index.json 清单 + 每首一个文件，运行时下载
 ├── assets/            # 共用素材：原版系统素材参考、字体等，来源与授权见 assets/README.md
 ├── promo/             # 宣发视频（HyperFrames：HTML + GSAP 渲染成 MP4），独立于游戏工程，说明见 promo/AGENTS.md
 ├── src/
 │   ├── game/          # 游戏画布（1280×720 等比缩放）、场景接口、场景切换器、输入、设置、入口
-│   ├── scenes/        # 各场景，一个场景一个目录，例如 scenes/windows-xp/
+│   ├── scenes/        # 各场景，一个场景一个目录；catalog.ts 登记各场景支持的动作
 │   ├── theme/         # 场景主题颜色、字体、判定颜色、动画拍数，取自设计系统提案
 │   ├── ui/            # 跨场景共用的画面部件（判定字样、缓动函数）
 │   ├── audio/         # 音频时钟、节拍器、音序器、合成鼓点与音效
-│   ├── rhythm/        # 拍 ↔ 音频时间换算、谱面、判定
+│   ├── rhythm/        # 拍 ↔ 音频时间换算、动作 ID、谱面校验与展开、判定、轮次提示
 │   ├── latency/       # 延迟与偏差统计
 │   └── prototypes/    # 原型页面自己的界面代码
 ├── vite.config.ts     # Vite+ 的全部配置：构建、测试、格式化、代码检查
@@ -58,7 +59,8 @@
 
 - 单元测试与被测文件放在一起，命名为 `*.test.ts`，从 `vite-plus/test` 导入测试 API。
 - 新增原型页面时，在 `vite.config.ts` 的 `build.rolldownOptions.input` 中登记入口，并加到 `src/game/dev-panel.ts` 的原型列表里。
-- 新增场景时，在 `src/scenes/<场景名>/` 实现 `Scene` 接口（`src/game/scene.ts`），再在 `src/game/main.ts` 里登记。场景按 1280×720 的逻辑坐标绘制，颜色只取 `src/theme/` 的 token。
+- 新增场景时，在 `src/scenes/<场景名>/` 实现 `Scene` 接口（`src/game/scene.ts`），在 `src/scenes/catalog.ts` 登记场景名称和支持的动作，再在 `src/game/main.ts` 里登记。场景按 1280×720 的逻辑坐标绘制，颜色只取 `src/theme/` 的 token。
+- 新增谱面时，在 `public/charts/` 放 `<谱面 id>.json` 并加进 `index.json`；`vp test` 会校验目录下的每个谱面。新增动作类型时，先更新 [doc/chart-format.md](doc/chart-format.md) 的动作表，再改 `src/rhythm/actions.ts` 和场景目录。
 - `promo/` 不属于游戏构建：它用 `npx hyperframes`（版本钉在 `promo/package.json`）预览和渲染，不进游戏的 pnpm 依赖。`promo/assets` 是指向根目录 `assets/` 的符号链接，视频里用 `assets/...` 引用素材（HyperFrames 预览服务读不到工程目录以外的文件；Windows 上克隆需开启 `git config core.symlinks true`）。做视频前先用 `/hyperframes` 技能。
 
 ## 技术栈

@@ -1,27 +1,9 @@
-// MVP 曲目：谱面、鼓点和音效，全部 MVP 暂定（doc/prototypes/mvp.md）。
+// XP 场景的伴奏和音效，全部 MVP 暂定（doc/prototypes/mvp.md）。
+// 谱面不在这里，存放在 public/charts/（ADR 0003）。
 
 import type { SequencedSound } from '../../audio/sequencer.ts';
 import { createBlip, createHat, createKick, createSnare } from '../../audio/synth.ts';
-import { buildCallResponseChart, type Chart } from '../../rhythm/chart.ts';
-
-export function buildPopupChart(): Chart {
-  return buildCallResponseChart({
-    bpm: 120,
-    beatsPerBar: 4,
-    countInBars: 1,
-    outroBars: 1,
-    patterns: [
-      [0, 1, 2],
-      [0, 1, 2],
-      [0, 1, 2, 3],
-      [0, 0.5, 1, 2],
-      [0, 1, 1.5, 2],
-      [0, 1, 2, 2.5, 3],
-      [0, 0.5, 1, 1.5, 2],
-      [0, 0.5, 1, 2, 3],
-    ],
-  });
-}
+import type { Chart } from '../../rhythm/chart.ts';
 
 export interface PopupSounds {
   kick: AudioBuffer;

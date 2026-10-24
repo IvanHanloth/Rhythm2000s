@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 import type { SceneContext } from '../../game/scene.ts';
 import { PopupSession } from './popup-session.ts';
-import { buildPopupChart, type PopupSounds } from './song.ts';
+import type { PopupSounds } from './song.ts';
+import { loadMvpChart } from './test-mvp-chart.ts';
 
 /** 用名字代替真正的 AudioBuffer */
 const sounds = Object.fromEntries(
@@ -35,7 +36,7 @@ function fakeContext(calibration = 0) {
 describe('PopupSession', () => {
   it('跟打全部踩准、漏掉一个：其余都是 Perfect，漏掉的记为 Miss', () => {
     const { context, played } = fakeContext();
-    const session = new PopupSession(context, buildPopupChart(), sounds);
+    const session = new PopupSession(context, loadMvpChart(), sounds);
     const skipped = 4;
 
     session.chart.responses.forEach((cue, i) => {
@@ -54,7 +55,7 @@ describe('PopupSession', () => {
 
   it('判定前扣除校准值；画面上的关闭时间仍用听到的时间', () => {
     const { context } = fakeContext(0.08);
-    const session = new PopupSession(context, buildPopupChart(), sounds);
+    const session = new PopupSession(context, loadMvpChart(), sounds);
     const target = session.timeAt(session.chart.responses[0]!.beat);
 
     // 玩家习惯晚 80 毫秒：听感上晚 80 毫秒的输入应判为 Perfect
@@ -64,7 +65,7 @@ describe('PopupSession', () => {
 
   it('附近没有目标的输入不计分', () => {
     const { context, played } = fakeContext();
-    const session = new PopupSession(context, buildPopupChart(), sounds);
+    const session = new PopupSession(context, loadMvpChart(), sounds);
 
     expect(session.tap(session.timeAt(0))).toBeNull();
     expect(session.judgements).toHaveLength(0);

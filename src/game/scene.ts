@@ -2,6 +2,8 @@
 
 import type { Container } from 'pixi.js';
 import type { AudioClock } from '../audio/audio-clock.ts';
+import type { Chart } from '../rhythm/chart.ts';
+import type { SceneId } from '../scenes/catalog.ts';
 
 /** 每帧传给场景的信息。 */
 export interface FrameInfo {
@@ -20,6 +22,8 @@ export interface SceneContext {
   clock: AudioClock;
   /** 玩家校准值（秒），正数表示玩家习惯按晚。判定时从输入时间里扣除 */
   calibration(): number;
+  /** 已加载并通过校验的全部谱面；场景按 chart.scene 挑出自己的 */
+  charts: readonly Chart[];
 }
 
 export interface Scene {
@@ -34,8 +38,8 @@ export interface Scene {
 }
 
 export interface SceneEntry {
-  /** 场景标识，例如 "windows-xp" */
-  id: string;
+  /** 场景标识，与场景目录（scenes/catalog.ts）一致 */
+  id: SceneId;
   /** 给人看的名称，例如「Windows XP 桌面」 */
   label: string;
   create(context: SceneContext): Scene;

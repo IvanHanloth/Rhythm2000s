@@ -1,12 +1,17 @@
-// 谱面：示范 / 跟打的时间表。时间一律以拍为单位，第 0 拍是全曲第一拍（预备拍的开头）。
+// 谱面：把谱面文件（ChartSource）展开成游戏用的时间表。
+// 时间一律以拍为单位，第 0 拍是全曲第一拍（预备拍的开头）。
+
+import type { ActionType } from './actions.ts';
+import type { ChartEventSource, ChartSource } from './chart-file.ts';
 
 export interface ChartCue {
   /** 全曲拍位置 */
   beat: number;
   /** 属于第几个乐句（从 0 开始） */
   phrase: number;
-  /** 乐句内的第几个动作（从 0 开始） */
+  /** 在乐句的示范 / 跟打小节里是第几个事件（从 0 开始） */
   index: number;
+  action: ActionType;
 }
 
 export interface ChartPhrase {
@@ -19,63 +24,57 @@ export interface ChartPhrase {
 }
 
 export interface Chart {
+  id: string;
+  title: string;
+  /** 所属场景 id */
+  scene: string;
   bpm: number;
   beatsPerBar: number;
   phrases: ChartPhrase[];
-  /** 示范动作，按时间排序 */
+  /** 示范事件，按时间排序 */
   calls: ChartCue[];
-  /** 跟打目标，与 calls 一一对应（下标相同），按时间排序 */
+  /** 跟打目标（玩家要按的），按时间排序 */
   responses: ChartCue[];
   /** 全曲结束的拍位置 */
   endBeat: number;
 }
 
-export interface CallResponseOptions {
-  bpm: number;
-  beatsPerBar: number;
-  /** 开头预备的小节数 */
-  countInBars: number;
-  /** 结尾留空的小节数 */
-  outroBars: number;
-  /** 每个乐句示范小节内的拍位置，例如 [0, 1, 2] */
-  patterns: readonly (readonly number[])[];
-}
-
 /**
- * 生成「示范 1 小节 + 跟打 1 小节」的谱面：
- * 跟打目标与示范动作的相对位置相同，整体晚 1 小节。
+ * 展开谱面：每个乐句占 2 小节，示范小节后紧接跟打小节；
+ * 乐句没写 response 时，跟打与示范相同。输入应已通过 parseChartFile 校验。
  */
-export function buildCallResponseChart(options: CallResponseOptions): Chart {
-  const { bpm, beatsPerBar, countInBars, outroBars, patterns } = options;
+export function buildChart(source: ChartSource): Chart {
+  const { beatsPerBar, countInBars, outroBars } = source;
   const phrases: ChartPhrase[] = [];
   const calls: ChartCue[] = [];
   const responses: ChartCue[] = [];
 
-  patterns.forEach((pattern, phrase) => {
-    validatePattern(pattern, beatsPerBar, phrase);
-    const callStart = (countInBars + phrase * 2) * beatsPerBar;
+  const place = (events: readonly ChartEventSource[], barStart: number, phrase: number) =>
+    events.map((event, index) => ({
+      beat: barStart + event.beat,
+      phrase,
+      index,
+      action: event.action,
+    }));
+
+  source.phrases.forEach((phrase, i) => {
+    const callStart = (countInBars + i * 2) * beatsPerBar;
     const responseStart = callStart + beatsPerBar;
     phrases.push({ callStart, responseStart, end: responseStart + beatsPerBar });
-    pattern.forEach((offset, index) => {
-      calls.push({ beat: callStart + offset, phrase, index });
-      responses.push({ beat: responseStart + offset, phrase, index });
-    });
+    calls.push(...place(phrase.call, callStart, i));
+    responses.push(...place(phrase.response ?? phrase.call, responseStart, i));
   });
 
-  const endBeat = (countInBars + patterns.length * 2 + outroBars) * beatsPerBar;
-  return { bpm, beatsPerBar, phrases, calls, responses, endBeat };
-}
-
-function validatePattern(pattern: readonly number[], beatsPerBar: number, phrase: number): void {
-  if (pattern.length === 0) {
-    throw new RangeError(`第 ${phrase + 1} 个乐句没有动作`);
-  }
-  pattern.forEach((offset, i) => {
-    if (!(offset >= 0 && offset < beatsPerBar)) {
-      throw new RangeError(`第 ${phrase + 1} 个乐句的拍位置 ${offset} 超出小节`);
-    }
-    if (i > 0 && offset <= pattern[i - 1]!) {
-      throw new RangeError(`第 ${phrase + 1} 个乐句的拍位置必须从小到大且不重复`);
-    }
-  });
+  const endBeat = (countInBars + source.phrases.length * 2 + outroBars) * beatsPerBar;
+  return {
+    id: source.id,
+    title: source.title,
+    scene: source.scene,
+    bpm: source.bpm,
+    beatsPerBar,
+    phrases,
+    calls,
+    responses,
+    endBeat,
+  };
 }

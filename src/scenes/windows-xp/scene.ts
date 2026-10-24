@@ -13,7 +13,8 @@ import { createJudgementView } from '../../ui/judgement-view.ts';
 import { TurnBanner } from '../../ui/turn-banner.ts';
 import { PopupSession, type JudgementRecord, type PopupWindowState } from './popup-session.ts';
 import { PopupWindow } from './popup-window.ts';
-import { buildPopupChart, createPopupSounds, type PopupSounds } from './song.ts';
+import { SCENE_CATALOG } from '../catalog.ts';
+import { createPopupSounds, type PopupSounds } from './song.ts';
 
 const theme = THEMES.xp;
 const TASKBAR_HEIGHT = 40;
@@ -51,7 +52,8 @@ const FADE_BEATS = 0.25;
 /** 结果出来后多久才接受「再来一次」的输入（毫秒），避免连按误触 */
 const RESULT_INPUT_DELAY_MS = 600;
 
-type State = 'ready' | 'starting' | 'playing' | 'result';
+/** unavailable：没有可用的谱面，只显示提示，不接受开始 */
+type State = 'ready' | 'starting' | 'playing' | 'result' | 'unavailable';
 
 interface ActiveJudgement {
   record: JudgementRecord;
@@ -61,8 +63,9 @@ interface ActiveJudgement {
 class WindowsXpScene implements Scene {
   readonly view = new Container({ label: 'windows-xp' });
   private readonly context: SceneContext;
-  private readonly chart: Chart = buildPopupChart();
-  private readonly turnCues: TurnCue[] = buildTurnCues(this.chart);
+  /** 本场景使用的谱面；没有加载到可用谱面时为 null */
+  private readonly chart: Chart | null;
+  private readonly turnCues: TurnCue[];
   /** Follow me / Your turn 横幅：示范用凸起的按钮色，跟打用强调色 */
   private readonly turnBanner = new TurnBanner({
     call: { fill: theme.surfaceRaised, text: theme.ink, line: theme.line },
@@ -91,6 +94,9 @@ class WindowsXpScene implements Scene {
 
   constructor(context: SceneContext) {
     this.context = context;
+    // 目前只用第一首属于本场景的谱面；以后有选曲界面再改
+    this.chart = context.charts.find((chart) => chart.scene === windowsXpScene.id) ?? null;
+    this.turnCues = this.chart ? buildTurnCues(this.chart) : [];
     this.sounds = createPopupSounds(context.clock.context);
     this.turnBanner.view.position.set(DESIGN_WIDTH / 2, BANNER_Y);
     this.view.addChild(
@@ -100,11 +106,20 @@ class WindowsXpScene implements Scene {
       this.turnBanner.view,
       this.dialogLayer,
     );
-    this.showDialog({
-      title: '弹窗大扫除',
-      body: '电脑会先按节奏弹出一串窗口。\n看到「Your turn」时，请按同样的节奏把它们逐个关闭。\n\n按空格键或点击画面开始。',
-      button: '开始',
-    });
+    if (this.chart) {
+      this.showDialog({
+        title: this.chart.title,
+        body: '电脑会先按节奏弹出一串窗口。\n看到「Your turn」时，请按同样的节奏把它们逐个关闭。\n\n按空格键或点击画面开始。',
+        button: '开始',
+      });
+    } else {
+      this.state = 'unavailable';
+      this.showDialog({
+        title: '没有可用的谱面',
+        body: '谱面没有加载成功，原因见浏览器控制台。\n谱面文件放在 public/charts/ 目录下。',
+        button: '确定',
+      });
+    }
     document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
 
@@ -133,6 +148,7 @@ class WindowsXpScene implements Scene {
         if (performance.now() - this.resultShownAt >= RESULT_INPUT_DELAY_MS) void this.start();
         break;
       case 'starting':
+      case 'unavailable':
         break;
     }
   }
@@ -149,6 +165,8 @@ class WindowsXpScene implements Scene {
   // ---------- 流程 ----------
 
   private async start(): Promise<void> {
+    const chart = this.chart;
+    if (!chart) return;
     this.state = 'starting';
     await this.context.clock.resume();
     // 等待音频恢复期间可能已经离开场景
@@ -156,7 +174,7 @@ class WindowsXpScene implements Scene {
 
     this.clearRound();
     this.hideDialog();
-    this.session = new PopupSession(this.context, this.chart, this.sounds);
+    this.session = new PopupSession(this.context, chart, this.sounds);
     this.popups = this.session.windows.map((w) => this.createPopup(w));
     this.state = 'playing';
   }
@@ -359,6 +377,6 @@ class WindowsXpScene implements Scene {
 
 export const windowsXpScene: SceneEntry = {
   id: 'windows-xp',
-  label: 'Windows XP 桌面',
+  label: SCENE_CATALOG['windows-xp'].label,
   create: (context) => new WindowsXpScene(context),
 };
