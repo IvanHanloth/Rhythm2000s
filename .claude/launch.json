@@ -15,7 +15,7 @@
         "vp",
         "preview",
         "--base",
-        "/rhythm2000s/",
+        "/Rhythm2000s/",
         "--port",
         "4173",
         "--strictPort"

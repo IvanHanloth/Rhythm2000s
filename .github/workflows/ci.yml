@@ -32,7 +32,7 @@ jobs:
       - name: Unit tests (including validation of every chart in public/charts/)
         run: pnpm exec vp test
 
-      # Gives the sub-path Pages serves the site from: "/rhythm2000s", or "" with a custom domain
+      # Gives the sub-path Pages serves the site from: "/Rhythm2000s", or "" with a custom domain
       - name: Read GitHub Pages path
         id: pages
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
