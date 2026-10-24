@@ -2,6 +2,7 @@
   "format": 1,
   "id": "mac-mail-rush",
   "title": "Mail Rush",
+  "icon": "mail",
   "scene": "mac-2000",
   "bpm": 120,
   "beatsPerBar": 4,

@@ -8,12 +8,13 @@ import type { Chart } from '@/rhythm/chart.ts';
 import { formatDuration, summarizeChart } from '@/rhythm/chart-summary.ts';
 import { AQUA } from '@/theme/aqua.ts';
 import { DoubleClick } from '@/ui/double-click.ts';
-import { isMacAction, MAC_ACTIONS, type MacTargetKind } from './action-kinds.ts';
-import { appIcon, type AppIconName } from './assets.ts';
-import { drawCautionIcon, drawDocumentIcon, drawTrashIcon } from './components/icons.ts';
+import type { MacTargetKind } from './action-kinds.ts';
+import { drawDocumentIcon, drawTrashIcon } from './components/icons.ts';
+import { macSystemIcon } from './components/system-icon.ts';
 import { aquaText, drawGelPill } from './components/paint.ts';
 import { PUSH_BUTTON_HEIGHT, PushButton } from './components/push-button.ts';
 import { AquaWindow, TITLE_BAR_HEIGHT } from './components/window.ts';
+import { autoMacIcon, isMacIconId, macKinds } from './system-icons.ts';
 
 /** Finder and info window positions on the virtual screen (the mock-up scaled to 1024×576) */
 const FINDER = { x: 56, y: 40, width: 616, height: 445 };
@@ -40,21 +41,6 @@ const KIND_LABELS: Record<MacTargetKind, string> = {
   chat: 'iChat',
   volume: 'Volume',
   chair: 'Swivel chair',
-};
-
-/** Icon standing for each widget kind; levels mixing several use iTunes (a remix) */
-const KIND_ICONS: Record<MacTargetKind, AppIconName | 'caution' | 'trash'> = {
-  alert: 'caution',
-  dock: 'iChat',
-  mail: 'Mail',
-  window: 'TextEdit',
-  menu: 'System Preferences',
-  file: 'trash',
-  sheet: 'TextEdit',
-  chat: 'iChat',
-  volume: 'iTunes',
-  // The cutaway is a little film of the café (provisional)
-  chair: 'QuickTime Player',
 };
 
 export interface MacLevelSelectOptions {
@@ -265,18 +251,14 @@ export class MacLevelSelect {
 
 /** Widget kinds the chart uses, in order of first appearance */
 function chartKinds(chart: Chart): MacTargetKind[] {
-  const actions = summarizeChart(chart).actions.filter(isMacAction);
-  return [...new Set(actions.map((a) => MAC_ACTIONS[a].kind))];
+  return macKinds(summarizeChart(chart).actions);
 }
 
-/** Level icon: the widget's icon when the chart uses one kind, iTunes for a mix */
+/** Level icon: the chart's own, else picked from its actions (doc/level-select.md) */
 function levelIcon(chart: Chart, size: number): Container {
-  const kinds = chartKinds(chart);
-  const only = kinds.length === 1 ? kinds[0]! : null;
-  const name = only ? KIND_ICONS[only] : 'iTunes';
-  if (name === 'caution') return drawCautionIcon(size);
-  if (name === 'trash') return drawTrashIcon(size, { full: true });
-  return appIcon(name, size);
+  const id = chart.icon ?? autoMacIcon(summarizeChart(chart).actions);
+  if (!isMacIconId(id)) throw new Error(`Chart ${chart.id} has no Mac icon ${id}`);
+  return macSystemIcon(id, size);
 }
 
 // ---------- Info window ----------

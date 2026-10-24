@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-tray",
   "title": "Tray Balloons",
+  "icon": "network",
   "scene": "windows-xp",
   "bpm": 120,
   "beatsPerBar": 4,

@@ -2,6 +2,7 @@
   "format": 1,
   "id": "mac-remix-1",
   "title": "Mac Remix 1",
+  "icon": "itunes",
   "scene": "mac-2000",
   "bpm": 124,
   "beatsPerBar": 4,

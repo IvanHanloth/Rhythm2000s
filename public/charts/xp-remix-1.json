@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-remix-1",
   "title": "XP Remix 1",
+  "icon": "windows-media-player",
   "scene": "windows-xp",
   "bpm": 128,
   "beatsPerBar": 4,

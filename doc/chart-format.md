@@ -65,6 +65,7 @@ All required unless marked optional; unknown fields are errors (so a misspelt fi
 | `format` | integer | Format version, currently `1` |
 | `id` | string | Chart id: lowercase letters, digits and hyphens; must match the file name |
 | `title` | string | Song title shown to the player |
+| `icon` | string (optional) | The level's icon in the level list: one of its scene's [icon IDs](#icon-ids). **Picked from the chart's actions when omitted** ([level-select.md](level-select.md)) |
 | `scene` | string | Scene: `windows-xp` or `mac-2000` |
 | `bpm` | number | Beats per minute, above 0 |
 | `beatsPerBar` | integer | Beats per bar, above 0 |
@@ -134,6 +135,15 @@ An action ID names **the widget that appears in the call**, after the original s
 | `menu-volume` | Menu bar volume extra (`NSMenuExtra`); visual only | `mac-2000` | The volume menu drops before the beat with the slider at the bottom; the virtual mouse grabs it on the beat (`Tink`) and drags it to the top over **1 beat**, releasing (`Pop`) | Press on the beat; the game releases 1 beat later, only the press is judged (as `volume-mute`) |
 
 Actions of a scene can be mixed freely within a phrase. Two-press actions (`desktop-refresh`, `start-menu`, `menu-apple`, `sheet-save`) have their second press fixed half a beat after the first, and the chart only gives the first beat. `progress-download` is judged at +3 beats; the volume actions are pressed at 0 and released by the game at +1. `chair-swivel` is pressed at 0 and lands by itself at +2. Designs for the XP actions are in [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md), the Mac sounds in [scenes/mac-2000.md](scenes/mac-2000.md#sounds). Other designed actions (XP mail etc.) join this table when implemented. A chart using an action its scene doesn't support is an error.
+
+### Icon IDs
+
+A chart's `icon` can be any system icon its scene already has. IDs are lowercase and hyphenated; an ID the scene doesn't have is an error.
+
+| Scene | Icon IDs |
+| --- | --- |
+| `windows-xp` | Every icon in `assets/reference/windows-xp/icons/`, by file name without `.png`, e.g. `dialog-error`, `my-computer`, `recycle-bin-full`, `internet-explorer`, `windows-logo`, `minesweeper` |
+| `mac-2000` | The application icons in `assets/reference/mac-os-x/icons/`: `address-book`, `calculator`, `chess`, `dvd-player`, `ical`, `ichat`, `iphoto`, `itunes`, `mail`, `preview`, `quicktime-player`, `safari`, `sherlock`, `stickies`, `system-preferences`, `terminal`, `textedit`; and the icons the scene draws: `finder`, `folder`, `document`, `trash`, `trash-full`, `caution`, `apple`, `speaker`. `Dashboard.png` is left out: Dashboard came with Mac OS X 10.4, after the scene's 10.0–10.2 |
 
 ## Official levels
 

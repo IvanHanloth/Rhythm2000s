@@ -28,17 +28,7 @@ import chordUrl from '@assets/reference/windows-xp/sounds/chord.wav?url';
 import arrowCursorUrl from '@assets/reference/windows-xp/icons/default_arrow.cur?url';
 import linkCursorUrl from '@assets/reference/windows-xp/icons/default_link.cur?url';
 import { XP_FONT_FAMILY } from './components/xp-text.ts';
-
-/** Icon file name (without .png) → URL */
-const ICON_URLS: Record<string, string> = Object.fromEntries(
-  Object.entries(
-    import.meta.glob<string>('/assets/reference/windows-xp/icons/*.png', {
-      eager: true,
-      query: '?url',
-      import: 'default',
-    }),
-  ).map(([path, url]) => [path.replace(/^.*\/(.+)\.png$/, '$1'), url]),
-);
+import { XP_ICON_URLS } from './system-icons.ts';
 
 /**
  * XP's standard arrow pointer (the .cur file carries its hotspot, at the arrow's tip).
@@ -113,7 +103,7 @@ export function xpAssets(): XpAssets {
 }
 
 async function load(audio: BaseAudioContext): Promise<XpAssets> {
-  const iconEntries = Object.entries(ICON_URLS);
+  const iconEntries = Object.entries(XP_ICON_URLS);
   const [wallpaper, icons, sounds, , pointer] = await Promise.all([
     Assets.load<Texture>(blissUrl),
     Promise.all(

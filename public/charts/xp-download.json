@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-download",
   "title": "Download Complete",
+  "icon": "internet-explorer",
   "scene": "windows-xp",
   "bpm": 112,
   "beatsPerBar": 4,

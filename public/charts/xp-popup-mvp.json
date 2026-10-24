@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-popup-mvp",
   "title": "Pop-up Sweep",
+  "icon": "dialog-info",
   "scene": "windows-xp",
   "bpm": 120,
   "beatsPerBar": 4,

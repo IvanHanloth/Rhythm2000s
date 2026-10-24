@@ -2,6 +2,7 @@
   "format": 1,
   "id": "mac-ichat",
   "title": "Buddy List",
+  "icon": "ichat",
   "scene": "mac-2000",
   "bpm": 120,
   "beatsPerBar": 4,

@@ -2,6 +2,7 @@
   "format": 1,
   "id": "mac-apple-menu",
   "title": "Apple Menu",
+  "icon": "apple",
   "scene": "mac-2000",
   "bpm": 112,
   "beatsPerBar": 4,

@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-crash",
   "title": "Before the Blue Screen",
+  "icon": "dialog-warning",
   "scene": "windows-xp",
   "bpm": 138,
   "beatsPerBar": 4,

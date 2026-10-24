@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-minimize",
   "title": "Minimize All",
+  "icon": "notepad",
   "scene": "windows-xp",
   "bpm": 112,
   "beatsPerBar": 4,

@@ -2,6 +2,7 @@
   "format": 1,
   "id": "mac-alert-basics",
   "title": "Alert 101",
+  "icon": "caution",
   "scene": "mac-2000",
   "bpm": 104,
   "beatsPerBar": 4,

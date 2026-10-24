@@ -23,6 +23,8 @@ export interface ChartSource {
   format: typeof CHART_FORMAT_VERSION;
   id: string;
   title: string;
+  /** The level icon, one of the scene's icon IDs; picked from the actions when omitted */
+  icon?: string;
   scene: string;
   bpm: number;
   beatsPerBar: number;
@@ -36,6 +38,8 @@ export interface ChartSource {
 export interface ChartFileOptions {
   /** Actions each scene supports, keyed by scene id */
   scenes: Readonly<Record<string, readonly ActionType[]>>;
+  /** System icon IDs each scene has, keyed by scene id (doc/chart-format.md "Icon IDs") */
+  icons: Readonly<Record<string, readonly string[]>>;
   /** Chart id derived from the file name; when given, the id field must match */
   expectedId?: string;
 }
@@ -47,6 +51,7 @@ const CHART_KEYS = [
   'format',
   'id',
   'title',
+  'icon',
   'scene',
   'bpm',
   'beatsPerBar',
@@ -98,6 +103,17 @@ export function parseChartFile(data: unknown, options: ChartFileOptions): ParseR
   if (!sceneActions) {
     const known = Object.keys(options.scenes).join(', ');
     errors.push(`scene must be a known scene (${known}), got ${JSON.stringify(data.scene)}`);
+  }
+  if (data.icon !== undefined) {
+    const icons =
+      typeof data.scene === 'string' && Object.hasOwn(options.icons, data.scene)
+        ? options.icons[data.scene]!
+        : null;
+    if (typeof data.icon !== 'string' || !ID_PATTERN.test(data.icon)) {
+      errors.push('icon must be a string of lowercase letters, digits and hyphens');
+    } else if (icons && !icons.includes(data.icon)) {
+      errors.push(`icon: scene ${String(data.scene)} has no icon ${data.icon}`);
+    }
   }
 
   if (typeof data.bpm !== 'number' || !(data.bpm > 0) || !Number.isFinite(data.bpm)) {

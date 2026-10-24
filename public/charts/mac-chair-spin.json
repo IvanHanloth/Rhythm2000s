@@ -2,6 +2,7 @@
   "format": 1,
   "id": "mac-chair-spin",
   "title": "Desk Chair Twirl",
+  "icon": "quicktime-player",
   "scene": "mac-2000",
   "bpm": 116,
   "beatsPerBar": 4,

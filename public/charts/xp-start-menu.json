@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-start-menu",
   "title": "Start Me Up",
+  "icon": "windows-logo",
   "scene": "windows-xp",
   "bpm": 116,
   "beatsPerBar": 4,

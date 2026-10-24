@@ -28,6 +28,8 @@ export interface ChartPhrase {
 export interface Chart {
   id: string;
   title: string;
+  /** The level icon (an icon ID of the scene); null when the chart leaves it to its actions */
+  icon: string | null;
   /** Scene id */
   scene: string;
   bpm: number;
@@ -79,6 +81,7 @@ export function buildChart(source: ChartSource): Chart {
   return {
     id: source.id,
     title: source.title,
+    icon: source.icon ?? null,
     scene: source.scene,
     bpm: source.bpm,
     beatsPerBar,

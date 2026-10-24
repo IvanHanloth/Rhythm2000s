@@ -2,6 +2,7 @@
   "format": 1,
   "id": "mac-save-sheet",
   "title": "Save Changes?",
+  "icon": "document",
   "scene": "mac-2000",
   "bpm": 108,
   "beatsPerBar": 4,

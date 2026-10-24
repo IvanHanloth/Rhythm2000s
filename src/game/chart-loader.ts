@@ -5,7 +5,7 @@ import { buildChart, type Chart } from '@/rhythm/chart.ts';
 import { parseChartFile, parseChartIndex, type ChartSource } from '@/rhythm/chart-file.ts';
 import { JUDGE_WINDOWS } from '@/rhythm/judge.ts';
 import { checkTurnCueSpacing } from '@/rhythm/turn-cue.ts';
-import { sceneActions, SCENE_CATALOG, type SceneId } from '@/scenes/catalog.ts';
+import { sceneActions, SCENE_CATALOG, sceneIcons, type SceneId } from '@/scenes/catalog.ts';
 
 export const CHART_INDEX_FILE = 'index.json';
 
@@ -71,7 +71,11 @@ export function checkChartData(
   data: unknown,
   expectedId?: string,
 ): { loaded: LoadedChart; errors: [] } | { loaded: null; errors: string[] } {
-  const parsed = parseChartFile(data, { scenes: sceneActions(), expectedId });
+  const parsed = parseChartFile(data, {
+    scenes: sceneActions(),
+    icons: sceneIcons(),
+    expectedId,
+  });
   if (!parsed.ok) return { loaded: null, errors: parsed.errors };
 
   const chart = buildChart(parsed.value);

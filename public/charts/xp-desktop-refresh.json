@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-desktop-refresh",
   "title": "Right-Click Refresh",
+  "icon": "my-computer",
   "scene": "windows-xp",
   "bpm": 120,
   "beatsPerBar": 4,

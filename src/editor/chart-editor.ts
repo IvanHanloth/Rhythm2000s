@@ -245,6 +245,7 @@ export function gridBeats(beatsPerBar: number, step: number): number[] {
 const SONG_FIELD_NAMES: Record<string, string> = {
   id: 'File name',
   title: 'Title',
+  icon: 'Icon',
   bpm: 'BPM',
   beatsPerBar: 'Beats per bar',
   countInBars: 'Count-in',

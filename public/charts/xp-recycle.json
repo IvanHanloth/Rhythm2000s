@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-recycle",
   "title": "Empty the Bin",
+  "icon": "recycle-bin-full",
   "scene": "windows-xp",
   "bpm": 124,
   "beatsPerBar": 4,

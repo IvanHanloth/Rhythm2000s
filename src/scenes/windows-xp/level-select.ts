@@ -26,7 +26,7 @@ import {
 } from './components/explorer-bars.ts';
 import { CAPTION_HEIGHT, FRAME_WIDTH, XpWindowFrame } from './components/window-frame.ts';
 import { xpText } from './components/xp-text.ts';
-import { DIALOG_KINDS, isDialogKind } from './dialog-kinds.ts';
+import { autoXpIcon } from './system-icons.ts';
 
 export const EXPLORER_TITLE = 'My Levels';
 const ADDRESS = 'C:\\Rhythm 2000s\\My Levels\\XP Desktop';
@@ -191,7 +191,7 @@ export class XpLevelSelect {
   private tile(chart: Chart, index: number, width: number): Tile {
     const summary = summarizeChart(chart);
     const view = new Container({ label: `tile-${chart.id}` });
-    const icon = new Sprite(xpAssets().icon(levelIcon(summary.actions)));
+    const icon = new Sprite(xpAssets().icon(chart.icon ?? autoXpIcon(summary.actions)));
     icon.setSize(TILE_ICON);
     icon.position.set(3, (TILE_HEIGHT - TILE_ICON) / 2);
 
@@ -374,12 +374,6 @@ export class XpLevelSelect {
     add(views.view, views.width);
     return bar;
   }
-}
-
-/** Level icon: the message box icon when the chart uses one kind, a program window icon for a mix */
-function levelIcon(actions: readonly string[]): string {
-  const only = actions.length === 1 ? actions[0]! : null;
-  return only && isDialogKind(only) ? DIALOG_KINDS[only].icon : 'program-window';
 }
 
 function actionText(actions: readonly (keyof typeof ACTION_LABELS)[]): string {

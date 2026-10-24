@@ -2,6 +2,7 @@
   "format": 1,
   "id": "mac-trash",
   "title": "Take Out the Trash",
+  "icon": "trash-full",
   "scene": "mac-2000",
   "bpm": 120,
   "beatsPerBar": 4,

@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-yes-no",
   "title": "Yes or No?",
+  "icon": "dialog-question",
   "scene": "windows-xp",
   "bpm": 104,
   "beatsPerBar": 4,

@@ -2,6 +2,7 @@
   "format": 1,
   "id": "mac-dock-hop",
   "title": "Dock Hop",
+  "icon": "safari",
   "scene": "mac-2000",
   "bpm": 116,
   "beatsPerBar": 4,

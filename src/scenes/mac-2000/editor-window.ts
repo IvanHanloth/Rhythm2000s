@@ -16,18 +16,12 @@ import {
   type ToggleWidget,
 } from '@/ui/hacker-editor-panel.ts';
 import { isMacAction, type MacAction } from './action-kinds.ts';
-import { appIcon, type AppIconName } from './assets.ts';
 import { AquaCheckBox } from './components/check-box.ts';
-import {
-  drawAppleLogo,
-  drawCautionIcon,
-  drawDocumentIcon,
-  drawTrashIcon,
-} from './components/icons.ts';
 import { aquaText, drawGelPill, vGradient } from './components/paint.ts';
-import { drawSpeakerIcon } from './components/volume-menu.ts';
+import { macSystemIcon } from './components/system-icon.ts';
 import { AquaWindow } from './components/window.ts';
 import { macPanelText } from './panel-kit.ts';
+import { autoMacIcon, isMacIconId, MAC_ICON_IDS, type MacIconId } from './system-icons.ts';
 
 /** The application's name in the menu bar */
 export const EDITOR_TITLE = 'HackerEditor';
@@ -46,59 +40,36 @@ const GROUP_INSET = { x: 16, y: 30 };
 const GROUP_TOP = 22;
 const GROUP_SIDE = 8;
 
-type IconPick = AppIconName | 'caution' | 'trash' | 'apple' | 'document' | 'speaker';
-
 /**
  * Icon for each Mac action in the palette and lanes (provisional picks): the caution triangle, the Apple, the Trash
  * and the menu bar speaker are the widgets themselves; note and stop alerts show their application's icon in the
  * original, here Software Update's (System Preferences) and the crashed iTunes; Safari bounces when a download ends.
  */
-const ACTION_ICONS: Record<MacAction, IconPick> = {
-  'alert-note': 'System Preferences',
+const ACTION_ICONS: Record<MacAction, MacIconId> = {
+  'alert-note': 'system-preferences',
   'alert-caution': 'caution',
-  'alert-stop': 'iTunes',
-  'dock-bounce': 'Safari',
-  'mail-new': 'Mail',
-  'window-miniaturize': 'TextEdit',
+  'alert-stop': 'itunes',
+  'dock-bounce': 'safari',
+  'mail-new': 'mail',
+  'window-miniaturize': 'textedit',
   'menu-apple': 'apple',
-  'dock-trash': 'trash',
+  'dock-trash': 'trash-full',
   'sheet-save': 'document',
-  'ichat-message': 'iChat',
+  'ichat-message': 'ichat',
   'menu-volume': 'speaker',
   // The cutaway is a little film of the café, as in the level list (doc/cross-dimension.md)
-  'chair-swivel': 'QuickTime Player',
+  'chair-swivel': 'quicktime-player',
 };
 
 function actionIcon(action: ActionType, size: number): Container {
   if (!isMacAction(action)) throw new Error(`No Mac icon for action ${action}`);
-  const pick = ACTION_ICONS[action];
-  switch (pick) {
-    case 'caution':
-      return drawCautionIcon(size);
-    case 'trash':
-      return drawTrashIcon(size, { full: true });
-    case 'document':
-      return drawDocumentIcon(size);
-    case 'apple': {
-      // 20×24 units: centred across the square
-      const holder = new Container({ label: 'apple-icon' });
-      const logo = drawAppleLogo(size);
-      logo.x = (size - (size * 20) / 24) / 2;
-      holder.addChild(logo);
-      return holder;
-    }
-    case 'speaker': {
-      // About 18×16: centred down the square
-      const holder = new Container({ label: 'speaker-icon' });
-      const speaker = drawSpeakerIcon();
-      speaker.scale.set(size / 18);
-      speaker.y = (size - (16 * size) / 18) / 2;
-      holder.addChild(speaker);
-      return holder;
-    }
-    default:
-      return appIcon(pick, size);
-  }
+  return macSystemIcon(ACTION_ICONS[action], size);
+}
+
+/** Any of the scene's system icons; chart icons are validated against the same list */
+function systemIcon(id: string, size: number): Container {
+  if (!isMacIconId(id)) throw new Error(`No Mac icon ${id}`);
+  return macSystemIcon(id, size);
 }
 
 /** Aqua group box with the small font's tighter padding: translucent white, thin grey rounded border, bold title */
@@ -271,6 +242,9 @@ const kit: EditorKit = {
   checkBox: (label, onToggle) => new AquaCheckBox(label, onToggle),
   field,
   actionIcon,
+  icons: MAC_ICON_IDS,
+  icon: systemIcon,
+  autoIcon: autoMacIcon,
   colors: {
     window: AQUA.white,
     ink: AQUA.ink,

@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-chair-spin",
   "title": "Spin Cycle",
+  "icon": "pinball",
   "scene": "windows-xp",
   "bpm": 120,
   "beatsPerBar": 4,

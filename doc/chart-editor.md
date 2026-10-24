@@ -45,6 +45,7 @@ The editor computers open `#editor/<scene>` (e.g. `#editor/windows-xp`). Esc, th
 │ BPM            [120] − +   │                                                             │
 │ Beats per bar  [4]   − +   │                                                             │
 │ Count-in bars, Outro bars, Gap (beats) likewise                                          │
+│ Icon           ▣ [Automatic    ][...]                                                     │
 ├────────────────────────────┴─────────────────────────────────────────────────────────────┤
 │ 4 phrases · 0:42 · 1 problem · not saved        (hints)                                   │
 └───────────────────────────────────────────────────────────────────────────────────────────┘
@@ -54,7 +55,8 @@ The editor computers open `#editor/<scene>` (e.g. `#editor/windows-xp`). Esc, th
 | --- | --- |
 | Toolbar | New, Open, Save, Undo, Redo, Play, Test, the snap step, Import and Export |
 | Phrase list | One row per phrase in play order, with a strip of its action icons and a red "!" when it has a problem; Add (after the selected phrase), Copy, Delete, Up and Down. The mouse wheel scrolls it |
-| Song | Title, File name (the chart `id`), BPM, Beats per bar, Count-in bars, Outro bars and Gap (the song's `responseGapBeats`); numbers have − and + buttons and can be typed |
+| Song | Title, File name (the chart `id`), BPM, Beats per bar, Count-in bars, Outro bars and Gap (the song's `responseGapBeats`); numbers have − and + buttons and can be typed. Icon shows the level icon and its ID ("Automatic" when the chart sets none); clicking the box or its "..." button opens the icon chooser |
+| Icon chooser | Opened from the Song box's Icon row: every system icon of the scene ([icon IDs](chart-format.md#icon-ids)) in a grid, plus "Automatic" first (the chart sets no `icon` and the level list picks one from its actions). The current pick is highlighted, the pointed-at icon's name shows below the grid, a click picks it; Cancel or Esc closes it |
 | Phrase | The selected phrase: "Own gap" with its gap, "Reset to call", then the call lane and the response lane over one bar of beat grid |
 | Actions | Only this scene's actions ([action table](chart-format.md#action-ids)), each with an icon; the one pressed in is what a click in the call lane places |
 | Problems | The chart's validation errors, worded for the editor ("Phrase 3, call 2: …"); clicking one selects its phrase and event |
@@ -68,6 +70,7 @@ Two-press actions (`desktop-refresh`, `start-menu`, `menu-apple`, `sheet-save`) 
 - **Response lane**: shows the call's actions in order. Dragging a response event changes only its beat; the phrase then gets its own `response` array. "Reset to call" drops it again, so `response` is left out of the file when it equals `call`.
 - Placing, moving or removing a call event updates the response: a phrase whose response rhythm equals the call keeps following it; one with its own rhythm keeps its other beats and gets the new action at the same beat as in the call.
 - To change an action's type, delete it and place the other one.
+- Picking an icon is an edit like any other: undo covers it, and the chart counts as not saved.
 - ↑ ↓ pick the phrase. Undo and redo cover every edit, one drag being one step.
 - **Validation runs on every change** with the same checks as loading and importing (`checkChartData`): field rules, the scene's per-phrase limits and the [timing limits](chart-format.md#timing-limits). Problem events get a red outline.
 

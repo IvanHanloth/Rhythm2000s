@@ -41,6 +41,14 @@ describe('chart drafts', () => {
     expect('responseGapBeats' in plain).toBe(false);
   });
 
+  it('keeps the icon, and leaves it out of the file when the actions pick it', () => {
+    const source = { ...sourceFromPatterns([[0]]), icon: 'my-computer' };
+    const draft = draftFromSource(source);
+    expect(draft.icon).toBe('my-computer');
+    expect(draftToSource(draft).icon).toBe('my-computer');
+    expect('icon' in draftToSource({ ...draft, icon: null })).toBe(false);
+  });
+
   it('places events in call order, on the same beat in the response', () => {
     let draft = newDraft('windows-xp');
     draft = placeEvent(draft, 0, 2, 'dialog-info').draft;

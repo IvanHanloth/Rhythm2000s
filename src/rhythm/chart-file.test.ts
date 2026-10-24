@@ -4,6 +4,7 @@ import { sourceFromPatterns } from './test-charts.ts';
 
 const options: ChartFileOptions = {
   scenes: { 'windows-xp': ['dialog-info'], 'mac-2000': [] },
+  icons: { 'windows-xp': ['dialog-info', 'my-computer'], 'mac-2000': ['finder'] },
 };
 
 /** Deep-copies into plain JSON so a field can be broken */
@@ -26,6 +27,20 @@ describe('parseChartFile', () => {
     const data = json(sourceFromPatterns([[0, 1]]));
     data.phrases[0].response = [{ beat: 2, action: 'dialog-info' }];
     expect(errorsOf(data)).toEqual([]);
+  });
+
+  it("icon is optional; when present it must be one of its scene's icons", () => {
+    const data = json(sourceFromPatterns([[0]]));
+    data.icon = 'my-computer';
+    expect(errorsOf(data)).toEqual([]);
+
+    data.icon = 'finder';
+    expect(errorsOf(data)).toEqual(['icon: scene windows-xp has no icon finder']);
+
+    data.icon = 'My Computer';
+    expect(errorsOf(data)).toEqual([
+      'icon must be a string of lowercase letters, digits and hyphens',
+    ]);
   });
 
   it('responseGapBeats is optional; when present it must be a number ≥ 0', () => {
@@ -78,7 +93,10 @@ describe('parseChartFile', () => {
   });
 
   it('two-press actions: the next event must come after the second press, which must fit in the bar', () => {
-    const refresh = { scenes: { 'windows-xp': ['dialog-info', 'desktop-refresh'] } } as const;
+    const refresh = {
+      scenes: { 'windows-xp': ['dialog-info', 'desktop-refresh'] },
+      icons: {},
+    } as const;
     const data = json(sourceFromPatterns([[0]]));
     data.phrases[0].call = [
       { beat: 0, action: 'desktop-refresh' },

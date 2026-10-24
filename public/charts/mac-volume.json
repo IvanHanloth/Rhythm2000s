@@ -2,6 +2,7 @@
   "format": 1,
   "id": "mac-volume",
   "title": "Turn It Up",
+  "icon": "speaker",
   "scene": "mac-2000",
   "bpm": 104,
   "beatsPerBar": 4,

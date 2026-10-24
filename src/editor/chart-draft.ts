@@ -32,6 +32,8 @@ export interface ChartDraft {
   /** Chart id, also the file name; empty until the player names it */
   id: string;
   title: string;
+  /** The level icon (an icon ID of the scene); null leaves it to the actions */
+  icon: string | null;
   scene: SceneId;
   bpm: number;
   beatsPerBar: number;
@@ -46,6 +48,7 @@ export interface ChartDraft {
 export type SongField =
   | 'title'
   | 'id'
+  | 'icon'
   | 'bpm'
   | 'beatsPerBar'
   | 'countInBars'
@@ -57,6 +60,7 @@ export function newDraft(scene: SceneId): ChartDraft {
   return {
     id: '',
     title: 'Untitled',
+    icon: null,
     scene,
     bpm: 120,
     beatsPerBar: 4,
@@ -76,6 +80,7 @@ export function draftFromSource(source: ChartSource): ChartDraft {
   return {
     id: source.id,
     title: source.title,
+    icon: source.icon ?? null,
     scene: source.scene as SceneId,
     bpm: source.bpm,
     beatsPerBar: source.beatsPerBar,
@@ -112,6 +117,7 @@ export function draftToSource(draft: ChartDraft): ChartSource {
     format: CHART_FORMAT_VERSION,
     id: draft.id,
     title: draft.title,
+    ...(draft.icon !== null && { icon: draft.icon }),
     scene: draft.scene,
     bpm: draft.bpm,
     beatsPerBar: draft.beatsPerBar,

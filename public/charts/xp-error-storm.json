@@ -2,6 +2,7 @@
   "format": 1,
   "id": "xp-error-storm",
   "title": "Error Storm",
+  "icon": "dialog-error",
   "scene": "windows-xp",
   "bpm": 128,
   "beatsPerBar": 4,

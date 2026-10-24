@@ -19,6 +19,7 @@ import { XpCheckBox } from './components/check-box.ts';
 import { CAPTION_HEIGHT, FRAME_WIDTH, XpWindowFrame } from './components/window-frame.ts';
 import { XP_FONT_SIZE, xpText } from './components/xp-text.ts';
 import { XP_GROUP_INSET, XP_PANEL_MUTED, xpGroupBox, xpPanelText } from './panel-kit.ts';
+import { autoXpIcon, XP_ICON_IDS } from './system-icons.ts';
 
 export const EDITOR_TITLE = 'HackerEditor';
 /** Taskbar and title bar icon */
@@ -46,7 +47,12 @@ const ACTION_ICONS: Partial<Record<ActionType, string>> = {
 function iconOf(action: ActionType, size: number): Container {
   const name = ACTION_ICONS[action];
   if (!name) throw new Error(`No XP icon for action ${action}`);
-  const sprite = new Sprite(xpAssets().icon(name));
+  return systemIcon(name, size);
+}
+
+/** Any of XP's system icons, by file name */
+function systemIcon(id: string, size: number): Container {
+  const sprite = new Sprite(xpAssets().icon(id));
   sprite.setSize(size);
   return sprite;
 }
@@ -160,6 +166,9 @@ const kit: EditorKit = {
   checkBox: (label, onToggle) => new XpCheckBox(label, onToggle),
   field,
   actionIcon: iconOf,
+  icons: XP_ICON_IDS,
+  icon: systemIcon,
+  autoIcon: autoXpIcon,
   colors: {
     window: LUNA.white,
     ink: LUNA.ink,

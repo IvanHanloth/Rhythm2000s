@@ -75,6 +75,12 @@ export interface EditorKit {
   field(width: number, onPress: () => void): FieldWidget;
   /** The widget icon of an action, `size` px square */
   actionIcon(action: ActionType, size: number): Container;
+  /** The scene's system icons a chart can take as its level icon, in chooser order (doc/chart-format.md "Icon IDs") */
+  icons: readonly string[];
+  /** A system icon by ID, `size` px square */
+  icon(id: string, size: number): Container;
+  /** The icon the level list picks for a chart that sets none, from its actions in order of first appearance */
+  autoIcon(actions: readonly ActionType[]): string;
   colors: EditorColors;
   /** Ellipsis for buttons that open something ("..." on XP, "…" on the Mac) */
   ellipsis: string;
@@ -117,7 +123,7 @@ const GAP = 8;
 const LEFT_WIDTH = 236;
 const ROW_HEIGHT = 22;
 /** Song fields holding numbers, which get − and + buttons */
-type NumberField = Exclude<SongField, 'title' | 'id'>;
+type NumberField = Exclude<SongField, 'title' | 'id' | 'icon'>;
 type SongRow =
   | { field: 'title' | 'id'; label: string }
   | { field: NumberField; label: string; step: number; min: number };
@@ -138,6 +144,10 @@ const PALETTE_COLUMNS = 4;
 const PALETTE_ROW = 26;
 const PROBLEM_LINES = 5;
 const MAX_FIELD_LENGTH = 60;
+/** Icon chooser: cell and icon size, and the most width it takes */
+const CHOOSER_CELL = 40;
+const CHOOSER_ICON = 32;
+const CHOOSER_WIDTH = 560;
 
 type Drag = { lane: Lane; index: number; beat: number; moved: boolean };
 
@@ -158,6 +168,9 @@ export class HackerEditorPanel {
   /** Redrawn on every refresh */
   private readonly phraseList = new Container({ label: 'phrase-list' });
   private readonly songFields = new Map<SongField, FieldWidget>();
+  /** The Song box's Icon row: the icon and its name, redrawn on every refresh */
+  private readonly iconPreview = new Container({ label: 'icon-preview' });
+  private readonly iconField: FieldWidget;
   private readonly phraseHeader = new Container({ label: 'phrase-header' });
   private readonly phraseTitle: Text;
   private readonly lanes = new Container({ label: 'lanes' });
@@ -243,7 +256,8 @@ export class HackerEditorPanel {
     this.view.addChild(toolbar);
 
     // ---- Left: phrases and song ----
-    const songHeight = SONG_ROWS.length * ROW_HEIGHT + kit.groupInset.y + 4;
+    // The song's rows, then the Icon row
+    const songHeight = (SONG_ROWS.length + 1) * ROW_HEIGHT + kit.groupInset.y + 4;
     const phrasesHeight = bodyHeight - songHeight - GAP;
     const phrases = kit.groupBox('Phrases', LEFT_WIDTH, phrasesHeight);
     phrases.view.position.set(0, bodyTop);
@@ -297,6 +311,20 @@ export class HackerEditorPanel {
         song.inner.addChild(less.view, more.view);
       }
     });
+    const iconY = SONG_ROWS.length * ROW_HEIGHT;
+    const iconLabel = kit.text('Icon', { size });
+    iconLabel.anchor.set(0, 0.5);
+    iconLabel.position.set(0, iconY + 10);
+    this.iconPreview.position.set(fieldLeft, iconY + 10 - ICON_SIZE / 2);
+    // The ID in a read-only box (long ones are cut off; the chooser shows them whole) and a "..." button
+    const openChooser = () => this.run(() => this.showIconChooser());
+    const iconFieldLeft = fieldLeft + ICON_SIZE + 4;
+    this.iconField = kit.field(innerLeft - iconFieldLeft - 22, openChooser);
+    this.iconField.view.cursor = 'default';
+    this.iconField.view.position.set(iconFieldLeft, iconY);
+    const choose = kit.button(kit.ellipsis, openChooser, 20);
+    choose.view.position.set(innerLeft - 20, iconY);
+    song.inner.addChild(iconLabel, this.iconPreview, this.iconField.view, choose.view);
     this.view.addChild(phrases.view, song.view);
 
     // ---- Right: phrase lanes, palette, problems ----
@@ -497,6 +525,83 @@ export class HackerEditorPanel {
     this.chooser = layer;
   }
 
+  /**
+   * The icon chooser over the editor (doc/chart-editor.md "Icon chooser"): "Automatic" then every system icon of
+   * the scene in a grid, the current pick highlighted and the pointed-at icon's name below; a click picks.
+   */
+  showIconChooser(): void {
+    this.closeChooser();
+    const { kit, editor } = this;
+    const draft = editor.draft;
+    const auto = kit.autoIcon(draftActions(draft));
+    const width = Math.min(CHOOSER_WIDTH, this.width - 40);
+    const inner = width - kit.groupInset.x;
+    const columns = Math.floor(inner / CHOOSER_CELL);
+    const picks: (string | null)[] = [null, ...kit.icons];
+    const rows = Math.ceil(picks.length / columns);
+    const height = kit.groupInset.y + rows * CHOOSER_CELL + 8 + ROW_HEIGHT;
+    const describe = (pick: string | null) =>
+      pick === null ? `Automatic: picked from the actions (${auto})` : pick;
+
+    const shade = new Graphics()
+      .rect(0, 0, this.width, this.height)
+      .fill({ color: kit.colors.window, alpha: 0.6 });
+    shade.eventMode = 'static';
+    const box = kit.groupBox('Level icon', width, height);
+    const backing = new Graphics().rect(0, 0, width, height).fill(kit.colors.window);
+    const holder = new Container({ label: 'icon-chooser' });
+    holder.position.set(
+      Math.round((this.width - width) / 2),
+      Math.round((this.height - height) / 3),
+    );
+    holder.addChild(backing, box.view);
+
+    const name = kit.text(describe(draft.icon), { size: kit.textSize });
+    name.anchor.set(0, 0.5);
+    name.position.set(0, rows * CHOOSER_CELL + 8 + 10);
+    picks.forEach((pick, i) => {
+      const cell = new Container({ label: `icon-${pick ?? 'automatic'}` });
+      cell.position.set((i % columns) * CHOOSER_CELL, Math.floor(i / columns) * CHOOSER_CELL);
+      const current = pick === draft.icon;
+      const back = new Graphics()
+        .roundRect(1, 1, CHOOSER_CELL - 2, CHOOSER_CELL - 2, 3)
+        .fill({ color: kit.colors.selection, alpha: current ? 0.35 : 0.15 });
+      if (current) {
+        back
+          .roundRect(1, 1, CHOOSER_CELL - 2, CHOOSER_CELL - 2, 3)
+          .stroke({ width: 1, color: kit.colors.selection });
+      }
+      back.visible = current;
+      const icon = kit.icon(pick ?? auto, CHOOSER_ICON);
+      icon.position.set((CHOOSER_CELL - CHOOSER_ICON) / 2, (CHOOSER_CELL - CHOOSER_ICON) / 2);
+      // "Automatic" shows the icon the actions pick, faded
+      if (pick === null) icon.alpha = 0.45;
+      cell.addChild(back, icon);
+      cell.eventMode = 'static';
+      cell.hitArea = new Rectangle(0, 0, CHOOSER_CELL, CHOOSER_CELL);
+      cell.on('pointerover', () => {
+        back.visible = true;
+        name.text = describe(pick);
+      });
+      cell.on('pointerout', () => {
+        back.visible = current;
+        name.text = describe(draft.icon);
+      });
+      cell.on('pointertap', () => {
+        this.closeChooser();
+        this.run(() => editor.setSong('icon', pick));
+      });
+      box.inner.addChild(cell);
+    });
+    const cancel = kit.button('Cancel', () => this.closeChooser());
+    cancel.view.position.set(inner - cancel.width, rows * CHOOSER_CELL + 8);
+    box.inner.addChild(name, cancel.view);
+    const layer = new Container({ label: 'chooser-layer' });
+    layer.addChild(shade, holder);
+    this.view.addChild(layer);
+    this.chooser = layer;
+  }
+
   /** Redraws everything that follows the chart and the selection */
   refresh(): void {
     const editor = this.editor;
@@ -511,6 +616,7 @@ export class HackerEditorPanel {
       const text = editing ? this.editing!.text : String(draft[row.field]);
       this.songFields.get(row.field)!.setText(text, editing);
     }
+    this.drawIconRow(draft);
     const phrase = draft.phrases[editor.phrase]!;
     this.phraseTitle.text = `Phrase ${editor.phrase + 1}`;
     this.phraseGapCheck.setChecked(phrase.gap !== null);
@@ -607,6 +713,17 @@ export class HackerEditorPanel {
   }
 
   // ---------- Drawing ----------
+
+  /** The Song box's Icon row: the chart's icon and ID, or the one the actions pick, faded, for "Automatic" */
+  private drawIconRow(draft: ChartDraft): void {
+    const { kit } = this;
+    for (const child of this.iconPreview.removeChildren()) child.destroy({ children: true });
+    const id = draft.icon ?? kit.autoIcon(draftActions(draft));
+    const icon = kit.icon(id, ICON_SIZE);
+    if (draft.icon === null) icon.alpha = 0.45;
+    this.iconPreview.addChild(icon);
+    this.iconField.setText(draft.icon ?? 'Automatic', false);
+  }
 
   private drawPhraseList(draft: ChartDraft): void {
     const { kit, editor } = this;
@@ -874,4 +991,9 @@ export class HackerEditorPanel {
     const key = this.kit.commandKey;
     this.status.text = `${parts.join(' · ')}        Click the Call lane to place · Delete removes · ${key}+Z undo · ${key}+S save · Esc: back to the café`;
   }
+}
+
+/** The draft's actions in order of first appearance, as the level list sees them */
+function draftActions(draft: ChartDraft): ActionType[] {
+  return [...new Set(draft.phrases.flatMap((phrase) => phrase.events.map((e) => e.action)))];
 }

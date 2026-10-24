@@ -39,5 +39,5 @@ Clicks on the level list never count as rhythm input, and Space doesn't start a 
 - **The level list is every chart of the computer's scene** (charts in `public/charts/` with that `scene`, in `index.json` order, then the player's imported charts, see [chart-import-export.md](chart-import-export.md)). The design's locked "???" levels, best rating and high score are placeholders: unlocking and records aren't decided ([hub.md](hub.md) "Open questions"), so they aren't shown.
 - The design's task pane links "View best scores" and "Calibrate latency" are not built; settings open from the system menu, see [settings.md](settings.md).
 - Level details: song title, actions used, tempo (BPM), phrase count, length.
-- Icons follow the chart's actions: one action's icon when it uses one, a "remix" icon when it mixes several (a program window on XP, iTunes on Mac).
+- Icons: the chart's `icon` when it sets one (any system icon of the scene, see [chart-format.md](chart-format.md#icon-ids); HackerEditor picks it, [chart-editor.md](chart-editor.md)). Without one they follow the chart's actions: one action's icon when it uses one, a "remix" icon when it mixes several (a program window on XP, iTunes on Mac).
 - A results window follows each round, with retry, back to the list or straight to the next level, see [results.md](results.md).
