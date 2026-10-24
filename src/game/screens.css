@@ -1,0 +1,441 @@
+/* 关卡开场页和结算页。颜色都是 screen-theme.ts 注入的 --screen-* 变量，XP 关卡用 Luna、Mac 关卡用 Aqua */
+
+.level-intro,
+.results-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 16px;
+  box-sizing: border-box;
+  font: 14px/1.45 var(--screen-font);
+  color: var(--screen-ink);
+}
+
+.level-intro[hidden],
+.results-screen[hidden] {
+  display: none;
+}
+
+/* ---------- 窗口外框：两套主题共用结构 ---------- */
+
+.screen-window {
+  width: min(860px, 100%);
+  border: 1px solid var(--screen-frame);
+  border-radius: var(--screen-radius);
+  background: var(--screen-face);
+  box-shadow: 0 12px 36px rgb(0 0 0 / 0.45);
+  overflow: hidden;
+}
+
+.screen-caption {
+  padding: 6px 12px;
+  background: var(--screen-caption);
+  color: var(--screen-caption-ink);
+  font-weight: 700;
+  text-align: center;
+  border-bottom: 1px solid var(--screen-line);
+}
+
+.level-intro[data-theme='xp'] .screen-caption,
+.results-screen[data-theme='xp'] .screen-caption {
+  text-align: left;
+  text-shadow: 1px 1px 0 rgb(0 0 0 / 0.45);
+}
+
+.screen-body {
+  padding: 16px 20px;
+}
+
+.screen-group {
+  padding: 10px 14px 12px;
+  border: 1px solid var(--screen-line);
+  border-radius: 6px;
+  background: var(--screen-panel);
+}
+
+.screen-group h2 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--screen-ink-soft);
+}
+
+.screen-button {
+  min-width: 88px;
+  padding: 4px 16px;
+  border: 1px solid var(--screen-button-edge);
+  border-radius: var(--screen-button-radius);
+  background: var(--screen-button);
+  color: var(--screen-button-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.screen-button.is-primary {
+  background: var(--screen-primary);
+  color: var(--screen-primary-ink);
+  font-weight: 700;
+}
+
+.screen-button:focus-visible {
+  outline: 2px solid var(--screen-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- 关卡开场 ---------- */
+
+.level-intro {
+  background: rgb(0 0 0 / 0.55);
+  pointer-events: none;
+}
+
+.level-intro-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  animation: screen-drop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.level-intro-kicker {
+  padding: 3px 14px;
+  border-radius: 999px;
+  background: var(--screen-accent);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.level-intro-title {
+  margin: 0;
+  font: 800 clamp(40px, 7vw, 84px) / 1 var(--screen-font-display);
+  text-align: center;
+  text-shadow: 5px 5px 0 rgb(0 0 0 / 0.45);
+}
+
+.level-intro-card {
+  width: min(420px, 100%);
+  animation: screen-drop 0.45s 0.08s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.level-intro-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+
+.level-intro-facts dt {
+  color: var(--screen-ink-soft);
+}
+
+.level-intro-facts dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.level-intro-tip {
+  width: min(420px, 100%);
+  padding: 10px 14px;
+  border: 1px solid var(--screen-tip-edge);
+  border-radius: 8px;
+  background: var(--screen-tip);
+  color: var(--screen-ink);
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
+  animation: screen-drop 0.45s 0.16s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.level-intro-tip p {
+  margin: 6px 0 0;
+}
+
+.level-intro-turns {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.turn-chip {
+  padding: 0 8px;
+  border-radius: 999px;
+  color: #fff;
+  font: 800 13px / 20px var(--screen-font-display);
+}
+
+.turn-call {
+  background: var(--screen-good);
+  opacity: 0.75;
+}
+
+.turn-response {
+  background: var(--screen-accent);
+}
+
+.level-intro-keys {
+  color: var(--screen-ink-soft);
+  font-size: 12px;
+  animation: screen-blink 1.2s steps(2, jump-none) infinite;
+}
+
+/* ---------- 结算 ---------- */
+
+.results-screen {
+  background: rgb(0 0 0 / 0.5);
+}
+
+.results-window {
+  animation: screen-drop 0.4s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+
+.results-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.results-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .results-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.results-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.results-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.results-rating h2 {
+  align-self: flex-start;
+}
+
+/* 评级徽章：像盖章一样砸下来 */
+.rating-badge {
+  margin: 6px 0 10px;
+  padding: 10px 30px 4px;
+  border: 5px solid var(--screen-ink);
+  border-radius: 999px;
+  font: 800 52px / 1.05 var(--screen-font-display);
+  box-shadow: 6px 6px 0 var(--screen-ink);
+  transform: rotate(-5deg);
+  animation: screen-stamp 0.5s 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.rating-superb {
+  background: var(--screen-perfect);
+  color: var(--screen-on-perfect);
+}
+
+.rating-ok {
+  background: var(--screen-good);
+  color: var(--screen-on-good);
+}
+
+.rating-try-again {
+  background: var(--screen-miss);
+  color: var(--screen-on-miss);
+  font-size: 40px;
+}
+
+.results-comments {
+  flex: 1;
+}
+
+.results-comments ul {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.results-score-head,
+.results-offset-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.results-score-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.results-score {
+  font: 500 34px / 1.1 var(--screen-font-pixel);
+  font-variant-numeric: tabular-nums;
+}
+
+.results-new-record {
+  padding: 0 9px;
+  border-radius: 9px;
+  background: var(--screen-accent);
+  color: #fff;
+  font-size: 11px;
+  line-height: 17px;
+  animation: screen-blink 0.8s steps(2, jump-none) 4;
+}
+
+.results-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.results-tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--screen-line);
+  border-radius: 6px;
+}
+
+.judgement-chip {
+  padding: 1px 10px;
+  border: 2px solid var(--screen-ink);
+  border-radius: 999px;
+  font: 800 15px / 20px var(--screen-font-display);
+}
+
+.judgement-perfect {
+  background: var(--screen-perfect);
+  color: var(--screen-on-perfect);
+}
+
+.judgement-good {
+  background: var(--screen-good);
+  color: var(--screen-on-good);
+}
+
+.judgement-miss {
+  background: var(--screen-miss);
+  color: var(--screen-on-miss);
+}
+
+.results-count {
+  font: 500 26px / 30px var(--screen-font-pixel);
+}
+
+.results-offsets {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.results-histogram {
+  position: relative;
+  height: 110px;
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 4px;
+  align-items: end;
+  padding: 0 6px;
+  border-bottom: 1px solid var(--screen-line);
+}
+
+/* 中间的虚线是拍点 */
+.results-histogram::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--screen-ink-soft);
+}
+
+.results-bar {
+  height: var(--h);
+  border-radius: 3px 3px 0 0;
+  transform-origin: bottom;
+  animation: screen-grow 0.4s var(--delay) ease-out both;
+}
+
+.results-bar.is-perfect {
+  background: var(--screen-perfect);
+}
+
+.results-bar.is-good {
+  background: var(--screen-good);
+}
+
+.results-bar.is-empty {
+  background: var(--screen-line);
+}
+
+.results-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--screen-ink-soft);
+}
+
+.results-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.results-keys {
+  margin-right: auto;
+  font-size: 11px;
+  color: var(--screen-ink-soft);
+}
+
+@keyframes screen-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.96);
+  }
+}
+
+@keyframes screen-stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-12deg) scale(2.2);
+  }
+}
+
+@keyframes screen-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes screen-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-intro *,
+  .results-screen * {
+    animation: none !important;
+  }
+}

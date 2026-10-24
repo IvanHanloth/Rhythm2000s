@@ -12,8 +12,8 @@ export interface SceneHost {
 export class SceneDirector {
   readonly entries: readonly SceneEntry[];
   private readonly host: SceneHost;
-  private readonly context: SceneContext;
-  private current: { id: string; scene: Scene } | null = null;
+  private context: SceneContext;
+  private current: { id: string; chartId: string | undefined; scene: Scene } | null = null;
 
   constructor(host: SceneHost, entries: readonly SceneEntry[], context: SceneContext) {
     const ids = new Set<string>();
@@ -26,21 +26,26 @@ export class SceneDirector {
     this.context = context;
   }
 
+  /** 一局结束时的处理（结算页、记成绩），之后创建的场景都会拿到 */
+  setFinishRound(finishRound: SceneContext['finishRound']): void {
+    this.context = { ...this.context, finishRound };
+  }
+
   /** 当前场景的标识；还没有显示任何场景时为 null。 */
   get currentId(): string | null {
     return this.current?.id ?? null;
   }
 
-  /** 切换到指定场景。已经在这个场景时什么都不做。 */
-  show(id: string): void {
-    if (this.current?.id === id) return;
+  /** 切换到指定场景，可以指定要打的谱面。已经在这个场景、这首谱面时什么都不做。 */
+  show(id: string, chartId?: string): void {
+    if (this.current?.id === id && this.current.chartId === chartId) return;
     const entry = this.entries.find((e) => e.id === id);
     if (!entry) throw new Error(`没有登记场景 ${id}`);
 
     this.clear();
-    const scene = entry.create(this.context);
+    const scene = entry.create({ ...this.context, chartId });
     this.host.addChild(scene.view);
-    this.current = { id, scene };
+    this.current = { id, chartId, scene };
   }
 
   /** 每帧调用，转给当前场景。 */

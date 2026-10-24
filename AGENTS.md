@@ -31,7 +31,7 @@
 ├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/、prototypes/xp-components/（XP 界面部件展示）
 ├── public/charts/     # 谱面 JSON：index.json 清单 + 每首一个文件，运行时下载
 ├── public/models/     # 大厅用的 3D 模型（GLB）：props/ 现成道具，custom/ 自制模型（规格见 doc/hub-assets.md）
-├── public/textures/   # 大厅的 PBR 贴图和显示器画面；public/hdri/ 是环境光。来源与授权都登记在 assets/README.md
+├── public/textures/   # 大厅的 PBR 贴图和显示器画面，来源与授权登记在 assets/README.md
 ├── assets/            # 共用素材：原版系统素材参考、字体等，来源与授权见 assets/README.md
 ├── promo/             # 宣发视频（HyperFrames：HTML + GSAP 渲染成 MP4），独立于游戏工程，说明见 promo/AGENTS.md
 ├── src/
@@ -98,11 +98,11 @@ vp preview     # 本地预览构建结果
 vp add <包名>  # 添加依赖
 ```
 
-- 游戏：开发服务器启动后打开 `http://localhost:5173/`，默认是 3D 街区（开始界面 + 选关）；网址末尾写 `#场景标识`（如 `#mac-2000`）直接打开那个场景，关卡里按 Esc 回街区；按 `` ` `` 键隐藏 / 显示开发面板。
+- 游戏：开发服务器启动后打开 `http://localhost:5173/`，默认是 3D 街区（开始界面 + 选关）；网址末尾写 `#场景标识`（如 `#mac-2000`）直接打开那个场景，写 `#场景/谱面`（如 `#windows-xp/xp-error-storm`）直接打开某一关，关卡里按 Esc 回街区；按 `` ` `` 键隐藏 / 显示开发面板。
 - 延迟测试原型：开发服务器启动后打开 `http://localhost:5173/prototypes/latency/`。
 - `dev`、`build`、`test` 等内置命令不读取 `package.json` 的 scripts。`vp build` 只构建、不做类型检查；要连 `tsc` 一起跑，用 `vp run build`。
 - 没有全局安装 `vp` 时（安装方法见 [Vite+ 文档](https://viteplus.dev/guide)），在命令前加 `pnpm exec`，例如 `pnpm exec vp dev`。
-- 提交前至少跑一遍 `vp check` 和 `vp test`。
+- 提交前至少跑一遍 `vp check` 和 `vp test`。推送后 GitHub Actions（`.github/workflows/ci.yml`）会再跑一遍检查、测试和构建。
 
 ## 术语
 

@@ -5,6 +5,7 @@
 
 import { Container, Graphics, Sprite } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../../game/layout.ts';
+import { roundResult } from '../../game/round-summary.ts';
 import type { FrameInfo, Scene, SceneContext, SceneEntry, TapInfo } from '../../game/scene.ts';
 import type { Chart } from '../../rhythm/chart.ts';
 import { buildTurnCues, turnCueAt, type TurnCue } from '../../rhythm/turn-cue.ts';
@@ -134,7 +135,13 @@ class Mac2000Scene implements Scene {
     this.view.addChild(this.screen, this.judgementLayer, this.turnBanner.view);
 
     if (this.charts.length > 0) {
-      this.select(0);
+      // 从网吧的电脑进来时，列表里先选中指定的那首
+      this.select(
+        Math.max(
+          0,
+          this.charts.findIndex((chart) => chart.id === context.chartId),
+        ),
+      );
     } else {
       this.state = 'unavailable';
       this.showDialog({
@@ -171,6 +178,8 @@ class Mac2000Scene implements Scene {
         this.session?.tap(audioTime);
         break;
       case 'result':
+        // 有结算页时由结算页的「重试」重新开始
+        if (this.context.finishRound) break;
         if (performance.now() - this.resultShownAt >= RESULT_INPUT_DELAY_MS) void this.start();
         break;
       case 'starting':
@@ -194,7 +203,7 @@ class Mac2000Scene implements Scene {
   /** ↑ ↓ 选谱面；结果出来后按 ↑ ↓ 回到谱面列表（Esc 留给全局的「回到街区」） */
   private readonly onKeyDown = (event: KeyboardEvent) => {
     const step = event.code === 'ArrowUp' ? -1 : event.code === 'ArrowDown' ? 1 : 0;
-    if (this.state === 'result' && step !== 0) {
+    if (this.state === 'result' && step !== 0 && !this.context.finishRound) {
       event.preventDefault();
       this.backToList();
       return;
@@ -243,10 +252,16 @@ class Mac2000Scene implements Scene {
   private finish(session: MacSession): void {
     const { perfect, good, miss } = session.counts();
     const title = session.chart.title;
+    const result = roundResult(session.chart, session.judgements, mac2000Scene.id);
     this.clearRound();
     this.state = 'result';
     this.resultShownAt = performance.now();
     this.picker.view.visible = false;
+    if (this.context.finishRound) {
+      this.playNow(this.sounds.result);
+      this.context.finishRound(result, () => void this.start());
+      return;
+    }
     this.showDialog({
       icon: drawFinderIcon(64),
       message: `「${title}」完成。`,

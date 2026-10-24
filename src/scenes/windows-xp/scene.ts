@@ -4,6 +4,7 @@
 // 画面每帧只根据音频时间计算，不累加帧间隔。
 
 import { Container } from 'pixi.js';
+import { roundResult } from '../../game/round-summary.ts';
 import type { FrameInfo, Scene, SceneContext, SceneEntry, TapInfo } from '../../game/scene.ts';
 import type { Chart } from '../../rhythm/chart.ts';
 import { buildTurnCues, turnCueAt, type TurnCue } from '../../rhythm/turn-cue.ts';
@@ -117,8 +118,9 @@ class WindowsXpScene implements Scene {
 
   constructor(context: SceneContext) {
     this.context = context;
-    // 目前只用第一首属于本场景的谱面；以后有选曲界面再改
-    this.chart = context.charts.find((chart) => chart.scene === windowsXpScene.id) ?? null;
+    // 从网吧的电脑进来时打指定的那首；直接打开场景时用第一首
+    const ownCharts = context.charts.filter((chart) => chart.scene === windowsXpScene.id);
+    this.chart = ownCharts.find((chart) => chart.id === context.chartId) ?? ownCharts[0] ?? null;
     this.turnCues = this.chart ? buildTurnCues(this.chart) : [];
     const audio = context.clock.context;
     this.sounds = createPopupSounds(audio, xpAssets().sounds);
@@ -176,6 +178,8 @@ class WindowsXpScene implements Scene {
         this.session?.tap(audioTime);
         break;
       case 'result':
+        // 有结算页时由结算页的「重试」重新开始
+        if (this.context.finishRound) break;
         if (performance.now() - this.resultShownAt >= RESULT_INPUT_DELAY_MS) void this.start();
         break;
       case 'starting':
@@ -212,9 +216,14 @@ class WindowsXpScene implements Scene {
 
   private finish(session: PopupSession): void {
     const { perfect, good, miss } = session.counts();
+    const result = roundResult(session.chart, session.judgements, windowsXpScene.id);
     this.clearRound();
     this.state = 'result';
     this.resultShownAt = performance.now();
+    if (this.context.finishRound) {
+      this.context.finishRound(result, () => void this.start());
+      return;
+    }
     this.showDialog({
       kind: 'dialog-info',
       title: '大扫除完成',

@@ -4,11 +4,11 @@
 
 import {
   ACESFilmicToneMapping,
-  Color,
+  DefaultLoadingManager,
   DirectionalLight,
-  EquirectangularReflectionMapping,
   Fog,
   HemisphereLight,
+  MathUtils,
   PCFSoftShadowMap,
   PMREMGenerator,
   Vector2,
@@ -34,7 +34,8 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js';
+import { createDreamGradePass, createDreamSky, DreamMotes } from './dream.ts';
+import { HubSounds } from './sounds.ts';
 import { WhaleAvatar } from './whale-model.ts';
 import { buildWorld, type HubSpot, type LevelSpot, type ScreenImage, type World } from './world.ts';
 
@@ -42,8 +43,9 @@ export type { LevelInfo } from './overlay.ts';
 
 /** 设备像素比上限：高分屏上不按满分辨率渲染，省一点性能 */
 const MAX_PIXEL_RATIO = 1.5;
-/** 环境光 HDRI（Poly Haven，CC0），黄昏的城市街道 */
-const HDRI_URL = `${import.meta.env.BASE_URL}hdri/sunset_jhbcentral_1k.hdr`;
+/** 太阳的高度角和方位角（度）：上午，阳光从东南边斜照进街道 */
+const SUN_ELEVATION = 38;
+const SUN_AZIMUTH = 150;
 /** 阴影只算角色周围这么大的范围（米，半宽） */
 const SHADOW_RANGE = 22;
 /** 一帧最多算多少秒，切回页面时不会一下子走出很远 */
@@ -105,10 +107,14 @@ interface CameraTween {
 }
 
 export interface HubOptions {
-  /** 网吧里的关卡电脑，按顺序放到空着的机器上 */
+  /** 全部关卡，一关一台电脑，按顺序摆进网吧（cafe-layout.ts） */
   levels: readonly LevelInfo[];
-  /** 坐下后按「开始」：进入这个场景 */
-  onPlay(sceneId: string): void;
+  /** 坐下后按「开始」：进入这一关 */
+  onPlay(levelId: string): void;
+  /** 这一关的最佳成绩（一行文字）；还没打过时为 null */
+  recordOf(levelId: string): string | null;
+  /** 用来播放坐下时的开机声；不给时大厅没有声音 */
+  audio?: AudioContext;
 }
 
 function smoothstep(t: number): number {
@@ -125,8 +131,15 @@ export class Hub {
   });
   private readonly composer: EffectComposer;
   private readonly bloom: UnrealBloomPass;
-  /** 落日：投射阴影，光源每帧跟着角色走 */
-  private readonly sun = new DirectionalLight(C.sun, 2.2);
+  /** 阳光：投射阴影，光源每帧跟着角色走 */
+  private readonly sun = new DirectionalLight(C.sun, 2.6);
+  /** 太阳所在的方向（单位向量），天空和阳光共用 */
+  private readonly sunDirection = new Vector3().setFromSphericalCoords(
+    1,
+    MathUtils.degToRad(90 - SUN_ELEVATION),
+    MathUtils.degToRad(SUN_AZIMUTH),
+  );
+  private readonly motes = new DreamMotes();
   private readonly scene = new Scene();
   private readonly camera = new PerspectiveCamera(62, 16 / 9, 0.05, 220);
   private readonly cameraLook = new Vector3();
@@ -134,6 +147,7 @@ export class Hub {
   private readonly world: World;
   private readonly player = new WhaleAvatar();
   private readonly overlay: HubOverlay;
+  private readonly sounds: HubSounds | null;
   private readonly keys = new Set<string>();
 
   private state: State = 'title';
@@ -168,6 +182,7 @@ export class Hub {
 
     this.world = buildWorld(
       options.levels.map((level) => ({
+        levelId: level.id,
         sceneId: level.sceneId,
         ...(MACHINE_LOOKS[level.sceneId] ?? { screen: 'xp-bliss' }),
       })),
@@ -178,9 +193,13 @@ export class Hub {
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
     // 只有亮度超过 1 的东西（灯箱招牌、屏幕、亮着的窗）才发出辉光
-    this.bloom = new UnrealBloomPass(new Vector2(1, 1), 0.35, 0.4, 1.05);
+    // 辉光只给专门调亮的自发光（斑马线闪灯、LED 屏、霓虹灯牌、关卡标记，亮度 4～6），带一点梦一样的柔光；
+    // 天空和被阳光照亮的白墙（线性亮度最多 1.5 左右）都在阈值以下，否则整个画面会糊成一片白（2026-10-24 实测）
+    this.bloom = new UnrealBloomPass(new Vector2(1, 1), 0.5, 0.5, 2.0);
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
+    this.composer.addPass(createDreamGradePass());
+    this.scene.add(this.motes.points);
 
     const { spawn } = this.world;
     this.position = { x: spawn.x, z: spawn.z };
@@ -197,6 +216,8 @@ export class Hub {
     });
     this.element.append(this.overlay.element);
     this.overlay.showTitle(true);
+    this.sounds = options.audio ? new HubSounds(options.audio) : null;
+    this.trackLoading();
 
     new ResizeObserver(() => this.resize()).observe(this.element);
     this.listen();
@@ -211,7 +232,7 @@ export class Hub {
     if (this.state === 'launching' && this.seat) {
       this.state = 'seated';
       this.applyPose(this.seatedPose(this.seat.spot));
-      this.overlay.showCard(this.levelOf(this.seat.spot));
+      this.overlay.showCard(this.levelOf(this.seat.spot), this.recordOf(this.seat.spot));
     }
     this.overlay.setFade(false, FADE_MS);
     this.lastFrame = performance.now();
@@ -286,12 +307,14 @@ export class Hub {
     this.overlay.setLockHint(false);
     this.releasePointer();
     this.seat = { spot, from: { ...this.position }, fromHeading: this.heading, start: this.time };
+    const level = this.levelOf(spot);
+    if (level) this.sounds?.playStartup(level.sceneId);
     this.tweenCamera(
       () => this.seatedPose(spot),
       SIT_SECONDS,
       () => {
         this.state = 'seated';
-        this.overlay.showCard(this.levelOf(spot));
+        this.overlay.showCard(this.levelOf(spot), this.recordOf(spot));
       },
     );
   }
@@ -333,12 +356,16 @@ export class Hub {
     this.tweenCamera(
       () => ({ position: screen.clone().add(new Vector3(0, 0, 0.3)), look: screen.clone() }),
       LAUNCH_SECONDS,
-      () => this.options.onPlay(seat.spot.sceneId),
+      () => this.options.onPlay(seat.spot.levelId),
     );
   }
 
   private levelOf(spot: LevelSpot): LevelInfo | null {
-    return this.options.levels.find((level) => level.sceneId === spot.sceneId) ?? null;
+    return this.options.levels.find((level) => level.id === spot.levelId) ?? null;
+  }
+
+  private recordOf(spot: LevelSpot): string | null {
+    return this.options.recordOf(spot.levelId);
   }
 
   // ---------- 输入 ----------
@@ -426,6 +453,10 @@ export class Hub {
     this.time += dt;
     this.update(dt);
     this.followSun();
+    this.motes.update(
+      this.time,
+      this.state === 'title' ? this.cameraLook : this.player.root.position,
+    );
     this.composer.render(dt);
   };
 
@@ -533,7 +564,7 @@ export class Hub {
   private promptFor(spot: HubSpot): string {
     if (spot.kind === 'read') return `${spot.verb} · ${spot.name}`;
     const level = this.levelOf(spot);
-    return `坐下 · ${level?.label ?? spot.sceneId}`;
+    return `坐下 · ${level?.label ?? spot.levelId}`;
   }
 
   /** 坐下的过程：角色从站的地方挪到椅子上，转身面对屏幕 */
@@ -613,18 +644,37 @@ export class Hub {
     };
   }
 
+  /**
+   * 加载进度：模型、贴图都走 three 的默认加载管理器，按它的计数显示进度条；
+   * 全部完成后收起。之后再有零星的加载（例如自制模型）不再显示。
+   */
+  private trackLoading(): void {
+    let done = false;
+    this.overlay.setLoading(0);
+    DefaultLoadingManager.onProgress = (_url, loaded, total) => {
+      if (!done) this.overlay.setLoading(total > 0 ? loaded / total : 0);
+    };
+    DefaultLoadingManager.onLoad = () => {
+      done = true;
+      this.overlay.setLoading(null);
+    };
+  }
+
   // ---------- 渲染设置 ----------
 
-  /** 写实光照：HDRI 环境光 + 落日平行光（带阴影）+ 一点天光，ACES 色调映射 */
+  /**
+   * 明亮的白天：风格化的渐变天空当背景，同一片天空生成环境反射；阳光带阴影，天光把阴影照亮，
+   * ACES 色调映射。之前是黄昏的 HDRI，2026-10-24 用户觉得太暗，改成现在这样（ADR 0005 修订）。
+   */
   private setUpLighting(): void {
     const renderer = this.renderer;
     renderer.toneMapping = ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.75;
+    renderer.toneMappingExposure = 1.05;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
 
-    this.scene.fog = new Fog(C.fog, 45, 140);
-    this.scene.add(new HemisphereLight(C.ambientSky, C.ambientGround, 0.35));
+    this.scene.fog = new Fog(C.fog, 55, 170);
+    this.scene.add(new HemisphereLight(C.ambientSky, C.ambientGround, 1.3));
 
     const sun = this.sun;
     sun.castShadow = true;
@@ -638,31 +688,25 @@ export class Hub {
     camera.far = 120;
     sun.shadow.bias = -0.0004;
     sun.shadow.normalBias = 0.03;
+    // 阴影边缘柔一点
+    sun.shadow.radius = 4;
     this.scene.add(sun, sun.target);
 
-    // HDRI 同时当天空背景和环境反射；下载完成前背景是雾的颜色
-    this.scene.background = new Color(C.fog);
+    // 风格化的渐变天空（dream.ts），同一片天空单独渲染一次生成环境反射，玻璃和金属会映出蓝天
+    this.scene.add(createDreamSky(this.sunDirection, 180));
     const pmrem = new PMREMGenerator(renderer);
-    new HDRLoader().load(
-      HDRI_URL,
-      (hdr) => {
-        hdr.mapping = EquirectangularReflectionMapping;
-        this.scene.environment = pmrem.fromEquirectangular(hdr).texture;
-        this.scene.environmentIntensity = 0.4;
-        this.scene.background = hdr;
-        this.scene.backgroundIntensity = 0.45;
-        pmrem.dispose();
-      },
-      undefined,
-      (error) => console.warn('HDRI 加载失败，只用平行光和天光', error),
-    );
+    const skyOnly = new Scene();
+    skyOnly.add(createDreamSky(this.sunDirection, 180));
+    this.scene.environment = pmrem.fromScene(skyOnly, 0.02).texture;
+    this.scene.environmentIntensity = 1.5;
+    pmrem.dispose();
   }
 
-  /** 阴影只覆盖角色附近：落日的位置和目标每帧跟着角色（或开始界面的镜头）平移 */
+  /** 阴影只覆盖角色附近：阳光的位置和目标每帧跟着角色（或开始界面的镜头）平移 */
   private followSun(): void {
     const center = this.state === 'title' ? this.cameraLook : this.player.root.position;
     this.sun.target.position.set(center.x, 0, center.z);
-    this.sun.position.set(center.x - 30, 22, center.z + 14);
+    this.sun.position.copy(this.sunDirection).multiplyScalar(40).add(this.sun.target.position);
   }
 
   private resize(): void {

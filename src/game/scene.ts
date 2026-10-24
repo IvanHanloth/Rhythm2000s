@@ -3,6 +3,7 @@
 import type { Container } from 'pixi.js';
 import type { AudioClock } from '../audio/audio-clock.ts';
 import type { Chart } from '../rhythm/chart.ts';
+import type { RoundResult } from './round-summary.ts';
 import type { SceneId } from '../scenes/catalog.ts';
 
 /** 每帧传给场景的信息。 */
@@ -24,6 +25,13 @@ export interface SceneContext {
   calibration(): number;
   /** 已加载并通过校验的全部谱面；场景按 chart.scene 挑出自己的 */
   charts: readonly Chart[];
+  /** 要打的那一首谱面（从网吧的电脑或网址 #场景/谱面 进来时有）；不写时场景自己挑 */
+  chartId?: string;
+  /**
+   * 一局结束时调用：由游戏外壳显示结算页、记下成绩。retry 给结算页的「重试」用。
+   * 不提供时（单元测试、原型页面）场景自己显示结果。
+   */
+  finishRound?(result: RoundResult, retry: () => void): void;
 }
 
 export interface Scene {
