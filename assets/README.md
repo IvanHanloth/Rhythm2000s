@@ -46,5 +46,5 @@ archive.org 上的条目都是网友上传的，文件是否原样未经逐一�
 
 ## 授权与用途限制
 
-- **reference/**：版权属于微软、苹果。2026-10-24 用户决定直接提交到仓库，作风格对照和临时占位；游戏正式版和公开发布的宣发视频里不要直接使用，应做原创版本（见 [AGENTS.md「素材与版权」](../AGENTS.md#素材与版权)）。
+- **reference/**：版权属于微软、苹果。项目仅作学术用途，游戏和宣发视频可以直接使用（见 [ADR 0004](../doc/decisions/0004-界面贴近原版.md)）。
 - **PP NeueBit / PP Mondwest**：befonts 标注「Personal Use Only」。游戏发行和公开发布的宣发视频属于商用，正式使用前要从 Pangram Pangram 官网购买授权。

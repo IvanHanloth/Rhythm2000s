@@ -7,7 +7,7 @@
   "beatsPerBar": 4,
   "countInBars": 1,
   "outroBars": 1,
-  "responseGapBeats": 0.5,
+  "responseGapBeats": 1,
   "phrases": [
     {
       "call": [
