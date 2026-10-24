@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>延迟测试 · rhythm2000s</title>
+  </head>
+  <body>
+    <header>
+      <h1>延迟测试</h1>
+      <p>
+        跟着<strong>听到的</strong>拍子按空格键（或任意字母键），或点击 / 触摸画面。
+        偏差为正表示晚，为负表示早，单位毫秒。说明见 doc/prototypes/latency-test.md。
+      </p>
+    </header>
+
+    <main class="layout">
+      <section class="stage-column">
+        <div id="stage" class="stage"></div>
+        <ul id="legend" class="legend"></ul>
+      </section>
+
+      <aside class="panel">
+        <div class="controls">
+          <label>
+            BPM
+            <input id="bpm" type="number" min="60" max="200" step="1" value="120" />
+          </label>
+          <button id="start" type="button" class="primary">开始</button>
+          <button id="reset" type="button">清空记录</button>
+          <button id="export" type="button">导出 JSON</button>
+        </div>
+        <p id="status" class="status">尚未开始</p>
+
+        <h2>设备信息</h2>
+        <dl id="env" class="env"></dl>
+
+        <h2>统计</h2>
+        <div class="table-scroll">
+          <table id="stats">
+            <thead>
+              <tr>
+                <th>输入</th>
+                <th>方法</th>
+                <th>次数</th>
+                <th>平均</th>
+                <th>中位数</th>
+                <th>标准差</th>
+                <th>建议校准</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="note">
+          建议校准值：跳过前 4 次、去掉两端各 10% 后的中位数。至少 4 个有效样本才显示。
+        </p>
+      </aside>
+    </main>
+
+    <script type="module" src="/src/prototypes/latency/main.ts"></script>
+  </body>
+</html>

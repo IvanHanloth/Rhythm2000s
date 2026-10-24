@@ -78,3 +78,5 @@ release/
 # ---------- AI 助手本地配置 ----------
 # 共享的项目记忆在 memory/ 中，需要提交；以下是个人本地配置
 .claude/settings.local.json
+# Playwright MCP 浏览器工具的快照和临时脚本
+.playwright-mcp/

@@ -16,10 +16,10 @@
 
 ## 当前阶段
 
-**设计阶段，技术栈已确定**（见 [ADR 0001](doc/decisions/0001-技术栈选型.md)），工程脚手架尚未搭建。
+**设计阶段，技术栈已确定**（见 [ADR 0001](doc/decisions/0001-技术栈选型.md)），工程脚手架已搭好，游戏本体尚未开始开发。
 
 - 只使用已确定的技术栈；要引入新的运行时依赖（尤其是音频、渲染、状态管理类库）前，先向用户说明理由和取舍。
-- 下一步计划是做最小延迟测试原型，验证 [doc/tech-research.md](doc/tech-research.md) 第 5 节列出的风险。
+- 已完成[延迟测试原型](doc/prototypes/latency-test.md)，下一步是在不同设备、浏览器、耳机上实测，把结果登记到该文档的「测试记录」。
 
 ## 目录结构
 
@@ -28,16 +28,31 @@
 ├── AGENTS.md          # 本文件：给 AI 助手和协作者的项目说明
 ├── CLAUDE.md          # Claude Code 入口，引用本文件
 ├── README.md
+├── index.html         # 游戏入口页（目前只列出原型链接）
+├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/index.html
+├── src/
+│   ├── audio/         # 音频时钟、节拍器、合成音效（游戏会复用）
+│   ├── rhythm/        # 拍 ↔ 音频时间换算
+│   ├── latency/       # 延迟与偏差统计
+│   └── prototypes/    # 原型页面自己的界面代码
+├── vite.config.ts     # Vite+ 的全部配置：构建、测试、格式化、代码检查
+├── tsconfig.json
+├── package.json
+├── pnpm-workspace.yaml # pnpm 设置（含 Vite+ 版本目录和 nodeLinker，见文件内注释）
 ├── doc/               # 设计与技术文档（人和 AI 都要读）
 │   ├── README.md      # 文档索引与写作约定
 │   ├── game-design.md # 游戏设计总览
 │   ├── tech-research.md # 技术调研：浏览器能力、方案对比、待验证风险
 │   ├── scenes/        # 各关卡/场景的设计
+│   ├── prototypes/    # 各原型的说明和测试记录
 │   └── decisions/     # 决策记录（ADR）
 └── memory/            # LLM 共享记忆：跨会话保存的项目背景、偏好与约定
     ├── README.md      # 记忆的格式与维护规则
     └── MEMORY.md      # 记忆索引
 ```
+
+- 单元测试与被测文件放在一起，命名为 `*.test.ts`，从 `vite-plus/test` 导入测试 API。
+- 新增原型页面时，在 `vite.config.ts` 的 `build.rolldownOptions.input` 中登记入口。
 
 ## 技术栈
 
@@ -49,7 +64,7 @@ Web 优先，以浏览器为主要运行平台；需要上架 Steam 时再用 El
 | 工具链 | [Vite+](https://viteplus.dev/guide)（npm 包名 `vite-plus`） | 统一提供开发服务器（Vite）、构建（Rolldown）、测试（Vitest）、代码检查（Oxlint）、格式化（Oxfmt）；所有配置写在根目录 `vite.config.ts`，从 `vite-plus` 导入 `defineConfig`。不要再单独安装 ESLint、Prettier、Jest 等同类工具 |
 | 渲染 | PixiJS（npm 包名 `pixi.js`） | 负责游戏画面；菜单、设置等界面可用 DOM |
 | 音频 | 原生 Web Audio API | 自写「指挥」模块，负责拍点换算、预约播放和判定；不用 Howler.js 之类的播放封装 |
-| 包管理器 | pnpm | 由 Vite+ 根据 `package.json` 的 `packageManager` 字段和锁文件自动调用 |
+| 包管理器 | pnpm 10 | 版本写在 `package.json` 的 `devEngines.packageManager`；Vite+ 据此和锁文件自动调用。使用 `nodeLinker: hoisted` 布局，原因见 `pnpm-workspace.yaml` 注释 |
 | 运行环境 | Node.js 24 | 2026-10-24 本机版本 |
 
 音频与输入时序的实现原则（详见 [doc/tech-research.md](doc/tech-research.md) 第 2 节）：
@@ -60,21 +75,20 @@ Web 优先，以浏览器为主要运行平台；需要上架 Steam 时再用 El
 
 ## 常用命令
 
-> 脚手架尚未搭建，以下命令在搭建后生效；如有变化请同步修改。
-
 ```bash
 vp install     # 安装依赖（内部调用 pnpm）
-vp dev         # 启动开发服务器
-vp build       # 构建到 dist/
-vp preview     # 本地预览构建结果
-vp test        # 运行测试（Vitest）
+vp dev         # 启动开发服务器，默认 http://localhost:5173/
 vp check       # 格式、代码检查、类型检查一起跑；加 --fix 自动修复
+vp test        # 运行单元测试（Vitest）
+vp run build   # 类型检查（tsc）+ 构建到 dist/
+vp preview     # 本地预览构建结果
 vp add <包名>  # 添加依赖
-vp run <脚本>  # 运行 package.json 中的自定义脚本
 ```
 
-- `dev`、`build`、`test` 等内置命令不读取 `package.json` 的 scripts；自定义脚本要用 `vp run`。
-- 需要全局安装 `vp` 命令（见 [Vite+ 文档](https://viteplus.dev/guide)）；没有全局安装时，可以在项目里用 `pnpm exec vp <命令>` 调用本地的 `vite-plus`。
+- 延迟测试原型：开发服务器启动后打开 `http://localhost:5173/prototypes/latency/`。
+- `dev`、`build`、`test` 等内置命令不读取 `package.json` 的 scripts。`vp build` 只构建、不做类型检查；要连 `tsc` 一起跑，用 `vp run build`。
+- 没有全局安装 `vp` 时（安装方法见 [Vite+ 文档](https://viteplus.dev/guide)），在命令前加 `pnpm exec`，例如 `pnpm exec vp dev`。
+- 提交前至少跑一遍 `vp check` 和 `vp test`。
 
 ## 术语
 
