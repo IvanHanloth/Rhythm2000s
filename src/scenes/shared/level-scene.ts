@@ -13,6 +13,7 @@ import { Container, Rectangle } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
 import { recordScore } from '@/game/records.ts';
 import type { FrameInfo, Scene, SceneContext, TapInfo } from '@/game/scene.ts';
+import type { AudioClock } from '@/audio/audio-clock.ts';
 import type { PlayerSettings } from '@/game/settings.ts';
 import type { Chart } from '@/rhythm/chart.ts';
 import { summarizeResult, type HitResult, type ResultSummary } from '@/rhythm/result-summary.ts';
@@ -95,6 +96,16 @@ export interface ResultsWindowOptions {
 export interface SettingsWindowOptions {
   settings: PlayerSettings;
   onClose: () => void;
+  /** "Test Latency…": swaps the settings window for the latency test window */
+  onTestLatency: () => void;
+}
+
+/** What a scene's latency test window is given (doc/latency-test.md) */
+export interface LatencyTestWindowOptions {
+  clock: AudioClock;
+  settings: PlayerSettings;
+  /** Back to the settings window ("Back", the close button, Esc, or after using the suggested value) */
+  onBack: () => void;
 }
 
 /** A modal window on the desktop: a message box, an alert, the results or the settings window */
@@ -102,8 +113,12 @@ export interface ModalWindow {
   destroy(): void;
   /** Called every frame, for windows that animate (Aqua's pulsing default button) */
   update?(audioTime: number): void;
-  /** Keys while it is open over the level list (held keys repeat); Esc is handled by the scene */
+  /** Keys while it is open over the level list (held keys repeat); Esc goes to onEscape */
   onKeyDown?(event: KeyboardEvent): void;
+  /** Space or a click while it is open over the level list (heard audio time), for the latency test */
+  onTap?(audioTime: number): void;
+  /** Esc while it is open; without it Esc closes the window */
+  onEscape?(): void;
 }
 
 export interface LevelSceneOptions {
@@ -195,6 +210,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   protected abstract openResults(options: ResultsWindowOptions): ModalWindow;
   /** Opens the settings window on the desktop */
   protected abstract openSettingsWindow(options: SettingsWindowOptions): ModalWindow;
+  /** Opens the latency test window on the desktop */
+  protected abstract openLatencyTestWindow(options: LatencyTestWindowOptions): ModalWindow;
   /** Shows or hides the level list window */
   protected abstract setListVisible(visible: boolean): void;
   /** Sound played when a round's results appear */
@@ -216,14 +233,27 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     return this.state === 'select' && !this.modal;
   }
 
-  /** The system menu's settings item: opens the settings window over the level list */
+  /** The system menu's settings item (or Back from the latency test): the settings window over the level list */
   protected openSettings(): void {
     this.closeMenus();
-    if (!this.desktopIdle) return;
+    if (this.state !== 'select') return;
     this.showModal(
       this.openSettingsWindow({
         settings: this.context.settings,
         onClose: () => this.closeModal(),
+        onTestLatency: () => this.openLatencyTest(),
+      }),
+    );
+  }
+
+  /** "Test Latency…" in the settings window: the latency test replaces it */
+  private openLatencyTest(): void {
+    if (this.state !== 'select') return;
+    this.showModal(
+      this.openLatencyTestWindow({
+        clock: this.context.clock,
+        settings: this.context.settings,
+        onBack: () => this.openSettings(),
       }),
     );
   }
@@ -245,9 +275,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.roundEnded(session);
   }
 
-  /** Space and clicks are rhythm input only during a round; on the intro the first press starts the level */
+  /** Space and clicks are rhythm input only during a round; on the intro the first press starts the level; on the list they go to an open latency test */
   onTap({ audioTime }: TapInfo): void {
-    if (this.state === 'playing') this.session?.tap(audioTime);
+    if (this.state === 'select') this.modal?.onTap?.(audioTime);
+    else if (this.state === 'playing') this.session?.tap(audioTime);
     else if (this.state === 'ready' && this.chart) void this.start(this.chart);
   }
 
@@ -259,7 +290,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     if (this.state === 'select') {
       if (this.closeMenus()) return true;
       if (!this.modal) return false;
-      this.closeModal();
+      if (this.modal.onEscape) this.modal.onEscape();
+      else this.closeModal();
       return true;
     }
     this.backToList();

@@ -12,6 +12,7 @@ import { createJudgementView } from '@/ui/judgement-view.ts';
 import { SCENE_CATALOG } from '@/scenes/catalog.ts';
 import type { Turn } from '@/scenes/shared/cursor-path.ts';
 import {
+  type LatencyTestWindowOptions,
   LevelScene,
   type ResultsWindowOptions,
   type SettingsWindowOptions,
@@ -29,6 +30,7 @@ import {
 import { CONTROL_PANEL, XpStartMenu } from './components/start-menu.ts';
 import { XpTaskbar } from './components/taskbar.ts';
 import { isDialogKind, type DialogKind } from './dialog-kinds.ts';
+import { XpLatencyTestWindow } from './latency-test-window.ts';
 import { EXPLORER_TITLE, XpLevelSelect } from './level-select.ts';
 import { XpResultsWindow } from './results-window.ts';
 import { XpSession, type XpTarget } from './session.ts';
@@ -255,6 +257,13 @@ class WindowsXpScene extends LevelScene<XpSession> {
     settings.view.position.set(XP_SCREEN_WIDTH / 2, WORK_AREA_HEIGHT / 2);
     this.dialogLayer.addChild(settings.view);
     return settings;
+  }
+
+  protected openLatencyTestWindow(options: LatencyTestWindowOptions): XpLatencyTestWindow {
+    const test = new XpLatencyTestWindow(options);
+    test.view.position.set(XP_SCREEN_WIDTH / 2, WORK_AREA_HEIGHT / 2);
+    this.dialogLayer.addChild(test.view);
+    return test;
   }
 
   protected override closeMenus(): boolean {

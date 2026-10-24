@@ -14,6 +14,7 @@ import {
   XP_GROUP_INSET,
   XP_PANEL_MUTED,
   xpGroupBox,
+  xpLabelButton,
   xpPanelText,
 } from './panel-kit.ts';
 
@@ -30,6 +31,12 @@ const kit: SettingsKit = {
   groupInset: XP_GROUP_INSET,
   checkBox: (label, onToggle) => new XpCheckBox(label, onToggle),
   slider: (width, onChange) => new XpTrackbar(width, TICKS, onChange),
+  button: (label, onTap) => {
+    const button = xpLabelButton(label);
+    wireXpButton(button, onTap);
+    return button;
+  },
+  testLatencyLabel: 'Test Latency...',
   muted: XP_PANEL_MUTED,
   enterKey: 'Enter',
   textSize: XP_FONT_SIZE,
@@ -41,7 +48,7 @@ export class XpSettingsWindow {
   private readonly panel: SettingsPanel;
   private readonly onClose: () => void;
 
-  constructor({ settings, onClose }: SettingsWindowOptions) {
+  constructor({ settings, onClose, onTestLatency }: SettingsWindowOptions) {
     this.onClose = onClose;
     this.view.pivot.set(WIDTH / 2, HEIGHT / 2);
     this.frame = new XpWindowFrame({ title: SETTINGS_TITLE, width: WIDTH, height: HEIGHT });
@@ -59,6 +66,7 @@ export class XpSettingsWindow {
       width: clientWidth,
       height: buttonsTop - 12,
       kit,
+      onTestLatency,
     });
     const hint = xpText('Changes apply at once.    Enter / Esc: close', { fill: XP_PANEL_MUTED });
     hint.anchor.set(0, 0.5);

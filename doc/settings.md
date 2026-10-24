@@ -19,7 +19,7 @@ Player settings live in a settings window on the in-game computer, opened from e
 
 | Setting | Default | Effect |
 | --- | --- | --- |
-| Input latency calibration | 0 ms | Offset subtracted when judging, within ±300 ms; positive means the player presses late. A slider, with ← / → for 1 ms steps; the latency test's "suggested calibration" can be used directly |
+| Input latency calibration | 0 ms | Offset subtracted when judging, within ±300 ms; positive means the player presses late. A slider, with ← / → for 1 ms steps, and a "Test Latency…" button that opens the system's [latency test](latency-test.md), which can set it |
 | Skip tutorial | Off | Levels play the chart in one go without any action demo; Backspace during a demo skips the rest of that level's demos (demo rules in [level-design.md](level-design.md#rule-1-the-system-demonstrates-every-action-before-it-is-used)) |
 | Beat Guide | Off | Whether levels show the `((((O))))` beat cue, see [beat-guide.md](beat-guide.md). The same saved value H toggles in a level, so the check box and H always agree. Scores set with it on are marked "Beat Guide" |
 

@@ -1,9 +1,10 @@
-// Native XP pieces for the shared window panels (results, settings): text, the Luna group box and button wiring.
+// Native XP pieces for the shared window panels (results, settings, latency test): text, the Luna group box,
+// label-sized buttons and button wiring.
 
 import { Container, Graphics, type Text } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
 import type { PanelTextStyle } from '@/ui/results-panel.ts';
-import type { XpButton } from './components/button.ts';
+import { BUTTON_WIDTH, XpButton } from './components/button.ts';
 import { xpText } from './components/xp-text.ts';
 
 /** Luna group box: thin light grey rounded border, blue title set into the top edge */
@@ -62,4 +63,12 @@ export function wireXpButton(button: XpButton, onTap: () => void): void {
   });
   button.view.on('pointerdown', () => button.setPressed(true));
   button.view.on('pointertap', onTap);
+}
+
+/** A push button at least the standard 75 px wide, wider for long labels */
+export function xpLabelButton(label: string, isDefault = false): XpButton {
+  const probe = xpText(label);
+  const width = Math.max(BUTTON_WIDTH, Math.ceil(probe.width) + 20);
+  probe.destroy();
+  return new XpButton({ label, width, isDefault });
 }

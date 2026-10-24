@@ -151,37 +151,9 @@
   }
 }
 
-.hub-help {
-  position: absolute;
-  right: 24px;
-  bottom: 24px;
-  width: 320px;
-  padding: 14px 18px;
-  border: 1px solid var(--hub-line);
-  border-radius: 6px;
-  background: var(--hub-surface);
-  color: var(--hub-ink);
-}
-
-.hub-help-title {
+.hub-credits-title {
   margin-bottom: 8px;
   font-weight: 700;
-}
-
-.hub-keys {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 6px 14px;
-  margin: 0;
-}
-
-.hub-keys dt {
-  font-weight: 700;
-}
-
-.hub-keys dd {
-  margin: 0;
-  color: var(--hub-ink-muted);
 }
 
 /* ---------- Credits ---------- */

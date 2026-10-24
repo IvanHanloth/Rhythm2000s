@@ -6,7 +6,7 @@ The title screen and level select both take place in one 3D street. Technology c
 
 ## Decided
 
-- The title screen overlays the logo and menu on the street; "Start" drops the camera behind the character, who can walk straight away.
+- The title screen overlays the logo and menu on the street. The menu is "Start" and "Credits"; "Start" drops the camera behind the character, who can walk straight away. Keys are listed in the in-game settings window ([settings.md](settings.md#keyboard-shortcuts)), and the latency test lives there too ([latency-test.md](latency-test.md)).
 - Third-person follow camera, turned with the mouse.
 - A street of the 2000s with a few shops to walk into; the net café's computers are the level entries.
 - All text in the world (signs, posters, screens, shop names) and all overlays (menus, hints, dialogue) are English.

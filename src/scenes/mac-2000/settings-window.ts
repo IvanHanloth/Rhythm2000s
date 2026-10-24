@@ -27,6 +27,12 @@ const kit: SettingsKit = {
   groupInset: MAC_GROUP_INSET,
   checkBox: (label, onToggle) => new AquaCheckBox(label, onToggle),
   slider: (width, onChange) => new AquaSlider(width, onChange),
+  button: (label, onTap) => {
+    const button = new PushButton({ label });
+    wirePushButton(button, onTap);
+    return { view: button.view, width: button.width, height: PUSH_BUTTON_HEIGHT };
+  },
+  testLatencyLabel: 'Test Latency…',
   muted: AQUA.inkSoft,
   enterKey: 'Return',
   textSize: 12,
@@ -39,7 +45,7 @@ export class MacSettingsWindow {
   private readonly ok: PushButton;
   private readonly onClose: () => void;
 
-  constructor({ settings, onClose }: SettingsWindowOptions) {
+  constructor({ settings, onClose, onTestLatency }: SettingsWindowOptions) {
     this.onClose = onClose;
     this.window = new AquaWindow({
       title: SETTINGS_TITLE,
@@ -72,6 +78,7 @@ export class MacSettingsWindow {
       width: contentWidth,
       height: contentHeight - PUSH_BUTTON_HEIGHT - 14,
       kit,
+      onTestLatency,
     });
     this.panel.view.position.set(PADDING_X, PADDING_Y);
     const hint = aquaText('Changes apply at once.    Return / Esc: close', {

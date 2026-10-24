@@ -125,6 +125,17 @@ export const AQUA = {
   /** iChat 1.0 speech bubble: light blue gradient, slightly darker edge */
   chatBubble: { top: '#e3f0ff', bottom: '#b9d6fb', edge: '#7da5d8' },
 
+  /** Latency test beat dots (doc/latency-test.md): white well, grey rings, Aqua blue for the current beat */
+  latencyTest: {
+    well: '#ffffff',
+    wellEdge: '#a5a5a5',
+    ring: '#9a9a9a',
+    ringCurrent: '#1d5fd6',
+    fillCurrent: '#9fc6ff',
+    fillPressed: '#dce8fb',
+    mark: '#e8740c',
+  },
+
   /** Sliders (volume menu, settings window): grey groove, blue gel knob */
   slider: {
     trackDark: '#9a9a9a',

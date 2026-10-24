@@ -40,3 +40,4 @@ What follows from it, its costs, and the work it creates.
 | [0007](0007-official-level-design-guidelines.md) | Official level design guidelines | Accepted (demo timing superseded by 0008) |
 | [0008](0008-demos-before-each-new-action.md) | Demos before the phrase that introduces each action | Accepted |
 | [0009](0009-settings-in-system-menus.md) | Settings in the in-game system menus, no dev panel | Accepted |
+| [0010](0010-latency-test-in-game.md) | The latency test moves into the game, one per system | Accepted |

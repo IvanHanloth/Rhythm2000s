@@ -77,7 +77,6 @@ function setThemeVariables(root: HTMLElement): void {
 export class HubOverlay {
   readonly element = el('div', 'hub-ui');
   private readonly title = el('section', 'hub-title');
-  private readonly help = el('div', 'hub-help');
   private readonly hud = el('div', 'hub-hud');
   private readonly objective = el('div', 'hub-objective');
   private readonly place = el('div', 'hub-place');
@@ -108,12 +107,8 @@ export class HubOverlay {
     menu.setAttribute('aria-label', 'Main menu');
     menu.append(
       button('Start', 'hub-button hub-button-primary', handlers.onStart),
-      button('Controls', 'hub-button', () => this.toggleHelp()),
       button('Credits', 'hub-button', () => this.toggleCredits()),
     );
-    const latency = el('a', 'hub-button', 'Latency test');
-    latency.href = `${import.meta.env.BASE_URL}prototypes/latency/`;
-    menu.append(latency);
     this.title.append(
       logo,
       el('p', 'hub-tagline', 'Pop-ups, close boxes, new mail — all on the beat.'),
@@ -126,19 +121,6 @@ export class HubOverlay {
     track.append(this.loadingBar);
     this.loading.append(this.loadingText, track);
     this.loading.hidden = true;
-
-    this.help.append(el('div', 'hub-help-title', 'Controls'));
-    const keys: [string, string][] = [
-      ['W A S D', 'Walk'],
-      ['Shift', 'Run'],
-      ['Mouse', 'Look around (click the screen first)'],
-      ['E', 'Examine things; sit down at a computer'],
-      ['Esc', 'Pause; stand up when seated; leave a level for the café'],
-    ];
-    const list = el('dl', 'hub-keys');
-    for (const [key, what] of keys) list.append(el('dt', '', key), el('dd', '', what));
-    this.help.append(list);
-    this.help.hidden = true;
 
     this.objective.textContent =
       'Go into the CYBERSPACE CAFÉ and sit at a PC with a yellow marker over it';
@@ -165,7 +147,6 @@ export class HubOverlay {
 
     this.element.append(
       this.title,
-      this.help,
       this.credits,
       this.loading,
       this.hud,
@@ -184,14 +165,8 @@ export class HubOverlay {
   showTitle(visible: boolean): void {
     this.title.hidden = !visible;
     if (!visible) {
-      this.help.hidden = true;
       this.credits.hidden = true;
     }
-  }
-
-  toggleHelp(): void {
-    this.help.hidden = !this.help.hidden;
-    if (!this.help.hidden) this.credits.hidden = true;
   }
 
   showHud(visible: boolean): void {
@@ -255,7 +230,6 @@ export class HubOverlay {
 
   toggleCredits(): void {
     this.credits.hidden = !this.credits.hidden;
-    if (!this.credits.hidden) this.help.hidden = true;
   }
 
   /**
@@ -294,7 +268,7 @@ export class HubOverlay {
       list.append(li);
     }
     this.credits.append(
-      el('div', 'hub-help-title', 'Credits'),
+      el('div', 'hub-credits-title', 'Credits'),
       el(
         'p',
         '',

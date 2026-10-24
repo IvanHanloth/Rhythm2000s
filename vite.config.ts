@@ -17,15 +17,6 @@ const TOOLING_DIRS = [
 
 export default defineConfig({
   resolve: { alias },
-  build: {
-    rolldownOptions: {
-      // One page for the game and one per prototype (paths from the project root)
-      input: {
-        main: 'index.html',
-        latency: 'prototypes/latency/index.html',
-      },
-    },
-  },
   test: {
     include: ['src/**/*.test.ts'],
   },

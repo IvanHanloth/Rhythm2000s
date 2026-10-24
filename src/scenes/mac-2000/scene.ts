@@ -11,6 +11,7 @@ import { AQUA } from '@/theme/aqua.ts';
 import { THEMES } from '@/theme/tokens.ts';
 import { SCENE_CATALOG } from '@/scenes/catalog.ts';
 import {
+  type LatencyTestWindowOptions,
   LevelScene,
   type ResultsWindowOptions,
   type SettingsWindowOptions,
@@ -21,6 +22,7 @@ import { Dock, DOCK_HEIGHT, type DockItem } from './components/dock.ts';
 import { drawCautionIcon } from './components/icons.ts';
 import { APPLE_MENU, AquaMenu, SYSTEM_PREFERENCES } from './components/menu.ts';
 import { APPLE_MENU_LEFT, MENU_BAR_HEIGHT, MenuBar } from './components/menu-bar.ts';
+import { MacLatencyTestWindow } from './latency-test-window.ts';
 import { MacLevelSelect } from './level-select.ts';
 import { MacResultsWindow } from './results-window.ts';
 import { MacSession } from './session.ts';
@@ -182,6 +184,13 @@ class Mac2000Scene extends LevelScene<MacSession> {
     settings.view.position.set(SCREEN_WIDTH / 2, RESULTS_Y);
     this.dialogLayer.addChild(settings.view);
     return settings;
+  }
+
+  protected openLatencyTestWindow(options: LatencyTestWindowOptions): MacLatencyTestWindow {
+    const test = new MacLatencyTestWindow(options);
+    test.view.position.set(SCREEN_WIDTH / 2, RESULTS_Y);
+    this.dialogLayer.addChild(test.view);
+    return test;
   }
 
   protected override closeMenus(): boolean {

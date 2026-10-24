@@ -38,7 +38,7 @@ A banner at the top says whose turn it is: **Follow me** in the call bar (watch 
 - **Early presses are Misses**: an input before the earliest unjudged target, outside Good but within 200 ms (offset −200 to −100 ms), marks that target a Miss, like a missed one. Mashing always lands some presses there, so it misses a lot.
 - Inputs further away (over 200 ms early, or after a target is judged) neither score nor cost.
 - A target with no input by the end of its Good window is a Miss: XP's Default Beep plays and the box's title bar flashes like clicking outside a modal box; it stays put and fades at the end of the phrase.
-- The judged input time is the heard audio time (conversion in the [latency test](latency-test.md#time-conversion)) minus the player's calibration, set in the settings window in ms ([settings.md](../settings.md)) (positive means the player presses late; the latency prototype's suggested value can be used directly).
+- The judged input time is the heard audio time (conversion in the [latency test](../latency-test.md#time-conversion)) minus the player's calibration, set in the settings window in ms ([settings.md](../settings.md)) (positive means the player presses late; the [latency test](../latency-test.md) suggests a value).
 
 ## Sounds
 

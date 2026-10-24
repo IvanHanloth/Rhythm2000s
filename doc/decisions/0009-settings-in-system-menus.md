@@ -15,7 +15,7 @@ The input calibration and "Skip tutorial" lived in a dev panel across the top of
 ## Decision
 
 - Option 2, as asked by the user. Both windows share one panel (`src/ui/settings-panel.ts`) with native widgets supplied by each scene, as the results window does. Contents and rules in [settings.md](../settings.md).
-- The dev panel and the two widget gallery prototypes are removed. Scenes and levels still open from the URL hash. The latency test prototype stays, linked from the title screen.
+- The dev panel and the two widget gallery prototypes are removed. Scenes and levels still open from the URL hash. The latency test prototype stays, linked from the title screen (later replaced by in-game tests, [ADR 0010](0010-latency-test-in-game.md)).
 
 ## Consequences
 

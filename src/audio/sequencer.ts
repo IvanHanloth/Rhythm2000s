@@ -1,5 +1,5 @@
 // Sequencer: schedules a list of beat-timed sounds against the audio clock.
-// Like the metronome, call schedule() every frame to book sounds within the next lookAhead seconds with start(when);
+// Call schedule() every frame to book sounds within the next lookAhead seconds with start(when);
 // frames only queue ahead, and when a sound plays is decided entirely by the audio clock.
 
 import { beatToTime } from '@/rhythm/beat.ts';

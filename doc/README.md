@@ -15,7 +15,7 @@
 | [settings.md](settings.md) | Settings window in the XP / Mac system menus: latency calibration, skip tutorial, Beat Guide, keyboard shortcuts | Draft |
 | [chart-format.md](chart-format.md) | Chart JSON format: location, fields, action IDs, validation | Draft |
 | [tech-research.md](tech-research.md) | Technical research: browser capabilities, stack comparison, risks to verify | Draft |
-| [prototypes/latency-test.md](prototypes/latency-test.md) | Prototype: latency test (questions, time conversion methods, test log) | Draft |
+| [latency-test.md](latency-test.md) | Latency test: the in-game XP / Mac test windows, time conversion, suggested calibration, test log | Draft |
 | [prototypes/mvp.md](prototypes/mvp.md) | MVP: XP "pop up → close", provisional input, judgement windows, chart and sounds | Draft |
 | [decisions/](decisions/README.md) | Architecture decision records (ADRs) | — |
 | [Design system (external)](https://claude.ai/artifact/YTAfdQKAfiofe7o2vbNz5K) | Visual proposal: XP / Mac Platinum / Mac Aqua scene themes; colour, type, spacing, motion (in beats); window, button, dialog and judgement components | Proposal |

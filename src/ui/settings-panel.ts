@@ -14,6 +14,12 @@ export interface CheckBoxWidget {
   setChecked(checked: boolean): void;
 }
 
+export interface ButtonWidget {
+  view: Container;
+  width: number;
+  height: number;
+}
+
 export interface SliderWidget {
   view: Container;
   height: number;
@@ -32,6 +38,10 @@ export interface SettingsKit {
   checkBox(label: string, onToggle: () => void): CheckBoxWidget;
   /** A horizontal slider `width` wide; onChange gets the new fraction (0–1) while dragging */
   slider(width: number, onChange: (fraction: number) => void): SliderWidget;
+  /** A push button sized to its label */
+  button(label: string, onTap: () => void): ButtonWidget;
+  /** The latency test button's label, in the system's ellipsis style ("..." on XP, "…" on the Mac) */
+  testLatencyLabel: string;
   /** Caption text colour */
   muted: string;
   /** The scene's name for the Enter key in the shortcut list ("Enter" / "Return") */
@@ -45,6 +55,8 @@ export interface SettingsPanelOptions {
   width: number;
   height: number;
   kit: SettingsKit;
+  /** "Test Latency…": opens the system's latency test (doc/latency-test.md) */
+  onTestLatency: () => void;
 }
 
 export interface SettingsPanel {
@@ -57,7 +69,7 @@ export interface SettingsPanel {
 
 const LEFT_WIDTH = 300;
 const GAP = 12;
-const CALIBRATION_HEIGHT = 160;
+const CALIBRATION_HEIGHT = 166;
 const CHECK_GROUP_HEIGHT = 84;
 /** Rows of the shortcut table */
 const ROW_HEIGHT = 15;
@@ -70,6 +82,7 @@ export function createSettingsPanel({
   width,
   height,
   kit,
+  onTestLatency,
 }: SettingsPanelOptions): SettingsPanel {
   const panel = new Container({ label: 'settings-panel' });
   const size = kit.textSize;
@@ -85,22 +98,25 @@ export function createSettingsPanel({
   });
   const label = kit.text('Calibration:', { size });
   value.position.set(Math.ceil(label.width) + 6, 0);
-  valueNote.position.set(0, 18);
-  slider.view.position.set(0, 40);
+  const test = kit.button(kit.testLatencyLabel, onTestLatency);
+  test.view.position.set(innerLeft - test.width, -3);
+  valueNote.position.set(0, 26);
+  const sliderTop = 48;
+  slider.view.position.set(0, sliderTop);
   const ends = [`−${CALIBRATION_LIMIT_MS} ms`, '0', `+${CALIBRATION_LIMIT_MS} ms`].map(
     (text, i) => {
       const end = kit.text(text, { size: size - 1, color: kit.muted });
       end.anchor.set(i / 2, 0);
-      end.position.set((innerLeft * i) / 2, 40 + slider.height + 2);
+      end.position.set((innerLeft * i) / 2, sliderTop + slider.height + 2);
       return end;
     },
   );
   const help = kit.text(
-    'Raise it if you tend to press late, lower it if early. ← → change it by 1 ms. The latency test on the title screen suggests a value.',
+    'Raise it if you press late, lower it if early; ← → change it by 1 ms. Test Latency measures it for you.',
     { size: size - 1, color: kit.muted, wrapWidth: innerLeft, lineHeight: size + 3 },
   );
-  help.position.set(0, 40 + slider.height + 20);
-  calibration.inner.addChild(label, value, valueNote, slider.view, ...ends, help);
+  help.position.set(0, sliderTop + slider.height + 20);
+  calibration.inner.addChild(label, value, test.view, valueNote, slider.view, ...ends, help);
   panel.addChild(calibration.view);
 
   // ---- Check boxes ----

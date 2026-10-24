@@ -19,7 +19,7 @@ Design details: [doc/game-design.md](doc/game-design.md).
 **Building the game itself.** The stack is in [ADR 0001](doc/decisions/0001-tech-stack.md); the game canvas and scene structure are in place ([ADR 0002](doc/decisions/0002-game-canvas-and-scenes.md)). The Windows XP scene has a playable [MVP "pop up → close"](doc/prototypes/mvp.md) whose input, judgement windows and charts are provisional until play-tested. The Mac scene recreates the early Aqua of Mac OS X 10.0–10.2 with its own actions and charts and the same gameplay as XP ([doc/scenes/mac-2000.md](doc/scenes/mac-2000.md)). On the computer, levels are picked with the mouse in XP Explorer / Mac Finder ([doc/level-select.md](doc/level-select.md)), a results window follows each round ([doc/results.md](doc/results.md)), and the settings window opens from XP's Start menu / the Mac's Apple menu ([doc/settings.md](doc/settings.md)). Charts are JSON files in `public/charts/`, separate from the code ([ADR 0003](doc/decisions/0003-chart-data-format.md), format in [doc/chart-format.md](doc/chart-format.md)). The title screen and level select are a realistic 3D street ([ADR 0005](doc/decisions/0005-3d-street-hub-with-threejs.md), design in [doc/hub.md](doc/hub.md)); sitting at a computer in the net café enters a level. Period prop models are made by the user in Tripo / Blender to the spec in [doc/hub-assets.md](doc/hub-assets.md).
 
 - Use only the agreed stack. Before adding a runtime dependency (especially audio, rendering or state management), explain the reason and trade-offs to the user.
-- The [latency test prototype](doc/prototypes/latency-test.md) is done; next it needs measuring on different devices, browsers and headphones, with results logged in its "Test log".
+- The [latency test](doc/latency-test.md) runs inside each computer's settings window; next it needs measuring on different devices, browsers and headphones, with results logged in its "Test log".
 
 ## Layout
 
@@ -27,8 +27,7 @@ Design details: [doc/game-design.md](doc/game-design.md).
 .
 ├── AGENTS.md          # This file
 ├── README.md
-├── index.html         # Game entry: game canvas
-├── prototypes/        # Prototype page entries, e.g. prototypes/latency/
+├── index.html         # Game entry: game canvas (the only page)
 ├── public/charts/     # Chart JSON: index.json plus one file per chart, fetched at runtime
 ├── public/models/     # 3D models for the hub (GLB): props/ stock, custom/ bespoke (spec in doc/hub-assets.md)
 ├── public/textures/   # Hub PBR textures and monitor images; sources and licences in assets/README.md
@@ -42,11 +41,10 @@ Design details: [doc/game-design.md](doc/game-design.md).
 │   │   ├── windows-xp/ # components/ holds widgets faithful to the original
 │   │   └── mac-2000/
 │   ├── theme/         # Scene theme colours, fonts, judgement colours, animation beats; xp-luna.ts and aqua.ts are the original palettes
-│   ├── ui/            # Canvas widgets shared across scenes (judgement labels, banners, results and settings panels, easing)
+│   ├── ui/            # Canvas widgets shared across scenes (judgement labels, banners, results, settings and latency test panels, easing)
 │   ├── audio/         # Audio clock, metronome, sequencer, synthesised drums and effects
 │   ├── rhythm/        # Beat ↔ audio time, action IDs, chart validation and expansion, judging, turn cues
-│   ├── latency/       # Latency and offset statistics
-│   └── prototypes/    # UI code of the prototype pages
+│   └── latency/       # Latency test run and offset statistics
 ├── vite.config.ts     # All Vite+ configuration: build, test, format, lint, import aliases
 ├── tsconfig.json
 ├── package.json
@@ -56,7 +54,7 @@ Design details: [doc/game-design.md](doc/game-design.md).
 │   ├── game-design.md # Game design overview
 │   ├── tech-research.md # Browser capabilities, options compared, risks to verify
 │   ├── scenes/        # Scene designs
-│   ├── prototypes/    # Prototype notes and test logs
+│   ├── prototypes/    # Prototype notes
 │   └── decisions/     # Architecture decision records (ADRs)
 └── memory/            # Shared LLM memory: context, preferences and conventions across sessions
     ├── README.md      # Memory format and rules
@@ -65,7 +63,7 @@ Design details: [doc/game-design.md](doc/game-design.md).
 
 - Imports across folders use the aliases `@/` (src), `@assets/` and `@public/`, declared in `vite.config.ts` and mirrored in `tsconfig.json`; imports within a folder use `./`.
 - Unit tests sit next to the code as `*.test.ts` and import the test API from `vite-plus/test`. Test-only helpers are `test-*.ts` (e.g. `src/rhythm/test-charts.ts`, `src/scenes/shared/test-audio.ts`).
-- A new prototype page is registered in `build.rolldownOptions.input` in `vite.config.ts`.
+- A new stand-alone page would need registering in `build.rolldownOptions.input` in `vite.config.ts`; today `index.html` is the only one.
 - A new desktop scene goes in `src/scenes/<scene>/`: extend `LevelScene` (`src/scenes/shared/level-scene.ts`) for the level flow, build its round on `RoundSession`, register its name and actions in `src/scenes/catalog.ts` and add it in `src/game/main.ts`. Scenes draw in 1280×720 logical coordinates with colours from `src/theme/` only.
 - A new chart: read the [level design guidelines](doc/level-design.md) first (the opening demo is generated by the system, not written in the chart; easy to hard; at least 1 minute of chart), add `<chart id>.json` to `public/charts/` and list it in `index.json`; `vp test` validates every chart there. A new action type: update the action table in [doc/chart-format.md](doc/chart-format.md) first, then `src/rhythm/actions.ts` and the scene catalog.
 - `promo/` is not part of the game build: it is previewed and rendered with `npx hyperframes` (pinned in `promo/package.json`) and stays out of the game's pnpm dependencies. `promo/assets` is a symlink to the root `assets/`, so videos reference `assets/...` (the HyperFrames preview server can't read outside the project; on Windows clone with `git config core.symlinks true`). Use the `/hyperframes` skill before making videos.
@@ -103,7 +101,6 @@ vp add <pkg>   # Add a dependency
 ```
 
 - Game: with the dev server running, open `http://localhost:5173/` for the 3D street (title screen and level select). Append `#scene` (e.g. `#mac-2000`) to open a scene, or `#scene/chart` (e.g. `#windows-xp/xp-error-storm`) to open one level; Esc in a level returns to the street. There is no dev panel ([ADR 0009](doc/decisions/0009-settings-in-system-menus.md)); player settings open from the in-game Start menu / Apple menu ([doc/settings.md](doc/settings.md)).
-- Latency test prototype: `http://localhost:5173/prototypes/latency/` with the dev server running.
 - Built-in commands like `dev`, `build` and `test` don't read `package.json` scripts. `vp build` only builds; use `vp run build` to include `tsc`.
 - Without a global `vp` (installation in the [Vite+ docs](https://viteplus.dev/guide)), prefix commands with `pnpm exec`, e.g. `pnpm exec vp dev`.
 - Run `vp check` and `vp test` before every commit. GitHub Actions (`.github/workflows/ci.yml`) runs check, test and build again on push.

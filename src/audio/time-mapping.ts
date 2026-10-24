@@ -1,6 +1,6 @@
 // Converts input event times (performance.now() timeline, ms) into
 // "the audio the speakers were playing at that moment" (AudioContext timeline, s).
-// Both methods are described in doc/prototypes/latency-test.md.
+// Both methods are described in doc/latency-test.md.
 
 export interface OutputStamp {
   /** Audio time being output by the speakers (s) */

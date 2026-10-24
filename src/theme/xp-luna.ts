@@ -99,6 +99,17 @@ export const LUNA = {
     ],
   },
 
+  /** Latency test beat dots (doc/latency-test.md), after the settings board of the main screen designs */
+  latencyTest: {
+    well: '#ffffff',
+    wellEdge: '#7f9db9',
+    ring: '#7f9db9',
+    ringCurrent: '#e5a01a',
+    fillCurrent: '#ffd85a',
+    fillPressed: '#c1d3fb',
+    mark: '#e5a01a',
+  },
+
   checkbox: {
     border: '#1c5180',
     fill: [
