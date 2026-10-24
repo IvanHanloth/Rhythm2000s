@@ -34,6 +34,9 @@ export interface CutawayStage {
   hide(): void;
 }
 
+/** What a scene computer runs: the level list and its levels, or HackerEditor (doc/chart-editor.md) */
+export type SceneMode = 'levels' | 'editor';
+
 /** Shared resources a scene gets when created. */
 export interface SceneContext {
   clock: AudioClock;
@@ -57,6 +60,8 @@ export interface SceneContext {
   cutaway: CutawayStage;
   /** The chart to play (when #scene/chart opens a level directly); without it the scene shows its level list first */
   chartId?: string;
+  /** The level list and levels, or the chart editor (doc/chart-editor.md) */
+  mode: SceneMode;
   /**
    * Called before a level starts: the shell shows the level intro (title, tempo, widgets, best score, how to play).
    * The player's first Space or click dismisses it; that press still reaches the scene, which then starts.

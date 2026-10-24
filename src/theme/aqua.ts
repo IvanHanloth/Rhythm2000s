@@ -44,6 +44,16 @@ export const AQUA = {
 
   /** Blue behind selected items in Finder */
   selection: '#3875d7',
+  /** Text field (bezeled NSTextField): white with a darker top edge, and the blue focus ring while typing */
+  edit: { top: '#8c8c8c', side: '#c3c3c3', fill: '#ffffff', focus: '#76a3e6' },
+  /** HackerEditor's lanes (doc/chart-editor.md): light grey snap lines, darker beats, Aqua blue and green blocks, problems in the close button's red */
+  hackerEditor: {
+    line: '#d3d3d3',
+    beat: '#8e8e8e',
+    call: '#82b2f0',
+    response: '#90d27e',
+    problem: '#c4291c',
+  },
 
   gel: {
     /** Default button, active window scroller thumb */
@@ -141,6 +151,14 @@ export const AQUA = {
     trackDark: '#9a9a9a',
     trackLight: '#dcdcdc',
     knob: { rim: '#163f94', dark: '#2f6fe0', light: '#bfe6ff' } satisfies BallColors,
+  },
+
+  /** Combo effects (doc/combo.md): Aqua glow, iTunes-visualizer bands, the spinning wait cursor */
+  combo: {
+    glow: '#8fd0ff',
+    bands: ['#ff4fb0', '#8a63ff', '#33d6ff', '#62f59a'],
+    beachBall: ['#ff3b30', '#ff9500', '#ffd60a', '#34c759', '#0a84ff', '#bf5af2'],
+    beachBallEdge: '#4a4a4a',
   },
 };
 

@@ -44,6 +44,11 @@ describe('parseRoute', () => {
     expect(parseRoute('#nope/x1', ids)).toEqual({ kind: 'hub' });
   });
 
+  it('#editor/scene opens the scene chart editor', () => {
+    expect(parseRoute('#editor/mac-2000', ids)).toEqual({ kind: 'editor', sceneId: 'mac-2000' });
+    expect(parseRoute('#editor/nope', ids)).toEqual({ kind: 'hub' });
+  });
+
   it('#scene and #scene/chart', () => {
     expect(parseRoute('#mac-2000', ids)).toEqual({ kind: 'scene', sceneId: 'mac-2000' });
     expect(parseRoute('#windows-xp/x2', ids)).toEqual({

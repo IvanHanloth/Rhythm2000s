@@ -22,6 +22,7 @@ import minimizeUrl from '@assets/reference/windows-xp/sounds/Windows XP Minimize
 import recycleUrl from '@assets/reference/windows-xp/sounds/Windows XP Recycle.wav?url';
 import defaultSoundUrl from '@assets/reference/windows-xp/sounds/Windows XP Default.wav?url';
 import hardwareInsertUrl from '@assets/reference/windows-xp/sounds/Windows XP Hardware Insert.wav?url';
+import hardwareRemoveUrl from '@assets/reference/windows-xp/sounds/Windows XP Hardware Remove.wav?url';
 import notifyUrl from '@assets/reference/windows-xp/sounds/Windows XP Notify.wav?url';
 import chordUrl from '@assets/reference/windows-xp/sounds/chord.wav?url';
 import arrowCursorUrl from '@assets/reference/windows-xp/icons/default_arrow.cur?url';
@@ -74,6 +75,8 @@ const SOUND_FILES = {
   downloadOpen: { url: notifyUrl, peak: 0.55 },
   /** volume-mute slider released: chord, since Ding (the original) is the Miss sound here (provisional) */
   volumeRelease: { url: chordUrl, peak: 0.55 },
+  /** Hardware Remove: a combo of 10 or more breaks (doc/combo.md "Combo break") */
+  comboBreak: { url: hardwareRemoveUrl, peak: 0.55 },
 } satisfies Record<string, { url: string } & SampleOptions>;
 
 export type XpSoundName = keyof typeof SOUND_FILES;

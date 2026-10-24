@@ -12,6 +12,7 @@ import {
   type Rank,
   type ResultSummary,
 } from '@/rhythm/result-summary.ts';
+import { JUDGE_WINDOWS } from '@/rhythm/judge.ts';
 import { BEAT_GUIDE_COLORS, FONT_FAMILIES, JUDGEMENT_COLORS } from '@/theme/tokens.ts';
 
 export interface PanelTextStyle {
@@ -91,6 +92,15 @@ export function createResultsPanel({
   stamp.scale.set(Math.min(1, stampRoom / stamp.width));
   stamp.position.set((LEFT_WIDTH - kit.groupInset.x) / 2, (RANK_HEIGHT - kit.groupInset.y) / 2 + 2);
   rank.inner.addChild(stamp);
+  if (summary.fullCombo) {
+    // Smaller and tilted the other way, overlapping the rating stamp's lower right like a second rubber stamp
+    const full = fullComboStamp();
+    full.position.set(
+      LEFT_WIDTH - kit.groupInset.x - full.width / 2 + 4,
+      RANK_HEIGHT - kit.groupInset.y - 6,
+    );
+    rank.inner.addChild(full);
+  }
 
   // Left: comments
   const commentsHeight = height - RANK_HEIGHT - GAP;
@@ -134,6 +144,10 @@ export function createResultsPanel({
     tag.position.set(0, 2);
     score.inner.addChild(tag);
   }
+  // Best combo at the top left, after the Beat Guide tag when there is one (doc/combo.md)
+  const best = kit.text(`Best combo: ${summary.bestCombo}`, { size: 12, color: kit.muted });
+  best.position.set(assisted ? 96 : 0, 3);
+  score.inner.addChild(best);
   const tileGap = 10;
   const tileWidth = (innerWidth - tileGap * 2) / 3;
   LEVELS.forEach(({ level, label, fill, text }, i) => {
@@ -193,6 +207,34 @@ function rankStamp(rank: Rank): Container {
   label.position.set(0, 2);
   stamp.addChild(shape, label);
   stamp.rotation = (-5 * Math.PI) / 180;
+  return stamp;
+}
+
+/** "Full Combo": a small Perfect-yellow stamp tilted 8°, origin at its centre */
+function fullComboStamp(): Container {
+  const label = new Text({
+    text: 'Full Combo',
+    resolution: RESOLUTION,
+    style: {
+      fontFamily: FONT_FAMILIES.display,
+      fontSize: 15,
+      fontWeight: '800',
+      fill: JUDGEMENT_COLORS.onPerfect,
+    },
+  });
+  const width = Math.ceil(label.width) + 22;
+  const height = 26;
+  const stamp = new Container({ label: 'full-combo' });
+  const shape = new Graphics()
+    .roundRect(-width / 2 + 3, -height / 2 + 3, width, height, height / 2)
+    .fill(INK)
+    .roundRect(-width / 2, -height / 2, width, height, height / 2)
+    .fill(JUDGEMENT_COLORS.perfect)
+    .stroke({ width: 3, color: INK, alignment: 1 });
+  label.anchor.set(0.5);
+  label.position.set(0, 1);
+  stamp.addChild(shape, label);
+  stamp.rotation = (8 * Math.PI) / 180;
   return stamp;
 }
 
@@ -262,7 +304,7 @@ function histogram(bins: readonly number[], width: number, height: number): Cont
   bins.forEach((count, i) => {
     const x = padding + i * (barWidth + gap);
     const barHeight = count === 0 ? 2 : Math.max(4, (count / max) * maxBar);
-    const inPerfect = Math.abs(i - half) * OFFSET_BIN_MS <= 40;
+    const inPerfect = Math.abs(i - half) * OFFSET_BIN_MS <= JUDGE_WINDOWS.perfect * 1000;
     const color =
       count === 0 ? '#c8c8c8' : inPerfect ? JUDGEMENT_COLORS.perfect : JUDGEMENT_COLORS.good;
     g.roundRect(x, height - 1 - barHeight, barWidth, barHeight, Math.min(3, barWidth / 2)).fill(

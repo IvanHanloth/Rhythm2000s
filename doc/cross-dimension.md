@@ -16,7 +16,7 @@ On a press the 2D desktop gives way to the 3D net café ([hub.md](hub.md)): the 
 | Call | The virtual mouse clicks the middle of the desktop on the beat, the cutaway runs for 2 beats |
 | Response | A hit starts the same cutaway from the moment of the press; a Miss stays in 2D (the miss beep only) |
 | Cutaway timing | 0–0.5 beat: out of the monitor, over the shoulder, up behind the chair · 0.5–1.5: one full turn · 1.5–2: back the same way into the monitor |
-| Bar | The event occupies its bar for 2 beats like other multi-press actions; at 120 BPM it starts by beat 1.25 ([chart-format.md](chart-format.md#timing-limits)) |
+| Bar | The event occupies its bar for 2 beats like other multi-press actions; at 120 BPM it starts before beat 1.24 ([chart-format.md](chart-format.md#timing-limits)) |
 | Sounds | XP: press with the usual click (`navigate`), landing on `Windows XP Restore.wav` · Mac: press on `Tink`, landing on `Pop` |
 | Test levels | `xp-chair-spin` ("Spin Cycle", 120 BPM, 6 phrases), last in the XP list: `#windows-xp/xp-chair-spin` · `mac-chair-spin` ("Desk Chair Twirl", 116 BPM, 6 phrases), last in the Mac list: `#mac-2000/mac-chair-spin` |
 

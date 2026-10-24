@@ -9,7 +9,8 @@ function fakeEntry(id: string, log: string[]): SceneEntry {
     id: id as SceneEntry['id'],
     label: id,
     create(context): Scene {
-      log.push(context.chartId ? `create ${id} ${context.chartId}` : `create ${id}`);
+      const what = [id, context.chartId, context.mode === 'editor' ? 'editor' : undefined];
+      log.push(['create', ...what.filter((part) => part !== undefined)].join(' '));
       return {
         view: { label: id } as unknown as Container,
         update: (frame: FrameInfo) => log.push(`update ${id} ${frame.audioTime}`),
@@ -65,6 +66,17 @@ describe('SceneDirector', () => {
     director.show('a', 'y');
 
     expect(log).toEqual(['create a x', 'add a', 'remove a', 'destroy a', 'create a y', 'add a']);
+  });
+
+  it('rebuilds when switching between the level list and the editor', () => {
+    const log: string[] = [];
+    const director = new SceneDirector(fakeHost(log), [fakeEntry('a', log)], context);
+
+    director.show('a', undefined, 'editor');
+    director.show('a', undefined, 'editor');
+    director.show('a');
+
+    expect(log).toEqual(['create a editor', 'add a', 'remove a', 'destroy a', 'create a', 'add a']);
   });
 
   it('updates only the current scene each frame', () => {

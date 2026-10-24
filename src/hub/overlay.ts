@@ -5,11 +5,15 @@ import type { SceneId } from '@/scenes/catalog.ts';
 import './hub.css';
 import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS, THEMES } from '@/theme/tokens.ts';
 
-/** Level info on the card once seated (one level is one chart) */
+/** What the card shows once seated at an entry computer: a scene's play computer or its chart editor */
 export interface LevelInfo {
-  /** Level id (chart id) */
+  /** Computer id, passed to onPlay */
   id: string;
   sceneId: SceneId;
+  /** A play computer shows a best-score line; an editor has none */
+  role: 'levels' | 'editor';
+  /** The card's button and key hint, e.g. "Play" */
+  action: string;
   /** Level name (song title), the card's heading */
   label: string;
   /** Title, tempo and so on, one per line */
@@ -206,16 +210,19 @@ export class HubOverlay {
     if (!level) return;
     this.cardTitle.textContent = level.label;
     const lines = level.details.map((line) => el('p', '', line));
-    const best = el('p', 'hub-card-record');
-    best.append(el('b', '', 'Best\u2003'), record ?? 'No record yet');
-    lines.push(best);
+    if (level.role === 'levels') {
+      const best = el('p', 'hub-card-record');
+      best.append(el('b', '', 'Best\u2003'), record ?? 'No record yet');
+      lines.push(best);
+    }
     const keys = el('p', 'hub-card-keys');
     keys.append(
-      ...(level.playable ? [el('kbd', '', 'E'), ' Play\u2003'] : []),
+      ...(level.playable ? [el('kbd', '', 'E'), ` ${level.action}\u2003`] : []),
       el('kbd', '', 'Esc'),
       ' Stand up',
     );
     this.cardBody.replaceChildren(...lines, keys);
+    this.cardPlay.textContent = level.action;
     this.cardPlay.disabled = !level.playable;
   }
 

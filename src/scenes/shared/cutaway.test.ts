@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { CHAIR_SWIVEL_BEATS } from '@/rhythm/actions.ts';
 import { buildChart } from '@/rhythm/chart.ts';
+import { JUDGE_WINDOWS } from '@/rhythm/judge.ts';
 import { sourceFromPatterns } from '@/rhythm/test-charts.ts';
 import { cutawayDesktopAlpha, cutawayProgress, hasCutaway } from './cutaway.ts';
 import { pairTargets, RoundSession } from './round-session.ts';
@@ -40,7 +41,8 @@ describe('chair-swivel cutaway', () => {
     const press = session.targets[0]!.clicks[0]!;
     expect(cutawayProgress(session, press.beat + 0.5)).toBeNull();
 
-    const late = session.timeAt(press.beat) + 0.05;
+    // Late enough to miss Perfect, early enough for Good
+    const late = session.timeAt(press.beat) + (JUDGE_WINDOWS.perfect + JUDGE_WINDOWS.good) / 2;
     expect(session.tap(late)?.level).toBe('good');
     const hitBeat = session.beatAt(late);
     expect(cutawayProgress(session, hitBeat)).toBe(0);

@@ -140,7 +140,7 @@ interface Cutaway {
 }
 
 export interface HubOptions {
-  /** Entry computers in the café (one per scene), seated in order (cafe-layout.ts) */
+  /** Entry computers in the café (per scene a play computer and a chart editor), seated by cafe-layout.ts */
   levels: readonly LevelInfo[];
   /** "Start" once seated: enter the level */
   onPlay(levelId: string): void;
@@ -224,6 +224,7 @@ export class Hub {
       options.levels.map((level) => ({
         levelId: level.id,
         sceneId: level.sceneId,
+        role: level.role,
         ...MACHINE_LOOKS[level.sceneId],
       })),
     );
@@ -498,8 +499,8 @@ export class Hub {
   }
 
   /**
-   * New card contents after charts were imported or deleted (doc/chart-import-export.md). The computers stay:
-   * there is one per scene, so `levels` must have the same ids as at construction.
+   * New card contents after charts were imported, saved or deleted (doc/chart-import-export.md). The computers stay
+   * (a play computer and an editor per scene), so `levels` must have the same ids as at construction.
    */
   setLevels(levels: readonly LevelInfo[]): void {
     const ids = (list: readonly LevelInfo[]) => list.map((level) => level.id).join(',');

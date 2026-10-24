@@ -29,6 +29,8 @@ export interface DockItem {
 interface ItemView {
   /** The icon (moves when bouncing); origin at the middle of its bottom edge so it squashes from there */
   icon: Container;
+  /** Wraps the picture inside `icon`; scaled for the combo swell so it doesn't fight the bounce's squash */
+  swell: Container;
   indicator: Graphics;
   /** Badge; origin at its centre */
   badge: Container;
@@ -72,7 +74,9 @@ export class Dock {
           : appIcon(item.icon, DOCK_ICON_SIZE);
       graphic.position.set(-DOCK_ICON_SIZE / 2, -DOCK_ICON_SIZE);
       const icon = new Container({ label: `dock-${item.icon}` });
-      icon.addChild(graphic);
+      const swell = new Container({ label: 'swell' });
+      swell.addChild(graphic);
+      icon.addChild(swell);
       const centerX = x + DOCK_ICON_SIZE / 2;
       icon.position.set(centerX, PADDING_TOP + DOCK_ICON_SIZE);
       iconLayer.addChild(icon);
@@ -92,7 +96,16 @@ export class Dock {
       badge.visible = false;
 
       overlay.addChild(indicator, badge);
-      this.items.push({ icon, indicator, badge, badgeShape, badgeText, badgeCount: 0, centerX });
+      this.items.push({
+        icon,
+        swell,
+        indicator,
+        badge,
+        badgeShape,
+        badgeText,
+        badgeCount: 0,
+        centerX,
+      });
       x += DOCK_ICON_SIZE + GAP;
     }
 
@@ -141,6 +154,17 @@ export class Dock {
     const icon = this.items[index]!.icon;
     icon.y = PADDING_TOP + DOCK_ICON_SIZE - lift;
     icon.scale.set(1 + 0.12 * squash, 1 - 0.12 * squash);
+  }
+
+  /** Number of application icons (the Trash not included) */
+  get iconCount(): number {
+    return this.items.length;
+  }
+
+  /** Enlarges icon `index` from its bottom centre by `amount` (0 = normal size), like Dock magnification (doc/combo.md) */
+  setSwell(index: number, amount: number): void {
+    // The picture sits above and centred on the wrapper's origin, so scaling the wrapper grows it from the bottom centre
+    this.items[index]!.swell.scale.set(1 + amount);
   }
 
   setRunning(index: number, running: boolean): void {

@@ -14,7 +14,7 @@ import { GameCanvas } from './game-canvas.ts';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from './layout.ts';
 import { listenForTaps } from './input.ts';
 import { LevelIntro } from './level-intro.ts';
-import { buildLevels, formatBestScore, parseRoute } from './levels.ts';
+import { buildLevels, editorRoute, formatBestScore, parseRoute } from './levels.ts';
 import { loadBestAssisted, loadBestScore } from './records.ts';
 import { SceneDirector } from './scene-director.ts';
 import type { CutawayStage } from './scene.ts';
@@ -111,28 +111,52 @@ let levels = buildLevels(director.entries, library.charts);
 /** This level was entered by sitting down in the café. Opened from a URL, Esc also goes to the café, but the hub starts at the title screen */
 let cameFromHub = false;
 
-/** One computer per scene in the café: the card after sitting down lists that computer's levels */
+/**
+ * Two computers per scene in the café: one to play, whose card lists that computer's levels, and HackerEditor behind
+ * it (doc/chart-editor.md). Their ids are the URL routes they open.
+ */
 function computerCards(): LevelInfo[] {
-  return director.entries.map(({ id, label }) => {
+  const play = director.entries.map(({ id, label }): LevelInfo => {
     const own = levels.filter((level) => level.sceneId === id);
     const details = own.map((level) => `Level ${level.number}: ${level.title} (${level.bpm} BPM)`);
     if (details.length === 0) details.push('No playable levels on this machine yet.');
-    return { id, sceneId: id, label, details, playable: own.length > 0 };
+    return {
+      id,
+      sceneId: id,
+      role: 'levels',
+      action: 'Play',
+      label,
+      details,
+      playable: own.length > 0,
+    };
   });
+  const editors = director.entries.map(({ id, label }): LevelInfo => ({
+    id: editorRoute(id),
+    sceneId: id,
+    role: 'editor',
+    action: 'Open',
+    label: `HackerEditor (${label})`,
+    details: [
+      `Make levels for the ${label} computer.`,
+      'Saved levels show up on the computer in front.',
+    ],
+    playable: true,
+  }));
+  return [...play, ...editors];
 }
 
 const hub = new Hub({
   levels: computerCards(),
-  recordOf: (sceneId) => {
-    const own = levels.filter((level) => level.sceneId === sceneId);
+  recordOf: (computerId) => {
+    const own = levels.filter((level) => level.sceneId === computerId);
     const played = own.filter((level) => loadBestScore(level.id) !== null).length;
     return own.length > 0 ? `Played: ${played} / ${own.length} levels` : null;
   },
   audio: clock.context,
-  onPlay: (sceneId) => {
+  onPlay: (computerId) => {
     // Esc inside the computer goes back to the café
     cameFromHub = true;
-    location.hash = sceneId;
+    location.hash = computerId;
   },
 });
 cafe = hub;
@@ -205,7 +229,8 @@ function showRoute(): void {
   }
   hub.hide();
   canvas.app.ticker.start();
-  director.show(route.sceneId, route.chartId);
+  if (route.kind === 'editor') director.show(route.sceneId, undefined, 'editor');
+  else director.show(route.sceneId, route.chartId);
   // PixiJS makes the canvas inherit its container's cursor, so set it on the container
   gameHost.style.cursor = director.entries.find((e) => e.id === route.sceneId)?.cursor ?? '';
   backHint.hidden = false;

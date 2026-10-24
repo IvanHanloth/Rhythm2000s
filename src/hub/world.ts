@@ -101,10 +101,15 @@ export interface World {
 /** Monitor images: the original system wallpapers (assets/reference/, ADR 0004), scaled down */
 export type ScreenImage = 'xp-bliss' | 'xp-azul' | 'xp-autumn' | 'xp-desert' | 'mac-aqua-blue';
 
-/** Entry computer: one per scene; sitting down opens that scene's level list (scene ids in src/scenes/catalog.ts) */
+/**
+ * Entry computer: per scene one to play, whose level list opens on sitting down, and one running the chart editor
+ * (doc/chart-editor.md). Scene ids in src/scenes/catalog.ts
+ */
 export interface LevelMachine {
   levelId: string;
   sceneId: SceneId;
+  /** Play computers sit in the café's front row, editors in the row behind */
+  role: 'levels' | 'editor';
   /** Wallpaper on its screen (public/textures/screens/) */
   screen: ScreenImage;
   /** Translucent all-in-one; otherwise a beige CRT */
@@ -828,7 +833,10 @@ function buildFillers(b: Builder): void {
 
 // ---------- Net café ----------
 
-/** Desk centre z of the café's three rows, and the x offsets of their 4 seats: XP in front, Mac in the back two (allocated by cafe-layout.ts) */
+/**
+ * Desk centre z of the café's three rows, and the x offsets of their 4 seats: XP and Mac side by side at the start of the
+ * front row, their chart editors right behind them in the middle row (allocated by cafe-layout.ts)
+ */
 const CAFE_ROWS = [-11.2, -14.2, -17.2];
 const CAFE_COLUMNS = [-5.3, -3.1, -0.9, 1.3];
 
@@ -861,8 +869,12 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
     lightRows: 3,
   });
 
-  // One entry computer per scene; empty seats get occupied, out-of-order or switched-off machines
-  const layout = arrangeMachines(levels, CAFE_ROWS.length, CAFE_COLUMNS.length);
+  // Entry computers (play in front, editors behind); empty seats get occupied, out-of-order or switched-off machines
+  const layout = arrangeMachines(
+    levels.map((level) => ({ ...level, row: level.role === 'editor' ? 1 : 0 })),
+    CAFE_ROWS.length,
+    CAFE_COLUMNS.length,
+  );
   if (layout.overflow.length > 0) {
     console.warn(
       `No room in the café for levels: ${layout.overflow.map((l) => l.levelId).join(', ')}`,

@@ -12,9 +12,11 @@
 | [hub-assets.md](hub-assets.md) | Custom models for the street: spec (size, facing, origin, SCREEN mesh) and slot list | Draft |
 | [level-design.md](level-design.md) | Official level design guidelines: the system demonstrates every action first, easy to hard, at least 1 minute of chart | Draft |
 | [beat-guide.md](beat-guide.md) | Beat guide: the `((((O))))` beat cue, toggled with H and flagged on scores | Draft |
+| [combo.md](combo.md) | Combo: counting, the hit counter, XP / Mac tier and break effects, best combo and Full Combo on the results | Draft |
 | [settings.md](settings.md) | Settings window in the XP / Mac system menus: latency calibration, skip tutorial, Beat Guide, keyboard shortcuts | Draft |
 | [cross-dimension.md](cross-dimension.md) | Cross-dimension action prototype: a press cuts to the 3D café, the character spins on the swivel chair, back to the level | Draft (prototype) |
 | [chart-format.md](chart-format.md) | Chart JSON format: location, fields, action IDs, validation | Draft |
+| [chart-editor.md](chart-editor.md) | Chart editor on its own café computers: period program window, phrase-by-phrase timeline, play and test | Draft |
 | [chart-import-export.md](chart-import-export.md) | Importing charts into the browser and exporting any chart, from the level list | Draft |
 | [tech-research.md](tech-research.md) | Technical research: browser capabilities, stack comparison, risks to verify | Draft |
 | [latency-test.md](latency-test.md) | Latency test: the in-game XP / Mac test windows, time conversion, suggested calibration, test log | Draft |

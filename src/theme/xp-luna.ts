@@ -18,6 +18,16 @@ export const LUNA = {
   selection: '#316ac5',
   /** Shadow under desktop icon labels */
   desktopTextShadow: '#000000',
+  /** Edit control (text box): Luna's thin blue-grey border around a white field */
+  edit: { border: '#7f9db9', fill: '#ffffff' },
+  /** HackerEditor's lanes (doc/chart-editor.md), after Windows Movie Maker 2's timeline: grey lines, blue and green clips */
+  hackerEditor: {
+    line: '#c9c7ba',
+    beat: '#8a877a',
+    call: '#7aa7e8',
+    response: '#8cc97a',
+    problem: '#d0312d',
+  },
 
   window: {
     caption: [
@@ -343,5 +353,16 @@ export const LUNA = {
   /** Red no-entry sign on the muted tray speaker */
   speaker: {
     mute: '#e0301e',
+  },
+
+  /** Combo effects on the desktop (doc/combo.md): Bliss sky light, clouds, and the 3D Pipes screen saver's pipes */
+  combo: {
+    skyLight: '#ffffff',
+    cloud: '#ffffff',
+    pipes: [
+      { base: '#c8281e', light: '#ff9a8a', dark: '#5e0d08' },
+      { base: '#1f9a35', light: '#9cf0a8', dark: '#0b4316' },
+      { base: '#2457c9', light: '#9ec0ff', dark: '#0d2460' },
+    ],
   },
 } as const;

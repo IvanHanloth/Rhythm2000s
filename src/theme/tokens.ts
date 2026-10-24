@@ -119,6 +119,27 @@ export const BEAT_GUIDE_COLORS = {
   core: '#ffffff',
 };
 
+/**
+ * The combo hit counter (doc/combo.md), shared by every theme: a GeoCities-style web counter with a "HOT!" flame.
+ */
+export const HIT_COUNTER_COLORS = {
+  /** Bevelled frame around the digit cells */
+  frame: '#4a4a4a',
+  frameLight: '#b4b4b4',
+  frameDark: '#151515',
+  cell: '#000000',
+  digit: '#ffffff',
+  /** Caption tag ("HITS") */
+  captionBack: '#000080',
+  caption: '#ffffff',
+  /** Cells flash this on a reset */
+  broken: '#c81e1e',
+  flameOuter: '#ff5a00',
+  flameInner: '#ffd400',
+  hot: '#fff200',
+  hotEdge: '#b00000',
+};
+
 /** Animation durations in beats. Multiplied by the song's beat length at runtime, positions computed from the audio clock */
 export const BEATS = {
   /** Window pop-up, completing on the target beat */
@@ -129,4 +150,8 @@ export const BEATS = {
   squash: 0.125,
   /** How long a judgement word stays */
   judgementHold: 1,
+  /** Hit counter digits rolling to the next number */
+  counterRoll: 0.125,
+  /** Hit counter cells flashing red after a reset */
+  counterFlash: 0.5,
 };

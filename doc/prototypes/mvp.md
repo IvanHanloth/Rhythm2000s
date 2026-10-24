@@ -10,7 +10,7 @@
 | --- | --- |
 | Scene and action | Windows XP. Call: the computer pops up a series of windows on the beat; response: the player closes them one by one in the same rhythm |
 | Input | Space, or a click anywhere on the canvas, closes a window; no need to hit the close button |
-| Judgement windows | Perfect within ±45 ms; Good within ±100 ms; otherwise or unpressed, Miss. Pressing 100–200 ms before a target is also a Miss (against mashing) |
+| Judgement windows | Perfect within ±60 ms; Good within ±130 ms; otherwise or unpressed, Miss. Pressing 130–250 ms before a target is also a Miss (against mashing). Widened on 2026-10-24 from ±45 / ±100 / 200 ms, which play-testing found too hard |
 | Music | A simple drum beat synthesised with Web Audio, no sample files |
 
 ## Flow
@@ -28,15 +28,15 @@ A banner at the top says whose turn it is: **Follow me** in the call bar (watch 
 - Follow me appears half a beat before the call bar; Your turn half a beat **before the call bar ends**, giving the player a beat to get ready.
 - Your turn lasts to the end of the phrase, switching back to Follow me half a beat before the next call bar; the banner disappears after the last phrase and first appears in the last half beat of the count-in.
 - Each switch squashes and springs back once (`beat-squash`, 0.125 beat), timed by the audio clock.
-- Because of the early switch, the last action of a call or response bar must have its Good window closed half a beat before the bar ends. At 120 BPM Good is about 0.2 beat, so the last action is at beat 3.25 at the latest; validation checks this.
+- Because of the early switch, the last action of a call or response bar must have its Good window closed half a beat before the bar ends. At 120 BPM Good is 0.26 beat, so the last action must come before beat 3.24 (beat 3 fits, 3.25 doesn't); validation checks this.
 - It shows on every phrase.
 
 ## Judging rules
 
 - Each call event has one response target.
 - Each input takes **the earliest unjudged target within its Good window**, graded Perfect or Good by offset, and that window closes at once.
-- **Early presses are Misses**: an input before the earliest unjudged target, outside Good but within 200 ms (offset −200 to −100 ms), marks that target a Miss, like a missed one. Mashing always lands some presses there, so it misses a lot.
-- Inputs further away (over 200 ms early, or after a target is judged) neither score nor cost.
+- **Early presses are Misses**: an input before the earliest unjudged target, outside Good but within 250 ms (offset −250 to −130 ms), marks that target a Miss, like a missed one. Mashing always lands some presses there, so it misses a lot.
+- Inputs further away (over 250 ms early, or after a target is judged) neither score nor cost.
 - A target with no input by the end of its Good window is a Miss: XP's Default Beep plays and the box's title bar flashes like clicking outside a modal box; it stays put and fades at the end of the phrase.
 - The judged input time is the heard audio time (conversion in the [latency test](../latency-test.md#time-conversion)) minus the player's calibration, set in the settings window in ms ([settings.md](../settings.md)) (positive means the player presses late; the [latency test](../latency-test.md) suggests a value).
 

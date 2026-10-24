@@ -1,45 +1,31 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { arrangeMachines, type Seat } from './cafe-layout.ts';
 
-const level = (id: string, sceneId: string) => ({ id, sceneId });
+const machine = (id: string, row: number) => ({ id, row });
 const ids = (row: Seat<{ id: string }>[]) =>
   row.map((s) => (s.kind === 'level' ? s.level.id : s.kind));
 
 describe('arrangeMachines', () => {
-  it('starts each scene on a new row and fills empty seats with props in turn', () => {
+  it('seats each row side by side from the first seat, so editors sit behind their play computers', () => {
     const { seats, overflow } = arrangeMachines(
-      [
-        level('x1', 'xp'),
-        level('x2', 'xp'),
-        level('m1', 'mac'),
-        level('m2', 'mac'),
-        level('m3', 'mac'),
-      ],
+      [machine('xp', 0), machine('mac', 0), machine('xp-editor', 1), machine('mac-editor', 1)],
       3,
-      2,
+      4,
     );
     expect(seats.map(ids)).toEqual([
-      ['x1', 'x2'],
-      ['m1', 'm2'],
-      ['m3', 'repair'],
+      ['xp', 'mac', 'busy', 'off'],
+      ['xp-editor', 'mac-editor', 'busy', 'off'],
+      ['busy', 'repair', 'busy', 'off'],
     ]);
     expect(overflow).toEqual([]);
   });
 
-  it('moves the next scene to the next row when a row is not full', () => {
-    const { seats } = arrangeMachines([level('x1', 'xp'), level('m1', 'mac')], 2, 4);
-    expect(seats.map(ids)).toEqual([
-      ['x1', 'repair', 'busy', 'off'],
-      ['m1', 'repair', 'busy', 'off'],
-    ]);
-  });
-
-  it('puts levels that do not fit into overflow', () => {
+  it('puts machines that do not fit their row into overflow', () => {
     const { overflow } = arrangeMachines(
-      [level('a', 'xp'), level('b', 'xp'), level('c', 'xp')],
+      [machine('a', 0), machine('b', 0), machine('c', 0), machine('d', 5)],
       1,
       2,
     );
-    expect(overflow.map((l) => l.id)).toEqual(['c']);
+    expect(overflow.map((l) => l.id)).toEqual(['c', 'd']);
   });
 });

@@ -148,7 +148,7 @@ Official levels also follow [level-design.md](level-design.md): easy to hard, at
 
 ## Timing limits
 
-The "Follow me / Your turn" banner switches half a beat before the call and response bars end ([prototypes/mvp.md](prototypes/mvp.md#turn-cue)), so the last press in either bar must have its Good window closed by then. At 120 BPM with Good ±100 ms the last press is at beat 3.25 at the latest; two-press actions start by 2.75, the volume actions by 2.25, `chair-swivel` by 1.25 and `progress-download` by 0.25. Charts that break this fail validation.
+The "Follow me / Your turn" banner switches half a beat before the call and response bars end ([prototypes/mvp.md](prototypes/mvp.md#turn-cue)), so the last press in either bar must have its Good window closed by then. At 120 BPM with Good ±130 ms (0.26 beat) the last press must come before beat 3.24, so beat 3 fits but 3.25 doesn't; two-press actions start before 2.74, the volume actions before 2.24, `chair-swivel` before 1.24 and `progress-download` before 0.24 (only beat 0). Faster tempos allow later presses. Charts that break this fail validation.
 
 ## Validation
 
