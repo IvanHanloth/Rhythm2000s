@@ -6,6 +6,7 @@ import {
   isMacAction,
   MAC_ACTIONS,
   MAX_BOUNCES_PER_PHRASE,
+  MAX_FILES_PER_PHRASE,
   MAX_WINDOWS_PER_PHRASE,
 } from './action-kinds.ts';
 
@@ -40,6 +41,12 @@ export function checkMacChart(chart: Chart): string[] {
     if (bounces > MAX_BOUNCES_PER_PHRASE) {
       errors.push(
         `phrases[${phrase}]：dock-bounce 有 ${bounces} 个，Mac 场景每个乐句最多 ${MAX_BOUNCES_PER_PHRASE} 个`,
+      );
+    }
+    const files = kinds.filter((k) => k === 'file').length;
+    if (files > MAX_FILES_PER_PHRASE) {
+      errors.push(
+        `phrases[${phrase}]：dock-trash 有 ${files} 个，Mac 场景每个乐句最多 ${MAX_FILES_PER_PHRASE} 个`,
       );
     }
   });

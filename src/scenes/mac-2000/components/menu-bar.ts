@@ -8,6 +8,10 @@ import { aquaText, stripes, vGradient } from './paint.ts';
 
 export const MENU_BAR_HEIGHT = 22;
 const APPLE_X = 14;
+const APPLE_HEIGHT = 17;
+/** 苹果菜单标题的高亮范围（菜单打开时的蓝底）；苹果菜单从 APPLE_MENU_LEFT 垂下 */
+export const APPLE_MENU_LEFT = 4;
+const APPLE_TITLE_WIDTH = 32;
 const FIRST_MENU_X = 40;
 /** 菜单名左右各留的空白 */
 const MENU_PADDING = 10;
@@ -24,6 +28,8 @@ export interface MenuBarOptions {
 export class MenuBar {
   readonly view = new Container({ label: 'menu-bar' });
   private readonly clock: Text;
+  /** 苹果菜单打开时的蓝色标题底和白色苹果 */
+  private readonly appleHighlight: Container;
   private clockLabel = '';
 
   constructor({ width, appName, menus }: MenuBarOptions) {
@@ -41,10 +47,24 @@ export class MenuBar {
         ]),
       );
 
-    const apple = drawAppleLogo(17);
+    const apple = drawAppleLogo(APPLE_HEIGHT);
     apple.position.set(APPLE_X, 2);
 
-    this.view.addChild(bar, apple);
+    this.appleHighlight = new Container({ label: 'apple-highlight' });
+    const whiteApple = drawAppleLogo(APPLE_HEIGHT, { white: true });
+    whiteApple.position.set(APPLE_X, 2);
+    this.appleHighlight.addChild(
+      new Graphics().rect(APPLE_MENU_LEFT, 0, APPLE_TITLE_WIDTH, MENU_BAR_HEIGHT - 1).fill(
+        vGradient([
+          [0, AQUA.menu.highlightTop],
+          [1, AQUA.menu.highlightBottom],
+        ]),
+      ),
+      whiteApple,
+    );
+    this.appleHighlight.visible = false;
+
+    this.view.addChild(bar, apple, this.appleHighlight);
 
     let x = FIRST_MENU_X;
     [appName, ...menus].forEach((name, i) => {
@@ -59,6 +79,16 @@ export class MenuBar {
     this.clock.anchor.set(1, 0.5);
     this.clock.position.set(width - CLOCK_RIGHT, MENU_BAR_HEIGHT / 2);
     this.view.addChild(this.clock);
+  }
+
+  /** 苹果标志的中心（菜单栏自己的坐标），虚拟鼠标点这里打开苹果菜单 */
+  get appleCenter(): { x: number; y: number } {
+    return { x: APPLE_MENU_LEFT + APPLE_TITLE_WIDTH / 2, y: MENU_BAR_HEIGHT / 2 };
+  }
+
+  /** 苹果菜单打开时，苹果的标题底变蓝 */
+  setAppleHighlighted(highlighted: boolean): void {
+    this.appleHighlight.visible = highlighted;
   }
 
   /** 显示本机时间，例如「周四 下午3:01」。分钟变了才重画文字。 */

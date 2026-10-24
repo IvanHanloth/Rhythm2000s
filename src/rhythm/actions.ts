@@ -20,6 +20,8 @@ export const ACTION_TYPES = [
   'dock-bounce',
   'mail-new',
   'window-miniaturize',
+  'menu-apple',
+  'dock-trash',
 ] as const;
 
 export type ActionType = (typeof ACTION_TYPES)[number];
@@ -43,6 +45,8 @@ export const ACTION_LABELS: Record<ActionType, string> = {
   'dock-bounce': 'Dock 图标弹跳',
   'mail-new': '新邮件',
   'window-miniaturize': '最小化窗口',
+  'menu-apple': 'Apple menu',
+  'dock-trash': 'Trash',
 };
 
 /**
@@ -54,6 +58,8 @@ export const ACTION_LABELS: Record<ActionType, string> = {
 const TAP_OFFSETS: Partial<Record<ActionType, readonly number[]>> = {
   'desktop-refresh': [0, 0.5],
   'start-menu': [0, 0.5],
+  // Mac 苹果菜单：先点苹果、0.5 拍后点菜单项（doc/scenes/mac-2000.md）
+  'menu-apple': [0, 0.5],
   'progress-download': [2],
   'volume-mute': [0, 1],
 };

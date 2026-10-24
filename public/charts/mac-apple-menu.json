@@ -1,0 +1,106 @@
+{
+  "format": 1,
+  "id": "mac-apple-menu",
+  "title": "Apple Menu",
+  "scene": "mac-2000",
+  "bpm": 112,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [{ "beat": 0, "action": "menu-apple" }]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 2, "action": "menu-apple" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 1, "action": "menu-apple" },
+        { "beat": 2, "action": "menu-apple" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 2, "action": "menu-apple" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "menu-apple" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 2, "action": "alert-note" },
+        { "beat": 3, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 2, "action": "menu-apple" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 1.5, "action": "menu-apple" },
+        { "beat": 2.5, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 2, "action": "menu-apple" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0.5, "action": "menu-apple" },
+        { "beat": 1.5, "action": "alert-note" },
+        { "beat": 2, "action": "menu-apple" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 0.5, "action": "menu-apple" },
+        { "beat": 1.5, "action": "alert-note" },
+        { "beat": 2, "action": "menu-apple" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 1.5, "action": "menu-apple" },
+        { "beat": 2.5, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 1, "action": "menu-apple" },
+        { "beat": 2, "action": "menu-apple" },
+        { "beat": 3, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 2, "action": "menu-apple" }
+      ]
+    }
+  ]
+}

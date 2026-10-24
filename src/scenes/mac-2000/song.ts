@@ -4,7 +4,8 @@
 import type { SequencedSound } from '../../audio/sequencer.ts';
 import { createBlip, createHat, createKick, createSnare } from '../../audio/synth.ts';
 import type { Chart } from '../../rhythm/chart.ts';
-import { isMacAction, MAC_ACTIONS, type MacAction } from './action-kinds.ts';
+import { actionTapOffsets } from '../../rhythm/actions.ts';
+import { isMacAction, MAC_ACTIONS, macHandledSound, type MacAction } from './action-kinds.ts';
 import type { MacSounds } from './assets.ts';
 
 export interface MacSongSounds {
@@ -16,8 +17,10 @@ export interface MacSongSounds {
   count: AudioBuffer;
   /** 示范段各动作在拍点上的提示音 */
   actions: Record<MacAction, AudioBuffer>;
-  /** 玩家处理掉一个目标 */
+  /** 玩家处理掉一个目标（大多数动作）；各动作每一下的声音用 handledSound() */
   handled: AudioBuffer;
+  /** 按文件名取原版提示音 */
+  byName: MacSounds;
   miss: AudioBuffer;
   /** 一局结束 */
   result: AudioBuffer;
@@ -35,6 +38,7 @@ export function createMacSongSounds(context: BaseAudioContext, mac: MacSounds): 
     count: createBlip(context, { from: 880, duration: 0.05, gain: 0.5 }),
     actions,
     handled: mac.Tink,
+    byName: mac,
     miss: mac.Sosumi,
     result: mac.Hero,
   };
@@ -72,11 +76,21 @@ export function buildBackingTrack(chart: Chart, sounds: MacSongSounds): Sequence
   );
 
   for (const call of chart.calls) {
-    if (isMacAction(call.action)) {
-      track.push({ beat: call.beat, buffer: sounds.actions[call.action] });
-    }
+    if (!isMacAction(call.action)) continue;
+    const action = call.action;
+    track.push({ beat: call.beat, buffer: sounds.actions[action] });
+    // 要按两下的动作（menu-apple）：虚拟鼠标示范的第二下也在拍点上响
+    actionTapOffsets(action).forEach((offset, step) => {
+      if (step > 0)
+        track.push({ beat: call.beat + offset, buffer: handledSound(sounds, action, step) });
+    });
   }
   return track;
+}
+
+/** 这个动作第 step 下命中时的声音 */
+export function handledSound(sounds: MacSongSounds, action: MacAction, step: number): AudioBuffer {
+  return sounds.byName[macHandledSound(action, step)];
 }
 
 /** 从 start 到 end 打一段鼓点：整拍上底鼓、军鼓交替（从底鼓开始），每半拍踩镲。 */

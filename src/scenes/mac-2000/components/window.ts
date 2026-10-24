@@ -155,6 +155,14 @@ export class AquaWindow {
     this.view.addChild(edge);
   }
 
+  /** 黄色最小化按钮的中心（以窗口中心为原点，与 view 的坐标一致） */
+  get minimizeCenter(): { x: number; y: number } {
+    return {
+      x: LIGHT_X + LIGHT_PITCH - this.view.pivot.x,
+      y: TITLE_BAR_HEIGHT / 2 - this.view.pivot.y,
+    };
+  }
+
   /** 非活动窗口：三颗按钮变灰、标题字变灰、标题栏条纹变淡、投影变浅 */
   setActive(active: boolean): void {
     if (this.active === active) return;

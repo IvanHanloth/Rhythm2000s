@@ -1,7 +1,8 @@
-// 一局里各个目标的画面：提示框、文稿窗口、Dock 弹跳、Mail 未读角标，以及判定字样。
+// 一局里各个目标的画面：提示框、文稿窗口、Dock 弹跳、Mail 未读角标、苹果菜单、扔进废纸篓的文件，以及判定字样。
 // 每帧只根据当前拍位置计算，不累加帧间隔（doc/scenes/mac-2000.md「玩法」）。
 
 import { Container } from 'pixi.js';
+import { AQUA } from '../../theme/aqua.ts';
 import { BEATS } from '../../theme/tokens.ts';
 import { clamp01, easeOutBack, easeOutCubic } from '../../ui/easing.ts';
 import { createJudgementView } from '../../ui/judgement-view.ts';
@@ -9,7 +10,14 @@ import type { MacAction } from './action-kinds.ts';
 import { appIcon, type AppIconName } from './assets.ts';
 import { AquaAlert } from './components/alert.ts';
 import type { Dock } from './components/dock.ts';
-import { drawCautionIcon, drawFinderIcon } from './components/icons.ts';
+import {
+  drawCautionIcon,
+  drawDocumentIcon,
+  drawFinderIcon,
+  drawFolderIcon,
+} from './components/icons.ts';
+import { APPLE_MENU, AquaMenu } from './components/menu.ts';
+import { APPLE_MENU_LEFT, MENU_BAR_HEIGHT, type MenuBar } from './components/menu-bar.ts';
 import { aquaText } from './components/paint.ts';
 import { AquaWindow } from './components/window.ts';
 import type { JudgementRecord, MacSession, MacTarget } from './session.ts';
@@ -29,6 +37,8 @@ export const BOUNCE_DOCK_INDICES = [2, 3, 4, 5, 6, 7, 8, 9];
 /** Mail 在 Dock 里的位置 */
 export const MAIL_DOCK_INDEX = 1;
 
+type Point = { x: number; y: number };
+
 const ALERT_WIDTH = 300;
 const DOC_WIDTH = 240;
 const DOC_HEIGHT = 150;
@@ -45,6 +55,36 @@ const SHAKE_BEATS = 0.25;
 const FADE_BEATS = 0.25;
 /** 最小化缩进 Dock 的时长（拍） */
 const MINIMIZE_BEATS = 0.5;
+/** 文件飞进废纸篓的时长（拍）、落下的高度（像素） */
+const THROW_BEATS = 0.25;
+const DROP_PIXELS = 24;
+/** 苹果菜单：第二下之前多久菜单项开始高亮（虚拟鼠标移上去了）；选中后菜单项闪一下再收起（拍） */
+const MENU_HOVER_BEATS = 0.2;
+const MENU_BLINK_BEATS = 1 / 16;
+const MENU_CLOSE_BEATS = 1 / 8;
+
+/** 苹果菜单里会被点到的条目，按顺序轮换（只是画面，不打开任何东西） */
+const MENU_PICKS = [
+  'About This Mac',
+  'System Preferences…',
+  'Force Quit…',
+  'Get Mac OS X Software…',
+];
+
+/** 扔进废纸篓的文件：文稿（中间叠程序小图标）或文件夹。新增的玩家可见文字只用英文 */
+const FILES: { label: string; app: AppIconName | 'folder' }[] = [
+  { label: 'Untitled.rtf', app: 'TextEdit' },
+  { label: 'Mix Tape.mp3', app: 'iTunes' },
+  { label: 'Holiday.jpg', app: 'Preview' },
+  { label: 'Old Stuff', app: 'folder' },
+  { label: 'Homework.txt', app: 'TextEdit' },
+  { label: 'Screen Shot.pdf', app: 'Preview' },
+];
+/** 文件那一行：Dock 上方，从左往右；纵坐标是图标中心（虚拟屏幕坐标） */
+const FILE_ROW_LEFT = 120;
+const FILE_ROW_STEP = 92;
+const FILE_ROW_Y = 466;
+const FILE_ICON_SIZE = 48;
 
 type AlertAction = Extract<MacAction, `alert-${string}`>;
 
@@ -121,6 +161,13 @@ interface ScreenTarget {
   alert: AquaAlert | null;
 }
 
+interface FileTarget {
+  target: MacTarget;
+  view: Container;
+  /** 图标中心 */
+  center: Point;
+}
+
 interface ActiveJudgement {
   record: JudgementRecord;
   view: Container;
@@ -132,6 +179,11 @@ export interface TargetsViewOptions {
   /** 判定字样所在的图层（画布坐标） */
   judgementLayer: Container;
   dock: Dock;
+  menuBar: MenuBar;
+  /** 扔进废纸篓的文件所在的图层：在 Dock 之上，飞进废纸篓时不会被 Dock 挡住 */
+  fileLayer: Container;
+  /** 苹果菜单所在的图层：在菜单栏之上、虚拟鼠标之下 */
+  menuLayer: Container;
   /** 虚拟屏幕放大到画布的倍数 */
   screenScale: number;
 }
@@ -140,6 +192,9 @@ export class MacTargetsView {
   private readonly session: MacSession;
   private readonly options: TargetsViewOptions;
   private readonly screenTargets: ScreenTarget[] = [];
+  private readonly files: FileTarget[] = [];
+  private readonly menu = new AquaMenu({ entries: APPLE_MENU });
+  private readonly menuOrigin: Point = { x: APPLE_MENU_LEFT, y: MENU_BAR_HEIGHT };
   private judgementViews: ActiveJudgement[] = [];
   private shownJudgements = 0;
 
@@ -152,8 +207,44 @@ export class MacTargetsView {
         created.window.view.visible = false;
         options.windowLayer.addChild(created.window.view);
         this.screenTargets.push({ target, index, ...created });
+      } else if (target.kind === 'file') {
+        const file = FILES[(target.call.phrase * 2 + target.order) % FILES.length]!;
+        const view = createDesktopFile(file.label, file.app);
+        view.visible = false;
+        options.fileLayer.addChild(view);
+        const center = { x: FILE_ROW_LEFT + target.order * FILE_ROW_STEP, y: FILE_ROW_Y };
+        this.files.push({ target, view, center });
       }
     });
+    this.menu.view.position.set(this.menuOrigin.x, this.menuOrigin.y);
+    this.menu.view.visible = false;
+    options.menuLayer.addChild(this.menu.view);
+  }
+
+  /** 虚拟鼠标每一下要点的位置（虚拟屏幕坐标） */
+  clickPoints(event: number): Point[] {
+    const target = this.session.targets[event]!;
+    const { dock, menuBar } = this.options;
+    switch (target.kind) {
+      case 'alert':
+      case 'window': {
+        const screen = this.screenTargets.find((t) => t.index === event)!;
+        const slot = SLOTS[target.order % SLOTS.length]!;
+        const offset = screen.alert
+          ? screen.alert.defaultButtonCenter
+          : (screen.window as AquaWindow).minimizeCenter;
+        return [add(slot, offset)];
+      }
+      case 'dock':
+      case 'mail':
+        return [add(dock.view.position, dock.iconCenter(this.dockIndex(target)))];
+      case 'menu': {
+        const item = this.menu.itemCenter(this.menuPick(target)) ?? { x: 0, y: 0 };
+        return [add(menuBar.view.position, menuBar.appleCenter), add(this.menuOrigin, item)];
+      }
+      case 'file':
+        return [this.files.find((f) => f.target === target)!.center];
+    }
   }
 
   update(audioTime: number): void {
@@ -161,11 +252,17 @@ export class MacTargetsView {
     const focus = this.focusedTarget(beat);
     this.renderScreenTargets(beat, focus, audioTime);
     this.renderDock(beat);
+    this.renderMenu(beat);
+    this.renderFiles(beat);
     this.renderJudgements(beat);
   }
 
   destroy(): void {
     for (const { window } of this.screenTargets) window.destroy();
+    for (const { view } of this.files) view.destroy({ children: true });
+    this.menu.destroy();
+    this.options.menuBar.setAppleHighlighted(false);
+    this.options.dock.setTrashFull(false);
     for (const { view } of this.judgementViews) view.destroy({ children: true });
     const { dock } = this.options;
     for (const index of [...BOUNCE_DOCK_INDICES, MAIL_DOCK_INDEX]) dock.setLift(index, 0);
@@ -313,13 +410,121 @@ export class MacTargetsView {
     dock.setBadge(MAIL_DOCK_INDEX, unread, unread > 0 ? badgePop : 0);
   }
 
+  /** Dock 弹跳、新邮件用的是 Dock 上的第几个图标 */
+  private dockIndex(target: MacTarget): number {
+    return target.kind === 'mail'
+      ? MAIL_DOCK_INDEX
+      : BOUNCE_DOCK_INDICES[target.order % BOUNCE_DOCK_INDICES.length]!;
+  }
+
+  /** 这个 menu-apple 要点的菜单项 */
+  private menuPick(target: MacTarget): string {
+    return MENU_PICKS[(target.call.phrase + target.order) % MENU_PICKS.length]!;
+  }
+
+  /** 苹果菜单：同一时间最多一个；打开时菜单栏上的苹果标题变蓝 */
+  private renderMenu(beat: number): void {
+    let open = false;
+    let hot: string | null = null;
+    for (const target of this.session.targets) {
+      if (target.kind !== 'menu') continue;
+      const state = this.menuState(target, beat);
+      if (!state.open) continue;
+      open = true;
+      hot = state.hot ? this.menuPick(target) : null;
+    }
+    this.menu.view.visible = open;
+    this.menu.setHot(open ? hot : null);
+    this.options.menuBar.setAppleHighlighted(open);
+  }
+
+  /**
+   * 苹果菜单的状态。示范段：第一下打开，第二下选中，菜单项闪一下后收起。
+   * 跟打段：命中第一下才打开；第二下命中就同样闪一下收起，Miss 就一直开到乐句结束。
+   */
+  private menuState(target: MacTarget, beat: number): { open: boolean; hot: boolean } {
+    const { session } = this;
+    const phrase = session.chart.phrases[target.call.phrase]!;
+    const closed = { open: false, hot: false };
+    const [first, second] = target.clicks;
+    if (!first || !second) return closed;
+    const gap = second.beat - first.beat;
+    /** 选中那一下之后：先灭一下再亮，然后收起 */
+    const chosen = (pick: number) => {
+      const since = beat - pick;
+      if (since >= MENU_CLOSE_BEATS) return closed;
+      return { open: true, hot: since >= MENU_BLINK_BEATS };
+    };
+
+    if (beat < phrase.callEnd) {
+      const openBeat = target.call.beat;
+      const pickBeat = openBeat + gap;
+      if (beat < openBeat) return closed;
+      if (beat >= pickBeat) return chosen(pickBeat);
+      return { open: true, hot: beat >= pickBeat - MENU_HOVER_BEATS };
+    }
+    if (first.hitAt === null || beat < session.beatAt(first.hitAt)) return closed;
+    if (second.hitAt !== null && beat >= session.beatAt(second.hitAt)) {
+      return chosen(session.beatAt(second.hitAt));
+    }
+    if (beat >= phrase.end) return closed;
+    return { open: true, hot: beat >= second.beat - MENU_HOVER_BEATS };
+  }
+
+  /** 扔进废纸篓的文件；这一乐句里有文件扔进去了，废纸篓就是满的 */
+  private renderFiles(beat: number): void {
+    const { session } = this;
+    const { dock } = this.options;
+    const currentPhrase = session.chart.phrases.findIndex(
+      (p) => beat >= p.callStart && beat < p.end,
+    );
+    const trash = add(dock.view.position, dock.trashCenter());
+    let full = false;
+
+    for (const { target, view, center } of this.files) {
+      const appearBeat = target.call.beat - BEATS.windowOpen;
+      let visible = beat >= appearBeat;
+      let { x, y } = center;
+      let scale = 1;
+      let alpha = 1;
+      if (visible && target.handledAt !== null) {
+        // 沿弧线飞进废纸篓，越飞越小
+        const p = clamp01((beat - session.beatAt(target.handledAt)) / THROW_BEATS);
+        x = center.x + (trash.x - center.x) * p;
+        y = center.y + (trash.y - center.y) * p - 60 * Math.sin(Math.PI * p);
+        scale = 1 - 0.6 * p;
+        visible = p < 1;
+        if (p >= 1 && target.call.phrase === currentPhrase) full = true;
+      } else if (visible && target.missedAt !== null) {
+        // Miss：左右抖一下，留到这一乐句结束再淡出
+        const since = beat - session.beatAt(target.missedAt);
+        if (since < SHAKE_BEATS) {
+          x += Math.sin(since * Math.PI * 16) * 7 * (1 - since / SHAKE_BEATS);
+        }
+        alpha = 1 - clamp01((beat - this.phraseEnd(target)) / FADE_BEATS);
+        visible = alpha > 0;
+      } else if (visible) {
+        // 从上方落下，在示范拍点那一刻落地并轻弹一下
+        const p = (beat - appearBeat) / BEATS.windowOpen;
+        y -= DROP_PIXELS * (1 - easeOutBack(p));
+        alpha = clamp01(p * 2);
+      }
+      view.visible = visible;
+      if (!visible) continue;
+      view.position.set(x, y);
+      view.scale.set(scale);
+      view.alpha = alpha;
+    }
+    dock.setTrashFull(full);
+  }
+
   private renderJudgements(beat: number): void {
     const { session } = this;
     const { judgementLayer, screenScale } = this.options;
     for (; this.shownJudgements < session.judgements.length; this.shownJudgements++) {
       const record = session.judgements[this.shownJudgements]!;
       const view = createJudgementView(record.level);
-      const at = this.judgementAnchor(session.targets[record.target]!);
+      const at = this.judgementAnchor(session.targets[record.event]!);
       view.position.set(at.x * screenScale, at.y * screenScale - 20);
       judgementLayer.addChild(view);
       this.judgementViews.push({ record, view });
@@ -343,12 +548,16 @@ export class MacTargetsView {
   private judgementAnchor(target: MacTarget): { x: number; y: number } {
     const { dock } = this.options;
     if (target.kind === 'dock' || target.kind === 'mail') {
-      const index =
-        target.kind === 'mail'
-          ? MAIL_DOCK_INDEX
-          : BOUNCE_DOCK_INDICES[target.order % BOUNCE_DOCK_INDICES.length]!;
-      const center = dock.iconCenter(index);
+      const center = dock.iconCenter(this.dockIndex(target));
       return { x: dock.view.x + center.x, y: dock.view.y - BOUNCE_HEIGHT };
+    }
+    if (target.kind === 'menu') {
+      // 菜单右边，菜单栏下方
+      return { x: this.menuOrigin.x + this.menu.width + 60, y: this.menuOrigin.y + 50 };
+    }
+    if (target.kind === 'file') {
+      const file = this.files.find((f) => f.target === target)!;
+      return { x: file.center.x, y: file.center.y - FILE_ICON_SIZE / 2 - 4 };
     }
     const slot = SLOTS[target.order % SLOTS.length]!;
     const alert = this.screenTargets.find((t) => t.target === target)?.alert;
@@ -417,4 +626,36 @@ function createScreenTarget(target: MacTarget): { window: WindowLike; alert: Aqu
   text.position.set(8, 6);
   window.content.addChild(text);
   return { window, alert: null };
+}
+
+/** 桌面上的文件：48 像素图标，下面是白色带阴影的文件名。原点在图标中心 */
+function createDesktopFile(label: string, app: AppIconName | 'folder'): Container {
+  const view = new Container({ label: `file-${label}` });
+  const half = FILE_ICON_SIZE / 2;
+  if (app === 'folder') {
+    const folder = drawFolderIcon(FILE_ICON_SIZE);
+    folder.position.set(-half, -half);
+    view.addChild(folder);
+  } else {
+    // 文稿：白纸中间叠程序小图标
+    const page = drawDocumentIcon(FILE_ICON_SIZE);
+    page.position.set(-half, -half);
+    const badge = appIcon(app, 24);
+    badge.position.set(-12, -8);
+    view.addChild(page, badge);
+  }
+  const textY = half + 2;
+  const shadow = aquaText(label, { size: 12, bold: true, color: AQUA.desktopLabel.shadow });
+  shadow.anchor.set(0.5, 0);
+  shadow.position.set(1, textY + 1);
+  shadow.alpha = 0.6;
+  const text = aquaText(label, { size: 12, bold: true, color: AQUA.desktopLabel.text });
+  text.anchor.set(0.5, 0);
+  text.position.set(0, textY);
+  view.addChild(shadow, text);
+  return view;
+}
+
+function add(a: Point, b: Point): Point {
+  return { x: a.x + b.x, y: a.y + b.y };
 }

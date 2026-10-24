@@ -33,12 +33,15 @@ const SOUND_URLS = urlsByName(
 /** 场景用到的提示音和各自的峰值音量 */
 const SOUNDS: Record<MacSoundName, number> = {
   Basso: 0.7,
+  Blow: 0.6,
   Bottle: 0.6,
   Funk: 0.7,
   Glass: 0.6,
   Hero: 0.6,
+  Morse: 0.6,
   Ping: 0.6,
   Pop: 0.7,
+  Purr: 0.7,
   Sosumi: 0.6,
   Tink: 0.7,
 };

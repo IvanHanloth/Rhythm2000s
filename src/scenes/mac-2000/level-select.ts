@@ -9,7 +9,7 @@ import { AQUA } from '../../theme/aqua.ts';
 import { DoubleClick } from '../../ui/double-click.ts';
 import { isMacAction, MAC_ACTIONS, type MacTargetKind } from './action-kinds.ts';
 import { appIcon, type AppIconName } from './assets.ts';
-import { drawCautionIcon } from './components/icons.ts';
+import { drawCautionIcon, drawTrashIcon } from './components/icons.ts';
 import { aquaText, drawGelPill } from './components/paint.ts';
 import { PUSH_BUTTON_HEIGHT, PushButton } from './components/push-button.ts';
 import { AquaWindow, TITLE_BAR_HEIGHT } from './components/window.ts';
@@ -32,14 +32,19 @@ const KIND_LABELS: Record<MacTargetKind, string> = {
   dock: 'Dock 弹跳',
   mail: '新邮件',
   window: '最小化窗口',
+  // 2026-10-24 起新增的玩家可见文字只用英文
+  menu: 'Apple menu',
+  file: 'Trash',
 };
 
 /** 每种动作代表的图标；混用多种动作的关卡用 iTunes（混音） */
-const KIND_ICONS: Record<MacTargetKind, AppIconName | 'caution'> = {
+const KIND_ICONS: Record<MacTargetKind, AppIconName | 'caution' | 'trash'> = {
   alert: 'caution',
   dock: 'iChat',
   mail: 'Mail',
   window: 'TextEdit',
+  menu: 'System Preferences',
+  file: 'trash',
 };
 
 export interface MacLevelSelectOptions {
@@ -235,7 +240,9 @@ function levelIcon(chart: Chart, size: number): Container {
   const kinds = chartKinds(chart);
   const only = kinds.length === 1 ? kinds[0]! : null;
   const name = only ? KIND_ICONS[only] : 'iTunes';
-  return name === 'caution' ? drawCautionIcon(size) : appIcon(name, size);
+  if (name === 'caution') return drawCautionIcon(size);
+  if (name === 'trash') return drawTrashIcon(size, { full: true });
+  return appIcon(name, size);
 }
 
 // ---------- 简介窗口 ----------

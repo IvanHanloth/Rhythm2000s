@@ -43,6 +43,9 @@ export class Dock {
   readonly width: number;
   private readonly items: ItemView[] = [];
   private readonly separatorX: number;
+  private readonly trashX: number;
+  private readonly trashEmpty: Graphics;
+  private readonly trashFull: Graphics;
 
   /** 左上角在 (0, 0)；调用方负责把它放到屏幕底边居中 */
   constructor(items: readonly DockItem[]) {
@@ -102,10 +105,14 @@ export class Dock {
       .fill({ color: AQUA.white, alpha: 0.6 });
     x += SEPARATOR_WIDTH;
 
-    const trash = drawTrashIcon(DOCK_ICON_SIZE);
-    trash.position.set(x, PADDING_TOP);
+    this.trashX = x;
+    this.trashEmpty = drawTrashIcon(DOCK_ICON_SIZE);
+    this.trashFull = drawTrashIcon(DOCK_ICON_SIZE, { full: true });
+    this.trashEmpty.position.set(x, PADDING_TOP);
+    this.trashFull.position.set(x, PADDING_TOP);
+    this.trashFull.visible = false;
 
-    this.view.addChild(separator, trash, iconLayer, overlay);
+    this.view.addChild(separator, this.trashEmpty, this.trashFull, iconLayer, overlay);
   }
 
   /** 第 index 个图标中心（Dock 自己的坐标） */
@@ -116,6 +123,17 @@ export class Dock {
   /** 最小化的窗口缩进去的位置：分隔线旁边（原版的最小化窗口排在分隔线和废纸篓之间） */
   minimizeTarget(): { x: number; y: number } {
     return { x: this.separatorX, y: PADDING_TOP + DOCK_ICON_SIZE / 2 };
+  }
+
+  /** 废纸篓图标的中心（Dock 自己的坐标） */
+  trashCenter(): { x: number; y: number } {
+    return { x: this.trashX + DOCK_ICON_SIZE / 2, y: PADDING_TOP + DOCK_ICON_SIZE / 2 };
+  }
+
+  /** 废纸篓空 / 满 */
+  setTrashFull(full: boolean): void {
+    this.trashEmpty.visible = !full;
+    this.trashFull.visible = full;
   }
 
   /** 图标离开 Dock 的高度（弹跳）和落地时的挤压量（0～1） */

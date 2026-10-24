@@ -4,7 +4,7 @@
 // Aqua 界面按原版像素尺寸画在 1024×576 的虚拟屏幕上，整体放大 1.25 倍铺满画布；轮次横幅和判定字样按画布坐标画。
 // 画面每帧只根据音频时间计算，不累加帧间隔。
 
-import { Container, Graphics, Sprite } from 'pixi.js';
+import { Container, Graphics, Rectangle, Sprite } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../../game/layout.ts';
 import type { FrameInfo, Scene, SceneContext, SceneEntry, TapInfo } from '../../game/scene.ts';
 import { recordScore } from '../../game/records.ts';
@@ -27,6 +27,7 @@ import { MacResultsWindow } from './results-window.ts';
 import { MacSession } from './session.ts';
 import { createMacSongSounds, type MacSongSounds } from './song.ts';
 import { MacTargetsView } from './targets-view.ts';
+import { MacVirtualMouse } from './virtual-mouse.ts';
 
 const theme = THEMES.aqua;
 const SCREEN_SCALE = 1.25;
@@ -82,7 +83,18 @@ class Mac2000Scene implements Scene {
   private readonly levelSelect: MacLevelSelect;
   private readonly windowLayer = new Container({ label: 'windows' });
   private readonly dialogLayer = new Container({ label: 'dialogs' });
+  /** 一局里扔进废纸篓的文件，在 Dock 之上 */
+  private readonly fileLayer = new Container({ label: 'files' });
+  /** 一局里的苹果菜单，在菜单栏之上 */
+  private readonly menuLayer = new Container({ label: 'menus' });
+  /** 一局里的虚拟鼠标，在 Mac 界面最上层 */
+  private readonly pointerLayer = new Container({ label: 'pointer' });
   private readonly judgementLayer = new Container({ label: 'judgements' });
+  /**
+   * 一局里盖在画面最上面的透明层，鼠标移上去时把玩家自己的指针藏起来，免得和虚拟鼠标混在一起。
+   * 不拦截节奏输入（节奏输入在 DOM 上监听）。
+   */
+  private readonly cursorCover = new Container({ label: 'cursor-cover' });
   /** 场景自己的音效出口（结果音）；一局里的声音走 MacSession 的出口 */
   private readonly output: GainNode;
 
@@ -91,6 +103,7 @@ class Mac2000Scene implements Scene {
   private turnCues: TurnCue[] = [];
   private session: MacSession | null = null;
   private targetsView: MacTargetsView | null = null;
+  private virtualMouse: MacVirtualMouse | null = null;
   private dialog: AquaAlert | null = null;
   /** 结算窗口（doc/results.md）；不在结算时为 null */
   private results: MacResultsWindow | null = null;
@@ -126,10 +139,16 @@ class Mac2000Scene implements Scene {
       this.windowLayer,
       this.dialogLayer,
       this.dock.view,
+      this.fileLayer,
       this.menuBar.view,
+      this.menuLayer,
+      this.pointerLayer,
     );
     this.turnBanner.view.position.set(DESIGN_WIDTH / 2, BANNER_Y);
-    this.view.addChild(this.screen, this.judgementLayer, this.turnBanner.view);
+    this.cursorCover.hitArea = new Rectangle(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
+    this.cursorCover.cursor = 'none';
+    this.cursorCover.eventMode = 'none';
+    this.view.addChild(this.screen, this.judgementLayer, this.turnBanner.view, this.cursorCover);
 
     if (this.charts.length === 0) {
       this.showDialog({
@@ -161,6 +180,7 @@ class Mac2000Scene implements Scene {
     if (this.state !== 'playing' || !session) return;
     session.update(audioTime);
     this.targetsView?.update(audioTime);
+    this.virtualMouse?.update(session.beatAt(audioTime));
     this.renderTurnBanner(session.beatAt(audioTime));
     if (audioTime >= session.endTime) this.finish(session);
   }
@@ -265,8 +285,17 @@ class Mac2000Scene implements Scene {
       windowLayer: this.windowLayer,
       judgementLayer: this.judgementLayer,
       dock: this.dock,
+      menuBar: this.menuBar,
+      fileLayer: this.fileLayer,
+      menuLayer: this.menuLayer,
       screenScale: SCREEN_SCALE,
     });
+    const targetsView = this.targetsView;
+    this.virtualMouse = new MacVirtualMouse(this.session, (_, event) =>
+      targetsView.clickPoints(event),
+    );
+    this.pointerLayer.addChild(this.virtualMouse.view);
+    this.cursorCover.eventMode = 'static';
     this.state = 'playing';
   }
 
@@ -287,7 +316,7 @@ class Mac2000Scene implements Scene {
       session.judgements.map((j) => ({
         level: j.level,
         offset: j.offset,
-        phrase: session.targets[j.target]?.call.phrase ?? 0,
+        phrase: session.targets[j.event]?.call.phrase ?? 0,
       })),
     );
     const newRecord = recordScore(chart.id, summary.score);
@@ -322,6 +351,9 @@ class Mac2000Scene implements Scene {
     this.session = null;
     this.targetsView?.destroy();
     this.targetsView = null;
+    this.virtualMouse?.destroy();
+    this.virtualMouse = null;
+    this.cursorCover.eventMode = 'none';
     this.turnCues = [];
     this.turnBanner.show(null);
   }

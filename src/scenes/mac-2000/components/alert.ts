@@ -77,6 +77,16 @@ export class AquaAlert {
     );
   }
 
+  /** 默认按钮（最右边那个）的中心（以提示框中心为原点，与 view 的坐标一致） */
+  get defaultButtonCenter(): { x: number; y: number } {
+    const button = this.buttons.at(-1);
+    if (!button) return { x: 0, y: 0 };
+    return {
+      x: button.view.x + button.width / 2 - this.view.pivot.x,
+      y: button.view.y + PUSH_BUTTON_HEIGHT / 2 - this.view.pivot.y,
+    };
+  }
+
   /** 不在最前面的提示框：默认按钮变白、不再呼吸 */
   setActive(active: boolean): void {
     for (const button of this.buttons) button.setActive(active);

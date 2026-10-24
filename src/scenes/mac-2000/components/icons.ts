@@ -1,17 +1,24 @@
-// 本地素材里没有的三个图标，按原版样子用矢量画：菜单栏的蓝色苹果、Finder 笑脸、废纸篓。
+// 本地素材里没有的图标，按原版样子用矢量画：菜单栏的蓝色苹果、Finder 笑脸、废纸篓、警告三角、
+// 箭头指针、文稿和文件夹。
 // 每个函数返回左上角在 (0, 0) 的图形，内部按固定的单位坐标绘制，再整体缩放到需要的大小。
 
 import { Graphics } from 'pixi.js';
 import { AQUA } from '../../../theme/aqua.ts';
 import { hGradient, vGradient } from './paint.ts';
 
-/** 菜单栏的苹果标志：蓝色半透明果冻质感。单位坐标 20×24。 */
-export function drawAppleLogo(height: number): Graphics {
-  const { rim, top, bottom } = AQUA.apple;
-  const fill = vGradient([
-    [0, top],
-    [1, bottom],
-  ]);
+/**
+ * 菜单栏的苹果标志：蓝色半透明果冻质感。单位坐标 20×24。
+ * white：苹果菜单打开时，标题底变成蓝色，苹果画成白色（按记忆，没有对照原机核对）。
+ */
+export function drawAppleLogo(height: number, { white = false } = {}): Graphics {
+  const { top, bottom } = AQUA.apple;
+  const rim = white ? AQUA.white : AQUA.apple.rim;
+  const fill = white
+    ? AQUA.white
+    : vGradient([
+        [0, top],
+        [1, bottom],
+      ]);
   const g = new Graphics({ label: 'apple-logo' })
     // 叶子
     .moveTo(10.3, 5.6)
@@ -106,13 +113,31 @@ export function drawFinderIcon(size: number): Graphics {
   return g;
 }
 
-/** 废纸篓：10.0–10.2 的金属网篓。单位坐标 48×48。 */
-export function drawTrashIcon(size: number): Graphics {
+/** 废纸篓：10.0–10.2 的金属网篓；full 时网篓里露出揉皱的白纸。单位坐标 48×48。 */
+export function drawTrashIcon(size: number, { full = false } = {}): Graphics {
   const c = AQUA.trash;
   const top = 12;
   const bottom = 44;
-  const g = new Graphics({ label: 'trash-icon' })
-    .moveTo(9, top)
+  const g = new Graphics({ label: full ? 'trash-icon-full' : 'trash-icon' });
+  if (full) {
+    // 揉皱的纸团从篓口冒出来，画在网篓后面
+    for (const [x, y, r] of [
+      [17, 11, 7],
+      [27, 9, 8],
+      [33, 13, 6],
+      [22, 15, 7],
+    ] as const) {
+      g.circle(x, y, r).fill(c.paper).stroke({ width: 0.8, color: c.paperShade });
+    }
+    g.moveTo(14, 10)
+      .lineTo(19, 13)
+      .moveTo(24, 6)
+      .lineTo(29, 11)
+      .moveTo(31, 12)
+      .lineTo(36, 10)
+      .stroke({ width: 0.8, color: c.paperShade });
+  }
+  g.moveTo(9, top)
     .lineTo(13, bottom)
     .quadraticCurveTo(24, bottom + 3, 35, bottom)
     .lineTo(39, top)
@@ -178,5 +203,79 @@ export function drawCautionIcon(size: number): Graphics {
     .circle(32, 48, 3.4)
     .fill(c.mark);
   g.scale.set(size / 64);
+  return g;
+}
+
+/**
+ * 箭头指针（NSCursor arrowCursor）：黑色箭头、白色描边，下面一层淡淡的投影。
+ * 热点（箭头尖）在 (0, 0)，原版像素尺寸。
+ */
+export function drawArrowCursor(): Graphics {
+  const arrow = [0, 0, 0, 16, 4, 12.3, 7, 18.6, 9.6, 17.5, 6.7, 11.3, 11.6, 11.3];
+  return new Graphics({ label: 'arrow-cursor' })
+    .poly(arrow.map((v, i) => v + (i % 2 === 0 ? 1 : 1.6)))
+    .fill({ color: AQUA.shadow, alpha: 0.28 })
+    .poly(arrow)
+    .fill(AQUA.cursor.fill)
+    .stroke({ width: 1.4, color: AQUA.cursor.outline, join: 'round' });
+}
+
+/** 文稿图标：右上角折角的白纸。单位坐标 48×48；叠在中间的程序小图标由调用方放。 */
+export function drawDocumentIcon(size: number): Graphics {
+  const c = AQUA.document;
+  const left = 8;
+  const right = 40;
+  const top = 2;
+  const bottom = 46;
+  const fold = 11;
+  const g = new Graphics({ label: 'document-icon' })
+    .poly([
+      left + 1,
+      top + 1.5,
+      right - fold + 1,
+      top + 1.5,
+      right + 1,
+      top + fold + 1.5,
+      right + 1,
+      bottom + 1.5,
+      left + 1,
+      bottom + 1.5,
+    ])
+    .fill({ color: AQUA.shadow, alpha: 0.25 })
+    .poly([left, top, right - fold, top, right, top + fold, right, bottom, left, bottom])
+    .fill(c.paper)
+    .stroke({ width: 1, color: c.edge, join: 'round' })
+    .poly([right - fold, top, right - fold, top + fold, right, top + fold])
+    .fill(c.fold)
+    .stroke({ width: 1, color: c.edge, join: 'round' });
+  g.scale.set(size / 48);
+  return g;
+}
+
+/** 文件夹：10.0–10.2 的蓝色文件夹，左上角一个标签。单位坐标 48×48。 */
+export function drawFolderIcon(size: number): Graphics {
+  const c = AQUA.folder;
+  const g = new Graphics({ label: 'folder-icon' })
+    .roundRect(4, 8, 18, 8, 3)
+    .fill(c.tab)
+    .stroke({ width: 1, color: c.edge })
+    .roundRect(3, 12, 42, 32, 3)
+    .fill({ color: AQUA.shadow, alpha: 0.2 })
+    .roundRect(2, 11, 42, 32, 3)
+    .fill(
+      vGradient([
+        [0, c.top],
+        [1, c.bottom],
+      ]),
+    )
+    .stroke({ width: 1, color: c.edge })
+    .roundRect(4, 13, 38, 10, 2)
+    .fill(
+      vGradient([
+        [0, 'rgba(255,255,255,0.6)'],
+        [1, 'rgba(255,255,255,0)'],
+      ]),
+    );
+  g.scale.set(size / 48);
   return g;
 }

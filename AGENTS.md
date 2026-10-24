@@ -16,7 +16,7 @@
 
 ## 当前阶段
 
-**开始开发游戏本体**。技术栈见 [ADR 0001](doc/decisions/0001-技术栈选型.md)；游戏画布和场景结构已搭好（[ADR 0002](doc/decisions/0002-游戏画布与场景结构.md)）。Windows XP 场景有一个可玩的 [MVP「弹窗 → 关窗」](doc/prototypes/mvp.md)，输入、判定窗口、谱面都是暂定值，等试玩后调整；Mac 场景按 Mac OS X 10.0–10.2 的早期 Aqua 还原了桌面和界面部件，有提示框、Dock 弹跳、新邮件、最小化四类动作和 5 首谱面，玩法与 XP 相同（[doc/scenes/mac-2000.md](doc/scenes/mac-2000.md)）。进电脑后先在 XP 资源管理器 / Mac Finder 里用鼠标选关（[doc/level-select.md](doc/level-select.md)），一局结束弹出结算窗口（[doc/results.md](doc/results.md)）。谱面已与游戏代码分离，以 JSON 存放在 `public/charts/`（[ADR 0003](doc/decisions/0003-谱面数据格式.md)，格式见 [doc/chart-format.md](doc/chart-format.md)）。开始界面和选关是一个写实风格的 3D 街区（[ADR 0005](doc/decisions/0005-街区大厅用Three.js.md)，设计见 [doc/hub.md](doc/hub.md)），在网吧里坐到电脑前进入关卡；年代道具的模型等用户用 Tripo / Blender 制作，规格见 [doc/hub-assets.md](doc/hub-assets.md)。
+**开始开发游戏本体**。技术栈见 [ADR 0001](doc/decisions/0001-技术栈选型.md)；游戏画布和场景结构已搭好（[ADR 0002](doc/decisions/0002-游戏画布与场景结构.md)）。Windows XP 场景有一个可玩的 [MVP「弹窗 → 关窗」](doc/prototypes/mvp.md)，输入、判定窗口、谱面都是暂定值，等试玩后调整；Mac 场景按 Mac OS X 10.0–10.2 的早期 Aqua 还原了桌面和界面部件，有提示框、Dock 弹跳、新邮件、最小化、苹果菜单、废纸篓六类动作和 7 首谱面，一局里也有虚拟鼠标，玩法与 XP 相同（[doc/scenes/mac-2000.md](doc/scenes/mac-2000.md)）。进电脑后先在 XP 资源管理器 / Mac Finder 里用鼠标选关（[doc/level-select.md](doc/level-select.md)），一局结束弹出结算窗口（[doc/results.md](doc/results.md)）。谱面已与游戏代码分离，以 JSON 存放在 `public/charts/`（[ADR 0003](doc/decisions/0003-谱面数据格式.md)，格式见 [doc/chart-format.md](doc/chart-format.md)）。开始界面和选关是一个写实风格的 3D 街区（[ADR 0005](doc/decisions/0005-街区大厅用Three.js.md)，设计见 [doc/hub.md](doc/hub.md)），在网吧里坐到电脑前进入关卡；年代道具的模型等用户用 Tripo / Blender 制作，规格见 [doc/hub-assets.md](doc/hub-assets.md)。
 
 - 只使用已确定的技术栈；要引入新的运行时依赖（尤其是音频、渲染、状态管理类库）前，先向用户说明理由和取舍。
 - 已完成[延迟测试原型](doc/prototypes/latency-test.md)，下一步是在不同设备、浏览器、耳机上实测，把结果登记到该文档的「测试记录」。

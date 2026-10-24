@@ -96,8 +96,34 @@ export const AQUA = {
     darkEdge: '#0f4fb8',
     face: '#0b2754',
   },
-  /** 废纸篓（金属网篓） */
-  trash: { light: '#eef2f6', dark: '#98a3ae', wire: '#6c7783', inside: '#3e4650' },
+  /** 废纸篓（金属网篓）；paper 是装满时网篓里揉皱的纸 */
+  trash: {
+    light: '#eef2f6',
+    dark: '#98a3ae',
+    wire: '#6c7783',
+    inside: '#3e4650',
+    paper: '#fbfbf7',
+    paperShade: '#c9ccd0',
+  },
+
+  /** 下拉菜单（NSMenu）：略透明的白底，鼠标所在的条目是蓝色果冻底 */
+  menu: {
+    alpha: 0.95,
+    edge: '#8a8a8a',
+    separator: '#d2d2d2',
+    disabled: '#9a9a9a',
+    highlightTop: '#6aa6f5',
+    highlightBottom: '#1d5fd6',
+  },
+
+  /** 箭头指针：黑色箭头、白色描边 */
+  cursor: { fill: '#000000', outline: '#ffffff' },
+
+  /** 桌面上的文稿图标（白纸、折角）和文件夹（蓝色） */
+  document: { paper: '#ffffff', fold: '#d9dde3', edge: '#8c929a' },
+  folder: { top: '#a9d1ff', bottom: '#4d8fe6', tab: '#7fb4f6', edge: '#2f69bf' },
+  /** 桌面图标下的白色文件名和它的投影 */
+  desktopLabel: { text: '#ffffff', shadow: '#000000' },
 };
 
 /**
