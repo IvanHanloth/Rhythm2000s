@@ -117,9 +117,6 @@ const sceneIds = director.entries.map((e) => e.id);
  */
 let levels = buildLevels(director.entries, library.charts);
 
-/** This level was entered by sitting down in the café. Opened from a URL, Esc also goes to the café, but the hub starts at the title screen */
-let cameFromHub = false;
-
 /**
  * Two computers per scene in the café: one to play, whose card lists that computer's levels, and HackerEditor behind
  * it (doc/chart-editor.md). Their ids are the URL routes they open.
@@ -165,8 +162,6 @@ const hub = new Hub({
   cheat,
   onCoinInserted: () => cheatNotice.playDrop(),
   onPlay: (computerId) => {
-    // Esc inside the computer goes back to the café
-    cameFromHub = true;
     location.hash = computerId;
   },
 });
@@ -197,17 +192,6 @@ director.setIntroduce((chartId) => {
   });
 });
 
-const backHint = document.createElement('div');
-backHint.className = 'back-hint';
-backHint.hidden = true;
-document.body.append(backHint);
-/** Where Esc goes; the hint also shows the beat guide toggle */
-let backLabel = 'Esc: back to the café';
-function renderBackHint(): void {
-  backHint.textContent = `${backLabel} · H: Beat Guide ${settings.values.beatGuide ? 'on' : 'off'}`;
-}
-settings.onChange(renderBackHint);
-
 // H toggles the beat guide in a level; ignored on the street, where it could clash with the controls
 window.addEventListener('keydown', (event) => {
   if (event.code !== 'KeyH' || event.repeat) return;
@@ -234,7 +218,6 @@ function showRoute(): void {
   if (route.kind === 'hub') {
     director.clear();
     canvas.app.ticker.stop();
-    backHint.hidden = true;
     gameHost.style.cursor = '';
     hub.show();
     return;
@@ -245,11 +228,6 @@ function showRoute(): void {
   else director.show(route.sceneId, route.chartId);
   // PixiJS makes the canvas inherit its container's cursor, so set it on the container
   gameHost.style.cursor = director.entries.find((e) => e.id === route.sceneId)?.cursor ?? '';
-  backHint.hidden = false;
-  backLabel = cameFromHub ? 'Esc: back to the café' : 'Esc: back to the street';
-  renderBackHint();
-  // Only for this one entry: later entries from a URL don't count
-  cameFromHub = false;
 }
 
 window.addEventListener('hashchange', showRoute);
