@@ -168,6 +168,11 @@ export class AquaWindow {
     };
   }
 
+  /** A new title, e.g. when the document is renamed */
+  setTitle(title: string): void {
+    this.titleText.text = title;
+  }
+
   /** Inactive window: grey buttons and title, fainter title bar stripes, lighter shadow */
   setActive(active: boolean): void {
     if (this.active === active) return;

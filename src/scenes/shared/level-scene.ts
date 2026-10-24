@@ -9,12 +9,17 @@
 // Outside `playing` and `ready`, clicks and Space are not rhythm input; only buttons, icons and keys respond.
 // On the list the desktop's system menu opens the settings window (doc/settings.md), a modal like the results,
 // and the list imports, exports and deletes charts (doc/chart-import-export.md), reporting in message boxes.
+// In editor mode (doc/chart-editor.md) HackerEditor takes the level list's place after the "Welcome Back Hacker"
+// opening: Play and Test run the edited chart from the selected phrase, without demos, results or records, and
+// return to the editor.
 
 import { Container, Rectangle } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
 import { listErrors } from '@/game/chart-library.ts';
 import { recordScore } from '@/game/records.ts';
-import type { FrameInfo, Scene, SceneContext, TapInfo } from '@/game/scene.ts';
+import type { FrameInfo, Scene, SceneContext, SceneMode, TapInfo } from '@/game/scene.ts';
+import type { ChartEditor } from '@/editor/chart-editor.ts';
+import type { ActionType } from '@/rhythm/actions.ts';
 import type { AudioClock } from '@/audio/audio-clock.ts';
 import type { PlayerSettings } from '@/game/settings.ts';
 import type { Chart } from '@/rhythm/chart.ts';
@@ -31,9 +36,13 @@ import {
 import { BEATS, type ThemeColors } from '@/theme/tokens.ts';
 import { BEAT_GUIDE_POSITION, BeatGuideView } from '@/ui/beat-guide-view.ts';
 import { clamp01 } from '@/ui/easing.ts';
+import { HackerIntro } from '@/ui/hacker-intro.ts';
+import type { EditorPanelHandlers, HackerEditorPanel } from '@/ui/hacker-editor-panel.ts';
+import { TextEntry } from '@/ui/text-entry.ts';
 import { TurnBanner } from '@/ui/turn-banner.ts';
 import { TutorialCaption } from '@/ui/tutorial-caption.ts';
 import { SCENE_CATALOG, type SceneId } from '@/scenes/catalog.ts';
+import { EditorDesk } from './editor-desk.ts';
 import type { RoundSession } from './round-session.ts';
 
 /** How long after the results appear before Retry / Next accept input (ms), against mashing through */
@@ -69,6 +78,8 @@ interface LevelRun {
   hits: HitResult[];
   /** The beat guide was on at some point during the chart */
   assisted: boolean;
+  /** Played from HackerEditor: `watch` lets the computer do the responses. No results or records */
+  editor: { watch: boolean } | null;
 }
 
 /** The scene's level list (Explorer / Finder window) */
@@ -126,6 +137,26 @@ export interface MessageWindowOptions {
   onClose: () => void;
 }
 
+/** What a scene's HackerEditor window is given (doc/chart-editor.md) */
+export interface EditorWindowOptions {
+  editor: ChartEditor;
+  /** The scene's actions, for the palette */
+  actions: readonly ActionType[];
+  textEntry: TextEntry;
+  handlers: EditorPanelHandlers;
+  /** The window's close button: leave the computer (asking first with unsaved changes) */
+  onClose: () => void;
+}
+
+/** HackerEditor's window on the desktop, in place of the level list */
+export interface EditorWindow {
+  readonly view: Container;
+  readonly panel: HackerEditorPanel;
+  /** Inactive behind a message box: dimmed title bar, no clicks */
+  setActive(active: boolean): void;
+  destroy(): void;
+}
+
 /** A modal window on the desktop: a message box, an alert, the results or the settings window */
 export interface ModalWindow {
   destroy(): void;
@@ -156,8 +187,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   /** Judgement labels, in canvas coordinates */
   protected readonly judgementLayer = new Container({ label: 'judgements' });
   protected session: S | null = null;
-  /** Replaced by rebuildLevelList after an import or delete */
+  /** Replaced by rebuildLevelList after an import or delete; never shown in editor mode */
   protected abstract levelList: LevelList;
+  /** The level list and levels, or HackerEditor */
+  protected readonly mode: SceneMode;
 
   private readonly turnBanner: TurnBanner;
   private readonly caption: TutorialCaption;
@@ -178,11 +211,14 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   private resultDefault: () => void = () => {};
   private resultShownAt = 0;
   private destroyed = false;
+  /** HackerEditor, in editor mode once opened */
+  private desk: { desk: EditorDesk; window: EditorWindow; entry: TextEntry } | null = null;
 
   constructor(context: SceneContext, options: LevelSceneOptions) {
     this.context = context;
     this.view = new Container({ label: options.id });
     this.sceneId = options.id;
+    this.mode = context.mode;
     this.charts = this.ownCharts();
     const { theme, bannerY } = options;
     // Call: raised face like a button; response: the accent colour
@@ -241,6 +277,13 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   protected abstract openMessageWindow(options: MessageWindowOptions): ModalWindow;
   /** Replaces the level list with one built from `this.charts`, in the same place */
   protected abstract rebuildLevelList(): void;
+  /** Opens HackerEditor's window on the desktop (editor mode) */
+  protected abstract openEditorWindow(options: EditorWindowOptions): EditorWindow;
+
+  /** HackerEditor's window in editor mode; the scene shows it where the level list would be */
+  protected get editorWindow(): EditorWindow | null {
+    return this.desk?.window ?? null;
+  }
 
   /** Desktop decoration that runs regardless of state (clocks, list animations) */
   protected updateDesktop(_audioTime: number): void {}
@@ -402,6 +445,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
 
     const session = this.session;
     if (this.state !== 'playing' || !session) return;
+    if (this.run?.editor?.watch) session.autoplay(audioTime);
     session.update(audioTime);
     const beat = session.beatAt(audioTime);
     this.renderRound(session, beat, audioTime);
@@ -427,7 +471,11 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   onEscape(): boolean {
     if (this.state === 'select') {
       if (this.closeMenus()) return true;
-      if (!this.modal) return false;
+      if (!this.modal) {
+        if (!this.desk) return false;
+        if (!this.desk.window.panel.onEscape()) this.desk.desk.requestLeave();
+        return true;
+      }
       if (this.modal.onEscape) this.modal.onEscape();
       else this.closeModal();
       return true;
@@ -442,12 +490,20 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.endRound();
     this.closeModal();
+    this.desk?.entry.destroy();
     this.output.disconnect();
     this.view.destroy({ children: true });
   }
 
-  /** Opens the level the URL asked for (#scene/chart), skipping the list. Subclasses call it once built. */
+  /**
+   * Opens the level the URL asked for (#scene/chart), skipping the list; in editor mode opens HackerEditor instead.
+   * Subclasses call it once built.
+   */
   protected openRequestedLevel(): void {
+    if (this.mode === 'editor') {
+      this.openEditor();
+      return;
+    }
     const index = this.charts.findIndex((chart) => chart.id === this.context.chartId);
     if (index < 0) return;
     this.levelList.select(index);
@@ -459,13 +515,16 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.closeMenus();
     this.closeModal();
     this.levelList.setActive(false);
+    this.desk?.window.setActive(false);
     this.modal = modal;
   }
 
   protected closeModal(): void {
     this.modal?.destroy();
     this.modal = null;
-    if (this.state === 'select') this.levelList.setActive(true);
+    if (this.state !== 'select') return;
+    if (this.desk) this.desk.window.setActive(true);
+    else this.levelList.setActive(true);
   }
 
   protected playNow(buffer: AudioBuffer): void {
@@ -487,6 +546,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   private readonly onKeyDown = (event: KeyboardEvent) => {
     if (this.state === 'select' && this.modal?.onKeyDown) {
       if (event.code !== 'Escape') this.modal.onKeyDown(event);
+      return;
+    }
+    if (this.state === 'select' && !this.modal && this.desk) {
+      if (this.desk.window.panel.onKeyDown(event)) event.preventDefault();
       return;
     }
     if (event.repeat) return;
@@ -551,8 +614,67 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       nextPhrase: 0,
       hits: [],
       assisted: false,
+      editor: null,
     };
     this.advance();
+  }
+
+  /** HackerEditor's Play and Test: the chart from phrase `phrase` to the end, with no demos */
+  private async playFromEditor(chart: Chart, phrase: number, watch: boolean): Promise<void> {
+    this.closeMenus();
+    this.closeModal();
+    this.state = 'starting';
+    this.chart = chart;
+    await this.context.clock.resume();
+    if (this.destroyed || this.state !== 'starting') return;
+    this.run = {
+      stops: [],
+      demo: null,
+      retry: false,
+      passed: 0,
+      total: 0,
+      pieceStart: phrase,
+      nextPhrase: phrase,
+      hits: [],
+      assisted: false,
+      editor: { watch },
+    };
+    this.advance();
+  }
+
+  /** Editor mode: the opening plays over the desktop, then HackerEditor is ready */
+  private openEditor(): void {
+    const entry = new TextEntry();
+    const desk: EditorDesk = new EditorDesk({
+      sceneId: this.sceneId,
+      library: this.context.library,
+      chartFiles: this.context.chartFiles,
+      showMessage: (options) => this.showMessage(options),
+      closeMessage: () => this.closeModal(),
+      choose: (title, items, onPick) => editorWindow.panel.showChooser(title, items, onPick),
+      note: (text) => editorWindow.panel.setNote(text),
+      play: (chart, phrase, watch) => void this.playFromEditor(chart, phrase, watch),
+      leave: () => this.context.leave(),
+    });
+    const editorWindow = this.openEditorWindow({
+      editor: desk.editor,
+      actions: SCENE_CATALOG[this.sceneId].actions,
+      textEntry: entry,
+      handlers: desk.handlers,
+      onClose: () => {
+        if (this.state === 'select' && !this.modal) desk.requestLeave();
+      },
+    });
+    this.desk = { desk, window: editorWindow, entry };
+    this.setListVisible(true);
+    const intro = new HackerIntro(() => this.closeModal());
+    this.view.addChild(intro.view);
+    this.showModal({
+      update: () => intro.update(),
+      destroy: () => intro.destroy(),
+      // The opening is not skippable (doc/chart-editor.md)
+      onEscape: () => {},
+    });
   }
 
   /** Retry from the results: the demos were just played, so play the chart in one go */
@@ -659,6 +781,18 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
 
   /** The chart's last piece ended: record the best score and open the results */
   private finish(run: LevelRun, chart: Chart): void {
+    if (run.editor) {
+      // Back to the editor, with the test's judgements in its status line
+      const counts = { perfect: 0, good: 0, miss: 0 };
+      for (const hit of run.hits) counts[hit.level]++;
+      this.backToList();
+      if (!run.editor.watch) {
+        this.desk?.window.panel.setNote(
+          `Test: ${counts.perfect} Perfect, ${counts.good} Good, ${counts.miss} Miss`,
+        );
+      }
+      return;
+    }
     const summary = summarizeResult(run.hits);
     const assisted = run.assisted;
     const newRecord = recordScore(chart.id, summary.score, assisted);

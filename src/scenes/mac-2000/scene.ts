@@ -1,6 +1,7 @@
 // Scene: a Mac desktop from around 2000 (doc/scenes/mac-2000.md), the early Aqua of US English Mac OS X 10.0–10.2.
 // Levels are picked in a Finder window; on the list the Apple menu's "System Preferences…" opens the settings
-// window (doc/settings.md). The interface is drawn at original pixel size on a 1024×576 virtual
+// window (doc/settings.md). In editor mode HackerEditor's window takes the Finder's place (doc/chart-editor.md) and
+// the menu bar names it as the front application. The interface is drawn at original pixel size on a 1024×576 virtual
 // screen scaled 1.25× to the canvas; the turn banner and judgement labels use canvas coordinates.
 
 import { Container, Graphics, Rectangle, Sprite, type FederatedPointerEvent } from 'pixi.js';
@@ -11,6 +12,7 @@ import { AQUA } from '@/theme/aqua.ts';
 import { THEMES } from '@/theme/tokens.ts';
 import { SCENE_CATALOG } from '@/scenes/catalog.ts';
 import {
+  type EditorWindowOptions,
   type LatencyTestWindowOptions,
   LevelScene,
   type MessageWindowOptions,
@@ -23,6 +25,7 @@ import { Dock, DOCK_HEIGHT, type DockItem } from './components/dock.ts';
 import { drawCautionIcon } from './components/icons.ts';
 import { APPLE_MENU, AquaMenu, SYSTEM_PREFERENCES } from './components/menu.ts';
 import { APPLE_MENU_LEFT, MENU_BAR_HEIGHT, MenuBar } from './components/menu-bar.ts';
+import { EDITOR_TITLE, MacEditorWindow } from './editor-window.ts';
 import { MacLatencyTestWindow } from './latency-test-window.ts';
 import { MacLevelSelect } from './level-select.ts';
 import { MacMessageWindow } from './message-window.ts';
@@ -41,6 +44,8 @@ const SCREEN_HEIGHT = DESIGN_HEIGHT / SCREEN_SCALE;
 const BANNER_Y = 62;
 
 const MENUS = ['File', 'Edit', 'View', 'Go', 'Window', 'Help'];
+/** HackerEditor's menus in editor mode, a document application's usual set (decoration) */
+const EDITOR_MENUS = ['File', 'Edit', 'Window', 'Help'];
 
 /** Finder and Mail are always running; the other eight bounce for dock-bounce (BOUNCE_DOCK_INDICES in targets-view.ts) */
 const DOCK_ITEMS: DockItem[] = [
@@ -59,11 +64,17 @@ const DOCK_ITEMS: DockItem[] = [
 /** Vertical centres on the virtual screen: alerts, and the results window between menu bar and Dock */
 const DIALOG_Y = 250;
 const RESULTS_Y = 266;
+/** HackerEditor's window: nearly the whole space between the menu bar and the Dock (doc/chart-editor.md) */
+const EDITOR = { x: 8, y: MENU_BAR_HEIGHT + 1, width: SCREEN_WIDTH - 16, height: 495 };
 
 class Mac2000Scene extends LevelScene<MacSession> {
   protected levelList: MacLevelSelect;
   private readonly sounds: MacSongSounds;
-  private readonly menuBar = new MenuBar({ width: SCREEN_WIDTH, appName: 'Finder', menus: MENUS });
+  private readonly menuBar = new MenuBar(
+    this.mode === 'editor'
+      ? { width: SCREEN_WIDTH, appName: EDITOR_TITLE, menus: EDITOR_MENUS }
+      : { width: SCREEN_WIDTH, appName: 'Finder', menus: MENUS },
+  );
   private readonly dock = new Dock(DOCK_ITEMS);
   private readonly windowLayer = new Container({ label: 'windows' });
   private readonly dialogLayer = new Container({ label: 'dialogs' });
@@ -116,7 +127,7 @@ class Mac2000Scene extends LevelScene<MacSession> {
       if (event.target === this.menuLayer) this.closeMenus();
     });
 
-    if (this.charts.length === 0) this.showNoCharts();
+    if (this.charts.length === 0 && this.mode === 'levels') this.showNoCharts();
     this.openRequestedLevel();
   }
 
@@ -197,9 +208,22 @@ class Mac2000Scene extends LevelScene<MacSession> {
     return results;
   }
 
+  /** The Finder, or HackerEditor in editor mode; hidden during a round */
   protected setListVisible(visible: boolean): void {
-    this.levelList.view.visible = visible;
-    this.levelList.setActive(visible);
+    const editor = this.editorWindow;
+    this.levelList.view.visible = visible && !editor;
+    this.levelList.setActive(visible && !editor);
+    if (editor) {
+      editor.view.visible = visible;
+      editor.setActive(visible);
+    }
+  }
+
+  protected openEditorWindow(options: EditorWindowOptions): MacEditorWindow {
+    const editor = new MacEditorWindow(options, EDITOR.width, EDITOR.height);
+    editor.view.position.set(EDITOR.x + EDITOR.width / 2, EDITOR.y + EDITOR.height / 2);
+    this.screen.addChildAt(editor.view, this.screen.getChildIndex(this.levelList.view) + 1);
+    return editor;
   }
 
   protected resultSound(): AudioBuffer {

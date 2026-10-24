@@ -14,6 +14,7 @@
 | [beat-guide.md](beat-guide.md) | Beat guide: the `((((O))))` beat cue, toggled with H and flagged on scores | Draft |
 | [settings.md](settings.md) | Settings window in the XP / Mac system menus: latency calibration, skip tutorial, Beat Guide, keyboard shortcuts | Draft |
 | [chart-format.md](chart-format.md) | Chart JSON format: location, fields, action IDs, validation | Draft |
+| [chart-editor.md](chart-editor.md) | Chart editor on its own café computers: period program window, phrase-by-phrase timeline, play and test | Draft |
 | [chart-import-export.md](chart-import-export.md) | Importing charts into the browser and exporting any chart, from the level list | Draft |
 | [tech-research.md](tech-research.md) | Technical research: browser capabilities, stack comparison, risks to verify | Draft |
 | [latency-test.md](latency-test.md) | Latency test: the in-game XP / Mac test windows, time conversion, suggested calibration, test log | Draft |

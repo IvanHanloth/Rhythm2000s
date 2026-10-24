@@ -38,14 +38,30 @@ export function buildLevels(
   );
 }
 
-export type Route = { kind: 'hub' } | { kind: 'scene'; sceneId: SceneId; chartId?: string };
+export type Route =
+  | { kind: 'hub' }
+  | { kind: 'scene'; sceneId: SceneId; chartId?: string }
+  | { kind: 'editor'; sceneId: SceneId };
+
+/** First part of an editor route, `editor/<scene>` (doc/chart-editor.md) */
+export const EDITOR_ROUTE = 'editor';
+
+/** The URL route (without #) of a scene's chart editor computer */
+export function editorRoute(sceneId: SceneId): string {
+  return `${EDITOR_ROUTE}/${sceneId}`;
+}
 
 /**
  * Parses the part of the URL after #: empty or unknown goes back to the street;
- * `scene` opens a scene (it picks the chart), `scene/chart` opens one level.
+ * `scene` opens a scene (it picks the chart), `scene/chart` opens one level, `editor/scene` opens the scene's
+ * chart editor.
  */
 export function parseRoute(hash: string, sceneIds: readonly SceneId[]): Route {
   const [id, chartId] = decodeURIComponent(hash.replace(/^#/, '')).split('/');
+  if (id === EDITOR_ROUTE) {
+    const sceneId = sceneIds.find((known) => known === chartId);
+    return sceneId ? { kind: 'editor', sceneId } : { kind: 'hub' };
+  }
   const sceneId = sceneIds.find((known) => known === id);
   if (!sceneId) return { kind: 'hub' };
   return chartId ? { kind: 'scene', sceneId, chartId } : { kind: 'scene', sceneId };

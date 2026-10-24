@@ -44,6 +44,16 @@ export const AQUA = {
 
   /** Blue behind selected items in Finder */
   selection: '#3875d7',
+  /** Text field (bezeled NSTextField): white with a darker top edge, and the blue focus ring while typing */
+  edit: { top: '#8c8c8c', side: '#c3c3c3', fill: '#ffffff', focus: '#76a3e6' },
+  /** HackerEditor's lanes (doc/chart-editor.md): light grey snap lines, darker beats, Aqua blue and green blocks, problems in the close button's red */
+  hackerEditor: {
+    line: '#d3d3d3',
+    beat: '#8e8e8e',
+    call: '#82b2f0',
+    response: '#90d27e',
+    problem: '#c4291c',
+  },
 
   gel: {
     /** Default button, active window scroller thumb */

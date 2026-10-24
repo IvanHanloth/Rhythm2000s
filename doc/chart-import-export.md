@@ -2,7 +2,7 @@
 
 > Status: Draft. Decision record: [ADR 0011](decisions/0011-chart-import-export.md).
 
-Players can bring their own charts into the game and take any chart out of it, from the level list on the in-game computer ([level-select.md](level-select.md)). Files are chart JSON in the [chart format](chart-format.md), the same as the files in `public/charts/`.
+Players can bring their own charts into the game and take any chart out of it, from the level list on the in-game computer ([level-select.md](level-select.md)). Files are chart JSON in the [chart format](chart-format.md), the same as the files in `public/charts/`. Charts saved in HackerEditor ([chart-editor.md](chart-editor.md)) are stored and listed the same way as imported ones.
 
 ## Where
 
@@ -51,4 +51,3 @@ Stored imports are validated again at start-up, after the built-in charts. One t
 
 - Importing several files at once, or by dropping files on the window.
 - Sharing a chart by link.
-- An in-game chart editor.

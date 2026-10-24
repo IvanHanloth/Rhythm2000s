@@ -18,6 +18,16 @@ export const LUNA = {
   selection: '#316ac5',
   /** Shadow under desktop icon labels */
   desktopTextShadow: '#000000',
+  /** Edit control (text box): Luna's thin blue-grey border around a white field */
+  edit: { border: '#7f9db9', fill: '#ffffff' },
+  /** HackerEditor's lanes (doc/chart-editor.md), after Windows Movie Maker 2's timeline: grey lines, blue and green clips */
+  hackerEditor: {
+    line: '#c9c7ba',
+    beat: '#8a877a',
+    call: '#7aa7e8',
+    response: '#8cc97a',
+    problem: '#d0312d',
+  },
 
   window: {
     caption: [

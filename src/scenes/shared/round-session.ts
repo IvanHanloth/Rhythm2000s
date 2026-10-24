@@ -163,6 +163,22 @@ export class RoundSession<T extends RoundTarget = RoundTarget> {
     return record;
   }
 
+  /**
+   * HackerEditor's Play (doc/chart-editor.md): the computer makes every judged press on its beat, once the heard time
+   * reaches it, as a perfectly timed player would. Call every frame before update().
+   */
+  autoplay(audioTime: number): void {
+    const calibration = this.context.calibration();
+    for (const { event, step } of this.taps) {
+      const click = this.targets[event]!.clicks[step]!;
+      if (click.hitAt !== null || click.missedAt !== null) continue;
+      const time = this.timeAt(click.beat);
+      // Presses are in time order, so the rest are still ahead
+      if (time > audioTime) return;
+      this.tap(time + calibration);
+    }
+  }
+
   counts(): Record<JudgementLevel, number> {
     const counts = { perfect: 0, good: 0, miss: 0 };
     for (const judgement of this.judgements) counts[judgement.level]++;

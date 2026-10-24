@@ -12,6 +12,7 @@ import { createJudgementView } from '@/ui/judgement-view.ts';
 import { SCENE_CATALOG } from '@/scenes/catalog.ts';
 import type { Turn } from '@/scenes/shared/cursor-path.ts';
 import {
+  type EditorWindowOptions,
   type LatencyTestWindowOptions,
   LevelScene,
   type MessageWindowOptions,
@@ -21,6 +22,7 @@ import {
 import type { JudgementRecord } from '@/scenes/shared/round-session.ts';
 import { preloadXpAssets, XP_CURSOR, xpAssets } from './assets.ts';
 import { XpDesktop } from './components/desktop.ts';
+import { EDITOR_ICON, EDITOR_TITLE, XpEditorWindow } from './editor-window.ts';
 import { XpMessageBox } from './components/message-box.ts';
 import {
   WORK_AREA_HEIGHT,
@@ -105,6 +107,8 @@ const FADE_BEATS = 0.25;
 
 /** Explorer window on the virtual screen (the 1120×630 mock-up scaled to 1024×576) */
 const EXPLORER = { x: 80, y: 19, width: 864, height: 504 };
+/** HackerEditor's window: nearly the whole work area (doc/chart-editor.md) */
+const EDITOR = { x: 10, y: 6, width: 1004, height: 534 };
 
 interface ActiveJudgement {
   record: JudgementRecord;
@@ -116,7 +120,11 @@ class WindowsXpScene extends LevelScene<XpSession> {
   private readonly sounds: XpSongSounds;
   private readonly desktop = new XpDesktop();
   private readonly taskbar = new XpTaskbar({
-    tasks: [{ icon: 'folder-open', label: EXPLORER_TITLE }],
+    tasks: [
+      this.context.mode === 'editor'
+        ? { icon: EDITOR_ICON, label: EDITOR_TITLE }
+        : { icon: 'folder-open', label: EXPLORER_TITLE },
+    ],
   });
   private readonly windowLayer = new Container({ label: 'windows' });
   private readonly dialogLayer = new Container({ label: 'dialogs' });
@@ -163,7 +171,7 @@ class WindowsXpScene extends LevelScene<XpSession> {
     start.eventMode = 'static';
     start.on('pointerdown', () => this.openStartMenu());
 
-    if (this.charts.length === 0) this.showNoCharts();
+    if (this.charts.length === 0 && this.mode === 'levels') this.showNoCharts();
     this.openRequestedLevel();
   }
 
@@ -273,11 +281,26 @@ class WindowsXpScene extends LevelScene<XpSession> {
     return results;
   }
 
-  /** Explorer in front presses its taskbar button; during a round it is hidden and the button pops up */
+  /**
+   * Explorer (or HackerEditor in editor mode) in front presses its taskbar button; during a round it is hidden and
+   * the button pops up
+   */
   protected setListVisible(visible: boolean): void {
-    this.levelList.view.visible = visible;
-    this.levelList.setActive(visible);
+    const editor = this.editorWindow;
+    this.levelList.view.visible = visible && !editor;
+    this.levelList.setActive(visible && !editor);
+    if (editor) {
+      editor.view.visible = visible;
+      editor.setActive(visible);
+    }
     this.taskbar.setTaskActive(0, visible);
+  }
+
+  protected openEditorWindow(options: EditorWindowOptions): XpEditorWindow {
+    const editor = new XpEditorWindow(options, EDITOR.width, EDITOR.height);
+    editor.view.position.set(EDITOR.x, EDITOR.y);
+    this.screen.addChildAt(editor.view, this.screen.getChildIndex(this.levelList.view) + 1);
+    return editor;
   }
 
   protected resultSound(): AudioBuffer {
