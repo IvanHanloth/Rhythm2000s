@@ -54,7 +54,7 @@
 
 - 单元测试与被测文件放在一起，命名为 `*.test.ts`，从 `vite-plus/test` 导入测试 API。
 - 新增原型页面时，在 `vite.config.ts` 的 `build.rolldownOptions.input` 中登记入口。
-- `promo/` 不属于游戏构建：它用 `npx hyperframes`（版本钉在 `promo/package.json`）预览和渲染，不进游戏的 pnpm 依赖。做视频前先用 `/hyperframes` 技能。
+- `promo/` 不属于游戏构建：它用 `npx hyperframes`（版本钉在 `promo/package.json`）预览和渲染，不进游戏的 pnpm 依赖。`promo/assets` 是指向根目录 `assets/` 的符号链接，视频里用 `assets/...` 引用素材（HyperFrames 预览服务读不到工程目录以外的文件；Windows 上克隆需开启 `git config core.symlinks true`）。做视频前先用 `/hyperframes` 技能。
 
 ## 技术栈
 
