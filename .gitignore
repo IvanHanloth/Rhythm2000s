@@ -1,0 +1,77 @@
+# ==============================
+# rhythm2000s .gitignore
+# 技术栈尚未确定：以下为通用规则，选定引擎/框架后请补充对应段落。
+# ==============================
+
+# ---------- 操作系统 ----------
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ---------- 编辑器 / IDE ----------
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+
+# ---------- 环境变量与密钥 ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ---------- 日志与临时文件 ----------
+logs/
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+
+# ---------- Node / Web 前端（如采用 Web 技术栈） ----------
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+.vite/
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+*.tsbuildinfo
+coverage/
+
+# ---------- 构建产物 ----------
+dist/
+build/
+out/
+release/
+
+# ---------- 音频/美术工程的中间文件 ----------
+# 只提交导出的最终素材；工程源文件如需版本管理，建议改用 Git LFS
+*.reapeaks
+*.bak
+*.autosave
+
+# ---------- AI 助手本地配置 ----------
+# 共享的项目记忆在 memory/ 中，需要提交；以下是个人本地配置
+.claude/settings.local.json
