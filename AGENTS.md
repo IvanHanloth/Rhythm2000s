@@ -105,6 +105,7 @@ vp add <pkg>   # Add a dependency
 - Built-in commands like `dev`, `build` and `test` don't read `package.json` scripts. `vp build` only builds; use `vp run build` to include `tsc`.
 - Without a global `vp` (installation in the [Vite+ docs](https://viteplus.dev/guide)), prefix commands with `pnpm exec`, e.g. `pnpm exec vp dev`.
 - Run `vp check` and `vp test` before every commit. GitHub Actions (`.github/workflows/ci.yml`) runs check, test and build again on push.
+- Deploy: once those pass on `main`, the same workflow publishes `dist/` to GitHub Pages (<https://ivanhanloth.github.io/rhythm2000s/>). The build is served from the repository sub-path (Vite's `--base`), so files in `public/` must be fetched through `import.meta.env.BASE_URL`, never a bare `/charts/...`-style path. To try the sub-path build locally: `vp build --base /rhythm2000s/`, then `vp preview --base /rhythm2000s/`.
 
 ## Terms
 

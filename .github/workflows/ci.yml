@@ -1,10 +1,12 @@
 # Runs the pre-commit checks (AGENTS.md "Commands") on every push and PR: format / lint / types, unit tests, build.
+# Pushes to main then publish the build to GitHub Pages, so only builds that pass every check go live.
 name: CI
 
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   check:
@@ -30,5 +32,41 @@ jobs:
       - name: Unit tests (including validation of every chart in public/charts/)
         run: pnpm exec vp test
 
-      - name: Type check and build
-        run: pnpm exec vp run build
+      # Gives the sub-path Pages serves the site from: "/rhythm2000s", or "" with a custom domain
+      - name: Read GitHub Pages path
+        id: pages
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      # The same as `vp run build` (tsc, then vp build), with the Pages sub-path as Vite's base.
+      # Files in public/ are fetched through import.meta.env.BASE_URL, which follows --base.
+      - name: Type check
+        run: pnpm exec tsc
+
+      - name: Build
+        run: pnpm exec vp build --base "${{ steps.pages.outputs.base_path }}/"
+
+      - name: Upload the build for GitHub Pages
+        if: steps.pages.outcome == 'success'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    # One deploy at a time; a newer push waits rather than cancelling one already publishing
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -3,6 +3,8 @@
 A rhythm game in the style of Rhythm Heaven, set on the computer desktops of the early 2000s.
 See [AGENTS.md](AGENTS.md) for the project overview and [doc/](doc/README.md) for the design docs.
 
+Play it in the browser: <https://ivanhanloth.github.io/rhythm2000s/> (published from `main` by GitHub Actions).
+
 ## Credits
 
 Rhythm 2000s is made by [@IvanHanloth](https://github.com/IvanHanloth) and [@Pleasurecruise](https://github.com/Pleasurecruise), and was developed during the HackNotts 26 hackathon.
