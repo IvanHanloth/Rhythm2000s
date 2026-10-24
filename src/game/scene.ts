@@ -10,7 +10,7 @@ export interface FrameInfo {
   audioTime: number;
 }
 
-/** One action input (Space or a click), or one release. */
+/** One action input (Space or a click). */
 export interface TapInfo {
   /** Audio time the speakers were playing at the input (s), before calibration is subtracted. */
   audioTime: number;
@@ -46,8 +46,6 @@ export interface Scene {
   update(frame: FrameInfo): void;
   /** Player input; scenes without input can leave it out */
   onTap?(tap: TapInfo): void;
-  /** 玩家松开了空格或鼠标 / 触摸（长按动作用）；没有长按动作的场景可以不实现 */
-  onRelease?(tap: TapInfo): void;
   /**
    * The player pressed Esc. Return true if the scene handled it (e.g. going from a level back to the level list);
    * otherwise the entry point goes back to the street hub.

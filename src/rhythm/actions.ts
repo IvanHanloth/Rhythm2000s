@@ -55,40 +55,35 @@ export const ACTION_LABELS: Record<ActionType, string> = {
 };
 
 /**
- * How many presses an action takes: each press's offset (in beats) from the event's beat. Most actions take one ([0]);
- * desktop-refresh is right-click, then "Refresh" half a beat later (doc/chart-format.md, fixed interval set by the user on 2026-10-24);
- * start-menu is "start", then a menu item half a beat later (doc/scenes/windows-xp-levels.md);
- * progress-download waits 3 beats for the bar to fill (the bar works as a rest) and is clicked on the beat it fills;
- * volume-mute is pressed on the beat and released automatically 1 beat later (the release is not judged).
+ * Offsets (beats) of each press from the event's beat; most actions take a single press ([0]).
+ * Two-click actions (a click, then a menu item or button) follow half a beat apart; progress-download is
+ * clicked when its bar fills 3 beats in; the volume actions are pressed on the beat and released 1 beat later
+ * (doc/chart-format.md "Actions").
  */
 const TAP_OFFSETS: Partial<Record<ActionType, readonly number[]>> = {
   'desktop-refresh': [0, 0.5],
   'start-menu': [0, 0.5],
-  // Mac Apple menu: the Apple, then a menu item half a beat later (doc/scenes/mac-2000.md)
   'menu-apple': [0, 0.5],
-  // Mac save sheet: the close button, then "Don't Save" half a beat later;
-  // Mac volume menu: like volume-mute, released automatically 1 beat later
   'sheet-save': [0, 0.5],
-  'menu-volume': [0, 1],
   'progress-download': [3],
   'volume-mute': [0, 1],
+  'menu-volume': [0, 1],
 };
 
 /**
- * What each press is: press is a press; release is a release, held from the previous press and judged too;
- * auto is completed by the game after the previous press hits (visuals and sound as normal), not judged or scored.
- * volume-mute and menu-volume only judge the press; the release is auto (user request, 2026-10-24).
+ * Whether the player makes a press or the game completes it after the previous press hits
+ * (visuals and sound as normal, not judged or scored). volume-mute and menu-volume release by themselves.
  */
-export type TapKind = 'press' | 'release' | 'auto';
+export type TapKind = 'press' | 'auto';
 const TAP_KINDS: Partial<Record<ActionType, readonly TapKind[]>> = {
   'volume-mute': ['press', 'auto'],
   'menu-volume': ['press', 'auto'],
 };
 
-/** What the action's step-th press is */
 export function actionTapKind(action: ActionType, step: number): TapKind {
   return TAP_KINDS[action]?.[step] ?? 'press';
 }
+
 const SINGLE_TAP: readonly number[] = [0];
 
 export function actionTapOffsets(action: ActionType): readonly number[] {

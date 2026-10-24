@@ -56,11 +56,6 @@ export class SceneDirector {
     this.current?.scene.onTap?.(tap);
   }
 
-  /** The player released; forwarded to the current scene. */
-  release(tap: TapInfo): void {
-    this.current?.scene.onRelease?.(tap);
-  }
-
   /** The player pressed Esc; forwarded to the current scene, true when the scene handled it. */
   escape(): boolean {
     return this.current?.scene.onEscape?.() ?? false;
