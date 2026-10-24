@@ -7,12 +7,13 @@
 // States: select (choosing in the level list); ready (the shell shows the intro and waits for the first press);
 // starting (waiting for audio to resume); playing (a round is running); result (the results window is up).
 // Outside `playing` and `ready`, clicks and Space are not rhythm input; only buttons, icons and keys respond.
+// On the list the desktop's system menu opens the settings window (doc/settings.md), a modal like the results.
 
 import { Container, Rectangle } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
 import { recordScore } from '@/game/records.ts';
 import type { FrameInfo, Scene, SceneContext, TapInfo } from '@/game/scene.ts';
-import { loadSkipTutorial } from '@/game/settings.ts';
+import type { PlayerSettings } from '@/game/settings.ts';
 import type { Chart } from '@/rhythm/chart.ts';
 import { summarizeResult, type HitResult, type ResultSummary } from '@/rhythm/result-summary.ts';
 import { buildTurnCues, turnCueAt, type TurnCue } from '@/rhythm/turn-cue.ts';
@@ -90,11 +91,19 @@ export interface ResultsWindowOptions {
   onNext: () => void;
 }
 
-/** A modal window on the desktop: a message box, an alert or the results window */
+/** What a scene's settings window is given */
+export interface SettingsWindowOptions {
+  settings: PlayerSettings;
+  onClose: () => void;
+}
+
+/** A modal window on the desktop: a message box, an alert, the results or the settings window */
 export interface ModalWindow {
   destroy(): void;
   /** Called every frame, for windows that animate (Aqua's pulsing default button) */
   update?(audioTime: number): void;
+  /** Keys while it is open over the level list (held keys repeat); Esc is handled by the scene */
+  onKeyDown?(event: KeyboardEvent): void;
 }
 
 export interface LevelSceneOptions {
@@ -184,6 +193,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   protected abstract renderRound(session: S, beat: number, audioTime: number): void;
   /** Opens the results window on the desktop */
   protected abstract openResults(options: ResultsWindowOptions): ModalWindow;
+  /** Opens the settings window on the desktop */
+  protected abstract openSettingsWindow(options: SettingsWindowOptions): ModalWindow;
   /** Shows or hides the level list window */
   protected abstract setListVisible(visible: boolean): void;
   /** Sound played when a round's results appear */
@@ -194,6 +205,28 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
 
   /** A level was picked in the list, before its intro */
   protected onLevelOpened(): void {}
+
+  /** Closes the desktop's open menus (Start menu, Apple menu); true if one was open */
+  protected closeMenus(): boolean {
+    return false;
+  }
+
+  /** The level list is up with nothing over it: the desktop's own menus may open */
+  protected get desktopIdle(): boolean {
+    return this.state === 'select' && !this.modal;
+  }
+
+  /** The system menu's settings item: opens the settings window over the level list */
+  protected openSettings(): void {
+    this.closeMenus();
+    if (!this.desktopIdle) return;
+    this.showModal(
+      this.openSettingsWindow({
+        settings: this.context.settings,
+        onClose: () => this.closeModal(),
+      }),
+    );
+  }
 
   update({ audioTime }: FrameInfo): void {
     this.updateDesktop(audioTime);
@@ -218,9 +251,17 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     else if (this.state === 'ready' && this.chart) void this.start(this.chart);
   }
 
-  /** Esc in a level or on the results goes back to the list; on the list the shell returns to the street */
+  /**
+   * Esc in a level or on the results goes back to the list. On the list it closes an open menu or window first;
+   * with nothing open the shell returns to the street.
+   */
   onEscape(): boolean {
-    if (this.state === 'select') return false;
+    if (this.state === 'select') {
+      if (this.closeMenus()) return true;
+      if (!this.modal) return false;
+      this.closeModal();
+      return true;
+    }
     this.backToList();
     return true;
   }
@@ -245,6 +286,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
 
   /** Shows a modal window on the desktop (replacing any other); the level list goes inactive behind it */
   protected showModal(modal: ModalWindow): void {
+    this.closeMenus();
     this.closeModal();
     this.levelList.setActive(false);
     this.modal = modal;
@@ -273,6 +315,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
 
   /** List: arrow keys select, Enter starts. Demo: Tab skips the tutorial. Results: Enter / Space press the default button, R retries */
   private readonly onKeyDown = (event: KeyboardEvent) => {
+    if (this.state === 'select' && this.modal?.onKeyDown) {
+      if (event.code !== 'Escape') this.modal.onKeyDown(event);
+      return;
+    }
     if (event.repeat) return;
     if (this.state === 'select' && !this.modal) {
       const move = LIST_MOVES[event.code];
@@ -280,6 +326,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
         event.preventDefault();
         this.levelList.move(...move);
       } else if (event.code === 'Enter') {
+        this.closeMenus();
         this.openLevel(this.levelList.selectedIndex);
       }
     } else if (this.state === 'playing') {
@@ -302,6 +349,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       return;
     }
     this.endRound();
+    this.closeMenus();
     this.closeModal();
     this.chart = chart;
     this.state = 'ready';
@@ -317,7 +365,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     // The scene may have been left, or Esc pressed, while audio resumed
     if (this.destroyed || this.state !== 'starting') return;
 
-    const stops = withTutorial && !loadSkipTutorial() ? tutorialStops(chart) : [];
+    const stops =
+      withTutorial && !this.context.settings.values.skipTutorial ? tutorialStops(chart) : [];
     this.run = {
       stops,
       demo: null,
@@ -490,7 +539,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
    */
   private renderBeatGuide(beat: number): void {
     const demo = this.run !== null && this.run.demo !== null;
-    const on = demo || (this.context.beatGuide?.() ?? false);
+    const on = demo || this.context.settings.values.beatGuide;
     this.beatGuide.view.visible = on;
     if (!on) return;
     this.beatGuide.update(beat);

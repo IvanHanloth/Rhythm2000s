@@ -39,7 +39,7 @@ For chart authors: the first phrase is real content, so don't write a teaching p
 - **Resuming**: the first piece keeps the chart's count-in; later pieces start with one count-in bar. Only the last piece has the outro.
 - **Caption**: right of the "Follow me / Your turn" banner, "Practice 2 of 4" (or "Try again") over the action name and how to handle it, counted over the whole level, with "Tab: skip" at its top right; texts in `src/rhythm/tutorial.ts`.
 - **When**: entering a level from the list or "Next Level"; "Retry" on the results skips the demos.
-- **Skip toggle**: in the dev panel until the settings page exists, saved in the browser.
+- **Skip toggle**: "Skip tutorial" in the settings window ([settings.md](settings.md)), saved in the browser.
 
 ## Rule 2: easy to hard
 

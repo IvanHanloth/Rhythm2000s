@@ -28,5 +28,5 @@ Details in [level-design.md](../level-design.md), the setting in [settings.md](.
 
 - Existing charts must be lengthened past 1 minute and reordered easy to hard (deferred to the polish phase).
 - Scenes support an unscored, repeatable demo stage; results and best scores count only the chart.
-- A settings page is needed for "Skip tutorial", taking over the latency calibration from the dev panel.
+- A settings page is needed for "Skip tutorial", taking over the latency calibration from the dev panel (built in [ADR 0009](0009-settings-in-system-menus.md)).
 - The chart format is unchanged: the demo is derived from the chart's actions.

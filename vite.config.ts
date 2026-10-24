@@ -23,8 +23,6 @@ export default defineConfig({
       input: {
         main: 'index.html',
         latency: 'prototypes/latency/index.html',
-        xpComponents: 'prototypes/xp-components/index.html',
-        macComponents: 'prototypes/mac-components/index.html',
       },
     },
   },

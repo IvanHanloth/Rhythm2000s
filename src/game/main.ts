@@ -7,22 +7,13 @@ import { Hub } from '@/hub/hub.ts';
 import { mac2000Scene } from '@/scenes/mac-2000/scene.ts';
 import { windowsXpScene } from '@/scenes/windows-xp/scene.ts';
 import { fetchChartFromSite, loadCharts } from './chart-loader.ts';
-import { createDevPanel } from './dev-panel.ts';
 import { GameCanvas } from './game-canvas.ts';
 import { listenForTaps } from './input.ts';
 import { LevelIntro } from './level-intro.ts';
 import { buildLevels, formatBestScore, parseRoute } from './levels.ts';
 import { loadBestAssisted, loadBestScore } from './records.ts';
 import { SceneDirector } from './scene-director.ts';
-import {
-  clampCalibrationMs,
-  loadBeatGuide,
-  loadCalibrationMs,
-  loadSkipTutorial,
-  saveBeatGuide,
-  saveCalibrationMs,
-  saveSkipTutorial,
-} from './settings.ts';
+import { PlayerSettings } from './settings.ts';
 
 const host = document.querySelector<HTMLElement>('#game');
 if (!host) throw new Error('Game container #game not found');
@@ -34,9 +25,8 @@ const [canvas, { charts, errors: chartErrors }] = await Promise.all([
   loadCharts(fetchChartFromSite(import.meta.env.BASE_URL)),
 ]);
 for (const error of chartErrors) console.error(error);
-let calibrationMs = loadCalibrationMs();
-/** Beat guide on or off (doc/beat-guide.md), toggled with H in a level */
-let beatGuide = loadBeatGuide();
+/** Calibration, "Skip tutorial" and the beat guide (doc/settings.md); the in-game settings window and H change them */
+const settings = new PlayerSettings();
 
 const scenes = [windowsXpScene, mac2000Scene];
 // Load scene assets after the canvas exists (PixiJS texture loading is safer once the renderer is initialised)
@@ -47,8 +37,8 @@ const HUB_ROUTE = 'street';
 
 const director = new SceneDirector(canvas.stage, scenes, {
   clock,
-  calibration: () => calibrationMs / 1000,
-  beatGuide: () => beatGuide,
+  calibration: () => settings.values.calibrationMs / 1000,
+  settings,
   charts,
   leave: () => {
     location.hash = HUB_ROUTE;
@@ -118,8 +108,9 @@ document.body.append(backHint);
 /** Where Esc goes; the hint also shows the beat guide toggle */
 let backLabel = 'Esc: back to the café';
 function renderBackHint(): void {
-  backHint.textContent = `${backLabel} · H: Beat Guide ${beatGuide ? 'on' : 'off'}`;
+  backHint.textContent = `${backLabel} · H: Beat Guide ${settings.values.beatGuide ? 'on' : 'off'}`;
 }
+settings.onChange(renderBackHint);
 
 // H toggles the beat guide in a level; ignored on the street, where it could clash with the controls
 window.addEventListener('keydown', (event) => {
@@ -128,9 +119,7 @@ window.addEventListener('keydown', (event) => {
   if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)
     return;
   if (parseRoute(location.hash, sceneIds).kind === 'hub') return;
-  beatGuide = !beatGuide;
-  saveBeatGuide(beatGuide);
-  renderBackHint();
+  settings.setBeatGuide(!settings.values.beatGuide);
 });
 
 window.addEventListener('keydown', (event) => {
@@ -140,22 +129,6 @@ window.addEventListener('keydown', (event) => {
   if (!director.escape()) location.hash = HUB_ROUTE;
 });
 
-const panel = createDevPanel({
-  scenes: [{ id: HUB_ROUTE, label: 'Street (title / level select)' }, ...director.entries],
-  onSelectScene: (id) => {
-    location.hash = id;
-  },
-  calibrationMs,
-  onCalibrationChange: (value) => {
-    calibrationMs = clampCalibrationMs(value);
-    saveCalibrationMs(calibrationMs);
-    return calibrationMs;
-  },
-  skipTutorial: loadSkipTutorial(),
-  onSkipTutorialChange: saveSkipTutorial,
-});
-document.body.append(panel.element);
-
 const gameHost: HTMLElement = host;
 
 // The URL's #scene or #scene/chart decides where to go, so a refresh stays put
@@ -163,7 +136,6 @@ function showRoute(): void {
   const route = parseRoute(location.hash, sceneIds);
   intro.hide();
   if (route.kind === 'hub') {
-    panel.setActive(HUB_ROUTE);
     director.clear();
     canvas.app.ticker.stop();
     backHint.hidden = true;
@@ -171,7 +143,6 @@ function showRoute(): void {
     hub.show();
     return;
   }
-  panel.setActive(route.sceneId);
   hub.hide();
   canvas.app.ticker.start();
   director.show(route.sceneId, route.chartId);
@@ -180,7 +151,7 @@ function showRoute(): void {
   backHint.hidden = false;
   backLabel = cameFromHub ? 'Esc: back to the café' : 'Esc: back to the street';
   renderBackHint();
-  // Only for this one entry: later entries from the dev panel or a URL don't count
+  // Only for this one entry: later entries from a URL don't count
   cameFromHub = false;
 }
 

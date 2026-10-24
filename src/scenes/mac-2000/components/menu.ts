@@ -128,6 +128,14 @@ export class AquaMenu {
     return { x: this.width / 2, y: item.top + MENU_ITEM_HEIGHT / 2 };
   }
 
+  /** The enabled item without a submenu at height y (menu coordinates), if any */
+  itemAt(y: number): string | null {
+    const item = this.items.find(
+      (i) => !i.spec.disabled && !i.spec.submenu && y >= i.top && y < i.top + MENU_ITEM_HEIGHT,
+    );
+    return item?.spec.label ?? null;
+  }
+
   /** The hovered item, white on blue gel; null for none */
   setHot(label: string | null): void {
     if (label === this.hot) return;
@@ -172,12 +180,16 @@ function bottomRoundedRect(
     .closePath();
 }
 
+/** The Apple menu item that opens the settings window (doc/settings.md) */
+export const SYSTEM_PREFERENCES = 'System Preferences…';
+
 /** The Apple menu (10.2 English items, from memory, not checked on a real machine) */
+
 export const APPLE_MENU: readonly MenuEntry[] = [
   { label: 'About This Mac' },
   { label: 'Get Mac OS X Software…' },
   'separator',
-  { label: 'System Preferences…' },
+  { label: SYSTEM_PREFERENCES },
   { label: 'Dock', submenu: true },
   { label: 'Location', submenu: true },
   'separator',

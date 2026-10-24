@@ -24,4 +24,4 @@ The game needs one canvas. The XP and Mac desktops are not separate programs but
 ## Consequences
 
 - `src/game/` holds the canvas, scene interface and director; `src/scenes/<scene>/` the scenes; `src/theme/` the colours.
-- `index.html` is the game entry; the prototype list moved into a dev panel on the canvas, which also switches scenes.
+- `index.html` is the game entry; the prototype list moved into a dev panel on the canvas, which also switches scenes. (The dev panel was later removed, see [ADR 0009](0009-settings-in-system-menus.md).)

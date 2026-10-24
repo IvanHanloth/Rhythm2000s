@@ -1,23 +1,59 @@
 # Settings
 
-> Status: Draft. The user asked for a settings page; where it lives and how it looks are not decided.
+> Status: Draft. The window's layout and the calibration step are a first pass, to tune after play-testing.
 
-The only player setting so far is the input calibration, editable in the dev panel (`src/game/settings.ts`, saved in the browser). The user asked for a proper settings page.
+Player settings live in a settings window on the in-game computer, opened from each system's own menu while the level list is up ([level-select.md](level-select.md)). Values are kept in `src/game/settings.ts` and saved in the browser; when reading or writing fails (private mode etc.) they fall back to their defaults.
+
+## Opening it
+
+| Scene | Menu | Window |
+| --- | --- | --- |
+| Windows XP | "start" → "Control Panel" (right column, above "Printers and Faxes") | "Rhythm 2000s Settings", a Luna dialog |
+| Mac | Apple menu → "System Preferences…" | "Rhythm 2000s Preferences", an Aqua window |
+
+- The Start button and the Apple only open their menus on the level list; during a round the menus belong to the chart's actions.
+- A click outside an open menu, or Esc, closes it. The menus' other items close the menu and do nothing else.
+- While the settings window is open the level list is inactive. "OK", the close button, Enter / Return or Esc close it. Changes apply and are saved at once; there is no Cancel.
 
 ## Settings
 
-| Setting | Default | Effect | Status |
-| --- | --- | --- | --- |
-| Skip tutorial | Off | Levels play the chart in one go without any action demo; Tab during a demo skips the rest of that level's demos (demo rules in [level-design.md](level-design.md#rule-1-the-system-demonstrates-every-action-before-it-is-used)). Lives in the dev panel until the settings page exists | Decided, in the dev panel for now |
-| Beat Guide | Off | The `((((O))))` beat cue in a round, toggled with H in a level, see [beat-guide.md](beat-guide.md). Scores set with it on are marked "Beat Guide" | Decided, toggled with H |
-| Input latency calibration | 0 ms | Offset subtracted when judging, within ±300 ms; the existing value, to move to the settings page | Exists, to move |
+| Setting | Default | Effect |
+| --- | --- | --- |
+| Input latency calibration | 0 ms | Offset subtracted when judging, within ±300 ms; positive means the player presses late. A slider, with ← / → for 1 ms steps; the latency test's "suggested calibration" can be used directly |
+| Skip tutorial | Off | Levels play the chart in one go without any action demo; Tab during a demo skips the rest of that level's demos (demo rules in [level-design.md](level-design.md#rule-1-the-system-demonstrates-every-action-before-it-is-used)) |
+| Beat Guide | Off | Whether levels show the `((((O))))` beat cue, see [beat-guide.md](beat-guide.md). The same saved value H toggles in a level, so the check box and H always agree. Scores set with it on are marked "Beat Guide" |
 
-Settings are saved in the browser; when reading or writing fails (private mode etc.) they fall back to their defaults, as the calibration does now.
+## Keyboard shortcuts
+
+The window lists every shortcut in the game (texts in `src/game/shortcuts.ts`):
+
+| Where | Key | Does |
+| --- | --- | --- |
+| Street | W A S D / arrow keys | Walk |
+| | Shift | Run |
+| | Mouse | Look around (click the screen first) |
+| | E | Examine; sit down at a computer; continue a conversation |
+| | Enter | Start, on the title screen |
+| | Esc | Pause; stand up when seated |
+| Level list | Arrow keys | Select a level |
+| | Enter | Play the selected level |
+| | Esc | Back to the café |
+| In a level | Space / click | Do the action |
+| | H | Beat Guide on / off |
+| | Tab | Skip the remaining practice |
+| | Esc | Back to the level list |
+| Results | Enter | Next Level (Retry on the last level) |
+| | R | Retry |
+| | Esc | Back to the level list |
+
+## Development shortcuts
+
+There is no dev panel. Scenes and levels open straight from the URL (`#windows-xp`, `#mac-2000/<chart id>`, `#street`), see AGENTS.md.
 
 ## Candidates / open questions
 
 > Ideas only, not decided.
 
-- Where the page lives: in the 3D street (title screen menu), on the computer (XP's Control Panel / Mac's System Preferences), or both. The [main screen designs](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB) include a "Settings" board for reference.
-- The "Adjust latency calibration…" link in the results window (see [results.md](results.md)) points to the settings page.
+- The "Adjust latency calibration…" link in the results window (see [results.md](results.md)) could open this window.
+- A settings board on the title screen in the street as well (the [main screen designs](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB) have one for reference).
 - Other possible settings: volume (music / effects), judgement labels, full screen.

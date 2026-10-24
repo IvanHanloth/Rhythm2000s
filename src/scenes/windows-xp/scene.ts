@@ -1,8 +1,9 @@
-// Scene: the Windows XP desktop (doc/scenes/windows-xp.md). Levels are picked in an Explorer window.
+// Scene: the Windows XP desktop (doc/scenes/windows-xp.md). Levels are picked in an Explorer window; on the list,
+// "start" opens the Start menu, whose "Control Panel" opens the settings window (doc/settings.md).
 // The XP interface is drawn at original pixel size on a 1024×576 virtual screen scaled up to the canvas;
 // the turn banner and judgement labels use canvas coordinates.
 
-import { Container } from 'pixi.js';
+import { Container, Rectangle } from 'pixi.js';
 import type { SceneContext, SceneEntry } from '@/game/scene.ts';
 import type { Chart } from '@/rhythm/chart.ts';
 import { BEATS, THEMES } from '@/theme/tokens.ts';
@@ -10,7 +11,11 @@ import { clamp01, easeOutBack } from '@/ui/easing.ts';
 import { createJudgementView } from '@/ui/judgement-view.ts';
 import { SCENE_CATALOG } from '@/scenes/catalog.ts';
 import type { Turn } from '@/scenes/shared/cursor-path.ts';
-import { LevelScene, type ResultsWindowOptions } from '@/scenes/shared/level-scene.ts';
+import {
+  LevelScene,
+  type ResultsWindowOptions,
+  type SettingsWindowOptions,
+} from '@/scenes/shared/level-scene.ts';
 import type { JudgementRecord } from '@/scenes/shared/round-session.ts';
 import { preloadXpAssets, XP_CURSOR, xpAssets } from './assets.ts';
 import { XpDesktop } from './components/desktop.ts';
@@ -21,11 +26,13 @@ import {
   XP_SCREEN_HEIGHT,
   XP_SCREEN_WIDTH,
 } from './components/screen.ts';
+import { CONTROL_PANEL, XpStartMenu } from './components/start-menu.ts';
 import { XpTaskbar } from './components/taskbar.ts';
 import { isDialogKind, type DialogKind } from './dialog-kinds.ts';
 import { EXPLORER_TITLE, XpLevelSelect } from './level-select.ts';
 import { XpResultsWindow } from './results-window.ts';
 import { XpSession, type XpTarget } from './session.ts';
+import { XpSettingsWindow } from './settings-window.ts';
 import { ShellTargetsView, windowSlotIndex } from './shell-targets-view.ts';
 import { createXpSongSounds, type XpSongSounds } from './song.ts';
 import { VirtualMouse } from './virtual-mouse.ts';
@@ -109,8 +116,11 @@ class WindowsXpScene extends LevelScene<XpSession> {
   });
   private readonly windowLayer = new Container({ label: 'windows' });
   private readonly dialogLayer = new Container({ label: 'dialogs' });
+  /** The Start menu the player opens on the level list, above the taskbar */
+  private readonly menuLayer = new Container({ label: 'menus' });
   /** Virtual mouse and context menu, on top of the XP interface */
   private readonly pointerLayer = new Container({ label: 'pointer' });
+  private startMenu: XpStartMenu | null = null;
 
   /** One message box per chart event; null for events that are not message boxes */
   private popups: (XpMessageBox | null)[] = [];
@@ -143,8 +153,18 @@ class WindowsXpScene extends LevelScene<XpSession> {
       this.windowLayer,
       this.dialogLayer,
       this.taskbar.view,
+      this.menuLayer,
       this.pointerLayer,
     );
+
+    // A click anywhere outside the open Start menu closes it, Start included (the original toggles)
+    this.menuLayer.eventMode = 'static';
+    this.menuLayer.on('pointerdown', (event) => {
+      if (event.target === this.menuLayer) this.closeMenus();
+    });
+    const start = this.taskbar.startButton.view;
+    start.eventMode = 'static';
+    start.on('pointerdown', () => this.openStartMenu());
 
     if (this.charts.length === 0) this.showNoCharts();
     this.openRequestedLevel();
@@ -228,6 +248,42 @@ class WindowsXpScene extends LevelScene<XpSession> {
 
   protected resultSound(): AudioBuffer {
     return this.sounds.result;
+  }
+
+  protected openSettingsWindow(options: SettingsWindowOptions): XpSettingsWindow {
+    const settings = new XpSettingsWindow(options);
+    settings.view.position.set(XP_SCREEN_WIDTH / 2, WORK_AREA_HEIGHT / 2);
+    this.dialogLayer.addChild(settings.view);
+    return settings;
+  }
+
+  protected override closeMenus(): boolean {
+    if (!this.startMenu) return false;
+    this.startMenu.destroy();
+    this.startMenu = null;
+    this.menuLayer.hitArea = null;
+    this.taskbar.startButton.setPressed(false);
+    return true;
+  }
+
+  /** Only on the level list; during a round the Start menu belongs to the start-menu action */
+  private openStartMenu(): void {
+    if (this.startMenu || !this.desktopIdle) return;
+    const menu = new XpStartMenu({
+      onSelect: (label) => {
+        this.playNow(this.sounds.menuCommand);
+        this.closeMenus();
+        if (label === CONTROL_PANEL) this.openSettings();
+      },
+    });
+    menu.view.position.set(0, WORK_AREA_HEIGHT - menu.height);
+    // Clicks on the menu's own face (user bar, gaps) keep it open
+    menu.view.eventMode = 'static';
+    menu.view.hitArea = new Rectangle(0, 0, menu.width, menu.height);
+    this.menuLayer.hitArea = new Rectangle(0, 0, XP_SCREEN_WIDTH, XP_SCREEN_HEIGHT);
+    this.menuLayer.addChild(menu.view);
+    this.taskbar.startButton.setPressed(true);
+    this.startMenu = menu;
   }
 
   /** Error box in the middle of the screen; its button hovers orange and darkens when pressed, like the original */

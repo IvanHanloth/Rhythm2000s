@@ -1,6 +1,7 @@
 // XP Start menu: blue user bar with an orange rule; white left column (pinned, frequent, "All Programs"),
 // light blue right column (system folders and tools); blue footer with "Log Off" and "Turn Off Computer".
-// Hovered items are white on blue. Items without a local icon are left out. Origin at the top left.
+// Hovered items are white on blue. Items without a local icon are left out, except "Control Panel" (it opens the
+// settings, doc/settings.md), whose icon is drawn as vectors. Origin at the top left.
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -17,7 +18,13 @@ const BODY_PADDING = 6;
 const SEPARATOR_HEIGHT = 9;
 const ALL_PROGRAMS_HEIGHT = 30;
 
+/** Label of the item that opens the settings window */
+export const CONTROL_PANEL = 'Control Panel';
+/** Icon name drawn by drawControlPanelIcon rather than loaded */
+const CONTROL_PANEL_ICON = 'control-panel';
+
 interface ItemSpec {
+  /** File name under assets/reference/windows-xp/icons/, or CONTROL_PANEL_ICON */
   icon: string;
   label: string;
   /** Grey second line of a pinned item, e.g. "Internet Explorer" */
@@ -46,6 +53,7 @@ const RIGHT: Entry[] = [
   { icon: 'my-computer', label: 'My Computer', bold: true },
   'separator',
   { icon: 'network-global', label: 'My Network Places' },
+  { icon: CONTROL_PANEL_ICON, label: CONTROL_PANEL },
   { icon: 'printer', label: 'Printers and Faxes' },
   'separator',
   { icon: 'help', label: 'Help and Support' },
@@ -255,8 +263,7 @@ export class XpStartMenu {
     const hot = new Graphics().rect(inset, 0, width, height).fill(LUNA.selection);
     hot.visible = false;
 
-    const sprite = new Sprite(xpAssets().icon(spec.icon));
-    sprite.setSize(iconSize);
+    const sprite = itemIcon(spec.icon, iconSize);
     sprite.position.set(inset + 4, Math.round((height - iconSize) / 2));
 
     const textColor = side === 'right' ? LUNA.startMenu.rightText : LUNA.ink;
@@ -313,4 +320,40 @@ function addSeparator(
   line.y = y;
   column.addChild(line);
   return y + SEPARATOR_HEIGHT;
+}
+
+function itemIcon(name: string, size: number): Container {
+  if (name === CONTROL_PANEL_ICON) return drawControlPanelIcon(size);
+  const sprite = new Sprite(xpAssets().icon(name));
+  sprite.setSize(size);
+  return sprite;
+}
+
+/**
+ * Stand-in for the Control Panel icon, which isn't among the local assets: a small Luna window holding
+ * coloured applet tiles and a slider, drawn on a 24 px grid and scaled to `size`.
+ */
+function drawControlPanelIcon(size: number): Container {
+  const c = LUNA.startMenu.controlPanelIcon;
+  const g = new Graphics()
+    .roundRect(1, 3, 22, 19, 2)
+    .fill(c.frame)
+    .rect(2, 7, 20, 14)
+    .fill(c.face)
+    .rect(4, 9, 6, 5)
+    .fill(c.tileRed)
+    .rect(11, 9, 6, 5)
+    .fill(c.tileGreen)
+    .rect(4, 15, 6, 4)
+    .fill(c.tileYellow)
+    .rect(11, 16, 9, 2)
+    .fill(c.slider)
+    .rect(17, 14, 3, 6)
+    .fill(c.frame)
+    .rect(18, 9, 2, 5)
+    .fill(c.tileGreen);
+  const icon = new Container({ label: 'control-panel-icon' });
+  icon.addChild(g);
+  icon.scale.set(size / 24);
+  return icon;
 }

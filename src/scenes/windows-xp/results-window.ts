@@ -1,52 +1,30 @@
 // Results window (doc/results.md): a Luna window around the shared results panel (src/ui/results-panel.ts),
 // with clickable "Retry", "Levels" and "Next Level" buttons. Origin at the centre for the pop-up animation.
 
-import { Container, Graphics } from 'pixi.js';
+import { Container } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
 import type { ResultsWindowOptions } from '@/scenes/shared/level-scene.ts';
 import { createResultsPanel, type ResultsKit } from '@/ui/results-panel.ts';
 import { BUTTON_HEIGHT, XpButton } from './components/button.ts';
 import { CAPTION_HEIGHT, FRAME_WIDTH, XpWindowFrame } from './components/window-frame.ts';
 import { xpText } from './components/xp-text.ts';
+import {
+  wireXpButton,
+  XP_GROUP_INSET,
+  XP_PANEL_MUTED,
+  xpGroupBox,
+  xpPanelText,
+} from './panel-kit.ts';
 
 export const RESULTS_WIDTH = 688;
 export const RESULTS_HEIGHT = 448;
 const PADDING = 14;
-/** Luna group box: thin light grey rounded border, blue title set into the top edge */
-const GROUP_BORDER = '#d0d0bf';
-const GROUP_TITLE = '#0046d5';
 
 const kit: ResultsKit = {
-  text: (text, { size, bold, color, wrapWidth, lineHeight }) =>
-    xpText(text, {
-      fontSize: size,
-      fontWeight: bold ? '700' : '400',
-      fill: color ?? LUNA.ink,
-      ...(lineHeight !== undefined && { lineHeight }),
-      ...(wrapWidth !== undefined && {
-        wordWrap: true,
-        wordWrapWidth: wrapWidth,
-        breakWords: true,
-      }),
-    }),
-  groupBox(title, width, height) {
-    const view = new Container({ label: `group-${title}` });
-    const label = xpText(title, { fill: GROUP_TITLE });
-    const top = Math.round(label.height / 2);
-    const box = new Graphics()
-      .roundRect(0.5, top + 0.5, width - 1, height - top - 1, 3)
-      .stroke({ width: 1, color: GROUP_BORDER })
-      // Back the title with the window face to break the border line
-      .rect(6, 0, Math.ceil(label.width) + 6, label.height)
-      .fill(LUNA.face);
-    label.position.set(9, 0);
-    const inner = new Container({ label: 'inner' });
-    inner.position.set(10, top + 14);
-    view.addChild(box, label, inner);
-    return { view, inner };
-  },
-  groupInset: { x: 20, y: 30 },
-  muted: '#57533f',
+  text: xpPanelText,
+  groupBox: xpGroupBox,
+  groupInset: XP_GROUP_INSET,
+  muted: XP_PANEL_MUTED,
   accent: LUNA.selection,
 };
 
@@ -99,7 +77,7 @@ export class XpResultsWindow {
       button.view.position.set(right, buttonsTop);
       right -= 6;
       const enabled = label !== 'Next Level' || options.hasNext;
-      if (enabled) wireButton(button, onTap);
+      if (enabled) wireXpButton(button, onTap);
       else button.view.alpha = 0.45;
       client.addChild(button.view);
     }
@@ -110,16 +88,4 @@ export class XpResultsWindow {
   destroy(): void {
     this.view.destroy({ children: true });
   }
-}
-
-/** Hover turns orange and pressing darkens, like the original */
-function wireButton(button: XpButton, onTap: () => void): void {
-  button.view.eventMode = 'static';
-  button.view.on('pointerover', () => button.setHot(true));
-  button.view.on('pointerout', () => {
-    button.setHot(false);
-    button.setPressed(false);
-  });
-  button.view.on('pointerdown', () => button.setPressed(true));
-  button.view.on('pointertap', onTap);
 }

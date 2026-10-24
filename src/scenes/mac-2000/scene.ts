@@ -1,23 +1,30 @@
 // Scene: a Mac desktop from around 2000 (doc/scenes/mac-2000.md), the early Aqua of US English Mac OS X 10.0–10.2.
-// Levels are picked in a Finder window. The interface is drawn at original pixel size on a 1024×576 virtual
+// Levels are picked in a Finder window; on the list the Apple menu's "System Preferences…" opens the settings
+// window (doc/settings.md). The interface is drawn at original pixel size on a 1024×576 virtual
 // screen scaled 1.25× to the canvas; the turn banner and judgement labels use canvas coordinates.
 
-import { Container, Graphics, Sprite } from 'pixi.js';
+import { Container, Graphics, Rectangle, Sprite, type FederatedPointerEvent } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
 import type { SceneContext, SceneEntry } from '@/game/scene.ts';
 import type { Chart } from '@/rhythm/chart.ts';
 import { AQUA } from '@/theme/aqua.ts';
 import { THEMES } from '@/theme/tokens.ts';
 import { SCENE_CATALOG } from '@/scenes/catalog.ts';
-import { LevelScene, type ResultsWindowOptions } from '@/scenes/shared/level-scene.ts';
+import {
+  LevelScene,
+  type ResultsWindowOptions,
+  type SettingsWindowOptions,
+} from '@/scenes/shared/level-scene.ts';
 import { macAssets, preloadMacAssets } from './assets.ts';
 import { AquaAlert } from './components/alert.ts';
 import { Dock, DOCK_HEIGHT, type DockItem } from './components/dock.ts';
 import { drawCautionIcon } from './components/icons.ts';
-import { MenuBar } from './components/menu-bar.ts';
+import { APPLE_MENU, AquaMenu, SYSTEM_PREFERENCES } from './components/menu.ts';
+import { APPLE_MENU_LEFT, MENU_BAR_HEIGHT, MenuBar } from './components/menu-bar.ts';
 import { MacLevelSelect } from './level-select.ts';
 import { MacResultsWindow } from './results-window.ts';
 import { MacSession } from './session.ts';
+import { MacSettingsWindow } from './settings-window.ts';
 import { createMacSongSounds, type MacSongSounds } from './song.ts';
 import { MacTargetsView } from './targets-view.ts';
 import { MacVirtualMouse } from './virtual-mouse.ts';
@@ -58,8 +65,10 @@ class Mac2000Scene extends LevelScene<MacSession> {
   private readonly dialogLayer = new Container({ label: 'dialogs' });
   /** Files thrown in the Trash, above the Dock */
   private readonly fileLayer = new Container({ label: 'files' });
-  /** The Apple menu, above the menu bar */
+  /** The Apple menu (the menu-apple action's, or the player's on the level list), above the menu bar */
   private readonly menuLayer = new Container({ label: 'menus' });
+  /** The Apple menu the player opened on the level list */
+  private appleMenu: AquaMenu | null = null;
   /** The virtual mouse, on top of the Mac interface */
   private readonly pointerLayer = new Container({ label: 'pointer' });
   private targetsView: MacTargetsView | null = null;
@@ -90,6 +99,22 @@ class Mac2000Scene extends LevelScene<MacSession> {
       this.menuLayer,
       this.pointerLayer,
     );
+
+    // The Apple opens its menu on the level list; a click anywhere outside the open menu closes it, the Apple included
+    const apple = new Container({ label: 'apple-hit' });
+    apple.eventMode = 'static';
+    apple.hitArea = new Rectangle(
+      APPLE_MENU_LEFT,
+      0,
+      this.menuBar.appleCenter.x * 2 - APPLE_MENU_LEFT * 2,
+      MENU_BAR_HEIGHT,
+    );
+    apple.on('pointerdown', () => this.openAppleMenu());
+    this.menuBar.view.addChild(apple);
+    this.menuLayer.eventMode = 'static';
+    this.menuLayer.on('pointerdown', (event) => {
+      if (event.target === this.menuLayer) this.closeMenus();
+    });
 
     if (this.charts.length === 0) this.showNoCharts();
     this.openRequestedLevel();
@@ -150,6 +175,46 @@ class Mac2000Scene extends LevelScene<MacSession> {
 
   protected resultSound(): AudioBuffer {
     return this.sounds.result;
+  }
+
+  protected openSettingsWindow(options: SettingsWindowOptions): MacSettingsWindow {
+    const settings = new MacSettingsWindow(options);
+    settings.view.position.set(SCREEN_WIDTH / 2, RESULTS_Y);
+    this.dialogLayer.addChild(settings.view);
+    return settings;
+  }
+
+  protected override closeMenus(): boolean {
+    if (!this.appleMenu) return false;
+    this.appleMenu.destroy();
+    this.appleMenu = null;
+    this.menuLayer.hitArea = null;
+    this.menuBar.setAppleHighlighted(false);
+    return true;
+  }
+
+  /** Only on the level list; during a round the Apple menu belongs to the menu-apple action */
+  private openAppleMenu(): void {
+    if (this.appleMenu || !this.desktopIdle) return;
+    const menu = new AquaMenu({ entries: APPLE_MENU });
+    menu.view.position.set(APPLE_MENU_LEFT, MENU_BAR_HEIGHT);
+    menu.view.eventMode = 'static';
+    menu.view.hitArea = new Rectangle(0, 0, menu.width, menu.height);
+    const itemUnder = (event: FederatedPointerEvent) =>
+      menu.itemAt(menu.view.toLocal(event.global).y);
+    menu.view.on('pointermove', (event) => menu.setHot(itemUnder(event)));
+    menu.view.on('pointerout', () => menu.setHot(null));
+    menu.view.on('pointertap', (event) => {
+      const item = itemUnder(event);
+      if (!item) return;
+      this.playNow(this.sounds.byName.Tink);
+      this.closeMenus();
+      if (item === SYSTEM_PREFERENCES) this.openSettings();
+    });
+    this.menuLayer.hitArea = new Rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    this.menuLayer.addChild(menu.view);
+    this.menuBar.setAppleHighlighted(true);
+    this.appleMenu = menu;
   }
 
   private showNoCharts(): void {

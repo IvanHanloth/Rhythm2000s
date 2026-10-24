@@ -28,4 +28,4 @@ The design only shows the look, not the rules; this is the first version, to be 
   1. An overall line for the rating.
   2. With Misses, the phrases they were in (up to 3); without, "No mistakes.".
   3. When the average hit offset is over 20 ms (with at least 4 hits), a note that timing runs early / late and a suggestion to recalibrate; otherwise that the timing shows no clear bias.
-- The design's "Adjust latency calibration…" link waits for the settings screen; the calibration is still set in the dev panel.
+- The design's "Adjust latency calibration…" link is not built; the calibration is set in the settings window ([settings.md](settings.md)).

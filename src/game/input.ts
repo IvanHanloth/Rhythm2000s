@@ -35,7 +35,7 @@ export function listenForTaps(
   window.addEventListener('keydown', (event) => {
     if (event.code !== 'Space' || event.repeat) return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
-    // Space on the dev panel's inputs and buttons belongs to the browser
+    // Space on form controls (the latency link, hub buttons) belongs to the browser
     if (isFormControl(event.target)) return;
     // Keep Space from scrolling the page
     event.preventDefault();

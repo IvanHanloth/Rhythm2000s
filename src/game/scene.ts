@@ -4,6 +4,7 @@ import type { Container } from 'pixi.js';
 import type { AudioClock } from '@/audio/audio-clock.ts';
 import type { Chart } from '@/rhythm/chart.ts';
 import type { SceneId } from '@/scenes/catalog.ts';
+import type { PlayerSettings } from './settings.ts';
 
 export interface FrameInfo {
   /** Audio time the speakers are playing right now (s, AudioContext timeline). Draw only from this; never accumulate frame deltas. */
@@ -22,10 +23,10 @@ export interface SceneContext {
   /** Player calibration (s); positive means the player presses late. Subtracted from input times when judging */
   calibration(): number;
   /**
-   * Whether the beat guide is on (doc/beat-guide.md); the player toggles it with H and scenes read it every frame.
-   * Absent in unit tests and prototype pages, where it counts as off.
+   * Player settings (doc/settings.md): the beat guide and "Skip tutorial" are read when needed, and the settings
+   * window changes them. Calibration is read through calibration() above.
    */
-  beatGuide?(): boolean;
+  settings: PlayerSettings;
   /** Every loaded, validated chart; scenes pick theirs by chart.scene */
   charts: readonly Chart[];
   /** Leave the scene and go back to the street hub ("Back" in the level select) */
@@ -35,7 +36,7 @@ export interface SceneContext {
   /**
    * Called before a level starts: the shell shows the level intro (title, tempo, widgets, best score, how to play).
    * The player's first Space or click dismisses it; that press still reaches the scene, which then starts.
-   * When absent (unit tests, prototype pages) the scene starts straight away.
+   * When absent (unit tests) the scene starts straight away.
    */
   introduce?(chartId: string): void;
 }

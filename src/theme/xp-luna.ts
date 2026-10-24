@@ -106,6 +106,8 @@ export const LUNA = {
       [1, '#ffffff'],
     ] as GradientStops,
     check: '#21a121',
+    /** Orange inner ring while the mouse is over the box */
+    hot: '#f8b33f',
   },
 
   /** Progress bar (msctls_progress32): thin grey rounded border, white track, green blocks */
@@ -258,6 +260,15 @@ export const LUNA = {
     headerText: '#ffffff',
     headerTextShadow: '#00000099',
     footerHot: '#ffffff33',
+    /** Vector stand-in for the Control Panel icon (start-menu.ts): window frame, face, applet tiles, slider groove */
+    controlPanelIcon: {
+      frame: '#2f62c8',
+      face: '#f4f1e4',
+      tileRed: '#e0503a',
+      tileGreen: '#3c9a3c',
+      tileYellow: '#e8b52e',
+      slider: '#9a9a8c',
+    },
     allProgramsArrow: [
       [0, '#7bd97b'],
       [0.5, '#35a235'],

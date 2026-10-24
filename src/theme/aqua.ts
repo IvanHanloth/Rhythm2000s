@@ -125,7 +125,7 @@ export const AQUA = {
   /** iChat 1.0 speech bubble: light blue gradient, slightly darker edge */
   chatBubble: { top: '#e3f0ff', bottom: '#b9d6fb', edge: '#7da5d8' },
 
-  /** Vertical slider (volume menu): grey groove, blue gel knob */
+  /** Sliders (volume menu, settings window): grey groove, blue gel knob */
   slider: {
     trackDark: '#9a9a9a',
     trackLight: '#dcdcdc',

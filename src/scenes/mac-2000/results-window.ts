@@ -1,43 +1,24 @@
 // Results window (doc/results.md): a pinstriped Aqua window around the shared results panel (src/ui/results-panel.ts),
 // with clickable "Retry", "Levels" and "Next Level" push buttons at the bottom right; the default is blue and pulses. Origin at the centre.
 
-import { Container, Graphics } from 'pixi.js';
+import type { Container } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
 import type { ResultsWindowOptions } from '@/scenes/shared/level-scene.ts';
 import { createResultsPanel, type ResultsKit } from '@/ui/results-panel.ts';
 import { aquaText } from './components/paint.ts';
 import { PUSH_BUTTON_HEIGHT, PushButton } from './components/push-button.ts';
 import { AquaWindow, TITLE_BAR_HEIGHT } from './components/window.ts';
+import { MAC_GROUP_INSET, macGroupBox, macPanelText, wirePushButton } from './panel-kit.ts';
 
 export const RESULTS_WIDTH = 688;
 export const RESULTS_HEIGHT = 448;
 const PADDING_X = 18;
 const PADDING_Y = 14;
 
-/** Aqua group box: translucent white, thin grey rounded border, bold title inside at the top left */
 const kit: ResultsKit = {
-  text: (text, { size, bold, color, wrapWidth, lineHeight }) =>
-    aquaText(text, {
-      size,
-      ...(bold !== undefined && { bold }),
-      ...(color !== undefined && { color }),
-      ...(wrapWidth !== undefined && { wrapWidth }),
-      ...(lineHeight !== undefined && { lineHeight }),
-    }),
-  groupBox(title, width, height) {
-    const view = new Container({ label: `group-${title}` });
-    const box = new Graphics()
-      .roundRect(0.5, 0.5, width - 1, height - 1, 6)
-      .fill({ color: AQUA.white, alpha: 0.4 })
-      .stroke({ width: 1, color: AQUA.separator });
-    const label = aquaText(title, { size: 12, bold: true });
-    label.position.set(10, 7);
-    const inner = new Container({ label: 'inner' });
-    inner.position.set(10, 30);
-    view.addChild(box, label, inner);
-    return { view, inner };
-  },
-  groupInset: { x: 20, y: 40 },
+  text: macPanelText,
+  groupBox: macGroupBox,
+  groupInset: MAC_GROUP_INSET,
   muted: AQUA.inkSoft,
   accent: AQUA.selection,
 };
@@ -97,17 +78,8 @@ export class MacResultsWindow {
       right -= button.width;
       button.view.position.set(right, buttonsTop);
       right -= 12;
-      if (enabled) {
-        button.view.eventMode = 'static';
-        button.view.on('pointerdown', () => (button.view.alpha = 0.75));
-        button.view.on('pointerout', () => (button.view.alpha = 1));
-        button.view.on('pointertap', () => {
-          button.view.alpha = 1;
-          onTap();
-        });
-      } else {
-        button.view.alpha = 0.45;
-      }
+      if (enabled) wirePushButton(button, onTap);
+      else button.view.alpha = 0.45;
       this.buttons.push(button);
       content.addChild(button.view);
     }

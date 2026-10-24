@@ -22,7 +22,7 @@ A beat cue shown during a round, shaped like `((((O))))`: the centre dot pulses 
 ## Toggle
 
 - Always shown during the system demo ([level-design.md](level-design.md#rule-1-the-system-demonstrates-every-action-before-it-is-used)) to introduce it; after that it follows the player's toggle.
-- **H** toggles it in a level, off by default. The state is saved in the browser (off if storage fails, like other [settings](settings.md)).
+- **H** toggles it in a level, off by default; the "Beat Guide" check box in the [settings](settings.md) window sets the same value. The state is saved in the browser (off if storage fails, like other settings).
 - The back hint at the bottom left shows the state, e.g. "Esc: back to the café · H: Beat Guide off".
 
 ## Recording scores
@@ -35,5 +35,4 @@ A beat cue shown during a round, shaped like `((((O))))`: the centre dot pulses 
 ## Candidates / open questions
 
 - How far ahead arcs appear, their spacing and screen position.
-- A toggle on the settings page as well.
 - Ranking assisted scores separately.

@@ -18,13 +18,13 @@ The reference is **US English Windows XP SP2 with the Luna blue theme**; interfa
 
 ### Widget list
 
-Code in `src/scenes/windows-xp/components/`; the [XP widget gallery](../../prototypes/xp-components/index.html) ("Prototype: XP widgets" in the dev panel) opens each one with its sound.
+Code in `src/scenes/windows-xp/components/`.
 
 | Widget | Original | Contents |
 | --- | --- | --- |
 | Desktop | Desktop | Bliss scaled to cover; "My Documents", "My Computer", "My Network Places", "Internet Explorer" down the top left, "Recycle Bin" at the bottom right; 32 px icons with shadowed white labels |
 | Taskbar | `Shell_TrayWnd` | 30 px blue gradient bar, the green "start" button (lowercase bold italic, `windows-logo.png` flag), the tray on the right |
-| Start menu | XP-style Start menu | Blue user bar (`user.png`) and orange rule; white left column (Internet, E-mail, Windows Media Player, Windows Messenger, Notepad, Paint, Calculator, Minesweeper, "All Programs"); light blue right column (My Documents, My Pictures, My Music, My Computer, My Network Places, Printers and Faxes, Help and Support, Search, Run...); blue footer with "Log Off" and "Turn Off Computer"; hovered items white on blue |
+| Start menu | XP-style Start menu | Blue user bar (`user.png`) and orange rule; white left column (Internet, E-mail, Windows Media Player, Windows Messenger, Notepad, Paint, Calculator, Minesweeper, "All Programs"); light blue right column (My Documents, My Pictures, My Music, My Computer, My Network Places, Control Panel, Printers and Faxes, Help and Support, Search, Run...); blue footer with "Log Off" and "Turn Off Computer"; hovered items white on blue |
 | Tray | `TrayNotifyWnd` | Light blue gradient with network (`network-neighborhood.png`), Messenger, the speaker (`speaker.png`, a red "no" sign when muted) and a 12-hour clock in local time ("5:49 PM") |
 | Tray balloon | Balloon `tooltips_class32` | Pale yellow rounded balloon, tail pointing at the tray icon, bold title with an icon, close button at the top right |
 | Volume control | The pop-up from the tray speaker | "Volume", a vertical slider with ticks on both sides, a "Mute" check box; releasing the slider beeps at the new volume like the original |
@@ -69,7 +69,7 @@ All from the original files in `assets/reference/windows-xp/sounds/`. Leading si
 | Miss | Default Beep (clicking outside a modal dialog) | `Windows XP Ding.wav` |
 | Round ends, results open | — | `tada.wav` |
 | Start menu item clicked | Menu Command | `Windows XP Menu Command.wav` |
-| Volume slider released (gallery) | Default Beep | `Windows XP Ding.wav` |
+| Volume slider released | Default Beep | `Windows XP Ding.wav` |
 | `desktop-refresh` right-click / Refresh | Silent originally; the navigation click / Menu Command (provisional) | `Windows XP Start.wav` / `Windows XP Menu Command.wav` |
 | `balloon-info` appears / closed | Balloon / the navigation click | `Windows XP Balloon.wav` / `Windows XP Start.wav` |
 | `window-minimize` opens / minimised | Restore Up / Minimize | `Windows XP Restore.wav` / `Windows XP Minimize.wav` |
@@ -111,7 +111,7 @@ Provisional:
 | Missing | Instead |
 | --- | --- |
 | Luna theme bitmaps (title bars, buttons, Start button, check boxes, sliders from `luna.msstyles`) | Vector gradients in the original colours |
-| Icons for "Control Panel", "My Recent Documents", "Set Program Access and Defaults" | Those Start menu items are left out |
+| Icons for "Control Panel", "My Recent Documents", "Set Program Access and Defaults" | "Control Panel" (it opens the [settings](../settings.md)) uses a vector stand-in for its icon; the other two are left out |
 | Trebuchet MS for title bars | The system's copy, falling back to Tahoma; the UI uses the local Tahoma |
 
 ## Actions

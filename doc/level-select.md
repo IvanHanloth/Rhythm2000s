@@ -28,6 +28,7 @@ Seated in café ── E ──► level list on the computer ── double-clic
 | Select a level | Click its icon | Click its icon |
 | Start | Double-click the icon, or "Play this level" in the task pane | Double-click the icon, or "Start" in the Info window |
 | Back to the café | Toolbar "Back" | Toolbar "Back", or "Back" in the Info window |
+| Settings ([settings.md](settings.md)) | "start" → "Control Panel" | Apple menu → "System Preferences…" |
 | Keyboard | Arrow keys select, Enter starts | Same |
 
 Clicks on the level list never count as rhythm input, and Space doesn't start a level, to avoid accidents. Once a round starts, Space or a click anywhere is rhythm input as usual.
@@ -35,7 +36,7 @@ Clicks on the level list never count as rhythm input, and Space doesn't start a 
 ## Provisional (first version, all adjustable)
 
 - **The level list is every chart of the computer's scene** (charts in `public/charts/` with that `scene`, in `index.json` order). The design's locked "???" levels, best rating and high score are placeholders: unlocking and records aren't decided ([hub.md](hub.md) "Open questions"), so they aren't shown.
-- The design's task pane links "View best scores" and "Calibrate latency" wait for the results and settings screens.
+- The design's task pane links "View best scores" and "Calibrate latency" are not built; settings open from the system menu, see [settings.md](settings.md).
 - Level details: song title, actions used, tempo (BPM), phrase count, length.
 - Icons follow the chart's actions: one action's icon when it uses one, a "remix" icon when it mixes several (a program window on XP, iTunes on Mac).
 - A results window follows each round, with retry, back to the list or straight to the next level, see [results.md](results.md).
