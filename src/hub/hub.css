@@ -163,7 +163,9 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: min(560px, calc(100% - 32px));
+  width: min(600px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
   box-sizing: border-box;
   padding: 16px 20px;
   border: 1px solid var(--hub-line);
@@ -184,6 +186,17 @@
   flex-direction: column;
   gap: 6px;
   line-height: 1.5;
+}
+
+.hub-credits-heading {
+  margin: 12px 0 6px;
+  font-weight: 700;
+}
+
+.hub-credits .hub-credits-legal {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--hub-ink-muted);
 }
 
 .hub-credits a {

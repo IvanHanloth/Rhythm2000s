@@ -240,7 +240,7 @@ export class HubOverlay {
   }
 
   /**
-   * Credits and asset attribution. The whale girl model is CC BY 4.0 and must be credited in game with a note of changes (assets/README.md).
+   * Makers, asset attribution and legal notice (doc/hub.md). The whale girl model is CC BY 4.0 and must be credited in game with a note of changes (assets/README.md).
    */
   private buildCredits(): void {
     const link = (text: string, href: string) => {
@@ -250,7 +250,30 @@ export class HubOverlay {
       a.rel = 'noopener';
       return a;
     };
-    const items: (string | HTMLElement)[][] = [
+    const list = (rows: (string | HTMLElement)[][]) => {
+      const ul = el('ul', 'hub-credits-list');
+      for (const parts of rows) {
+        const li = el('li', '');
+        li.append(...parts);
+        ul.append(li);
+      }
+      return ul;
+    };
+    const paragraph = (...parts: (string | HTMLElement)[]) => {
+      const p = el('p', '');
+      p.append(...parts);
+      return p;
+    };
+    const makers = paragraph(
+      'Made by ',
+      link('@IvanHanloth', 'https://github.com/IvanHanloth'),
+      ' and ',
+      link('@Pleasurecruise', 'https://github.com/Pleasurecruise'),
+      ' during the HackNotts 26 hackathon. Source code: ',
+      link('github.com/IvanHanloth/rhythm2000s', 'https://github.com/IvanHanloth/rhythm2000s'),
+      '.',
+    );
+    const assets: (string | HTMLElement)[][] = [
       [
         'DeepSeek whale girl 3D model: Manny / ningfangtianwai-pixel, ',
         link('AI Girls 3D', 'https://github.com/ningfangtianwai-pixel/ai-girls-3d'),
@@ -263,17 +286,13 @@ export class HubOverlay {
         link('Poly Haven', 'https://polyhaven.com/'),
         ' (CC0).',
       ],
-      [
-        'Windows XP and Mac OS interface artwork and sounds are © Microsoft and Apple. This project is for academic use only.',
-      ],
       ['Sources for all other assets are listed in assets/README.md in the repository.'],
     ];
-    const list = el('ul', 'hub-credits-list');
-    for (const parts of items) {
-      const li = el('li', '');
-      li.append(...parts);
-      list.append(li);
-    }
+    const legal = [
+      'Microsoft, Windows and Windows XP are trademarks or registered trademarks of Microsoft Corporation. Apple, Mac, Mac OS and Aqua are trademarks of Apple Inc., registered in the U.S. and other countries. Rhythm Heaven is a trademark of Nintendo.',
+      'The Windows XP and Mac OS interface artwork, icons, sounds and other materials reproduced in this game are the property of Microsoft Corporation and Apple Inc. respectively, and all rights in them remain with their owners. They are used solely for non-commercial academic purposes.',
+      'Rhythm 2000s is an independent project and is not affiliated with, sponsored by or endorsed by Microsoft Corporation, Apple Inc. or Nintendo.',
+    ];
     this.credits.append(
       el('div', 'hub-credits-title', 'Credits'),
       el(
@@ -281,7 +300,11 @@ export class HubOverlay {
         '',
         'Rhythm 2000s — a Rhythm Heaven-style rhythm game about everyday computing in the early 2000s.',
       ),
-      list,
+      makers,
+      el('div', 'hub-credits-heading', 'Assets'),
+      list(assets),
+      el('div', 'hub-credits-heading', 'Legal notice'),
+      ...legal.map((text) => el('p', 'hub-credits-legal', text)),
       button('Close', 'hub-button', () => this.toggleCredits()),
     );
     this.credits.hidden = true;
