@@ -12,6 +12,7 @@ import {
   type Rank,
   type ResultSummary,
 } from '@/rhythm/result-summary.ts';
+import { JUDGE_WINDOWS } from '@/rhythm/judge.ts';
 import { BEAT_GUIDE_COLORS, FONT_FAMILIES, JUDGEMENT_COLORS } from '@/theme/tokens.ts';
 
 export interface PanelTextStyle {
@@ -262,7 +263,7 @@ function histogram(bins: readonly number[], width: number, height: number): Cont
   bins.forEach((count, i) => {
     const x = padding + i * (barWidth + gap);
     const barHeight = count === 0 ? 2 : Math.max(4, (count / max) * maxBar);
-    const inPerfect = Math.abs(i - half) * OFFSET_BIN_MS <= 40;
+    const inPerfect = Math.abs(i - half) * OFFSET_BIN_MS <= JUDGE_WINDOWS.perfect * 1000;
     const color =
       count === 0 ? '#c8c8c8' : inPerfect ? JUDGEMENT_COLORS.perfect : JUDGEMENT_COLORS.good;
     g.roundRect(x, height - 1 - barHeight, barWidth, barHeight, Math.min(3, barWidth / 2)).fill(

@@ -34,7 +34,7 @@ Official levels demonstrate each action right before the phrase that first uses 
 ## Judging (to be refined)
 
 - Initial grades: Perfect / Good / Miss; exact windows to be set after prototype testing.
-- The MVP uses Perfect ±45 ms and Good ±100 ms; pressing 100–200 ms before a target counts as a Miss, so mashing can't guess, see [prototypes/mvp.md](prototypes/mvp.md#judging-rules).
+- Judging uses Perfect ±60 ms and Good ±130 ms (widened from ±45 / ±100 ms after play-testing); pressing 130–250 ms before a target counts as a Miss, so mashing can't guess, see [prototypes/mvp.md](prototypes/mvp.md#judging-rules).
 - Judging follows the audio playback time.
 - Input latency calibration is needed (the Rhythm Heaven series has a similar setting).
 

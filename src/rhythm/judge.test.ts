@@ -4,10 +4,10 @@ import { levelForOffset, JUDGE_WINDOWS, ResponseJudge } from './judge.ts';
 describe('levelForOffset', () => {
   it('grades by absolute offset, boundaries included', () => {
     expect(levelForOffset(0, JUDGE_WINDOWS)).toBe('perfect');
-    expect(levelForOffset(-0.045, JUDGE_WINDOWS)).toBe('perfect');
-    expect(levelForOffset(0.046, JUDGE_WINDOWS)).toBe('good');
-    expect(levelForOffset(-0.1, JUDGE_WINDOWS)).toBe('good');
-    expect(levelForOffset(0.101, JUDGE_WINDOWS)).toBeNull();
+    expect(levelForOffset(-0.06, JUDGE_WINDOWS)).toBe('perfect');
+    expect(levelForOffset(0.061, JUDGE_WINDOWS)).toBe('good');
+    expect(levelForOffset(-0.13, JUDGE_WINDOWS)).toBe('good');
+    expect(levelForOffset(0.131, JUDGE_WINDOWS)).toBeNull();
   });
 });
 
@@ -30,7 +30,7 @@ describe('ResponseJudge', () => {
   it('input with no target nearby does not count', () => {
     const judge = new ResponseJudge([1]);
     expect(judge.tap(0.5)).toBeNull();
-    expect(judge.tap(0.79)).toBeNull();
+    expect(judge.tap(0.74)).toBeNull();
     expect(judge.result(0)).toBeNull();
   });
 
@@ -75,8 +75,8 @@ describe('ResponseJudge', () => {
   it('no input by the end of the Good window is a Miss, timed when the window closes', () => {
     const judge = new ResponseJudge([1, 2]);
 
-    expect(judge.expire(1.1)).toEqual([]);
-    expect(judge.expire(1.2)).toEqual([{ target: 0, level: 'miss', offset: null, time: 1.1 }]);
+    expect(judge.expire(1.13)).toEqual([]);
+    expect(judge.expire(1.2)).toEqual([{ target: 0, level: 'miss', offset: null, time: 1.13 }]);
     expect(judge.expire(1.3)).toEqual([]);
     expect(judge.allJudged).toBe(false);
 

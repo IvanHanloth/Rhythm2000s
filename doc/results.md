@@ -12,7 +12,7 @@ After a round, a results window opens in the computer's own system (title "Resul
 | Comments | Up to three, generated from the round (see below) |
 | Score | A five-digit score; "New record" beside it when it beats the chart's previous best; a "Beat Guide" tag at the top left when the beat guide was on during the chart ([beat-guide.md](beat-guide.md#recording-scores)) |
 | Counts | Perfect! / Good / Miss boxes with their counts |
-| Timing | Every hit sorted by offset into 11 bars (100 ms either side of the beat, 20 ms each), with a dashed line on the beat; bars within Perfect use the Perfect colour, the rest the Good colour. The average early / late offset in ms at the top right |
+| Timing | Every hit sorted by offset into 13 bars of 20 ms (the whole Good window, 130 ms either side of the beat), with a dashed line on the beat; bars centred within Perfect use the Perfect colour, the rest the Good colour. The average early / late offset in ms at the top right |
 | Buttons | "Retry", "Levels", "Next Level"; Next Level is the default. On the last level in the list it is disabled and Retry becomes the default |
 
 Keys: Enter / Space press the default button, R retries, Esc returns to the level list ([level-select.md](level-select.md)).

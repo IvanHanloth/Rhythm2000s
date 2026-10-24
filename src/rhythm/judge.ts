@@ -15,8 +15,11 @@ export interface JudgeWindows {
   early: number;
 }
 
-/** Provisional MVP windows, see doc/prototypes/mvp.md */
-export const JUDGE_WINDOWS: JudgeWindows = { perfect: 0.045, good: 0.1, early: 0.2 };
+/**
+ * Provisional windows, see doc/prototypes/mvp.md. Widened on 2026-10-24 from 0.045 / 0.1 / 0.2 after play-testing.
+ * Good can't grow past 0.13 without breaking xp-download.json's turn-cue timing (doc/chart-format.md "Timing limits").
+ */
+export const JUDGE_WINDOWS: JudgeWindows = { perfect: 0.06, good: 0.13, early: 0.25 };
 
 export interface Judgement {
   /** Target index */

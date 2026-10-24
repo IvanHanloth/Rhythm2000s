@@ -24,8 +24,8 @@ const RANK_THRESHOLDS: [Rank, number][] = [
   ['ok', 6000],
 ];
 
-/** Offset histogram: 11 bins of 20 ms, the middle bin is on the beat */
-export const OFFSET_BINS = 11;
+/** Offset histogram: 13 bins of 20 ms covering the Good window (±130 ms), the middle bin is on the beat */
+export const OFFSET_BINS = 13;
 export const OFFSET_BIN_MS = 20;
 /** Only mention early / late when the mean offset is beyond this */
 const DRIFT_HINT_MS = 20;
@@ -39,7 +39,7 @@ export interface ResultSummary {
   rank: Rank;
   /** Mean offset of hits (ms, positive is late); null with no hits */
   meanOffsetMs: number | null;
-  /** Hits per bin, from "100 ms early" to "100 ms late" */
+  /** Hits per bin, from "120 ms early" to "120 ms late" (the end bins reach the Good window's edge) */
   bins: number[];
   /** Phrases with a Miss, counted from 1, ascending */
   missedPhrases: number[];

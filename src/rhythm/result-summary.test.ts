@@ -20,9 +20,9 @@ describe('summarizeResult', () => {
     expect(summarizeResult([perfect(0), miss()]).rank).toBe('tryAgain');
   });
 
-  it('buckets offsets by 20 ms; beyond ±100 ms goes to the ends', () => {
+  it('buckets offsets by 20 ms; beyond ±120 ms goes to the ends', () => {
     const { bins } = summarizeResult([perfect(0), perfect(0.009), good(-0.061), good(0.15)]);
-    expect(bins).toEqual([0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 1]);
+    expect(bins).toEqual([0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 1]);
   });
 
   it('comments: overall verdict, phrases with mistakes, a hint when consistently late', () => {
