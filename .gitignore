@@ -80,3 +80,8 @@ release/
 .claude/settings.local.json
 # Playwright MCP 浏览器工具的快照和临时脚本
 .playwright-mcp/
+
+# ---------- 原版系统素材（仅本地参考，见 assets/README.md） ----------
+assets/reference/
+# 仅限个人使用授权的字体：不能在公开仓库里分发，各自下载到本地（见 assets/README.md）
+assets/fonts/pp-neuebit/

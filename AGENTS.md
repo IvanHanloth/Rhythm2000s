@@ -29,6 +29,7 @@
 ├── README.md
 ├── index.html         # 游戏入口页（目前只列出原型链接）
 ├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/index.html
+├── assets/            # 共用素材：原版系统素材参考、字体等，大多不进 git，见 assets/README.md
 ├── promo/             # 宣发视频（HyperFrames：HTML + GSAP 渲染成 MP4），独立于游戏工程，说明见 promo/AGENTS.md
 ├── src/
 │   ├── audio/         # 音频时钟、节拍器、合成音效（游戏会复用）
