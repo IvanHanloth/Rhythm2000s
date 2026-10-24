@@ -70,3 +70,19 @@ body {
   padding: 4px 6px;
   color: #c8d8ff;
 }
+
+.dev-panel label {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.dev-panel input {
+  width: 4.5em;
+  padding: 3px 4px;
+  border: 1px solid #888;
+  border-radius: 4px;
+  background: #222;
+  color: #fff;
+  font: inherit;
+}

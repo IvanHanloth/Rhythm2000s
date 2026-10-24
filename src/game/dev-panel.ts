@@ -1,8 +1,18 @@
-// 开发面板：正式菜单做出来之前，用来切换场景和打开原型页面（ADR 0002）。
+// 开发面板：正式菜单做出来之前，用来切换场景、填写输入校准值、打开原型页面（ADR 0002）。
 
 import type { SceneEntry } from './scene.ts';
+import { CALIBRATION_LIMIT_MS } from './settings.ts';
 
 const PROTOTYPES = [{ label: '延迟测试', href: '/prototypes/latency/' }];
+
+export interface DevPanelOptions {
+  scenes: readonly SceneEntry[];
+  onSelectScene(id: string): void;
+  /** 当前校准值（毫秒） */
+  calibrationMs: number;
+  /** 校准值改变；返回实际采用的值（可能被限制在范围内） */
+  onCalibrationChange(value: number): number;
+}
 
 export interface DevPanel {
   element: HTMLElement;
@@ -10,10 +20,7 @@ export interface DevPanel {
   setActive(id: string): void;
 }
 
-export function createDevPanel(
-  scenes: readonly SceneEntry[],
-  onSelect: (id: string) => void,
-): DevPanel {
+export function createDevPanel(options: DevPanelOptions): DevPanel {
   const element = document.createElement('nav');
   element.className = 'dev-panel';
   element.setAttribute('aria-label', '开发面板');
@@ -24,14 +31,31 @@ export function createDevPanel(
     if (event.code === 'Backquote' && !event.repeat) element.hidden = !element.hidden;
   });
 
-  const buttons = scenes.map((scene) => {
+  const buttons = options.scenes.map((scene) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.textContent = scene.label;
     button.dataset.sceneId = scene.id;
-    button.addEventListener('click', () => onSelect(scene.id));
+    button.addEventListener('click', () => {
+      // 去掉焦点，避免之后按空格又触发这个按钮
+      button.blur();
+      options.onSelectScene(scene.id);
+    });
     return button;
   });
+
+  const calibration = document.createElement('label');
+  calibration.title = '正数表示你习惯按晚。可以填延迟测试原型给出的「建议校准」';
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.min = String(-CALIBRATION_LIMIT_MS);
+  input.max = String(CALIBRATION_LIMIT_MS);
+  input.step = '1';
+  input.value = String(options.calibrationMs);
+  input.addEventListener('change', () => {
+    input.value = String(options.onCalibrationChange(Number(input.value)));
+  });
+  calibration.append('校准', input, 'ms');
 
   const links = PROTOTYPES.map(({ label, href }) => {
     const link = document.createElement('a');
@@ -40,7 +64,7 @@ export function createDevPanel(
     return link;
   });
 
-  element.append(...buttons, ...links);
+  element.append(...buttons, calibration, ...links);
 
   return {
     element,

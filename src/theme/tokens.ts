@@ -90,3 +90,25 @@ export const FONT_FAMILIES = {
   display: ['Baloo 2', 'Noto Sans SC', 'sans-serif'],
   pixel: ['Pixelify Sans', 'Noto Sans SC', 'monospace'],
 };
+
+/** 判定颜色：三套主题共用，保证判定反馈跨场景一致。on-* 是落在对应底色上的文字颜色 */
+export const JUDGEMENT_COLORS = {
+  perfect: '#f2b705',
+  onPerfect: '#1b1b1b',
+  good: '#2f6fd6',
+  onGood: '#ffffff',
+  miss: '#a8281f',
+  onMiss: '#ffffff',
+};
+
+/** 动画时长，单位是拍。运行时乘以当前曲子的拍长，并按音频时钟计算每帧位置 */
+export const BEATS = {
+  /** 窗口弹出，在目标拍点完成 */
+  windowOpen: 0.25,
+  /** 窗口关闭 */
+  windowClose: 0.125,
+  /** 命中时的挤压回弹 */
+  squash: 0.125,
+  /** 判定字样停留时长 */
+  judgementHold: 1,
+};

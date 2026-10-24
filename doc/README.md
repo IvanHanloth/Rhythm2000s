@@ -7,6 +7,7 @@
 | [scenes/mac-2000.md](scenes/mac-2000.md) | 场景：2000 年前后的 Mac 桌面 | 草稿 |
 | [tech-research.md](tech-research.md) | 技术调研：浏览器能力、候选技术栈对比、待验证风险 | 草稿 |
 | [prototypes/latency-test.md](prototypes/latency-test.md) | 原型：延迟测试（要回答的问题、时间换算方法、测试记录） | 草稿 |
+| [prototypes/mvp.md](prototypes/mvp.md) | MVP：XP 场景「弹窗 → 关窗」，暂定的输入、判定窗口、谱面与音效 | 草稿 |
 | [decisions/](decisions/README.md) | 决策记录（ADR） | — |
 | [设计系统（外部链接）](https://claude.ai/artifact/YTAfdQKAfiofe7o2vbNz5K) | 视觉规范提案：XP / Mac 铂金 / Mac 水晶三套场景主题，颜色、字体、间距、动效（以拍为单位），窗口、按钮、对话框、判定字样四个组件 | 提案 |
 
