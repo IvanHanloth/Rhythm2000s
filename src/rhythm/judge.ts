@@ -67,28 +67,47 @@ export class ResponseJudge {
    * One input: matched to the earliest unjudged target whose offset is inside the Good window.
    * Otherwise, if the input is earlier than the earliest unjudged target but within the early range,
    * that target is judged a Miss. In every other case returns null; such a press neither scores nor costs anything.
+   * `invincible` (the cheat code, doc/cheat-code.md): the same presses match, but each is Perfect; a press nearest to a
+   * target already judged is that target's late press and does nothing, so it can't take the next target early.
    */
-  tap(time: number): Judgement | null {
+  tap(time: number, invincible = false): Judgement | null {
+    if (invincible && this.nearestJudged(time)) return null;
     for (let i = 0; i < this.targets.length; i++) {
       if (this.results[i]) continue;
       const offset = time - this.targets[i]!;
       const level = levelForOffset(offset, this.windows);
-      if (level) return this.record({ target: i, level, offset, time });
+      if (level)
+        return this.record({ target: i, level: invincible ? 'perfect' : level, offset, time });
     }
-    return this.earlyMiss(time);
+    return this.earlyMiss(time, invincible);
   }
 
   /** Early press: only the earliest unjudged target whose Good window is still open counts */
-  private earlyMiss(time: number): Judgement | null {
+  private earlyMiss(time: number, invincible: boolean): Judgement | null {
     for (let i = 0; i < this.targets.length; i++) {
       if (this.results[i]) continue;
       const offset = time - this.targets[i]!;
       // Skip targets whose window has closed; expire() marks them
       if (offset > this.windows.good) continue;
       if (offset < -this.windows.early) return null;
+      if (invincible) return this.record({ target: i, level: 'perfect', offset, time });
       return this.record({ target: i, level: 'miss', offset: null, time });
     }
     return null;
+  }
+
+  /** Whether the target nearest to `time` is already judged */
+  private nearestJudged(time: number): boolean {
+    let nearest = -1;
+    for (let i = 0; i < this.targets.length; i++) {
+      if (
+        nearest < 0 ||
+        Math.abs(time - this.targets[i]!) < Math.abs(time - this.targets[nearest]!)
+      ) {
+        nearest = i;
+      }
+    }
+    return nearest >= 0 && this.results[nearest] !== null;
   }
 
   private record(judgement: Judgement): Judgement {

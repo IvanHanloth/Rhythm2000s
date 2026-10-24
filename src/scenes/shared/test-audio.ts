@@ -1,9 +1,10 @@
 // Unit tests only: a stand-in SceneContext whose audio graph records which sounds play.
 // Sounds are named by strings in place of real AudioBuffers.
 
+import { CheatMode } from '@/game/cheat.ts';
 import type { SceneContext } from '@/game/scene.ts';
 
-export function fakeContext(calibration = 0) {
+export function fakeContext(calibration = 0, cheat = new CheatMode()) {
   /** Sounds played immediately (feedback on input) */
   const played: string[] = [];
   /** Sounds booked for a later time */
@@ -27,6 +28,6 @@ export function fakeContext(calibration = 0) {
     },
   };
   const cutaway = { prepare() {}, show() {}, hide() {} };
-  const context = { clock: { context: audio }, calibration: () => calibration, cutaway };
+  const context = { clock: { context: audio }, calibration: () => calibration, cutaway, cheat };
   return { context: context as unknown as SceneContext, played, scheduled };
 }

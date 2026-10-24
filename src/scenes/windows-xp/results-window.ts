@@ -50,6 +50,7 @@ export class XpResultsWindow {
       summary: options.summary,
       newRecord: options.newRecord,
       assisted: options.assisted,
+      cheat: options.cheat,
       width: clientWidth,
       height: buttonsTop - 12,
       kit,

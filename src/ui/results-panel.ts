@@ -13,7 +13,12 @@ import {
   type ResultSummary,
 } from '@/rhythm/result-summary.ts';
 import { JUDGE_WINDOWS } from '@/rhythm/judge.ts';
-import { BEAT_GUIDE_COLORS, FONT_FAMILIES, JUDGEMENT_COLORS } from '@/theme/tokens.ts';
+import {
+  BEAT_GUIDE_COLORS,
+  CHEAT_COLORS,
+  FONT_FAMILIES,
+  JUDGEMENT_COLORS,
+} from '@/theme/tokens.ts';
 
 export interface PanelTextStyle {
   size: number;
@@ -42,6 +47,8 @@ export interface ResultsPanelOptions {
   newRecord: boolean;
   /** The beat guide was on: a "Beat Guide" tag at the top left of the score box (doc/beat-guide.md) */
   assisted?: boolean;
+  /** The cheat code was on: a "Cheat" tag in place of the Beat Guide tag (doc/cheat-code.md) */
+  cheat?: boolean;
   width: number;
   height: number;
   kit: ResultsKit;
@@ -76,6 +83,7 @@ export function createResultsPanel({
   summary,
   newRecord,
   assisted = false,
+  cheat = false,
   width,
   height,
   kit,
@@ -133,20 +141,24 @@ export function createResultsPanel({
     badge.position.set(innerWidth - scoreText.width - 10 - badge.width, 2);
     score.inner.addChild(badge);
   }
-  if (assisted) {
-    // Top left of the score box, apart from the score and "New record" on the right
-    const tag = pill(
-      kit.text('Beat Guide', { size: 11, color: JUDGEMENT_COLORS.onPerfect }),
-      BEAT_GUIDE_COLORS.press,
-      INK,
-      8,
-    );
+  // Top left of the score box, apart from the score and "New record" on the right; the cheat outranks the beat guide
+  const tag = cheat
+    ? pill(kit.text('Cheat', { size: 11, color: CHEAT_COLORS.onBack }), CHEAT_COLORS.back, INK, 8)
+    : assisted
+      ? pill(
+          kit.text('Beat Guide', { size: 11, color: JUDGEMENT_COLORS.onPerfect }),
+          BEAT_GUIDE_COLORS.press,
+          INK,
+          8,
+        )
+      : null;
+  if (tag) {
     tag.position.set(0, 2);
     score.inner.addChild(tag);
   }
   // Best combo at the top left, after the Beat Guide tag when there is one (doc/combo.md)
   const best = kit.text(`Best combo: ${summary.bestCombo}`, { size: 12, color: kit.muted });
-  best.position.set(assisted ? 96 : 0, 3);
+  best.position.set(tag ? Math.ceil(tag.width) + 10 : 0, 3);
   score.inner.addChild(best);
   const tileGap = 10;
   const tileWidth = (innerWidth - tileGap * 2) / 3;

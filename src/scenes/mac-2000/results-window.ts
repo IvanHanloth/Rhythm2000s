@@ -49,6 +49,7 @@ export class MacResultsWindow {
       summary: options.summary,
       newRecord: options.newRecord,
       assisted: options.assisted,
+      cheat: options.cheat,
       width: contentWidth,
       height: contentHeight - PUSH_BUTTON_HEIGHT - 14,
       kit,

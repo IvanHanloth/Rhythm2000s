@@ -2,6 +2,7 @@
 // The title camera pans along the street → "Start" drops it behind the character → walk into the café and sit at a computer → the level.
 // The hub judges no rhythm, so it moves by requestAnimationFrame time (with a capped step), not the audio clock (ADR 0005).
 
+import type { CheatMode } from '@/game/cheat.ts';
 import type { SceneId } from '@/scenes/catalog.ts';
 import {
   ACESFilmicToneMapping,
@@ -42,7 +43,14 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { createDreamGradePass, createDreamSky, DreamMotes } from './dream.ts';
 import { HubSounds } from './sounds.ts';
 import { WhaleAvatar } from './whale-model.ts';
-import { buildWorld, type HubSpot, type LevelSpot, type ScreenImage, type World } from './world.ts';
+import {
+  buildWorld,
+  type HubSpot,
+  type LevelSpot,
+  type ReadSpot,
+  type ScreenImage,
+  type World,
+} from './world.ts';
 
 export type { LevelInfo } from './overlay.ts';
 
@@ -148,6 +156,10 @@ export interface HubOptions {
   recordOf(levelId: string): string | null;
   /** Plays the startup sound on sitting down; the hub is silent without it */
   audio?: AudioContext;
+  /** The cheat code (doc/cheat-code.md): while it is on, the arcade machines take the 10p coin to end it */
+  cheat: CheatMode;
+  /** The coin went into an arcade machine (plays its sound) */
+  onCoinInserted(): void;
 }
 
 function smoothstep(t: number): number {
@@ -216,6 +228,10 @@ export class Hub {
   constructor(options: HubOptions) {
     this.options = options;
     this.levels = options.levels;
+    // A prompt already showing at an arcade machine follows the coin coming and going
+    options.cheat.onChange(() => {
+      if (this.state === 'roam' && this.focus) this.overlay.setPrompt(this.promptFor(this.focus));
+    });
     this.element.className = 'hub';
     this.element.hidden = true;
     this.element.append(this.renderer.domElement);
@@ -425,12 +441,22 @@ export class Hub {
   private interact(spot: HubSpot): void {
     if (spot.kind === 'read') {
       this.state = 'dialog';
-      this.dialogQueue = spot.lines.map((text) => ({ name: spot.name, text }));
+      this.dialogQueue = this.readLines(spot).map((text) => ({ name: spot.name, text }));
       this.overlay.setPrompt(null);
       this.nextDialogLine();
       return;
     }
     this.sit(spot);
+  }
+
+  /** What a spot says; an arcade machine takes the cheat code's coin when the player has it (doc/cheat-code.md) */
+  private readLines(spot: ReadSpot): string[] {
+    if (!spot.coinSlot || !this.options.cheat.insertCoin()) return spot.lines;
+    this.options.onCoinInserted();
+    return [
+      'You drop the 10p into the slot. It rattles down inside the machine.',
+      'Cheat mode is off. Scores count again.',
+    ];
   }
 
   private nextDialogLine(): void {
@@ -716,6 +742,9 @@ export class Hub {
   }
 
   private promptFor(spot: HubSpot): string {
+    if (spot.kind === 'read' && spot.coinSlot && this.options.cheat.active) {
+      return `Insert 10p · ${spot.name}`;
+    }
     if (spot.kind === 'read') return `${spot.verb} · ${spot.name}`;
     const level = this.levelOf(spot);
     return `Sit down · ${level?.label ?? spot.levelId}`;

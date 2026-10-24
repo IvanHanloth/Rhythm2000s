@@ -91,6 +91,8 @@ interface LevelRun {
   /** Played from HackerEditor: `watch` lets the computer do the responses. No results or records */
   editor: { watch: boolean } | null;
   /** Hits in a row across the chart's pieces, demos skipped (doc/combo.md) */
+  /** The cheat code was on at some point during the level: no records (doc/cheat-code.md) */
+  cheat: boolean;
   combo: ComboTracker;
 }
 
@@ -113,6 +115,8 @@ export interface ResultsWindowOptions {
   /** Another level follows in the list; without one "Next Level" is disabled and Retry is the default */
   hasNext: boolean;
   onRetry: () => void;
+  /** The cheat code was on during the level: a "Cheat" tag, never a new record (doc/cheat-code.md) */
+  cheat: boolean;
   onList: () => void;
   onNext: () => void;
 }
@@ -565,6 +569,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.renderCombo(session, beat, audioTime);
 
     if (audioTime < session.endTime) return;
+    if (this.run && this.context.cheat.active) this.run.cheat = true;
     this.roundEnded(session);
   }
 
@@ -738,6 +743,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.state = 'starting';
     this.chart = chart;
     await this.context.clock.resume();
+      cheat: this.context.cheat.active,
     if (this.destroyed || this.state !== 'starting') return;
     this.run = {
       stops: [],
@@ -762,6 +768,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       sceneId: this.sceneId,
       library: this.context.library,
       chartFiles: this.context.chartFiles,
+      cheat: this.context.cheat.active,
       showMessage: (options) => this.showMessage(options),
       closeMessage: () => this.closeModal(),
       choose: (title, items, onPick) => editorWindow.panel.showChooser(title, items, onPick),
@@ -909,10 +916,13 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       return;
     }
     const summary = summarizeResult(run.hits);
-    const assisted = run.assisted;
-    const newRecord = recordScore(chart.id, summary.score, assisted);
-    this.mailbox.recordFinished(chart.id);
-    this.mailState = this.mailbox.state;
+    const { assisted, cheat } = run;
+    // A level played with the cheat code on saves nothing and doesn't count toward the Rickroll (doc/cheat-code.md)
+    const newRecord = !cheat && recordScore(chart.id, summary.score, assisted);
+    if (!cheat) {
+      this.mailbox.recordFinished(chart.id);
+      this.mailState = this.mailbox.state;
+    }
     const hasNext = this.charts.indexOf(chart) < this.charts.length - 1;
     this.endRound();
     this.closeModal();
@@ -982,6 +992,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     const hint = tutorialHint(action);
     const step = run.retry ? 'Try again' : `Practice ${run.passed + 1} of ${run.total}`;
     this.caption.show({ title: `${step} · ${hint.name}`, how: hint.how });
+        cheat,
   }
 
   /**

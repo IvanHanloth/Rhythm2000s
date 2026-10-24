@@ -73,6 +73,8 @@ export interface ReadSpot extends Spot {
   verb: string;
   name: string;
   lines: string[];
+  /** An arcade machine: takes the cheat code's 10p coin when the player has it (doc/cheat-code.md) */
+  coinSlot: boolean;
 }
 
 export type HubSpot = LevelSpot | ReadSpot;
@@ -308,8 +310,16 @@ class Builder {
     return anchor;
   }
 
-  read(name: string, verb: string, x: number, z: number, lines: string[], reach = 1.2): void {
-    this.spots.push({ kind: 'read', name, verb, x, z, reach, lines });
+  read(
+    name: string,
+    verb: string,
+    x: number,
+    z: number,
+    lines: string[],
+    reach = 1.2,
+    coinSlot = false,
+  ): void {
+    this.spots.push({ kind: 'read', name, verb, x, z, reach, lines, coinSlot });
   }
 
   /** Windows on a facade: from x0 to x1, `floors` storeys up from y0; z is the wall, facing its direction (+1 south, -1 north) */
@@ -1183,7 +1193,7 @@ function buildArcade(b: Builder, x: number): void {
       p.add(placeholderBox(0.86, 0.12, 0.35, 0, 0.95, 0.45, b.plain(C.plasticDark, 0.5)));
     });
     b.colliders.push(boxAt(cx, cz, 0.9, 0.8));
-    b.read('Arcade machine', 'Examine', cx, cz + 1.3, notes[i]!, 0.9);
+    b.read('Arcade machine', 'Examine', cx, cz + 1.3, notes[i]!, 0.9, true);
   });
 
   // Dance machine (custom slot dance-machine)

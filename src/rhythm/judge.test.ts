@@ -21,6 +21,23 @@ describe('ResponseJudge', () => {
     expect(result?.offset).toBeCloseTo(0.06, 10);
   });
 
+  it('invincible: Good and early presses are Perfect, stray presses still do nothing', () => {
+    const judge = new ResponseJudge([1, 2, 3]);
+    expect(judge.tap(1.1, true)?.level).toBe('perfect');
+    const early = judge.tap(1.8, true);
+    expect(early?.target).toBe(1);
+    expect(early?.level).toBe('perfect');
+    expect(early?.offset).toBeCloseTo(-0.2, 10);
+    expect(judge.tap(2.5, true)).toBeNull();
+  });
+
+  it('invincible: a late press after its target was hit does not take the next one', () => {
+    const judge = new ResponseJudge([1, 1.2]);
+    expect(judge.tap(1, true)?.target).toBe(0);
+    expect(judge.tap(1.08, true)).toBeNull();
+    expect(judge.tap(1.15, true)?.target).toBe(1);
+  });
+
   it('judges each target once; pressing again does nothing', () => {
     const judge = new ResponseJudge([1]);
     expect(judge.tap(1)?.level).toBe('perfect');

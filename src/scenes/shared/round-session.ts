@@ -135,10 +135,14 @@ export class RoundSession<T extends RoundTarget = RoundTarget> {
     return this.taps.length;
   }
 
-  /** Call every frame: books the backing track and marks targets whose window has passed as Misses. */
+  /**
+   * Call every frame: books the backing track and marks targets whose window has passed as Misses. With the cheat code
+   * on (doc/cheat-code.md) the game hits a target nobody pressed on its beat instead.
+   */
   update(audioTime: number): void {
     this.sequencer.schedule();
     const calibration = this.context.calibration();
+    if (this.context.cheat.active) this.autoplay(audioTime);
     for (const judgement of this.judge.expire(audioTime - calibration)) {
       this.recordMiss(judgement, judgement.time + calibration);
     }
@@ -149,7 +153,10 @@ export class RoundSession<T extends RoundTarget = RoundTarget> {
    * (see ResponseJudge.tap) records a Miss; a press that matches no target returns null.
    */
   tap(audioTime: number): JudgementRecord | null {
-    const judgement = this.judge.tap(audioTime - this.context.calibration());
+    const judgement = this.judge.tap(
+      audioTime - this.context.calibration(),
+      this.context.cheat.active,
+    );
     if (!judgement) return null;
     if (judgement.level === 'miss') return this.recordMiss(judgement, audioTime);
     const { event, step } = this.taps[judgement.target]!;

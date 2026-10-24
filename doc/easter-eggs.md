@@ -13,7 +13,7 @@ In the game the player gets the same bait by e-mail and follows it through a per
 ### Decided
 
 - **Both computers** have it: the XP machine with Outlook Express and Internet Explorer, the Mac with Mail and Safari.
-- **Unlock**: after the player has finished **3 different charts** (played to the results window, any score), counted together across both computers and kept in browser storage. Imported charts count; HackerEditor's play and test don't.
+- **Unlock**: after the player has finished **3 different charts** (played to the results window, any score), counted together across both computers and kept in browser storage. Imported charts count; HackerEditor's play and test don't. Nor do levels finished with the cheat code on ([cheat-code.md](cheat-code.md)).
 - **Before the unlock** the mail program opens to an empty inbox.
 - **The message stays** in the inbox once it has arrived, so it can be opened again. Whether it has been read is saved.
 - **The song** is the official music video embedded from YouTube inside the in-game browser ([ADR 0014](decisions/0014-rickroll-embeds-youtube.md)). The game ships none of the song's audio, video or lyrics.

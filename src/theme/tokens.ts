@@ -140,6 +140,16 @@ export const HIT_COUNTER_COLORS = {
   hotEdge: '#b00000',
 };
 
+/** The cheat code's notice, badge and results tag (doc/cheat-code.md), shared by every theme; the coin is a silver 10p */
+export const CHEAT_COLORS = {
+  coin: '#d3d6db',
+  coinEdge: '#7d828a',
+  onCoin: '#33363b',
+  /** Notice and badge background, and the results tag */
+  back: '#5b1a8c',
+  onBack: '#ffffff',
+};
+
 /** Animation durations in beats. Multiplied by the song's beat length at runtime, positions computed from the audio clock */
 export const BEATS = {
   /** Window pop-up, completing on the target beat */

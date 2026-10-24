@@ -10,6 +10,8 @@ import { windowsXpScene } from '@/scenes/windows-xp/scene.ts';
 import { browserChartStore, ChartLibrary } from './chart-library.ts';
 import { fetchChartFromSite, loadCharts } from './chart-loader.ts';
 import { browserChartFiles } from './chart-transfer.ts';
+import { CheatMode, listenForCheatCode } from './cheat.ts';
+import { CheatNotice } from './cheat-notice.ts';
 import { GameCanvas } from './game-canvas.ts';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from './layout.ts';
 import { listenForTaps } from './input.ts';
@@ -35,6 +37,11 @@ const library = new ChartLibrary(builtInCharts, browserChartStore());
 for (const error of library.loadErrors) console.error(error);
 /** Calibration, "Skip tutorial" and the beat guide (doc/settings.md); the in-game settings window and H change them */
 const settings = new PlayerSettings();
+/** The cheat code (doc/cheat-code.md): in memory only, so a refresh ends it */
+const cheat = new CheatMode();
+const cheatNotice = new CheatNotice(clock.context);
+cheat.onChange((active) => cheatNotice.setActive(active));
+listenForCheatCode(cheat, (turnedOn) => cheatNotice.announce(turnedOn));
 
 const scenes = [windowsXpScene, mac2000Scene];
 // Load scene assets after the canvas exists (PixiJS texture loading is safer once the renderer is initialised)
@@ -84,6 +91,7 @@ const director = new SceneDirector(canvas.stage, scenes, {
   clock,
   calibration: () => settings.values.calibrationMs / 1000,
   settings,
+  cheat,
   library,
   chartFiles: browserChartFiles,
   cutaway,
@@ -151,12 +159,15 @@ const hub = new Hub({
   recordOf: (computerId) => {
     const own = levels.filter((level) => level.sceneId === computerId);
     const played = own.filter((level) => loadBestScore(level.id) !== null).length;
+  cheat,
+  onCoinInserted: () => cheatNotice.playDrop(),
     return own.length > 0 ? `Played: ${played} / ${own.length} levels` : null;
   },
   audio: clock.context,
   onPlay: (computerId) => {
     // Esc inside the computer goes back to the café
     cameFromHub = true;
+document.body.append(cheatNotice.element);
     location.hash = computerId;
   },
 });

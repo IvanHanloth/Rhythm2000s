@@ -5,6 +5,7 @@ import type { AudioClock } from '@/audio/audio-clock.ts';
 import type { SceneId } from '@/scenes/catalog.ts';
 import type { ChartLibrary } from './chart-library.ts';
 import type { ChartFiles } from './chart-transfer.ts';
+import type { CheatMode } from './cheat.ts';
 import type { PlayerSettings } from './settings.ts';
 
 export interface FrameInfo {
@@ -47,6 +48,8 @@ export interface SceneContext {
    * window changes them. Calibration is read through calibration() above.
    */
   settings: PlayerSettings;
+  /** The cheat code (doc/cheat-code.md): while it is on, rounds judge every press Perfect and scores aren't saved */
+  cheat: CheatMode;
   /**
    * Every validated chart, built-in and imported; scenes pick theirs by chart.scene. The level list imports,
    * exports and deletes through it (doc/chart-import-export.md)
