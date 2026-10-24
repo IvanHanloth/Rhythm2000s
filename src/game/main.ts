@@ -159,20 +159,20 @@ const hub = new Hub({
   recordOf: (computerId) => {
     const own = levels.filter((level) => level.sceneId === computerId);
     const played = own.filter((level) => loadBestScore(level.id) !== null).length;
-  cheat,
-  onCoinInserted: () => cheatNotice.playDrop(),
     return own.length > 0 ? `Played: ${played} / ${own.length} levels` : null;
   },
   audio: clock.context,
+  cheat,
+  onCoinInserted: () => cheatNotice.playDrop(),
   onPlay: (computerId) => {
     // Esc inside the computer goes back to the café
     cameFromHub = true;
-document.body.append(cheatNotice.element);
     location.hash = computerId;
   },
 });
 cafe = hub;
 document.body.append(hub.element);
+document.body.append(cheatNotice.element);
 document.querySelector('#boot')?.remove();
 
 library.onChange(() => {

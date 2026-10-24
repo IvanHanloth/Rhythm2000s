@@ -730,6 +730,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       nextPhrase: 0,
       hits: [],
       assisted: false,
+      cheat: this.context.cheat.active,
       editor: null,
       combo: new ComboTracker(),
     };
@@ -743,7 +744,6 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.state = 'starting';
     this.chart = chart;
     await this.context.clock.resume();
-      cheat: this.context.cheat.active,
     if (this.destroyed || this.state !== 'starting') return;
     this.run = {
       stops: [],
@@ -755,6 +755,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       nextPhrase: phrase,
       hits: [],
       assisted: false,
+      cheat: this.context.cheat.active,
       editor: { watch },
       combo: new ComboTracker(),
     };
@@ -768,7 +769,6 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       sceneId: this.sceneId,
       library: this.context.library,
       chartFiles: this.context.chartFiles,
-      cheat: this.context.cheat.active,
       showMessage: (options) => this.showMessage(options),
       closeMessage: () => this.closeModal(),
       choose: (title, items, onPick) => editorWindow.panel.showChooser(title, items, onPick),
@@ -935,6 +935,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
         summary,
         newRecord,
         assisted,
+        cheat,
         hasNext,
         onRetry: () => this.retry(),
         onList: () => this.backToList(),
@@ -992,7 +993,6 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     const hint = tutorialHint(action);
     const step = run.retry ? 'Try again' : `Practice ${run.passed + 1} of ${run.total}`;
     this.caption.show({ title: `${step} · ${hint.name}`, how: hint.how });
-        cheat,
   }
 
   /**
