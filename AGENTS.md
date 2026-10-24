@@ -29,7 +29,7 @@
 ├── README.md
 ├── index.html         # 游戏入口页：游戏画布 + 开发面板（切换场景、打开原型）
 ├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/index.html
-├── assets/            # 共用素材：原版系统素材参考、字体等，大多不进 git，见 assets/README.md
+├── assets/            # 共用素材：原版系统素材参考、字体等，来源与授权见 assets/README.md
 ├── promo/             # 宣发视频（HyperFrames：HTML + GSAP 渲染成 MP4），独立于游戏工程，说明见 promo/AGENTS.md
 ├── src/
 │   ├── game/          # 游戏画布（1280×720 等比缩放）、场景接口、场景切换器、输入、设置、入口
@@ -59,7 +59,7 @@
 - 单元测试与被测文件放在一起，命名为 `*.test.ts`，从 `vite-plus/test` 导入测试 API。
 - 新增原型页面时，在 `vite.config.ts` 的 `build.rolldownOptions.input` 中登记入口，并加到 `src/game/dev-panel.ts` 的原型列表里。
 - 新增场景时，在 `src/scenes/<场景名>/` 实现 `Scene` 接口（`src/game/scene.ts`），再在 `src/game/main.ts` 里登记。场景按 1280×720 的逻辑坐标绘制，颜色只取 `src/theme/` 的 token。
-- `promo/` 不属于游戏构建：它用 `npx hyperframes`（版本钉在 `promo/package.json`）预览和渲染，不进游戏的 pnpm 依赖。做视频前先用 `/hyperframes` 技能。
+- `promo/` 不属于游戏构建：它用 `npx hyperframes`（版本钉在 `promo/package.json`）预览和渲染，不进游戏的 pnpm 依赖。`promo/assets` 是指向根目录 `assets/` 的符号链接，视频里用 `assets/...` 引用素材（HyperFrames 预览服务读不到工程目录以外的文件；Windows 上克隆需开启 `git config core.symlinks true`）。做视频前先用 `/hyperframes` 技能。
 
 ## 技术栈
 
@@ -123,9 +123,9 @@ vp add <包名>  # 添加依赖
 
 本项目模仿 Windows XP 与经典 Mac OS 的视觉风格。微软和苹果的原版素材（壁纸、图标、系统音效、字体、Logo）受版权和商标保护。
 
-- **不要**直接把原版系统素材提交到仓库。
-- 美术与音效应原创，做到「一看就是那个年代」，但不是像素级复制。
-- 如需临时占位素材，放在被忽略的本地目录中，并在文档里注明。
+- 原版系统素材统一放在 `assets/reference/`，只作风格参考和临时占位（2026-10-24 用户决定直接提交到仓库，来源见 [assets/README.md](assets/README.md)）。
+- 游戏正式版和公开发布的宣发视频里，美术与音效应原创，做到「一看就是那个年代」，但不是像素级复制；不要把 `assets/reference/` 里的文件直接用进去。
+- 素材放在别处时，在 `assets/README.md` 登记来源和授权。
 
 ## LLM 记忆目录（memory/）
 
