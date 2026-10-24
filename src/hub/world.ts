@@ -77,7 +77,13 @@ export interface ReadSpot extends Spot {
   coinSlot: boolean;
 }
 
-export type HubSpot = LevelSpot | ReadSpot;
+/** The guide booklet on the café's front desk: opens the booklet overlay (doc/hub.md#guide-booklet) */
+export interface GuideSpot extends Spot {
+  kind: 'guide';
+  name: string;
+}
+
+export type HubSpot = LevelSpot | ReadSpot | GuideSpot;
 
 /** A shop's area; entering shows its name */
 export interface Zone extends Box {
@@ -951,7 +957,26 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
   });
   b.colliders.push(boxAt(cx, cz, 2.6, 0.8));
   b.prop('classic_laptop', cx + 0.6, 1.1, cz, { width: 0.45, rotation: Math.PI });
-  b.read('Front desk', 'Examine', cx - 0.4, cz + 0.85, [
+  // The guide booklet, propped up at the west end of the desk facing the door (doc/hub.md#guide-booklet)
+  const booklet = new Group();
+  booklet.position.set(cx - 0.95, 1.1, cz + 0.22);
+  booklet.rotation.x = -0.35;
+  const cover = new Mesh(
+    new PlaneGeometry(0.2, 0.28),
+    b.glow(
+      posterTexture(['GUIDE', 'HOW TO', 'PLAY', 'READ ME!'], C.bookletCover, C.signText),
+      '#ffffff',
+      0.45,
+    ),
+  );
+  cover.position.set(0, 0.14, 0.006);
+  const pages = new Mesh(new BoxGeometry(0.2, 0.28, 0.01), b.plain(C.bookletPaper, 0.8));
+  pages.position.set(0, 0.14, 0);
+  pages.castShadow = true;
+  booklet.add(pages, cover);
+  b.root.add(booklet);
+  b.spots.push({ kind: 'guide', name: 'Guide booklet', x: cx - 0.95, z: cz + 0.85, reach: 0.75 });
+  b.read('Front desk', 'Examine', cx + 0.1, cz + 0.85, [
     'Nobody at the desk. The price list says: internet £1 per 30 minutes, printing 10p a page.',
     'A Post-it note beside it: "The ones with yellow markers are free. Help yourself."',
   ]);
@@ -1052,13 +1077,16 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
 
   switch (machine.kind) {
     case 'level': {
-      const marker = new Mesh(new OctahedronGeometry(0.12, 0), b.glow(null, C.marker, 6));
-      marker.position.set(x, 1.75, z - 0.1);
-      b.root.add(marker);
-      b.animations.push((t) => {
-        marker.position.y = 1.75 + Math.sin(t * 2.4 + x) * 0.06;
-        marker.rotation.y = t * 1.6;
-      });
+      // Only play computers get a marker; the editors behind them stay unmarked (doc/hub.md)
+      if (machine.level.role === 'levels') {
+        const marker = new Mesh(new OctahedronGeometry(0.12, 0), b.glow(null, C.marker, 6));
+        marker.position.set(x, 1.75, z - 0.1);
+        b.root.add(marker);
+        b.animations.push((t) => {
+          marker.position.y = 1.75 + Math.sin(t * 2.4 + x) * 0.06;
+          marker.rotation.y = t * 1.6;
+        });
+      }
       b.spots.push({
         kind: 'level',
         levelId: machine.level.levelId,

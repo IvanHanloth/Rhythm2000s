@@ -44,15 +44,28 @@ The intro takes the scene's colours: Luna for XP levels, Aqua for Mac levels.
 | W A S D | Move (relative to the camera) |
 | Shift | Run |
 | Mouse | Turn the camera (click the view to lock the pointer) |
-| E | Enter, sit down, start, talk to the clerk |
+| E | Enter, sit down, start, read, talk to the clerk |
 | Esc | Release the pointer and pause; stand up when seated; back to the café from the level list; back to the list from a level |
+
+## Guide booklet
+
+A small booklet stands on the café's front desk. E beside it ("Read · Guide booklet") opens it as a printed two-page leaflet over the street, and E, Esc or "Close" puts it back. It walks a new player through the game in six short numbered steps:
+
+1. **Watch and listen**: the computer goes first, showing a few things on the beat.
+2. **Your turn**: do the same things in the same rhythm, clicking on the beat; Perfect, Good or Miss.
+3. **Combo bonuses**: hits in a row liven up the computer in three tiers, from 8, 16 and 30 hits ([combo.md](combo.md#tiers)); a round without a Miss earns a Full Combo stamp, and the score is stamped Superb, OK or Try again ([results.md](results.md)).
+4. **Back to the street**: Start → "Log Off" / "Turn Off Computer" on the XP machine, Apple menu → "Log Out…" / "Shut Down…" on the Mac ([level-select.md](level-select.md)).
+5. **Beat Guide**: H during a song turns it on or off ([beat-guide.md](beat-guide.md)).
+6. **The computers**: the Windows XP PC and the iMac in the front row are for playing. A line about the HackerEditor computers behind them is struck through by hand in red pen, with the note "Please only use the two game machines at the front!", a wink at the editors without pointing new players there.
+
+The booklet is English, like everything in the world.
 
 ## Provisional content (first-pass placeholders)
 
 Shop names, layout and text are placeholders the user hasn't confirmed:
 
 - **Street**: bright daytime, an east–west two-lane road (driving on the left) with pavements. Three shops to enter on the north side; facades and street furniture on the south. Mostly red brick; double yellow lines, Belisha beacons at the zebra crossing, LOOK RIGHT at the kerb.
-- **CYBERSPACE CAFÉ** (net café, centre): 12 computers in three rows. The entry computers sit side by side at the start of the front row: the XP machine (beige CRT), then the Mac (translucent iMac), opening the XP and Mac level lists; right behind each, in the middle row, sits that system's HackerEditor computer for making charts ([chart-editor.md](chart-editor.md)); the other seats are taken, out of order or switched off. Seated at an editor the card's button reads "Open" and shows no best score. The front desk is unattended, with a price list and notes.
+- **CYBERSPACE CAFÉ** (net café, centre): 12 computers in three rows. The entry computers sit side by side at the start of the front row: the XP machine (beige CRT), then the Mac (translucent iMac), opening the XP and Mac level lists; right behind each, in the middle row, sits that system's HackerEditor computer for making charts ([chart-editor.md](chart-editor.md)); the other seats are taken, out of order or switched off. Seated at an editor the card's button reads "Open" and shows no best score. A yellow marker floats over each play computer; the editors have none, so a new player is only pointed at the play computers. The front desk is unattended, with a price list, notes and the guide booklet (below).
 - **MILLENNIUM RECORDS** (record shop, west): steel shelving, a boombox and tape deck on the counter.
 - **FUNLAND AMUSEMENTS** (arcade, east): arcade cabinets, a dance machine, a TV-and-console demo stand. With the cheat code's 10p coin in hand, any arcade cabinet takes it and ends the cheat ([cheat-code.md](cheat-code.md)).
 - **Street ends**: a yellow roadworks barrier closes each end, "ROAD CLOSED" on the street side; the east one has "Cheat Code: IvanHanloth" on the back ([cheat-code.md](cheat-code.md)).

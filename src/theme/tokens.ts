@@ -89,6 +89,8 @@ export const FONT_FAMILIES = {
   ui: ['PT Sans', 'sans-serif'],
   display: ['Baloo 2', 'sans-serif'],
   pixel: ['Pixelify Sans', 'monospace'],
+  /** Handwriting, such as the red-pen note in the café's guide booklet (system fonts of the period) */
+  hand: ['Comic Sans MS', 'Chalkboard', 'cursive'],
 };
 
 /** Joins a font list into a CSS font-family value, quoting names (unquoted, "Baloo 2" invalidates the whole declaration) */

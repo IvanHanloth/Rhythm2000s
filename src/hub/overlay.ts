@@ -3,6 +3,7 @@
 
 import type { SceneId } from '@/scenes/catalog.ts';
 import './hub.css';
+import { STREET_COLORS } from '@/theme/street.ts';
 import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS, THEMES } from '@/theme/tokens.ts';
 
 /** What the card shows once seated at an entry computer: a scene's play computer or its chart editor */
@@ -28,6 +29,7 @@ export interface OverlayHandlers {
   onQuitToTitle: () => void;
   onPlayLevel: () => void;
   onStandUp: () => void;
+  onCloseBooklet: () => void;
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(
@@ -74,6 +76,13 @@ function setThemeVariables(root: HTMLElement): void {
     '--hub-perfect': JUDGEMENT_COLORS.perfect,
     '--hub-on-perfect': JUDGEMENT_COLORS.onPerfect,
     '--hub-highlight': xp.highlight,
+    '--hub-font-hand': cssFontFamily(FONT_FAMILIES.hand),
+    '--hub-booklet-cover': STREET_COLORS.bookletCover,
+    '--hub-booklet-paper': STREET_COLORS.bookletPaper,
+    '--hub-booklet-ink': STREET_COLORS.bookletInk,
+    '--hub-booklet-ink-muted': STREET_COLORS.bookletInkMuted,
+    '--hub-booklet-pen': STREET_COLORS.bookletPen,
+    '--hub-booklet-marker': STREET_COLORS.marker,
   };
   for (const [name, value] of Object.entries(vars)) root.style.setProperty(name, value);
 }
@@ -95,6 +104,7 @@ export class HubOverlay {
   private readonly cardPlay: HTMLButtonElement;
   private readonly pause = el('section', 'hub-pause');
   private readonly credits = el('section', 'hub-credits');
+  private readonly booklet = el('section', 'hub-booklet');
   private readonly loading = el('div', 'hub-loading');
   private readonly loadingBar = el('span', 'hub-loading-fill');
   private readonly loadingText = el('span', 'hub-loading-text');
@@ -121,6 +131,7 @@ export class HubOverlay {
     );
 
     this.buildCredits();
+    this.buildBooklet(handlers.onCloseBooklet);
     const track = el('span', 'hub-loading-track');
     track.append(this.loadingBar);
     this.loading.append(this.loadingText, track);
@@ -156,10 +167,12 @@ export class HubOverlay {
       this.hud,
       this.dialog,
       this.card,
+      this.booklet,
       this.pause,
       this.fade,
     );
     this.showTitle(false);
+    this.showBooklet(false);
     this.showHud(false);
     this.showDialog(null);
     this.showCard(null);
@@ -308,6 +321,124 @@ export class HubOverlay {
       button('Close', 'hub-button', () => this.toggleCredits()),
     );
     this.credits.hidden = true;
+  }
+
+  showBooklet(visible: boolean): void {
+    this.booklet.hidden = !visible;
+    if (visible) this.booklet.scrollTop = 0;
+  }
+
+  /**
+   * The guide booklet from the café's front desk (doc/hub.md#guide-booklet): a printed two-page leaflet in six steps.
+   * The line about the HackerEditor computers is struck through by hand, steering new players to the play computers.
+   */
+  private buildBooklet(onClose: () => void): void {
+    const step = (number: number, heading: string, ...body: HTMLElement[]) => {
+      const node = el('div', 'hub-booklet-step');
+      const title = el('h3', 'hub-booklet-step-title');
+      title.append(el('span', 'hub-booklet-number', String(number)), heading);
+      node.append(title, ...body);
+      return node;
+    };
+    const text = (...parts: (string | HTMLElement)[]) => {
+      const p = el('p', '');
+      p.append(...parts);
+      return p;
+    };
+    const key = (label: string) => el('kbd', '', label);
+    const strong = (label: string) => el('b', '', label);
+    const tiers = el('ul', 'hub-booklet-tiers');
+    for (const [hits, effect] of [
+      ['8 hits', 'Tier 1: the desktop starts to dance'],
+      ['16 hits', 'Tier 2: it lights up. HOT!'],
+      ['30 hits', 'Tier 3: the grand finale'],
+    ] as const) {
+      const li = el('li', '');
+      li.append(el('span', 'hub-booklet-hits', hits), effect);
+      tiers.append(li);
+    }
+    const struck = el(
+      'p',
+      'hub-booklet-struck',
+      'Middle row: the HackerEditor computers, for writing your own songs.',
+    );
+    struck.setAttribute('aria-label', 'Crossed out: the HackerEditor computers in the middle row');
+
+    const left = el('div', 'hub-booklet-page');
+    left.append(
+      el('div', 'hub-booklet-kicker', 'CYBERSPACE CAFÉ'),
+      el('h2', 'hub-booklet-title', 'How to Play'),
+      el('p', 'hub-booklet-subtitle', 'A quick guide for new users'),
+      step(
+        1,
+        'Watch and listen',
+        text(
+          'When a song starts, the computer goes first: windows pop up, mail arrives, buttons get clicked, all on the beat. Just watch and listen.',
+        ),
+      ),
+      step(
+        2,
+        'Your turn',
+        text(
+          'Now do the same things in the same rhythm. Click each one right on the beat. Every press is graded ',
+          strong('Perfect'),
+          ', ',
+          strong('Good'),
+          ' or ',
+          strong('Miss'),
+          '.',
+        ),
+      ),
+      step(
+        3,
+        'Combo bonuses',
+        text('Hit in a row and the computer livens up:'),
+        tiers,
+        text(
+          'No Miss all song? ',
+          strong('Full Combo!'),
+          ' Your score is stamped Superb, OK or Try again.',
+        ),
+      ),
+    );
+    const right = el('div', 'hub-booklet-page');
+    right.append(
+      step(
+        4,
+        'Back to the street',
+        text(strong('Windows XP: '), 'start → Log Off or Turn Off Computer.'),
+        text(strong('Mac: '), 'Apple menu → Log Out… or Shut Down…'),
+      ),
+      step(
+        5,
+        'Beat Guide',
+        text(
+          'Lost the beat? Press ',
+          key('H'),
+          ' during a song for the Beat Guide: rings close in on a dot and meet it right on the beat.',
+        ),
+      ),
+      step(
+        6,
+        'The computers',
+        text(
+          'Front row, under the yellow markers: the Windows XP PC and the iMac. Sit down and press ',
+          key('E'),
+          ' to play.',
+        ),
+        struck,
+        el('p', 'hub-booklet-pen', 'Please only use the two game machines at the front! — Staff'),
+      ),
+    );
+
+    const spread = el('div', 'hub-booklet-spread');
+    spread.append(left, right);
+    const footer = el('div', 'hub-booklet-footer');
+    const keys = el('span', 'hub-booklet-keys');
+    keys.append(key('E'), ' / ', key('Esc'), ' Close');
+    footer.append(keys, button('Close', 'hub-button', onClose));
+    this.booklet.setAttribute('aria-label', 'Guide booklet');
+    this.booklet.append(spread, footer);
   }
 
   showPause(visible: boolean): void {

@@ -424,3 +424,150 @@
 .hub.is-cutaway .hub-ui {
   display: none;
 }
+
+/* ---------- Guide booklet (doc/hub.md#guide-booklet): a printed leaflet from the café's front desk ---------- */
+
+.hub-booklet {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-0.6deg);
+  width: min(860px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 6px;
+  background: var(--hub-booklet-cover);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.45);
+  color: var(--hub-booklet-ink);
+  pointer-events: auto;
+}
+
+.hub-booklet-spread {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--hub-booklet-paper);
+  border-radius: 3px;
+}
+
+.hub-booklet-page {
+  padding: 22px 26px 18px;
+}
+
+.hub-booklet-page + .hub-booklet-page {
+  border-left: 1px dashed var(--hub-booklet-ink-muted);
+}
+
+.hub-booklet-kicker {
+  font-family: var(--hub-font-pixel);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--hub-booklet-cover);
+}
+
+.hub-booklet-title {
+  margin: 2px 0 0;
+  font-family: var(--hub-font-display);
+  font-size: 34px;
+  line-height: 1.1;
+  color: var(--hub-booklet-cover);
+}
+
+.hub-booklet-subtitle {
+  margin: 2px 0 14px;
+  color: var(--hub-booklet-ink-muted);
+}
+
+.hub-booklet-step {
+  margin-bottom: 14px;
+}
+
+.hub-booklet-step p {
+  margin: 0 0 6px;
+  line-height: 1.45;
+}
+
+.hub-booklet-step-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-family: var(--hub-font-display);
+  font-size: 19px;
+}
+
+.hub-booklet-number {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--hub-booklet-marker);
+  color: var(--hub-booklet-ink);
+  font-size: 14px;
+}
+
+.hub-booklet kbd {
+  border-color: var(--hub-booklet-ink-muted);
+  color: var(--hub-booklet-ink);
+  background: var(--hub-booklet-paper);
+}
+
+.hub-booklet-tiers {
+  margin: 0 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.hub-booklet-tiers li {
+  display: flex;
+  gap: 8px;
+  line-height: 1.6;
+}
+
+.hub-booklet-hits {
+  flex: none;
+  width: 58px;
+  font-weight: 700;
+  color: var(--hub-booklet-cover);
+}
+
+/* Struck through by the staff's red pen */
+.hub-booklet .hub-booklet-struck {
+  margin-top: 8px;
+  color: var(--hub-booklet-ink-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--hub-booklet-pen);
+  text-decoration-thickness: 3px;
+}
+
+.hub-booklet .hub-booklet-pen {
+  margin: 4px 0 0;
+  transform: rotate(-2.5deg);
+  font-family: var(--hub-font-hand);
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--hub-booklet-pen);
+}
+
+.hub-booklet-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 10px 4px 0;
+  color: var(--hub-highlight);
+}
+
+@media (max-width: 640px) {
+  .hub-booklet-spread {
+    grid-template-columns: 1fr;
+  }
+
+  .hub-booklet-page + .hub-booklet-page {
+    border-left: none;
+    border-top: 1px dashed var(--hub-booklet-ink-muted);
+  }
+}

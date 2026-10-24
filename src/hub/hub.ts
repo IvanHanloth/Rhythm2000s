@@ -113,7 +113,7 @@ const MACHINE_LOOKS: Record<SceneId, { screen: ScreenImage; imac?: boolean }> = 
 
 /**
  * title: title screen; intro: camera drops behind the character; roam: walking; paused: menu after the pointer is released;
- * dialog: reading a notice or talking; sitting / seated / standing: sitting down, seated at the level card, getting up;
+ * dialog: reading a notice or talking; booklet: reading the café's guide booklet; sitting / seated / standing: sitting down, seated at the level card, getting up;
  * launching: the camera pushes into the screen and the level starts.
  */
 type State =
@@ -122,6 +122,7 @@ type State =
   | 'roam'
   | 'paused'
   | 'dialog'
+  | 'booklet'
   | 'sitting'
   | 'seated'
   | 'standing'
@@ -270,6 +271,7 @@ export class Hub {
       onQuitToTitle: () => this.quitToTitle(),
       onPlayLevel: () => this.launch(),
       onStandUp: () => this.standUp(),
+      onCloseBooklet: () => this.closeBooklet(),
     });
     this.element.append(this.overlay.element);
     this.overlay.showTitle(true);
@@ -446,7 +448,30 @@ export class Hub {
       this.nextDialogLine();
       return;
     }
+    if (spot.kind === 'guide') {
+      this.openBooklet();
+      return;
+    }
     this.sit(spot);
+  }
+
+  /** The guide booklet (doc/hub.md#guide-booklet): the pointer is freed so the leaflet can be scrolled and closed */
+  private openBooklet(): void {
+    this.state = 'booklet';
+    this.overlay.setPrompt(null);
+    this.overlay.setLockHint(false);
+    this.releasePointer();
+    this.overlay.showBooklet(true);
+  }
+
+  private closeBooklet(): void {
+    if (this.state !== 'booklet') return;
+    this.state = 'roam';
+    this.overlay.showBooklet(false);
+    if (this.focus) this.overlay.setPrompt(this.promptFor(this.focus));
+    // Closing is a key press or click, so the pointer can be locked again straight away
+    this.lockPointer();
+    this.overlay.setLockHint(document.pointerLockElement !== this.renderer.domElement);
   }
 
   /** What a spot says; an arcade machine takes the cheat code's coin when the player has it (doc/cheat-code.md) */
@@ -564,10 +589,12 @@ export class Hub {
         case 'KeyE':
           if (this.state === 'roam' && this.focus) this.interact(this.focus);
           else if (this.state === 'dialog') this.nextDialogLine();
+          else if (this.state === 'booklet') this.closeBooklet();
           else if (this.state === 'seated') this.launch();
           break;
         case 'Escape':
           if (this.state === 'seated') this.standUp();
+          else if (this.state === 'booklet') this.closeBooklet();
           else if (this.state === 'dialog') {
             this.dialogQueue = [];
             this.nextDialogLine();
@@ -658,11 +685,14 @@ export class Hub {
       case 'intro':
       case 'paused':
       case 'dialog':
+      case 'booklet':
       case 'standing':
       case 'launching':
         this.walkAmount = 0;
         this.player.pose(this.walkPhase, 0);
-        if (this.state === 'paused' || this.state === 'dialog') this.applyPose(this.followPose(dt));
+        if (this.state === 'paused' || this.state === 'dialog' || this.state === 'booklet') {
+          this.applyPose(this.followPose(dt));
+        }
         break;
     }
 
@@ -746,6 +776,7 @@ export class Hub {
       return `Insert 10p · ${spot.name}`;
     }
     if (spot.kind === 'read') return `${spot.verb} · ${spot.name}`;
+    if (spot.kind === 'guide') return `Read · ${spot.name}`;
     const level = this.levelOf(spot);
     return `Sit down · ${level?.label ?? spot.levelId}`;
   }
