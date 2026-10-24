@@ -93,6 +93,16 @@ export class XpMessageBox {
     this.frame.setActive(active);
   }
 
+  /** 第 index 个按钮（默认是默认按钮）的中心，相对消息框中心（view 的原点）；虚拟鼠标点它时用 */
+  buttonCenter(index = 0): { x: number; y: number } {
+    const button = this.buttons[index];
+    if (!button) throw new Error(`消息框没有第 ${index + 1} 个按钮`);
+    return {
+      x: FRAME_WIDTH + button.view.x + button.width / 2 - this.view.pivot.x,
+      y: CAPTION_HEIGHT + button.view.y + button.height / 2 - this.view.pivot.y,
+    };
+  }
+
   destroy(): void {
     this.view.destroy({ children: true });
   }

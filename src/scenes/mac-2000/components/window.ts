@@ -1,5 +1,5 @@
 // Aqua 文稿窗口（NSWindow）：22 像素细条纹标题栏，上方两角圆角、下方直角；
-// 左边关闭 / 最小化 / 缩放三颗果冻按钮，标题居中，右边工具栏开关；可选状态栏、滚动条、缩放手柄。
+// 左边关闭 / 最小化 / 缩放三颗果冻按钮，标题居中，右边工具栏开关；可选工具栏、状态栏、滚动条、缩放手柄。
 // 原点在窗口中心，方便做缩放动画（与 XP 的弹出窗口一致）。
 
 import { Container, Graphics, type Text } from 'pixi.js';
@@ -32,6 +32,8 @@ export interface AquaWindowOptions {
   content?: 'white' | 'pinstripe';
   /** 标题栏右边的工具栏开关（白色椭圆）。默认有 */
   toolbarButton?: boolean;
+  /** 标题栏下方工具栏的高度（Finder 是 58）；工具栏里的东西放进 toolbar 容器。默认 0，没有工具栏 */
+  toolbarHeight?: number;
   /** 标题栏下方状态栏的文字，例如「17 项，6.8 GB 可用」；不传则没有状态栏 */
   statusText?: string;
   /** 右侧竖向滚动条；不传则没有 */
@@ -46,6 +48,8 @@ export class AquaWindow {
   readonly content: Container;
   readonly contentWidth: number;
   readonly contentHeight: number;
+  /** 工具栏：左上角在标题栏下方；没有工具栏时是空的 */
+  readonly toolbar = new Container({ label: 'toolbar' });
   /** 活动 / 非活动两种状态下各画一份的部分：标题栏、三颗按钮、工具栏开关、滚动条 */
   private readonly activeLayer: Container;
   private readonly inactiveLayer: Container;
@@ -61,6 +65,7 @@ export class AquaWindow {
       height,
       content = 'pinstripe',
       toolbarButton = true,
+      toolbarHeight = 0,
       statusText,
       scroller,
       growBox = true,
@@ -77,7 +82,9 @@ export class AquaWindow {
       stripes(AQUA.stripe),
     );
 
-    const contentTop = TITLE_BAR_HEIGHT + (statusText !== undefined ? STATUS_BAR_HEIGHT : 0);
+    const statusTop = TITLE_BAR_HEIGHT + toolbarHeight;
+    const contentTop = statusTop + (statusText !== undefined ? STATUS_BAR_HEIGHT : 0);
+    this.toolbar.position.set(0, TITLE_BAR_HEIGHT);
     const scrollerWidth = scroller ? SCROLLER_WIDTH : 0;
     this.contentWidth = width - scrollerWidth;
     this.contentHeight = height - contentTop;
@@ -99,7 +106,7 @@ export class AquaWindow {
     const status =
       statusText !== undefined ? aquaText(statusText, { size: 11, color: AQUA.inkSoft }) : null;
     status?.anchor.set(0.5);
-    status?.position.set(width / 2, TITLE_BAR_HEIGHT + STATUS_BAR_HEIGHT / 2);
+    status?.position.set(width / 2, statusTop + STATUS_BAR_HEIGHT / 2);
 
     const scrollerHeight = this.contentHeight - (growBox ? GROW_BOX : 0);
     const makeLayer = (active: boolean): Container => {
@@ -141,6 +148,7 @@ export class AquaWindow {
       this.activeLayer,
       this.inactiveLayer,
       this.titleText,
+      this.toolbar,
     );
     if (status) this.view.addChild(status);
     if (growBox) this.view.addChild(drawGrowBox(width - GROW_BOX, height - GROW_BOX));

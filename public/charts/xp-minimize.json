@@ -1,0 +1,80 @@
+{
+  "format": 1,
+  "id": "xp-minimize",
+  "title": "最小化",
+  "scene": "windows-xp",
+  "bpm": 112,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 2, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "window-minimize" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 2, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-warning" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 2, "action": "dialog-warning" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "dialog-warning" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 1.5, "action": "dialog-warning" },
+        { "beat": 2, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "window-minimize" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "dialog-warning" },
+        { "beat": 3, "action": "dialog-warning" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-warning" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "dialog-warning" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    }
+  ]
+}

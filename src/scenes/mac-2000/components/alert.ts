@@ -30,7 +30,8 @@ export class AquaAlert {
   readonly view: Container;
   readonly width: number;
   readonly height: number;
-  private readonly buttons: PushButton[];
+  /** 按钮，从左到右；可以挂鼠标事件 */
+  readonly buttons: PushButton[];
 
   constructor({ icon, message, informative, buttons, width = 420 }: AquaAlertOptions) {
     this.view = new Container({ label: 'alert' });

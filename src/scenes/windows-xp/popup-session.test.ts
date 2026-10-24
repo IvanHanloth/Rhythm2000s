@@ -3,12 +3,25 @@ import type { SceneContext } from '../../game/scene.ts';
 import { DIALOG_KINDS } from './dialog-kinds.ts';
 import { PopupSession } from './popup-session.ts';
 import type { PopupSounds } from './song.ts';
+import { buildChart } from '../../rhythm/chart.ts';
+import { sourceFromPatterns } from '../../rhythm/test-charts.ts';
 import { loadMvpChart } from './test-mvp-chart.ts';
 
 /** 用名字代替真正的 AudioBuffer */
 const sounds = {
   ...Object.fromEntries(
-    ['kick', 'snare', 'hat', 'countAccent', 'count', 'close', 'miss', 'result'].map((n) => [n, n]),
+    [
+      'kick',
+      'snare',
+      'hat',
+      'countAccent',
+      'count',
+      'close',
+      'rightClick',
+      'menuCommand',
+      'miss',
+      'result',
+    ].map((n) => [n, n]),
   ),
   dialogs: Object.fromEntries(Object.keys(DIALOG_KINDS).map((kind) => [kind, kind])),
 } as unknown as PopupSounds;
@@ -74,5 +87,39 @@ describe('PopupSession', () => {
     expect(session.tap(session.timeAt(0))).toBeNull();
     expect(session.judgements).toHaveLength(0);
     expect(played).toHaveLength(0);
+  });
+
+  it('右键刷新要按两下：各自判定，第一下右键声、第二下菜单命令声，第二下命中才算完成', () => {
+    const { context, played } = fakeContext();
+    const chart = buildChart(
+      sourceFromPatterns([[0]], {
+        phrases: [
+          {
+            call: [
+              { beat: 0, action: 'desktop-refresh' },
+              { beat: 1, action: 'dialog-info' },
+            ],
+          },
+        ],
+      }),
+    );
+    const session = new PopupSession(context, chart, sounds);
+    const [refresh, dialog] = session.windows;
+    expect(refresh!.clicks.map((c) => c.beat)).toEqual([8, 8.5]);
+    expect(dialog!.clicks.map((c) => c.beat)).toEqual([9]);
+
+    // 第一下漏掉，第二下和消息框都踩准
+    session.update(session.timeAt(8.5) - 0.001);
+    expect(session.tap(session.timeAt(8.5))).toMatchObject({ event: 0, step: 1, target: 1 });
+    expect(session.tap(session.timeAt(9))).toMatchObject({ event: 1, step: 0, target: 2 });
+
+    expect(session.judgements.map((j) => [j.event, j.step, j.level])).toEqual([
+      [0, 0, 'miss'],
+      [0, 1, 'perfect'],
+      [1, 0, 'perfect'],
+    ]);
+    expect(refresh!.missedAt).not.toBeNull();
+    expect(refresh!.closedAt).toBeCloseTo(session.timeAt(8.5), 10);
+    expect(played).toEqual(['miss', 'menuCommand', 'close']);
   });
 });

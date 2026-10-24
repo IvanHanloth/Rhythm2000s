@@ -21,7 +21,7 @@ function fakeEntry(id: string, log: string[]): SceneEntry {
 }
 
 /** 假场景用不到音频时钟 */
-const context = { calibration: () => 0, charts: [] } as unknown as SceneContext;
+const context = { calibration: () => 0, charts: [], leave() {} } as unknown as SceneContext;
 
 function fakeHost(log: string[]): SceneHost {
   return {
@@ -80,6 +80,26 @@ describe('SceneDirector', () => {
     director.tap({ audioTime: 2 });
 
     expect(log.filter((line) => line.startsWith('tap'))).toEqual(['tap a 2']);
+  });
+
+  it('Esc 转给当前场景；场景没处理或没有场景时返回 false', () => {
+    const handled: SceneEntry = {
+      id: 'a' as SceneEntry['id'],
+      label: 'a',
+      create: () => ({
+        view: { label: 'a' } as unknown as Container,
+        update() {},
+        onEscape: () => true,
+        destroy() {},
+      }),
+    };
+    const director = new SceneDirector(fakeHost([]), [handled, fakeEntry('b', [])], context);
+
+    expect(director.escape()).toBe(false);
+    director.show('a');
+    expect(director.escape()).toBe(true);
+    director.show('b');
+    expect(director.escape()).toBe(false);
   });
 
   it('切换到没登记的场景时报错，并保留当前场景', () => {

@@ -24,6 +24,8 @@ export interface SceneContext {
   calibration(): number;
   /** 已加载并通过校验的全部谱面；场景按 chart.scene 挑出自己的 */
   charts: readonly Chart[];
+  /** 离开场景、回到街区大厅（选关界面的「后退」「返回」） */
+  leave(): void;
 }
 
 export interface Scene {
@@ -33,6 +35,11 @@ export interface Scene {
   update(frame: FrameInfo): void;
   /** 玩家输入；不需要输入的场景可以不实现 */
   onTap?(tap: TapInfo): void;
+  /**
+   * 玩家按了 Esc。场景自己处理了（例如从关卡回到关卡列表）就返回 true；
+   * 返回 false 或不实现时，由游戏入口回到街区大厅。
+   */
+  onEscape?(): boolean;
   /** 离开场景时调用，释放画面和其他资源 */
   destroy(): void;
 }

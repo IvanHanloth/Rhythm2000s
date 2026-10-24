@@ -1,0 +1,82 @@
+{
+  "format": 1,
+  "id": "xp-recycle",
+  "title": "回收站",
+  "scene": "windows-xp",
+  "bpm": 124,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "recycle-bin" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 2, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "recycle-bin" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "recycle-bin" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 2, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "recycle-bin" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 1.5, "action": "recycle-bin" },
+        { "beat": 2, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 1.5, "action": "recycle-bin" },
+        { "beat": 2, "action": "dialog-question" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "recycle-bin" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 1.5, "action": "recycle-bin" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 2.5, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 2, "action": "dialog-question" },
+        { "beat": 2.5, "action": "recycle-bin" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    }
+  ]
+}

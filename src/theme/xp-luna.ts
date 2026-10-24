@@ -64,6 +64,18 @@ export const LUNA = {
     glyph: '#ffffff',
   },
 
+  /** 标题栏上的最小化、最大化按钮：白色细边、蓝色渐变、白色图形 */
+  captionButton: {
+    border: '#ffffff',
+    fill: [
+      [0, '#9dbcf9'],
+      [0.25, '#5b90f5'],
+      [0.6, '#3a73ee'],
+      [1, '#2257d5'],
+    ] as GradientStops,
+    glyph: '#ffffff',
+  },
+
   button: {
     border: '#003c74',
     fill: [
@@ -145,6 +157,19 @@ export const LUNA = {
       [0.97, '#137ed7'],
       [1, '#095bc9'],
     ] as GradientStops,
+    /** 任务栏上的程序按钮：普通（窗口在后面或最小化）和按下（窗口在最前面） */
+    taskButton: [
+      [0, '#5a9bf7'],
+      [0.12, '#3c81f3'],
+      [0.9, '#3a7cee'],
+      [1, '#2b65d6'],
+    ] as GradientStops,
+    taskButtonActive: [
+      [0, '#174ba8'],
+      [0.15, '#1e52b7'],
+      [1, '#2259c4'],
+    ] as GradientStops,
+    taskButtonEdge: '#0f3fa3',
     trayBorder: '#1042af',
     trayHighlight: '#18bbff',
     text: '#ffffff',
@@ -229,6 +254,53 @@ export const LUNA = {
       [0.5, '#35a235'],
       [1, '#257d25'],
     ] as GradientStops,
+  },
+
+  /** 资源管理器（CabinetWClass）：菜单栏、工具栏、地址栏、任务窗格、平铺视图、状态栏 */
+  explorer: {
+    /** 工具栏、地址栏之间的分隔线：一暗一亮 */
+    bandDark: '#d0d0bf',
+    bandLight: '#ffffff',
+    toolbarSeparator: '#c5c2b2',
+    /** 工具栏按钮悬停时的凸起边 */
+    hotEdgeLight: '#ffffff',
+    hotEdgeDark: '#aca899',
+    disabledInk: '#aca899',
+    addressLabel: '#444444',
+    comboBorder: '#7f9db9',
+    comboButton: [
+      [0, '#e1eafe'],
+      [1, '#b4c9f5'],
+    ] as GradientStops,
+    comboButtonEdge: '#b9cdf6',
+    comboArrow: '#4d6185',
+    /** 后退、转到等绿色圆形箭头 */
+    go: '#3aa63a',
+    goEdge: '#1d6a1d',
+    goDisabled: '#c9c7ba',
+    goDisabledEdge: '#a1a192',
+    taskPane: [
+      [0, '#7ba2e7'],
+      [1, '#6375d6'],
+    ] as GradientStops,
+    groupHeader: [
+      [0, '#ffffff'],
+      [1, '#c6d3f7'],
+    ] as GradientStops,
+    groupHeaderText: '#215dc6',
+    groupBody: '#d6dff7',
+    link: '#215dc6',
+    linkHot: '#428eff',
+    /** 平铺视图「在组中显示」的组标题和下面渐隐的线 */
+    viewGroupTitle: '#0e3ea4',
+    viewGroupLine: [
+      [0, '#8ba8e0ff'],
+      [0.7, '#8ba8e000'],
+      [1, '#8ba8e000'],
+    ] as GradientStops,
+    subText: '#7a7a7a',
+    /** 选中的图标蒙一层蓝 */
+    selectedIconTint: '#9db8ec',
   },
 
   /** 信息提示（气泡、工具提示）的浅黄底 */

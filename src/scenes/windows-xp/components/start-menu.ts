@@ -63,6 +63,12 @@ export class XpStartMenu {
   readonly width = START_MENU_WIDTH;
   readonly height: number;
   private readonly onSelect: (label: string) => void;
+  /** 每一项：容器、鼠标热区（容器自己的坐标）、高亮开关 */
+  private readonly items = new Map<
+    string,
+    { item: Container; hitArea: Rectangle; setHot: (on: boolean) => void }
+  >();
+  private highlighted: string | null = null;
 
   constructor({ onSelect = () => {} }: StartMenuOptions = {}) {
     this.onSelect = onSelect;
@@ -116,6 +122,28 @@ export class XpStartMenu {
     right.y = bodyTop;
 
     this.view.addChild(shadow, face, this.header(), left, right, this.footer(bodyTop + bodyHeight));
+  }
+
+  /** 节奏关卡里虚拟鼠标停在哪一项：那一项蓝底白字，其余恢复；null 表示都不高亮 */
+  highlight(label: string | null): void {
+    if (label === this.highlighted) return;
+    if (this.highlighted) this.items.get(this.highlighted)?.setHot(false);
+    this.highlighted = label;
+    if (label) this.items.get(label)?.setHot(true);
+  }
+
+  /** 某一项的中心（菜单自己的坐标），虚拟鼠标点这里；没有这一项时返回 null */
+  itemCenter(label: string): { x: number; y: number } | null {
+    const entry = this.items.get(label);
+    if (!entry) return null;
+    // 菜单里没有缩放，把一路上各层容器的位置加起来即可（不依赖还没渲染过的世界变换）
+    const { x, y, width, height } = entry.hitArea;
+    const center = { x: x + width / 2, y: y + height / 2 };
+    for (let node: Container | null = entry.item; node && node !== this.view; node = node.parent) {
+      center.x += node.x;
+      center.y += node.y;
+    }
+    return center;
   }
 
   destroy(): void {
@@ -262,6 +290,7 @@ export class XpStartMenu {
     hitArea: Rectangle,
     setHot: (on: boolean) => void,
   ): void {
+    this.items.set(label, { item, hitArea, setHot });
     item.eventMode = 'static';
     item.hitArea = hitArea;
     item.on('pointerover', () => setHot(true));

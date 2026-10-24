@@ -1,7 +1,7 @@
 // 谱面文件（JSON）的校验：把下载来的未知数据检查成 ChartSource。
 // 格式说明见 doc/chart-format.md。报错带字段路径，一次列出所有问题。
 
-import { ACTION_TYPES, isActionType, type ActionType } from './actions.ts';
+import { ACTION_TYPES, isActionType, lastTapOffset, type ActionType } from './actions.ts';
 
 export const CHART_FORMAT_VERSION = 1;
 
@@ -28,7 +28,7 @@ export interface ChartSource {
   beatsPerBar: number;
   countInBars: number;
   outroBars: number;
-  /** 示范小节结束后、跟打小节开始前空几拍；不写时用 DEFAULT_RESPONSE_GAP_BEATS（0.5 拍） */
+  /** 示范小节结束后、跟打小节开始前空几拍；不写时用 DEFAULT_RESPONSE_GAP_BEATS（0 拍） */
   responseGapBeats?: number;
   phrases: ChartPhraseSource[];
 }
@@ -157,6 +157,8 @@ function checkEvents(
   }
   const errors: string[] = [];
   let previousBeat = -Infinity;
+  /** 上一个事件最后一下的拍位置（要按两下的动作占到第二下） */
+  let previousEnd = -Infinity;
 
   events.forEach((event, j) => {
     const eventPath = `${path}[${j}]`;
@@ -167,16 +169,24 @@ function checkEvents(
     errors.push(...unknownKeys(event, ['beat', 'action'], eventPath));
 
     const { beat, action } = event;
+    const last = isActionType(action) ? lastTapOffset(action) : 0;
     if (typeof beat !== 'number' || !Number.isFinite(beat) || beat < 0) {
       errors.push(`${eventPath}.beat 必须是不小于 0 的数字`);
     } else {
       if (beatsPerBar !== null && beat >= beatsPerBar) {
         errors.push(`${eventPath}.beat 必须小于每小节拍数 ${beatsPerBar}`);
+      } else if (beatsPerBar !== null && beat + last >= beatsPerBar) {
+        errors.push(
+          `${eventPath}.beat：${String(action)} 的最后一下在第 ${beat + last} 拍，必须小于每小节拍数 ${beatsPerBar}`,
+        );
       }
       if (beat <= previousBeat) {
         errors.push(`${eventPath}.beat 必须大于上一个事件的拍位置`);
+      } else if (beat <= previousEnd) {
+        errors.push(`${eventPath}.beat 必须在上一个事件的最后一下（第 ${previousEnd} 拍）之后`);
       }
       previousBeat = beat;
+      previousEnd = beat + last;
     }
 
     if (!isActionType(action)) {

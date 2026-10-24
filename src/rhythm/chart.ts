@@ -41,8 +41,8 @@ export interface Chart {
   endBeat: number;
 }
 
-/** 谱面没写 responseGapBeats 时，示范与跟打之间空几拍（2026-10-24 用户定为 0.5 拍） */
-export const DEFAULT_RESPONSE_GAP_BEATS = 0.5;
+/** 谱面没写 responseGapBeats 时，示范与跟打之间空几拍（2026-10-24 先定为 0.5 拍，同日用户改为 0：跟打紧接着示范） */
+export const DEFAULT_RESPONSE_GAP_BEATS = 0;
 
 /**
  * 展开谱面：每个乐句依次是示范小节、空档（responseGapBeats 拍）、跟打小节，乐句之间没有间隔；

@@ -2,8 +2,9 @@
 // 场景创建前先调用 preloadXpAssets() 加载完，之后用 xpAssets() 同步取用。
 // 音效与事件的对应关系见 doc/scenes/windows-xp.md「音效」。
 
-import { Assets, type Texture } from 'pixi.js';
+import { Assets, Texture } from 'pixi.js';
 import { loadSample, type SampleOptions } from '../../audio/samples.ts';
+import { decodeCur } from './cur-file.ts';
 import tahomaUrl from '../../../assets/reference/windows-xp/fonts/TAHOMA.TTF?url';
 import tahomaBoldUrl from '../../../assets/reference/windows-xp/fonts/TAHOMABD.TTF?url';
 import blissUrl from '../../../assets/reference/windows-xp/wallpapers/Bliss.jpg?url';
@@ -16,6 +17,10 @@ import navigateUrl from '../../../assets/reference/windows-xp/sounds/Windows XP 
 import menuCommandUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Menu Command.wav?url';
 import balloonUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Balloon.wav?url';
 import tadaUrl from '../../../assets/reference/windows-xp/sounds/tada.wav?url';
+import restoreUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Restore.wav?url';
+import minimizeUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Minimize.wav?url';
+import recycleUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Recycle.wav?url';
+import defaultSoundUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Default.wav?url';
 import arrowCursorUrl from '../../../assets/reference/windows-xp/icons/default_arrow.cur?url';
 import { XP_FONT_FAMILY } from './components/xp-text.ts';
 
@@ -53,6 +58,14 @@ const SOUND_FILES = {
   menuCommand: { url: menuCommandUrl, peak: 0.6 },
   balloon: { url: balloonUrl, peak: 0.55 },
   tada: { url: tadaUrl, peak: 0.6 },
+  /** 窗口还原：window-minimize 示范段弹出程序窗口 */
+  restore: { url: restoreUrl, peak: 0.6 },
+  /** 窗口最小化：window-minimize 跟打段命中 */
+  minimize: { url: minimizeUrl, peak: 0.6 },
+  /** 清空 / 扔进回收站：recycle-bin 跟打段命中 */
+  recycle: { url: recycleUrl, peak: 0.6 },
+  /** Windows XP Default.wav：recycle-bin 示范段桌面落下文件，暂定 */
+  fileDrop: { url: defaultSoundUrl, peak: 0.5 },
 } satisfies Record<string, { url: string } & SampleOptions>;
 
 export type XpSoundName = keyof typeof SOUND_FILES;
@@ -61,6 +74,8 @@ export type XpSounds = Record<XpSoundName, AudioBuffer>;
 export interface XpAssets {
   wallpaper: Texture;
   sounds: XpSounds;
+  /** 虚拟鼠标用的 XP 箭头（从 default_arrow.cur 解出来的），热点是点击发生的像素 */
+  pointer: { texture: Texture; hotspot: { x: number; y: number } };
   /** 按文件名取图标；没有这个图标时抛出错误，避免悄悄画成空白 */
   icon(name: string): Texture;
 }
@@ -82,7 +97,7 @@ export function xpAssets(): XpAssets {
 
 async function load(audio: BaseAudioContext): Promise<XpAssets> {
   const iconEntries = Object.entries(ICON_URLS);
-  const [wallpaper, icons, sounds] = await Promise.all([
+  const [wallpaper, icons, sounds, , pointer] = await Promise.all([
     Assets.load<Texture>(blissUrl),
     Promise.all(
       iconEntries.map(([, url]) =>
@@ -91,17 +106,35 @@ async function load(audio: BaseAudioContext): Promise<XpAssets> {
     ),
     loadSounds(audio),
     loadFonts(),
+    loadPointer(),
   ]);
   const iconTextures = new Map(iconEntries.map(([name], i) => [name, icons[i]!]));
   return {
     wallpaper,
     sounds,
+    pointer,
     icon(name) {
       const texture = iconTextures.get(name);
       if (!texture) throw new Error(`没有 XP 图标 ${name}.png`);
       return texture;
     },
   };
+}
+
+/** .cur 不是浏览器认识的图片格式，解码成像素再画到画布上做纹理；按最近邻放大，保持像素清楚 */
+async function loadPointer(): Promise<XpAssets['pointer']> {
+  const response = await fetch(arrowCursorUrl);
+  if (!response.ok) throw new Error(`指针 ${arrowCursorUrl} 下载失败（HTTP ${response.status}）`);
+  const image = decodeCur(new Uint8Array(await response.arrayBuffer()));
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('无法创建画布来解码指针');
+  context.putImageData(new ImageData(image.rgba, image.width, image.height), 0, 0);
+  const texture = Texture.from(canvas);
+  texture.source.scaleMode = 'nearest';
+  return { texture, hotspot: image.hotspot };
 }
 
 async function loadSounds(audio: BaseAudioContext): Promise<XpSounds> {

@@ -16,6 +16,16 @@ const TRAY_ICON = 16;
 const TRAY_GAP = 6;
 const TRAY_PADDING = 10;
 
+export const TASK_LEFT = START_WIDTH + 10;
+export const TASK_WIDTH = 160;
+export const TASK_HEIGHT = 22;
+
+export interface TaskbarTask {
+  /** assets/reference/windows-xp/icons/ 的文件名 */
+  icon: string;
+  label: string;
+}
+
 export class XpTaskbar {
   readonly view = new Container({ label: 'taskbar' });
   readonly startButton: StartButton;
@@ -25,8 +35,10 @@ export class XpTaskbar {
   private readonly clock: Text;
   private clockText = '';
   private muted = false;
+  private readonly taskButtons: TaskButton[] = [];
 
-  constructor() {
+  /** tasks：任务栏上的程序按钮，从「开始」右边依次排开 */
+  constructor({ tasks = [] }: { tasks?: TaskbarTask[] } = {}) {
     const bar = new Graphics()
       .rect(0, 0, XP_SCREEN_WIDTH, TASKBAR_HEIGHT)
       .fill(verticalGradient(LUNA.taskbar.fill));
@@ -73,6 +85,13 @@ export class XpTaskbar {
     tray.position.set(XP_SCREEN_WIDTH - trayWidth, 0);
 
     this.view.addChild(bar, this.startButton.view, tray);
+    tasks.forEach((task, i) => {
+      const button = new TaskButton(task);
+      const top = (TASKBAR_HEIGHT - TASK_HEIGHT) / 2 + 1;
+      button.view.position.set(TASK_LEFT + i * (TASK_WIDTH + 3), top);
+      this.taskButtons.push(button);
+      this.view.addChild(button.view);
+    });
     this.setClock(new Date());
   }
 
@@ -82,6 +101,11 @@ export class XpTaskbar {
     if (text === this.clockText) return;
     this.clockText = text;
     this.clock.text = text;
+  }
+
+  /** 第 index 个程序按钮是否按下（它的窗口在最前面） */
+  setTaskActive(index: number, active: boolean): void {
+    this.taskButtons[index]?.setActive(active);
   }
 
   setMuted(muted: boolean): void {
@@ -157,4 +181,38 @@ function startShape(g: Graphics): Graphics {
     .arcTo(w, h, w - r, h, r)
     .lineTo(0, h)
     .closePath();
+}
+
+/** 任务栏上的程序按钮：16 像素图标 + 白字；窗口在最前面时是按下的深蓝色 */
+export class TaskButton {
+  readonly view: Container;
+  private readonly normal: Graphics;
+  private readonly pressed: Graphics;
+
+  constructor({ icon, label }: TaskbarTask) {
+    this.view = new Container({ label: `task-${label}` });
+    const t = LUNA.taskbar;
+    const face = (stops: typeof t.taskButton) =>
+      new Graphics()
+        .roundRect(0, 0, TASK_WIDTH, TASK_HEIGHT, 3)
+        .fill(t.taskButtonEdge)
+        .roundRect(1, 1, TASK_WIDTH - 2, TASK_HEIGHT - 2, 2)
+        .fill(verticalGradient(stops));
+    this.normal = face(t.taskButton);
+    this.pressed = face(t.taskButtonActive);
+    this.pressed.visible = false;
+
+    const sprite = new Sprite(xpAssets().icon(icon));
+    sprite.setSize(16);
+    sprite.position.set(6, (TASK_HEIGHT - 16) / 2);
+    const text = xpText(label, { fill: t.text });
+    text.anchor.set(0, 0.5);
+    text.position.set(28, TASK_HEIGHT / 2);
+    this.view.addChild(this.normal, this.pressed, sprite, text);
+  }
+
+  setActive(active: boolean): void {
+    this.normal.visible = !active;
+    this.pressed.visible = active;
+  }
 }

@@ -77,6 +77,23 @@ describe('parseChartFile', () => {
     ]);
   });
 
+  it('要按两下的动作：下一个事件要在第二下之后，第二下也要在小节之内', () => {
+    const refresh = { scenes: { 'windows-xp': ['dialog-info', 'desktop-refresh'] } } as const;
+    const data = json(sourceFromPatterns([[0]]));
+    data.phrases[0].call = [
+      { beat: 0, action: 'desktop-refresh' },
+      { beat: 0.5, action: 'dialog-info' },
+      { beat: 1, action: 'desktop-refresh' },
+      { beat: 1.5, action: 'dialog-info' },
+      { beat: 3.5, action: 'desktop-refresh' },
+    ];
+    expect(errorsOf(data, refresh)).toEqual([
+      'phrases[0].call[1].beat 必须在上一个事件的最后一下（第 0.5 拍）之后',
+      'phrases[0].call[3].beat 必须在上一个事件的最后一下（第 1.5 拍）之后',
+      'phrases[0].call[4].beat：desktop-refresh 的最后一下在第 4 拍，必须小于每小节拍数 4',
+    ]);
+  });
+
   it('未知动作、场景不支持的动作、未知场景都报错', () => {
     const unknownAction = json(sourceFromPatterns([[0]]));
     unknownAction.phrases[0].call[0].action = 'refresh';

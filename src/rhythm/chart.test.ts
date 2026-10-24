@@ -26,11 +26,11 @@ describe('buildChart', () => {
     expect(chart.endBeat).toBe(34 + 4);
   });
 
-  it('不写 responseGapBeats 时，空档默认 0.5 拍', () => {
+  it('不写 responseGapBeats 时没有空档，跟打紧接着示范', () => {
     const source = sourceFromPatterns([[0]]);
     delete source.responseGapBeats;
     expect(buildChart(source).phrases).toEqual([
-      { callStart: 4, callEnd: 8, responseStart: 8.5, end: 12.5 },
+      { callStart: 4, callEnd: 8, responseStart: 8, end: 12 },
     ]);
   });
 

@@ -64,6 +64,26 @@ describe('checkTurnCueSpacing', () => {
     ]);
   });
 
+  it('要按两下的动作看第二下：右键刷新最晚放在第 2.75 拍', () => {
+    const ok = chartFromPatterns([[0, 2.75], [0]], {
+      phrases: [
+        { call: [{ beat: 2.75, action: 'desktop-refresh' }] },
+        { call: [{ beat: 0, action: 'dialog-info' }] },
+      ],
+    });
+    expect(checkTurnCueSpacing(ok, 0.1)).toEqual([]);
+
+    const late = chartFromPatterns([], {
+      phrases: [
+        { call: [{ beat: 3, action: 'desktop-refresh' }] },
+        { call: [{ beat: 0, action: 'dialog-info' }] },
+      ],
+    });
+    expect(checkTurnCueSpacing(late, 0.1)[0]).toBe(
+      'phrases[0].call[0]：第 3 拍太靠后，提示会在判定结束前切走；120 BPM 下要早于第 2.8 拍',
+    );
+  });
+
   it('最后一个乐句的 Your turn 显示到乐句结束，跟打可以更靠后', () => {
     const errors = checkTurnCueSpacing(chartFromPatterns([[0, 3.5]]), 0.1);
     expect(errors.map((e) => e.split('：')[0])).toEqual(['phrases[0].call[1]']);

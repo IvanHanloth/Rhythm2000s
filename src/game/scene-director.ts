@@ -53,6 +53,11 @@ export class SceneDirector {
     this.current?.scene.onTap?.(tap);
   }
 
+  /** 玩家按了 Esc，转给当前场景；场景自己处理了返回 true。 */
+  escape(): boolean {
+    return this.current?.scene.onEscape?.() ?? false;
+  }
+
   /** 销毁当前场景。 */
   clear(): void {
     if (!this.current) return;

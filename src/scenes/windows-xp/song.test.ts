@@ -8,17 +8,28 @@ import { loadMvpChart } from './test-mvp-chart.ts';
 /** 用名字代替真正的 AudioBuffer，只检查排了哪些声音 */
 const sounds = {
   ...Object.fromEntries(
-    ['kick', 'snare', 'hat', 'countAccent', 'count', 'close', 'miss', 'result'].map((n) => [n, n]),
+    [
+      'kick',
+      'snare',
+      'hat',
+      'countAccent',
+      'count',
+      'close',
+      'rightClick',
+      'menuCommand',
+      'miss',
+      'result',
+    ].map((n) => [n, n]),
   ),
   dialogs: Object.fromEntries(Object.keys(DIALOG_KINDS).map((kind) => [kind, kind])),
 } as unknown as PopupSounds;
 
 describe('MVP 谱面文件', () => {
-  it('8 个乐句，每句「示范 + 1 拍空档 + 跟打」，全曲 80 拍', () => {
+  it('8 个乐句，每句「示范 + 跟打」，中间没有空档，全曲 72 拍', () => {
     const chart = loadMvpChart();
     expect(chart.phrases).toHaveLength(8);
-    expect(chart.phrases[0]).toEqual({ callStart: 4, callEnd: 8, responseStart: 9, end: 13 });
-    expect(chart.endBeat).toBe(4 + 8 * 9 + 4);
+    expect(chart.phrases[0]).toEqual({ callStart: 4, callEnd: 8, responseStart: 8, end: 12 });
+    expect(chart.endBeat).toBe(4 + 8 * 8 + 4);
   });
 });
 
@@ -51,6 +62,19 @@ describe('buildBackingTrack', () => {
     const lastBar = chart.endBeat - 4;
     expect(at(lastBar)).toEqual(['kick', 'snare']);
     expect(track.every((s) => s.beat <= lastBar)).toBe(true);
+  });
+});
+
+describe('右键刷新的示范', () => {
+  it('虚拟鼠标在拍点上右键、0.5 拍后点「刷新」，各响一声', () => {
+    const chart = buildChart(
+      sourceFromPatterns([[0]], { phrases: [{ call: [{ beat: 1, action: 'desktop-refresh' }] }] }),
+    );
+    const clicks = buildBackingTrack(chart, sounds)
+      .filter((s) => ['rightClick', 'menuCommand'].includes(s.buffer as unknown as string))
+      .map((s) => `${s.beat}:${s.buffer as unknown as string}`);
+    // 示范小节从第 4 拍开始，只有示范段有提示音
+    expect(clicks).toEqual(['5:rightClick', '5.5:menuCommand']);
   });
 });
 

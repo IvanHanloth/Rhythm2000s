@@ -24,6 +24,12 @@ export interface BalloonOptions {
 
 export class XpBalloon {
   readonly view = new Container({ label: 'balloon' });
+  /** 气泡连尖角的总高度：从尖端往上这么高 */
+  readonly height: number;
+  /** 关闭按钮中心（相对尖端），虚拟鼠标点这里 */
+  readonly closeCenter: { x: number; y: number };
+  /** 关闭按钮的悬停高亮，虚拟鼠标移上去时用 */
+  readonly setCloseHot: (hot: boolean) => void;
 
   constructor({ title, text, icon = 'dialog-info', width = 270, onClose }: BalloonOptions) {
     const iconSprite = new Sprite(xpAssets().icon(icon));
@@ -84,6 +90,13 @@ export class XpBalloon {
     content.addChild(shape, iconSprite, titleText, body, close);
     content.position.set(-stemTipX, -(height + STEM_HEIGHT));
     this.view.addChild(content);
+
+    this.height = height + STEM_HEIGHT;
+    this.closeCenter = {
+      x: content.x + close.x + CLOSE_SIZE / 2,
+      y: content.y + close.y + CLOSE_SIZE / 2,
+    };
+    this.setCloseHot = drawClose;
   }
 
   destroy(): void {

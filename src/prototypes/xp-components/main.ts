@@ -25,6 +25,8 @@ import { XpTaskbar } from '../../scenes/windows-xp/components/taskbar.ts';
 import { CAPTION_HEIGHT } from '../../scenes/windows-xp/components/window-frame.ts';
 import { XpVolumeControl } from '../../scenes/windows-xp/components/volume-control.ts';
 import { DIALOG_KINDS, type DialogKind } from '../../scenes/windows-xp/dialog-kinds.ts';
+import { XpResultsWindow } from '../../scenes/windows-xp/results-window.ts';
+import { summarizeResult, type HitResult } from '../../rhythm/result-summary.ts';
 
 const host = document.querySelector<HTMLElement>('#game');
 if (!host) throw new Error('找不到容器 #game');
@@ -237,6 +239,41 @@ function closeDialog(dialog: XpMessageBox): void {
 
 let balloon: XpBalloon | null = null;
 
+// ---------- 结算窗口（示例数据：31 下命中、2 下 Miss，略偏晚） ----------
+
+let results: XpResultsWindow | null = null;
+
+function showResults(): void {
+  closePopups();
+  results?.destroy();
+  const offsetsMs = [
+    -58, -41, -35, -22, -20, -14, -9, -6, -3, 0, 2, 4, 6, 9, 11, 13, 15, 18, 20, 21, 24, 26, 29, 33,
+    36, 39, 44, 52, 61, 70, 84,
+  ];
+  const hits: HitResult[] = offsetsMs.map((ms, i) => ({
+    level: Math.abs(ms) <= 45 ? 'perfect' : 'good',
+    offset: ms / 1000,
+    phrase: Math.floor(i / 4),
+  }));
+  hits.push({ level: 'miss', offset: null, phrase: 3 }, { level: 'miss', offset: null, phrase: 6 });
+  const close = () => {
+    results?.destroy();
+    results = null;
+  };
+  results = new XpResultsWindow({
+    title: '弹窗大扫除',
+    summary: summarizeResult(hits),
+    newRecord: true,
+    hasNext: true,
+    onRetry: close,
+    onList: close,
+    onNext: close,
+  });
+  results.view.position.set(XP_SCREEN_WIDTH / 2, WORK_AREA_HEIGHT / 2);
+  windowLayer.addChild(results.view);
+  play('tada');
+}
+
 function showBalloon(): void {
   balloon?.destroy();
   balloon = new XpBalloon({
@@ -262,6 +299,7 @@ for (const kind of Object.keys(DIALOG_KINDS) as DialogKind[]) {
   toolbar.append(toolbarButton(`${kind}（${ACTION_LABELS[kind]}）`, () => openDialog(kind)));
 }
 toolbar.append(toolbarButton('托盘气泡', showBalloon));
+toolbar.append(toolbarButton('结算窗口', showResults));
 const back = document.createElement('a');
 back.href = '/';
 back.textContent = '回到游戏';

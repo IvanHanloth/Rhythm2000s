@@ -31,10 +31,16 @@ const scenes = [windowsXpScene, mac2000Scene];
 // 场景素材在画布建好之后加载（PixiJS 的纹理加载放在渲染器初始化之后更稳妥）
 await Promise.all(scenes.map(async (scene) => scene.preload?.(clock.context)));
 
+/** 街区大厅的网址标识；网址里没有写场景时也打开大厅 */
+const HUB_ROUTE = 'street';
+
 const director = new SceneDirector(canvas.stage, scenes, {
   clock,
   calibration: () => calibrationMs / 1000,
   charts,
+  leave: () => {
+    location.hash = HUB_ROUTE;
+  },
 });
 
 // 浏览器要求在用户操作里恢复音频；恢复之前音频时间不走
@@ -44,9 +50,6 @@ window.addEventListener('keydown', resumeAudio, { once: true });
 
 listenForTaps(clock, host, (tap) => director.tap(tap));
 canvas.onFrame(() => director.update({ audioTime: clock.heardNow() }));
-
-/** 街区大厅的网址标识；网址里没有写场景时也打开大厅 */
-const HUB_ROUTE = 'street';
 
 /** 网吧里每台关卡电脑坐下后显示的信息 */
 const levels: LevelInfo[] = director.entries.map(({ id, label }) => {
@@ -78,7 +81,9 @@ backHint.hidden = true;
 document.body.append(backHint);
 
 window.addEventListener('keydown', (event) => {
-  if (event.code === 'Escape' && currentRoute() !== HUB_ROUTE) location.hash = HUB_ROUTE;
+  if (event.code !== 'Escape' || currentRoute() === HUB_ROUTE) return;
+  // 关卡里先回到关卡列表，关卡列表上再按才回街区（doc/level-select.md）
+  if (!director.escape()) location.hash = HUB_ROUTE;
 });
 
 // 网址里的 #场景标识 决定打开哪个场景，刷新后停在原场景

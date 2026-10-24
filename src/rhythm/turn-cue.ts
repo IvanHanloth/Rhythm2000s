@@ -2,6 +2,7 @@
 // 时间以拍为单位，和谱面一致。
 
 import { secondsPerBeat } from './beat.ts';
+import { lastTapOffset } from './actions.ts';
 import type { Chart } from './chart.ts';
 
 export type Turn = 'call' | 'response';
@@ -61,12 +62,14 @@ export function checkTurnCueSpacing(
   ] as const) {
     for (const cue of list) {
       const shown = cues.find((c) => c.turn === turn && c.phrase === cue.phrase);
-      if (!shown || cue.beat + goodBeats < shown.end) continue;
+      // 要按两下的动作看最后一下
+      const lastTap = cue.beat + lastTapOffset(cue.action);
+      if (!shown || lastTap + goodBeats < shown.end) continue;
       const barStart =
         turn === 'call'
           ? chart.phrases[cue.phrase]!.callStart
           : chart.phrases[cue.phrase]!.responseStart;
-      const latest = shown.end - barStart - goodBeats;
+      const latest = shown.end - barStart - goodBeats - (lastTap - cue.beat);
       errors.push(
         `phrases[${cue.phrase}].${key}[${cue.index}]：第 ${cue.beat - barStart} 拍太靠后，` +
           `提示会在判定结束前切走；${chart.bpm} BPM 下要早于第 ${Number(latest.toFixed(2))} 拍`,

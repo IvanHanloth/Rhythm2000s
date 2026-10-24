@@ -1,0 +1,74 @@
+{
+  "format": 1,
+  "id": "xp-start-menu",
+  "title": "开始",
+  "scene": "windows-xp",
+  "bpm": 116,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "start-menu" },
+        { "beat": 2, "action": "start-menu" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "start-menu" },
+        { "beat": 1, "action": "start-menu" },
+        { "beat": 2, "action": "start-menu" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "start-menu" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "start-menu" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "start-menu" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "start-menu" },
+        { "beat": 1, "action": "start-menu" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 2.5, "action": "dialog-info" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 0.5, "action": "dialog-info" },
+        { "beat": 1, "action": "start-menu" },
+        { "beat": 2, "action": "start-menu" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "start-menu" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 1.5, "action": "dialog-info" },
+        { "beat": 2, "action": "start-menu" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "start-menu" },
+        { "beat": 1, "action": "start-menu" },
+        { "beat": 2, "action": "start-menu" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    }
+  ]
+}

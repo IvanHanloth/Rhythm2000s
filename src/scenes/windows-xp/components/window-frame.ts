@@ -1,8 +1,10 @@
 // Luna 窗口外框：上方两个圆角的蓝色标题栏、3 像素宽的蓝色边框、米色窗口底；
-// 活动 / 非活动两套颜色。标题栏右边是红色关闭按钮（消息框只有这一个按钮）。原点在左上角。
+// 活动 / 非活动两套颜色。标题栏右边是红色关闭按钮（消息框只有这一个按钮），
+// 普通程序窗口（如资源管理器）前面还有蓝色的最小化、最大化按钮，标题左边有 16 像素的程序图标。原点在左上角。
 
-import { CanvasTextMetrics, Container, Graphics, TextStyle, type Text } from 'pixi.js';
+import { CanvasTextMetrics, Container, Graphics, Sprite, TextStyle, type Text } from 'pixi.js';
 import { LUNA } from '../../../theme/xp-luna.ts';
+import { xpAssets } from '../assets.ts';
 import { topRoundedRect, verticalGradient } from './draw.ts';
 import { hardShadow, xpText, XP_FONTS } from './xp-text.ts';
 
@@ -21,6 +23,10 @@ export interface XpWindowFrameOptions {
   title: string;
   width: number;
   height: number;
+  /** 标题栏左边的程序小图标（assets/reference/windows-xp/icons/ 的文件名）；不传则没有 */
+  icon?: string;
+  /** close：只有关闭按钮（消息框）；all：最小化、最大化、关闭（普通窗口）。默认 close */
+  controls?: 'close' | 'all';
 }
 
 export class XpWindowFrame {
@@ -30,9 +36,10 @@ export class XpWindowFrame {
   private readonly active: Graphics;
   private readonly inactive: Graphics;
   private readonly titleText: Text;
+  private readonly captionButtons: Container[] = [];
   private isActive = true;
 
-  constructor({ title, width, height }: XpWindowFrameOptions) {
+  constructor({ title, width, height, icon, controls = 'close' }: XpWindowFrameOptions) {
     this.view = new Container({ label: `window-${title}` });
     this.active = drawFrame(width, height, true);
     this.inactive = drawFrame(width, height, false);
@@ -44,12 +51,29 @@ export class XpWindowFrame {
       dropShadow: hardShadow(LUNA.window.captionTextShadow),
     });
     this.titleText.anchor.set(0, 0.5);
-    this.titleText.position.set(7, Math.round(CAPTION_HEIGHT / 2) + 1);
+    this.titleText.position.set(icon ? 27 : 7, Math.round(CAPTION_HEIGHT / 2) + 1);
+    this.view.addChild(this.active, this.inactive, this.titleText);
+
+    if (icon) {
+      const sprite = new Sprite(xpAssets().icon(icon));
+      sprite.setSize(16);
+      sprite.position.set(6, Math.round((CAPTION_HEIGHT - 16) / 2) + 1);
+      this.view.addChild(sprite);
+    }
 
     this.closeButton = new CloseButton();
-    this.closeButton.view.position.set(width - FRAME_WIDTH - 2 - CLOSE_SIZE, 4);
-
-    this.view.addChild(this.active, this.inactive, this.titleText, this.closeButton.view);
+    let x = width - FRAME_WIDTH - 2 - CLOSE_SIZE;
+    this.closeButton.view.position.set(x, 4);
+    this.captionButtons.push(this.closeButton.view);
+    if (controls === 'all') {
+      for (const glyph of ['maximize', 'minimize'] as const) {
+        x -= CLOSE_SIZE + 2;
+        const button = drawCaptionButton(glyph);
+        button.position.set(x, 4);
+        this.captionButtons.push(button);
+      }
+    }
+    this.view.addChild(...this.captionButtons);
   }
 
   /** 活动窗口是深蓝标题栏；非活动窗口是浅蓝灰，关闭按钮变淡 */
@@ -60,8 +84,25 @@ export class XpWindowFrame {
     this.inactive.visible = !active;
     this.titleText.style.fill = active ? LUNA.window.captionText : LUNA.window.captionTextInactive;
     this.titleText.style.dropShadow = active ? hardShadow(LUNA.window.captionTextShadow) : false;
-    this.closeButton.view.alpha = active ? 1 : 0.55;
+    for (const button of this.captionButtons) button.alpha = active ? 1 : 0.55;
   }
+}
+
+/** 蓝色的最小化（左下角一道粗横线）、最大化（上沿加粗的方框）按钮 */
+function drawCaptionButton(glyph: 'minimize' | 'maximize'): Graphics {
+  const s = CLOSE_SIZE;
+  const c = LUNA.captionButton;
+  const g = new Graphics({ label: glyph })
+    .roundRect(0, 0, s, s, 3)
+    .fill(c.border)
+    .roundRect(1, 1, s - 2, s - 2, 2)
+    .fill(verticalGradient(c.fill));
+  if (glyph === 'minimize') {
+    g.rect(5, 13, 7, 3).fill(c.glyph);
+  } else {
+    g.rect(5.5, 5.5, 10, 10).stroke({ width: 1, color: c.glyph }).rect(5, 5, 11, 3).fill(c.glyph);
+  }
+  return g;
 }
 
 function drawFrame(width: number, height: number, active: boolean): Graphics {
