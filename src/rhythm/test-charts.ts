@@ -7,7 +7,7 @@ import type { ChartSource } from './chart-file.ts';
 export function sourceFromPatterns(
   patterns: readonly (readonly number[])[],
   overrides: Partial<ChartSource> = {},
-  action: ActionType = 'close-window',
+  action: ActionType = 'dialog-info',
 ): ChartSource {
   return {
     format: 1,

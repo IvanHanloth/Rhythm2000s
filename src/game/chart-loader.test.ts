@@ -51,7 +51,7 @@ describe('loadCharts', () => {
 
   it('场景附加规则和轮次提示的时间限制也会检查', async () => {
     const mismatched = sourceFromPatterns([[0, 1]], { id: 'mismatched' });
-    mismatched.phrases[0]!.response = [{ beat: 0, action: 'close-window' }];
+    mismatched.phrases[0]!.response = [{ beat: 0, action: 'dialog-info' }];
     const late = sourceFromPatterns([[0, 3.5], [0]], { id: 'late' });
 
     const result = await loadCharts(
@@ -66,5 +66,21 @@ describe('loadCharts', () => {
       '谱面 mismatched.json：phrases[0]：XP 场景要求跟打与示范的事件个数相同',
     );
     expect(result.errors[1]).toContain('谱面 late.json：phrases[0].call[1]：第 3.5 拍太靠后');
+  });
+
+  it('XP 场景要求跟打的消息框种类与示范依次相同', async () => {
+    const swapped = sourceFromPatterns([[0, 1]], { id: 'swapped' });
+    swapped.phrases[0]!.call[1]!.action = 'dialog-error';
+    swapped.phrases[0]!.response = [
+      { beat: 0, action: 'dialog-info' },
+      { beat: 1, action: 'dialog-warning' },
+    ];
+
+    const result = await loadCharts(
+      fakeFetch({ 'index.json': { format: 1, charts: ['swapped.json'] }, 'swapped.json': swapped }),
+    );
+    expect(result.errors).toEqual([
+      '谱面 swapped.json：phrases[0].response[1]：XP 场景要求动作与示范的第 2 个事件相同（dialog-error）',
+    ]);
   });
 });

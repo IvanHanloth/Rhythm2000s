@@ -3,7 +3,7 @@ import { parseChartFile, parseChartIndex, type ChartFileOptions } from './chart-
 import { sourceFromPatterns } from './test-charts.ts';
 
 const options: ChartFileOptions = {
-  scenes: { 'windows-xp': ['close-window'], 'mac-2000': [] },
+  scenes: { 'windows-xp': ['dialog-info'], 'mac-2000': [] },
 };
 
 /** 深拷贝成普通 JSON 对象，方便改坏某个字段 */
@@ -24,7 +24,7 @@ describe('parseChartFile', () => {
 
   it('response 可以省略，也可以显式写出', () => {
     const data = json(sourceFromPatterns([[0, 1]]));
-    data.phrases[0].response = [{ beat: 2, action: 'close-window' }];
+    data.phrases[0].response = [{ beat: 2, action: 'dialog-info' }];
     expect(errorsOf(data)).toEqual([]);
   });
 
@@ -84,7 +84,7 @@ describe('parseChartFile', () => {
 
     const macChart = json(sourceFromPatterns([[0]], { scene: 'mac-2000' }));
     expect(errorsOf(macChart)).toEqual([
-      'phrases[0].call[0].action：场景 mac-2000 不支持动作 close-window',
+      'phrases[0].call[0].action：场景 mac-2000 不支持动作 dialog-info',
     ]);
 
     const unknownScene = json(sourceFromPatterns([[0]], { scene: 'win98' }));

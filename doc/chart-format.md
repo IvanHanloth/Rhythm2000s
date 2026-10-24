@@ -1,6 +1,6 @@
 # 谱面格式
 
-> 状态：草稿（2026-10-24，格式版本 1）
+> 状态：草稿（2026-10-24，格式版本 1；同日动作 ID 改为按界面部件命名）
 >
 > 决策记录见 [ADR 0003](decisions/0003-谱面数据格式.md)。
 
@@ -38,20 +38,20 @@ public/charts/
   "phrases": [
     {
       "call": [
-        { "beat": 0, "action": "close-window" },
-        { "beat": 1, "action": "close-window" },
-        { "beat": 2, "action": "close-window" }
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-warning" },
+        { "beat": 2, "action": "dialog-error" }
       ]
     },
     {
       "responseGapBeats": 4,
       "call": [
-        { "beat": 0, "action": "close-window" },
-        { "beat": 1, "action": "close-window" }
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-info" }
       ],
       "response": [
-        { "beat": 0, "action": "close-window" },
-        { "beat": 1.5, "action": "close-window" }
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1.5, "action": "dialog-info" }
       ]
     }
   ]
@@ -98,19 +98,26 @@ public/charts/
 
 ### 动作 ID
 
-动作 ID 描述**玩家要做的事**；示范段怎么演由场景决定。
+动作 ID 是**示范段出现的界面部件**，按原版系统的类名或常量名取名（[ADR 0005](decisions/0005-动作按界面部件类名命名.md)）：
 
-| 动作 ID | 含义 | 支持的场景 | 示范段的表现 |
-| --- | --- | --- | --- |
-| `close-window` | 关闭窗口 | `windows-xp` | 窗口按节奏弹出，每弹一个响一声 |
+- 写成 `<部件>-<变体>`，全小写、连字符分隔，如 `dialog-info`。
+- 部件和变体取自原版：XP 消息框的图标常量 `MB_ICONINFORMATION` → `dialog-info`，`MB_ICONERROR` → `dialog-error`。名字与 `assets/reference/` 里对应图标的文件名保持一致。
+- 不要按动词命名（不再用 `close-window` 这类名字）；玩家在跟打段要对部件做什么，写在下表「跟打段」一列。
 
-设计文档里的其他动作（收邮件、点击刷新等）实现后再加入此表。谱面用了所在场景不支持的动作，视为错误。
+| 动作 ID | 部件 | 支持的场景 | 示范段 | 跟打段 |
+| --- | --- | --- | --- | --- |
+| `dialog-info` | 信息消息框（蓝色 i 图标） | `windows-xp` | 在拍点上弹出，响 XP「星号」提示音 | 在拍点上关掉 |
+| `dialog-warning` | 警告消息框（黄色感叹号图标） | `windows-xp` | 在拍点上弹出，响 XP「感叹号」提示音 | 在拍点上关掉 |
+| `dialog-error` | 错误消息框（红色叉号图标） | `windows-xp` | 在拍点上弹出，响 XP「严重停止」提示音 | 在拍点上关掉 |
+| `dialog-question` | 询问消息框（问号图标，按钮是「是」「否」） | `windows-xp` | 在拍点上弹出，暂用 `chimes.wav`（原版的「问题」事件没有声音，见 [scenes/windows-xp.md](scenes/windows-xp.md#音效)） | 在拍点上关掉 |
+
+四种消息框玩法相同，只是图标、按钮和提示音不同，同一乐句里可以混用。设计文档里的其他动作（收邮件、点击刷新等）实现后再按同样规则加入此表。谱面用了所在场景不支持的动作，视为错误。
 
 ## 场景附加规则
 
 | 场景 | 规则 |
 | --- | --- |
-| `windows-xp` | 每个乐句的 `response` 与 `call` 事件个数相同、动作依次相同：第几个弹出的窗口，就由第几下关掉 |
+| `windows-xp` | 每个乐句的 `response` 与 `call` 事件个数相同、动作依次相同：第几个弹出的消息框，就由第几下关掉 |
 
 ## 时间上的限制
 

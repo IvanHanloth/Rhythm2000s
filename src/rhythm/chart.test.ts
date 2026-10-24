@@ -36,19 +36,19 @@ describe('buildChart', () => {
 
   it('写了 response 时按 response 排跟打目标', () => {
     const source = sourceFromPatterns([[0, 1]]);
-    source.phrases[0]!.response = [{ beat: 0.5, action: 'close-window' }];
+    source.phrases[0]!.response = [{ beat: 0.5, action: 'dialog-info' }];
     const chart = buildChart(source);
 
-    expect(chart.responses).toEqual([{ beat: 8.5, phrase: 0, index: 0, action: 'close-window' }]);
+    expect(chart.responses).toEqual([{ beat: 8.5, phrase: 0, index: 0, action: 'dialog-info' }]);
   });
 
   it('乐句依次排列，记录乐句序号、乐句内序号和动作', () => {
     const chart = chartFromPatterns([[0], [0.5, 3]]);
 
     expect(chart.calls).toEqual([
-      { beat: 4, phrase: 0, index: 0, action: 'close-window' },
-      { beat: 12.5, phrase: 1, index: 0, action: 'close-window' },
-      { beat: 15, phrase: 1, index: 1, action: 'close-window' },
+      { beat: 4, phrase: 0, index: 0, action: 'dialog-info' },
+      { beat: 12.5, phrase: 1, index: 0, action: 'dialog-info' },
+      { beat: 15, phrase: 1, index: 1, action: 'dialog-info' },
     ]);
   });
 

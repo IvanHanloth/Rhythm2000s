@@ -11,67 +11,67 @@
   "phrases": [
     {
       "call": [
-        { "beat": 0, "action": "close-window" },
-        { "beat": 1, "action": "close-window" },
-        { "beat": 2, "action": "close-window" }
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "dialog-info" }
       ]
     },
     {
       "call": [
-        { "beat": 0, "action": "close-window" },
-        { "beat": 1, "action": "close-window" },
-        { "beat": 2, "action": "close-window" }
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "dialog-info" }
       ]
     },
     {
       "call": [
-        { "beat": 0, "action": "close-window" },
-        { "beat": 1, "action": "close-window" },
-        { "beat": 2, "action": "close-window" },
-        { "beat": 3, "action": "close-window" }
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 3, "action": "dialog-info" }
       ]
     },
     {
       "call": [
-        { "beat": 0, "action": "close-window" },
-        { "beat": 0.5, "action": "close-window" },
-        { "beat": 1, "action": "close-window" },
-        { "beat": 2, "action": "close-window" }
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 0.5, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "dialog-info" }
       ]
     },
     {
       "call": [
-        { "beat": 0, "action": "close-window" },
-        { "beat": 1, "action": "close-window" },
-        { "beat": 1.5, "action": "close-window" },
-        { "beat": 2, "action": "close-window" }
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 1.5, "action": "dialog-info" },
+        { "beat": 2, "action": "dialog-info" }
       ]
     },
     {
       "call": [
-        { "beat": 0, "action": "close-window" },
-        { "beat": 1, "action": "close-window" },
-        { "beat": 2, "action": "close-window" },
-        { "beat": 2.5, "action": "close-window" },
-        { "beat": 3, "action": "close-window" }
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 2.5, "action": "dialog-info" },
+        { "beat": 3, "action": "dialog-info" }
       ]
     },
     {
       "call": [
-        { "beat": 0, "action": "close-window" },
-        { "beat": 0.5, "action": "close-window" },
-        { "beat": 1, "action": "close-window" },
-        { "beat": 1.5, "action": "close-window" },
-        { "beat": 2, "action": "close-window" }
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 0.5, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 1.5, "action": "dialog-info" },
+        { "beat": 2, "action": "dialog-info" }
       ]
     },
     {
       "call": [
-        { "beat": 0, "action": "close-window" },
-        { "beat": 0.5, "action": "close-window" },
-        { "beat": 1, "action": "close-window" },
-        { "beat": 2, "action": "close-window" },
-        { "beat": 3, "action": "close-window" }
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 0.5, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 3, "action": "dialog-info" }
       ]
     }
   ]

@@ -19,7 +19,7 @@ export interface SceneInfo {
 export const SCENE_CATALOG: Record<SceneId, SceneInfo> = {
   'windows-xp': {
     label: 'Windows XP 桌面',
-    actions: ['close-window'],
+    actions: ['dialog-info', 'dialog-warning', 'dialog-error', 'dialog-question'],
     checkChart: checkWindowsXpChart,
   },
   'mac-2000': {
