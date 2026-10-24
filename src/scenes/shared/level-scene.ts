@@ -8,6 +8,7 @@
 // starting (waiting for audio to resume); playing (a round is running); result (the results window is up).
 // Outside `playing` and `ready`, clicks and Space are not rhythm input; only buttons, icons and keys respond.
 // On the list the desktop's system menu opens the settings window (doc/settings.md), a modal like the results,
+// and its log-off and shut-down items leave the computer,
 // and the list imports, exports and deletes charts (doc/chart-import-export.md), reporting in message boxes.
 // In editor mode (doc/chart-editor.md) HackerEditor takes the level list's place after the "Welcome Back Hacker"
 // opening: Play and Test run the edited chart from the selected phrase, without demos, results or records, and
@@ -343,6 +344,14 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
         onTestLatency: () => this.openLatencyTest(),
       }),
     );
+  }
+
+  /** The system menu's log-off and shut-down items: leave the computer like Esc on the list (HackerEditor asks first with unsaved changes) */
+  protected leaveComputer(): void {
+    this.closeMenus();
+    if (!this.desktopIdle) return;
+    if (this.desk) this.desk.desk.requestLeave();
+    else this.context.leave();
   }
 
   /** "Test Latency…" in the settings window: the latency test replaces it */

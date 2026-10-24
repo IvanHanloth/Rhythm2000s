@@ -1,5 +1,6 @@
 // Scene: the Windows XP desktop (doc/scenes/windows-xp.md). Levels are picked in an Explorer window; on the list,
-// "start" opens the Start menu, whose "Control Panel" opens the settings window (doc/settings.md).
+// "start" opens the Start menu, whose "Control Panel" opens the settings window (doc/settings.md)
+// and whose "Log Off" / "Turn Off Computer" leave the computer.
 // The XP interface is drawn at original pixel size on a 1024×576 virtual screen scaled up to the canvas;
 // the turn banner and judgement labels use canvas coordinates.
 
@@ -31,7 +32,7 @@ import {
   XP_SCREEN_HEIGHT,
   XP_SCREEN_WIDTH,
 } from './components/screen.ts';
-import { CONTROL_PANEL, XpStartMenu } from './components/start-menu.ts';
+import { CONTROL_PANEL, LOG_OFF, TURN_OFF_COMPUTER, XpStartMenu } from './components/start-menu.ts';
 import { XpTaskbar } from './components/taskbar.ts';
 import { isDialogKind, type DialogKind } from './dialog-kinds.ts';
 import { XpLatencyTestWindow } from './latency-test-window.ts';
@@ -365,6 +366,7 @@ class WindowsXpScene extends LevelScene<XpSession> {
         this.playNow(this.sounds.menuCommand);
         this.closeMenus();
         if (label === CONTROL_PANEL) this.openSettings();
+        else if (label === LOG_OFF || label === TURN_OFF_COMPUTER) this.leaveComputer();
       },
     });
     menu.view.position.set(0, WORK_AREA_HEIGHT - menu.height);

@@ -18,7 +18,7 @@ Seated in café ── E ──► level list on the computer ── double-clic
       └─────────────────────┘
 ```
 
-- Esc in a level or on the results returns to the level list. Esc or "Back" on the level list returns to the café seat.
+- Esc in a level or on the results returns to the level list. Esc, "Back" or the system menu's log-off and shut-down items on the level list return to the café seat.
 - Leaving the tab aborts the round and returns to the level list.
 
 ## Controls
@@ -27,7 +27,7 @@ Seated in café ── E ──► level list on the computer ── double-clic
 | --- | --- | --- |
 | Select a level | Click its icon | Click its icon |
 | Start | Double-click the icon, or "Play this level" in the task pane | Double-click the icon, or "Start" in the Info window |
-| Back to the café | Toolbar "Back" | Toolbar "Back", or "Back" in the Info window |
+| Back to the café | Toolbar "Back", or "start" → "Log Off" / "Turn Off Computer" | Toolbar "Back", "Back" in the Info window, or Apple menu → "Shut Down…" / "Log Out…" |
 | Settings ([settings.md](settings.md)) | "start" → "Control Panel" | Apple menu → "System Preferences…" |
 | Import / export / delete a chart ([chart-import-export.md](chart-import-export.md)) | "Import a level", "Export this level", "Delete this level" in the task pane | Toolbar "Import", "Export", "Delete" |
 | Keyboard | Arrow keys select, Enter starts | Same |

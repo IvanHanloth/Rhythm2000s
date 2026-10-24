@@ -183,6 +183,10 @@ function bottomRoundedRect(
 /** The Apple menu item that opens the settings window (doc/settings.md) */
 export const SYSTEM_PREFERENCES = 'System Preferences…';
 
+/** Apple menu items that leave the computer for the café */
+export const SHUT_DOWN = 'Shut Down…';
+export const LOG_OUT = 'Log Out…';
+
 /** The Apple menu (10.2 English items, from memory, not checked on a real machine) */
 
 export const APPLE_MENU: readonly MenuEntry[] = [
@@ -199,7 +203,7 @@ export const APPLE_MENU: readonly MenuEntry[] = [
   'separator',
   { label: 'Sleep' },
   { label: 'Restart…' },
-  { label: 'Shut Down…' },
+  { label: SHUT_DOWN },
   'separator',
-  { label: 'Log Out…', shortcut: '⇧⌘Q' },
+  { label: LOG_OUT, shortcut: '⇧⌘Q' },
 ];

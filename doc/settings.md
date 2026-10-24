@@ -12,7 +12,7 @@ Player settings live in a settings window on the in-game computer, opened from e
 | Mac | Apple menu → "System Preferences…" | "Rhythm 2000s Preferences", an Aqua window |
 
 - The Start button and the Apple only open their menus on the level list; during a round the menus belong to the chart's actions.
-- A click outside an open menu, or Esc, closes it. The menus' other items close the menu and do nothing else.
+- A click outside an open menu, or Esc, closes it. XP's "Log Off" and "Turn Off Computer" and the Mac's "Shut Down…" and "Log Out…" leave the computer for the café, like Esc on the level list ([level-select.md](level-select.md)). The menus' other items close the menu and do nothing else.
 - While the settings window is open the level list is inactive. "OK", the close button, Enter / Return or Esc close it. Changes apply and are saved at once; there is no Cancel.
 
 ## Settings

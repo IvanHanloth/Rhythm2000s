@@ -1,7 +1,7 @@
 // XP Start menu: blue user bar with an orange rule; white left column (pinned, frequent, "All Programs"),
 // light blue right column (system folders and tools); blue footer with "Log Off" and "Turn Off Computer".
 // Hovered items are white on blue. Items without a local icon are left out, except "Control Panel" (it opens the
-// settings, doc/settings.md), whose icon is drawn as vectors. Origin at the top left.
+// settings, doc/settings.md), whose icon is drawn as vectors. The footer items leave the computer. Origin at the top left.
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -20,6 +20,9 @@ const ALL_PROGRAMS_HEIGHT = 30;
 
 /** Label of the item that opens the settings window */
 export const CONTROL_PANEL = 'Control Panel';
+/** Footer items that leave the computer for the café */
+export const LOG_OFF = 'Log Off';
+export const TURN_OFF_COMPUTER = 'Turn Off Computer';
 /** Icon name drawn by drawControlPanelIcon rather than loaded */
 const CONTROL_PANEL_ICON = 'control-panel';
 
@@ -188,8 +191,8 @@ export class XpStartMenu {
     footer.y = top;
     let right = START_MENU_WIDTH - 8;
     for (const { icon, label } of [
-      { icon: 'shut-down', label: 'Turn Off Computer' },
-      { icon: 'log-off', label: 'Log Off' },
+      { icon: 'shut-down', label: TURN_OFF_COMPUTER },
+      { icon: 'log-off', label: LOG_OFF },
     ]) {
       const item = new Container({ label: `footer-${label}` });
       const hot = new Graphics();

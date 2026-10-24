@@ -24,7 +24,7 @@ Seated at an editor computer ── E ──► "Welcome Back Hacker" ──► 
             └──────────────────────────────┘
 ```
 
-The editor computers open `#editor/<scene>` (e.g. `#editor/windows-xp`). Esc or the window's close button leaves for the café; with unsaved changes a message box asks first.
+The editor computers open `#editor/<scene>` (e.g. `#editor/windows-xp`). Esc, the window's close button, or the system menu's log-off and shut-down items (XP "Log Off" / "Turn Off Computer", Mac "Shut Down…" / "Log Out…") leave for the café; with unsaved changes a message box asks first.
 
 ## Window
 

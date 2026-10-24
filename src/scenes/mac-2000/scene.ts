@@ -1,6 +1,6 @@
 // Scene: a Mac desktop from around 2000 (doc/scenes/mac-2000.md), the early Aqua of US English Mac OS X 10.0–10.2.
 // Levels are picked in a Finder window; on the list the Apple menu's "System Preferences…" opens the settings
-// window (doc/settings.md). In editor mode HackerEditor's window takes the Finder's place (doc/chart-editor.md) and
+// window (doc/settings.md) and "Shut Down…" / "Log Out…" leave the computer. In editor mode HackerEditor's window takes the Finder's place (doc/chart-editor.md) and
 // the menu bar names it as the front application. The interface is drawn at original pixel size on a 1024×576 virtual
 // screen scaled 1.25× to the canvas; the turn banner and judgement labels use canvas coordinates.
 
@@ -24,7 +24,7 @@ import { macAssets, preloadMacAssets } from './assets.ts';
 import { AquaAlert } from './components/alert.ts';
 import { Dock, DOCK_HEIGHT, type DockItem } from './components/dock.ts';
 import { drawCautionIcon } from './components/icons.ts';
-import { APPLE_MENU, AquaMenu, SYSTEM_PREFERENCES } from './components/menu.ts';
+import { APPLE_MENU, AquaMenu, LOG_OUT, SHUT_DOWN, SYSTEM_PREFERENCES } from './components/menu.ts';
 import { APPLE_MENU_LEFT, MENU_BAR_HEIGHT, MenuBar } from './components/menu-bar.ts';
 import { EDITOR_TITLE, MacEditorWindow } from './editor-window.ts';
 import { MacLatencyTestWindow } from './latency-test-window.ts';
@@ -312,6 +312,7 @@ class Mac2000Scene extends LevelScene<MacSession> {
       this.playNow(this.sounds.byName.Tink);
       this.closeMenus();
       if (item === SYSTEM_PREFERENCES) this.openSettings();
+      else if (item === SHUT_DOWN || item === LOG_OUT) this.leaveComputer();
     });
     this.menuLayer.hitArea = new Rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     this.menuLayer.addChild(menu.view);
