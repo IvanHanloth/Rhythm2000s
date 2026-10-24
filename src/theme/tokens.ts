@@ -107,6 +107,19 @@ export const JUDGEMENT_COLORS = {
   onMiss: '#ffffff',
 };
 
+/**
+ * 律动组件（doc/beat-guide.md）的颜色，各主题共用。press 和 Perfect 同一种黄色。
+ * 设计系统提案里还没有这个组件，先定在这里，提案补上后两边一起改。
+ */
+export const BEAT_GUIDE_COLORS = {
+  /** 平常的弧 */
+  idle: '#a6a6a6',
+  /** 要按的拍的弧，和中间圆的闪光 */
+  press: JUDGEMENT_COLORS.perfect,
+  /** 中间的圆 */
+  core: '#ffffff',
+};
+
 /** Animation durations in beats. Multiplied by the song's beat length at runtime, positions computed from the audio clock */
 export const BEATS = {
   /** Window pop-up, completing on the target beat */

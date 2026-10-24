@@ -18,6 +18,8 @@ export interface MacResultsOptions {
   title: string;
   summary: ResultSummary;
   newRecord: boolean;
+  /** 这一局正文里开过律动组件（doc/beat-guide.md） */
+  assisted?: boolean;
   /** 列表里还有下一关；没有时「Next Level」灰掉，默认按钮换成「Retry」 */
   hasNext: boolean;
   onRetry: () => void;
@@ -78,6 +80,7 @@ export class MacResultsWindow {
     const panel = createResultsPanel({
       summary: options.summary,
       newRecord: options.newRecord,
+      assisted: options.assisted ?? false,
       width: contentWidth,
       height: contentHeight - PUSH_BUTTON_HEIGHT - 14,
       kit,

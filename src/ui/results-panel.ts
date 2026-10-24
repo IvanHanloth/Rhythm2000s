@@ -12,7 +12,7 @@ import {
   type Rank,
   type ResultSummary,
 } from '../rhythm/result-summary.ts';
-import { FONT_FAMILIES, JUDGEMENT_COLORS } from '../theme/tokens.ts';
+import { BEAT_GUIDE_COLORS, FONT_FAMILIES, JUDGEMENT_COLORS } from '../theme/tokens.ts';
 
 export interface PanelTextStyle {
   size: number;
@@ -39,6 +39,8 @@ export interface ResultsPanelOptions {
   summary: ResultSummary;
   /** The score beat the previous best */
   newRecord: boolean;
+  /** 这一局正文里开过律动组件：得分框左上角显示「Beat Guide」标签（doc/beat-guide.md） */
+  assisted?: boolean;
   width: number;
   height: number;
   kit: ResultsKit;
@@ -72,6 +74,7 @@ const LEVELS: { level: JudgementLevel; label: string; fill: string; text: string
 export function createResultsPanel({
   summary,
   newRecord,
+  assisted = false,
   width,
   height,
   kit,
@@ -119,6 +122,17 @@ export function createResultsPanel({
     const badge = pill(kit.text('New record', { size: 11, color: '#ffffff' }), kit.accent, null, 8);
     badge.position.set(innerWidth - scoreText.width - 10 - badge.width, 2);
     score.inner.addChild(badge);
+  }
+  if (assisted) {
+    // 用了辅助：放在得分框左上角，和右边的得分、New record 分开
+    const tag = pill(
+      kit.text('Beat Guide', { size: 11, color: JUDGEMENT_COLORS.onPerfect }),
+      BEAT_GUIDE_COLORS.press,
+      INK,
+      8,
+    );
+    tag.position.set(0, 2);
+    score.inner.addChild(tag);
   }
   const tileGap = 10;
   const tileWidth = (innerWidth - tileGap * 2) / 3;

@@ -21,6 +21,11 @@ export interface SceneContext {
   clock: AudioClock;
   /** Player calibration (s); positive means the player presses late. Subtracted from input times when judging */
   calibration(): number;
+  /**
+   * 律动组件（doc/beat-guide.md）现在开着没有；玩家随时可以按 H 切换，场景每帧读。
+   * 没有时（单元测试、原型页面）当作关闭。
+   */
+  beatGuide?(): boolean;
   /** Every loaded, validated chart; scenes pick theirs by chart.scene */
   charts: readonly Chart[];
   /** Leave the scene and go back to the street hub ("Back" in the level select) */

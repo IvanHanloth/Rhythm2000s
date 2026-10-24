@@ -44,3 +44,22 @@ export function saveSkipTutorial(skip: boolean): void {
     // 保存失败只影响下次打开，不影响本次游戏
   }
 }
+
+const BEAT_GUIDE_KEY = 'rhythm2000s.beatGuide';
+
+/** 律动组件（doc/beat-guide.md），关卡里按 H 切换，默认关闭 */
+export function loadBeatGuide(): boolean {
+  try {
+    return localStorage.getItem(BEAT_GUIDE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function saveBeatGuide(on: boolean): void {
+  try {
+    localStorage.setItem(BEAT_GUIDE_KEY, on ? '1' : '0');
+  } catch {
+    // 保存失败只影响下次打开，不影响本次游戏
+  }
+}

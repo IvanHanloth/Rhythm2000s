@@ -66,5 +66,6 @@ describe('formatBestScore', () => {
   it('pads to five digits; null with no score', () => {
     expect(formatBestScore(4250)).toBe('Best score 04250');
     expect(formatBestScore(null)).toBeNull();
+    expect(formatBestScore(4250, true)).toBe('Best score 04250 (Beat Guide)');
   });
 });

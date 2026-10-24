@@ -12,12 +12,14 @@ import { GameCanvas } from './game-canvas.ts';
 import { listenForTaps } from './input.ts';
 import { LevelIntro } from './level-intro.ts';
 import { buildLevels, formatBestScore, parseRoute } from './levels.ts';
-import { loadBestScore } from './records.ts';
+import { loadBestAssisted, loadBestScore } from './records.ts';
 import { SceneDirector } from './scene-director.ts';
 import {
   clampCalibrationMs,
+  loadBeatGuide,
   loadCalibrationMs,
   loadSkipTutorial,
+  saveBeatGuide,
   saveCalibrationMs,
   saveSkipTutorial,
 } from './settings.ts';
@@ -33,6 +35,8 @@ const [canvas, { charts, errors: chartErrors }] = await Promise.all([
 ]);
 for (const error of chartErrors) console.error(error);
 let calibrationMs = loadCalibrationMs();
+/** 律动组件开着没有（doc/beat-guide.md），关卡里按 H 切换 */
+let beatGuide = loadBeatGuide();
 
 const scenes = [windowsXpScene, mac2000Scene];
 // Load scene assets after the canvas exists (PixiJS texture loading is safer once the renderer is initialised)
@@ -44,6 +48,7 @@ const HUB_ROUTE = 'street';
 const director = new SceneDirector(canvas.stage, scenes, {
   clock,
   calibration: () => calibrationMs / 1000,
+  beatGuide: () => beatGuide,
   charts,
   leave: () => {
     location.hash = HUB_ROUTE;
@@ -107,15 +112,31 @@ director.setIntroduce((chartId) => {
     title: level.title,
     bpm: level.bpm,
     actions: level.actions,
-    record: formatBestScore(loadBestScore(level.id)),
+    record: formatBestScore(loadBestScore(level.id), loadBestAssisted(level.id)),
   });
 });
 
 const backHint = document.createElement('div');
 backHint.className = 'back-hint';
-backHint.textContent = 'Esc: back to the café';
 backHint.hidden = true;
 document.body.append(backHint);
+/** Esc 回到哪里；提示条后面再写律动组件的开关状态 */
+let backLabel = 'Esc: back to the café';
+function renderBackHint(): void {
+  backHint.textContent = `${backLabel} · H: Beat Guide ${beatGuide ? 'on' : 'off'}`;
+}
+
+// 关卡里按 H 开关律动组件（doc/beat-guide.md）；街区里不管，免得和那边的按键冲突
+window.addEventListener('keydown', (event) => {
+  if (event.code !== 'KeyH' || event.repeat) return;
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
+  if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)
+    return;
+  if (parseRoute(location.hash, sceneIds).kind === 'hub') return;
+  beatGuide = !beatGuide;
+  saveBeatGuide(beatGuide);
+  renderBackHint();
+});
 
 window.addEventListener('keydown', (event) => {
   if (event.code !== 'Escape' || parseRoute(location.hash, sceneIds).kind === 'hub') return;
@@ -162,7 +183,8 @@ function showRoute(): void {
   // PixiJS makes the canvas inherit its container's cursor, so set it on the container
   gameHost.style.cursor = director.entries.find((e) => e.id === route.sceneId)?.cursor ?? '';
   backHint.hidden = false;
-  backHint.textContent = cameFromHub ? 'Esc: back to the café' : 'Esc: back to the street';
+  backLabel = cameFromHub ? 'Esc: back to the café' : 'Esc: back to the street';
+  renderBackHint();
   // Only for this one entry: later entries from the dev panel or a URL don't count
   cameFromHub = false;
 }

@@ -11,6 +11,7 @@
 | [level-select.md](level-select.md) | 选关：电脑里的关卡列表（XP 资源管理器、Mac Finder），鼠标操作与返回流程 | 草稿 |
 | [hub-assets.md](hub-assets.md) | 街区的自制模型：规格（尺寸、朝向、原点、SCREEN 网格）和槽位清单 | 草稿 |
 | [level-design.md](level-design.md) | 官方关卡设计规范：开头由系统演示全部操作、从简单到难、正文至少 1 分钟 | 草稿 |
+| [beat-guide.md](beat-guide.md) | 律动组件（Beat Guide）：`((((O))))` 节拍提示，H 键开关，用了会在成绩上标出 | 草稿 |
 | [settings.md](settings.md) | 设置页面：跳过操作演示、延迟校准 | 草稿 |
 | [chart-format.md](chart-format.md) | 谱面 JSON 格式：文件位置、字段、动作 ID、校验规则 | 草稿 |
 | [tech-research.md](tech-research.md) | 技术调研：浏览器能力、候选技术栈对比、待验证风险 | 草稿 |

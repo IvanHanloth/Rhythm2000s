@@ -25,6 +25,7 @@ import { BEATS, THEMES } from '../../theme/tokens.ts';
 import { clamp01 } from '../../ui/easing.ts';
 import { TurnBanner } from '../../ui/turn-banner.ts';
 import { TutorialCaption } from '../../ui/tutorial-caption.ts';
+import { BEAT_GUIDE_POSITION, BeatGuideView } from '../../ui/beat-guide-view.ts';
 import { SCENE_CATALOG } from '../catalog.ts';
 import { macAssets, preloadMacAssets } from './assets.ts';
 import { AquaAlert, type AquaAlertOptions } from './components/alert.ts';
@@ -97,6 +98,10 @@ class Mac2000Scene implements Scene {
   });
   /** 系统演示进行到哪：要演示的动作、第几个、这一轮是不是重来；不在演示时为 null */
   private tutorial: { actions: ActionType[]; index: number; retry: boolean } | null = null;
+  /** 律动组件 ((((O))))，按 H 开关（doc/beat-guide.md） */
+  private readonly beatGuide = new BeatGuideView();
+  /** 这一局正文里开过律动组件，记成绩时标出来 */
+  private assisted = false;
   private readonly screen = new Container({ label: 'mac-screen' });
   private readonly menuBar = new MenuBar({ width: SCREEN_WIDTH, appName: 'Finder', menus: MENUS });
   private readonly dock = new Dock(DOCK_ITEMS);
@@ -169,8 +174,11 @@ class Mac2000Scene implements Scene {
     this.cursorCover.cursor = 'none';
     this.cursorCover.eventMode = 'none';
     this.caption.view.position.set(CAPTION_X, BANNER_Y);
+    this.beatGuide.view.position.set(BEAT_GUIDE_POSITION.x, BEAT_GUIDE_POSITION.y);
+    // 律动组件在桌面界面之上、判定字样和横幅之下
     this.view.addChild(
       this.screen,
+      this.beatGuide.view,
       this.judgementLayer,
       this.turnBanner.view,
       this.caption.view,
@@ -211,6 +219,7 @@ class Mac2000Scene implements Scene {
     this.virtualMouse?.update(session.beatAt(audioTime));
     this.renderTurnBanner(session.beatAt(audioTime));
     this.renderCaption();
+    this.renderBeatGuide(session.beatAt(audioTime));
     if (audioTime < session.endTime) return;
     if (this.tutorial) this.nextTutorialRound(session);
     else this.finish(session);
@@ -346,6 +355,8 @@ class Mac2000Scene implements Scene {
     this.hideDialog();
     this.levelSelect.view.visible = false;
     this.turnCues = buildTurnCues(chart);
+    this.beatGuide.setRound(chart);
+    this.assisted = false;
     this.session = new MacSession(this.context, chart, this.sounds);
     this.targetsView = new MacTargetsView(this.session, {
       windowLayer: this.windowLayer,
@@ -387,7 +398,8 @@ class Mac2000Scene implements Scene {
         phrase: session.targets[j.event]?.call.phrase ?? 0,
       })),
     );
-    const newRecord = recordScore(chart.id, summary.score);
+    const assisted = this.assisted;
+    const newRecord = recordScore(chart.id, summary.score, assisted);
     const hasNext = this.charts.indexOf(chart) < this.charts.length - 1;
     this.clearRound();
     this.hideDialog();
@@ -398,6 +410,7 @@ class Mac2000Scene implements Scene {
       title: chart.title,
       summary,
       newRecord,
+      assisted,
       hasNext,
       onRetry: () => this.retry(),
       onList: () => this.backToList(),
@@ -425,6 +438,7 @@ class Mac2000Scene implements Scene {
     this.turnCues = [];
     this.turnBanner.show(null);
     this.caption.show(null);
+    this.beatGuide.view.visible = false;
   }
 
   /** 屏幕中央的提示框；按钮可以用鼠标点 */
@@ -479,6 +493,18 @@ class Mac2000Scene implements Scene {
       ? 'Try again'
       : `Practice ${tutorial.index + 1} of ${tutorial.actions.length}`;
     this.caption.show({ title: `${step} · ${hint.name}`, how: hint.how });
+  }
+
+  /**
+   * 律动组件：开着时每帧重画；正文里开过就记下「用了辅助」。
+   * 系统演示期间不管开关一直显示，演示结束后按玩家的开关（doc/beat-guide.md「开关」）。
+   */
+  private renderBeatGuide(beat: number): void {
+    const on = this.tutorial !== null || (this.context.beatGuide?.() ?? false);
+    this.beatGuide.view.visible = on;
+    if (!on) return;
+    this.beatGuide.update(beat);
+    if (!this.tutorial) this.assisted = true;
   }
 
   /** 轮次横幅：切换时挤压回弹一次 */

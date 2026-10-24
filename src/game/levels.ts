@@ -53,7 +53,11 @@ export function levelRoute(level: Level): string {
   return `${level.sceneId}/${level.id}`;
 }
 
-/** Best-score line on the intro, e.g. "Best score 04250"; null with no score (scoring rules: doc/results.md) */
-export function formatBestScore(score: number | null): string | null {
-  return score === null ? null : `Best score ${String(score).padStart(5, '0')}`;
+/**
+ * Best-score line on the intro, e.g. "Best score 04250"; null with no score (scoring rules: doc/results.md).
+ * 最好成绩是开着律动组件打的，后面加「(Beat Guide)」（doc/beat-guide.md）
+ */
+export function formatBestScore(score: number | null, assisted = false): string | null {
+  if (score === null) return null;
+  return `Best score ${String(score).padStart(5, '0')}${assisted ? ' (Beat Guide)' : ''}`;
 }

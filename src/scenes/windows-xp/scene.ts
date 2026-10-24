@@ -24,6 +24,7 @@ import { BEATS, THEMES } from '../../theme/tokens.ts';
 import { clamp01, easeOutBack } from '../../ui/easing.ts';
 import { createJudgementView } from '../../ui/judgement-view.ts';
 import { TurnBanner } from '../../ui/turn-banner.ts';
+import { BEAT_GUIDE_POSITION, BeatGuideView } from '../../ui/beat-guide-view.ts';
 import { SCENE_CATALOG } from '../catalog.ts';
 import { preloadXpAssets, XP_CURSOR, xpAssets } from './assets.ts';
 import { XpDesktop } from './components/desktop.ts';
@@ -142,6 +143,10 @@ class WindowsXpScene implements Scene {
     text: theme.ink,
     line: theme.line,
   });
+  /** 律动组件 ((((O))))，按 H 开关（doc/beat-guide.md） */
+  private readonly beatGuide = new BeatGuideView();
+  /** 这一局正文里开过律动组件，记成绩时标出来 */
+  private assisted = false;
   private readonly sounds: PopupSounds;
   /** 虚拟 XP 屏幕：放大 XP_SCALE 倍铺满画布 */
   private readonly screen = new Container({ label: 'xp-screen' });
@@ -226,8 +231,11 @@ class WindowsXpScene implements Scene {
     this.cursorCover.cursor = 'none';
     this.cursorCover.eventMode = 'none';
     this.caption.view.position.set(CAPTION_X, BANNER_Y);
+    this.beatGuide.view.position.set(BEAT_GUIDE_POSITION.x, BEAT_GUIDE_POSITION.y);
+    // 律动组件在桌面界面之上、判定字样和横幅之下
     this.view.addChild(
       this.screen,
+      this.beatGuide.view,
       this.judgementLayer,
       this.turnBanner.view,
       this.caption.view,
@@ -268,6 +276,7 @@ class WindowsXpScene implements Scene {
     this.renderJudgements(session, beat);
     this.renderTurnBanner(beat);
     this.renderCaption();
+    this.renderBeatGuide(beat);
 
     if (audioTime < session.endTime) return;
     if (this.tutorial) this.nextTutorialRound(session);
@@ -407,6 +416,8 @@ class WindowsXpScene implements Scene {
     this.hideDialog();
     this.setExplorerVisible(false);
     this.turnCues = buildTurnCues(chart);
+    this.beatGuide.setRound(chart);
+    this.assisted = false;
     this.session = new PopupSession(this.context, chart, this.sounds);
     const session = this.session;
     this.popups = session.windows.map((w, event) => this.createPopup(session, w, event));
@@ -446,7 +457,8 @@ class WindowsXpScene implements Scene {
         phrase: session.windows[j.event]?.call.phrase ?? 0,
       })),
     );
-    const newRecord = recordScore(chart.id, summary.score);
+    const assisted = this.assisted;
+    const newRecord = recordScore(chart.id, summary.score, assisted);
     const hasNext = this.charts.indexOf(chart) < this.charts.length - 1;
     this.clearRound();
     this.hideDialog();
@@ -457,6 +469,7 @@ class WindowsXpScene implements Scene {
       title: chart.title,
       summary,
       newRecord,
+      assisted,
       hasNext,
       onRetry: () => this.retry(),
       onList: () => this.backToList(),
@@ -503,6 +516,7 @@ class WindowsXpScene implements Scene {
     for (const { view } of this.judgementViews) view.destroy({ children: true });
     this.turnBanner.show(null);
     this.caption.show(null);
+    this.beatGuide.view.visible = false;
     this.judgementViews = [];
     this.shownJudgements = 0;
   }
@@ -672,6 +686,18 @@ class WindowsXpScene implements Scene {
       ? 'Try again'
       : `Practice ${tutorial.index + 1} of ${tutorial.actions.length}`;
     this.caption.show({ title: `${step} · ${hint.name}`, how: hint.how });
+  }
+
+  /**
+   * 律动组件：开着时每帧重画；正文里开过就记下「用了辅助」。
+   * 系统演示期间不管开关一直显示，演示结束后按玩家的开关（doc/beat-guide.md「开关」）。
+   */
+  private renderBeatGuide(beat: number): void {
+    const on = this.tutorial !== null || (this.context.beatGuide?.() ?? false);
+    this.beatGuide.view.visible = on;
+    if (!on) return;
+    this.beatGuide.update(beat);
+    if (!this.tutorial) this.assisted = true;
   }
 
   /** 轮次横幅：切换时挤压回弹一次 */
