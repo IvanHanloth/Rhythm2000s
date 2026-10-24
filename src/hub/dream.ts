@@ -1,5 +1,5 @@
-// 梦核感（2026-10-24 用户要求「来点原神的明亮和梦核感」）：明亮的粉彩调色、边缘泛白的柔光、空中慢慢漂浮的光点。
-// 调色是一个后处理 pass，放在色调映射（OutputPass）之后，在显示色彩空间里调，参数比较直观。
+// The dreamcore look: bright pastel grading, a soft whitened edge and slowly drifting motes of light.
+// Grading is a post-processing pass after tone mapping (OutputPass), in display colour space where the parameters read naturally.
 
 import {
   AdditiveBlending,
@@ -19,13 +19,13 @@ import {
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { STREET_COLORS as C } from '@/theme/street.ts';
 
-/** 调色参数（暂定，按截图调出来的） */
+/** Grading parameters (provisional, tuned from screenshots) */
 const GRADE = {
-  /** 饱和度倍数：1 是原样 */
+  /** Saturation multiplier; 1 is unchanged */
   saturation: 1.28,
-  /** 暗部抬亮的程度：把黑色往粉彩色拉，画面不会有死黑 */
+  /** How far the shadows lift towards pastel, so nothing is pure black */
   lift: 0.03,
-  /** 画面边缘泛白的程度 */
+  /** How much the edges whiten */
   haze: 0.16,
 };
 
@@ -60,9 +60,9 @@ export function createDreamGradePass(): ShaderPass {
         vec3 color = texel.rgb;
         float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
         color = mix(vec3(luma), color, saturation);
-        // 暗部往粉彩色抬：越暗抬得越多
+        // Lift the shadows towards pastel, darker parts more
         color = mix(color, liftColor, lift * (1.0 - luma));
-        // 边缘泛白：离中心越远越往雾色上靠，像梦里看东西
+        // Whiten towards the haze colour away from the centre, like seeing in a dream
         float edge = smoothstep(0.35, 0.95, length((vUv - 0.5) * vec2(1.25, 1.0)));
         color = mix(color, hazeColor, edge * haze);
         gl_FragColor = vec4(clamp(color, 0.0, 1.0), texel.a);
@@ -72,8 +72,8 @@ export function createDreamGradePass(): ShaderPass {
 }
 
 /**
- * 风格化的渐变天空：顶上饱和的蓝、往下变浅、地平线淡粉白，太阳方向一圈柔和的暖光。
- * 亮度不超过 1，不会触发辉光（three 自带的物理天空亮度远大于 1，会让辉光糊满画面，2026-10-24 实测）。
+ * Stylised gradient sky: saturated blue overhead fading down to a pale pink horizon, with a soft warm glow around the sun.
+ * Brightness stays at or below 1 so it never blooms (three's physical sky is far brighter and floods the bloom).
  */
 export function createDreamSky(sunDirection: Vector3, radius: number): Mesh {
   const material = new ShaderMaterial({
@@ -107,7 +107,7 @@ export function createDreamSky(sunDirection: Vector3, radius: number): Mesh {
         float h = clamp(vDirection.y, -1.0, 1.0);
         vec3 color = mix(horizon, mid, smoothstep(0.0, 0.25, h));
         color = mix(color, top, smoothstep(0.25, 0.9, h));
-        // 地平线以下用地平线的颜色，被楼挡住看不到
+        // Below the horizon, the horizon colour (hidden behind buildings anyway)
         color = h < 0.0 ? horizon : color;
         float sun = max(dot(normalize(vDirection), sunDirection), 0.0);
         color = mix(color, sunGlow, pow(sun, 24.0) * 0.8 + pow(sun, 4.0) * 0.15);
@@ -121,7 +121,7 @@ export function createDreamSky(sunDirection: Vector3, radius: number): Mesh {
   return sky;
 }
 
-/** 一颗柔光点的贴图：中间亮、边缘渐隐 */
+/** Texture for one soft mote: bright centre, fading edges */
 function moteTexture(): CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = 64;
@@ -138,12 +138,12 @@ function moteTexture(): CanvasTexture {
 }
 
 const MOTE_COUNT = 260;
-/** 光点分布在角色周围这么大的范围里（米，半宽） */
+/** Half-size of the box around the character the motes fill (m) */
 const MOTE_RANGE = 14;
 
 /**
- * 漂浮的光点：在角色周围的一个盒子里慢慢往上漂、左右晃，漂出盒子就从另一头回来，
- * 所以走到哪里身边都有。t 用大厅的帧时间。
+ * Drifting motes: they rise and sway in a box around the character and wrap round when they leave it,
+ * so they are always nearby. t is the hub's frame time.
  */
 export class DreamMotes {
   readonly points: Points;
@@ -184,14 +184,14 @@ export class DreamMotes {
       ];
       const x = wrap(a * span + Math.sin(t * 0.3 + d * 6) * 0.8 - center.x);
       const z = wrap(c * span + Math.cos(t * 0.25 + a * 6) * 0.8 - center.z);
-      // 高度 0.3～6 米之间慢慢往上漂
+      // Drift slowly upwards between 0.3 and 6 m
       const y = 0.3 + ((b * 5.7 + t * (0.08 + d * 0.12)) % 5.7);
       this.positions[i * 3] = center.x + x;
       this.positions[i * 3 + 1] = y;
       this.positions[i * 3 + 2] = center.z + z;
     }
     this.points.geometry.attributes.position!.needsUpdate = true;
-    // 整体轻轻一明一暗
+    // A gentle overall shimmer
     (this.points.material as PointsMaterial).opacity = 0.65 + Math.sin(t * 1.3) * 0.2;
   }
 }

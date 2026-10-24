@@ -1,20 +1,20 @@
-// 大厅画面上叠的 DOM 界面：开始界面、操作提示、对话框、选关卡片、暂停菜单、黑场。
-// 这些是菜单类界面，可以用 CSS 过渡（设计系统「动效」一节）；颜色从 src/theme 注入成 CSS 变量。
+// DOM layers over the hub: title screen, control hints, dialogue, level card, pause menu, fade to black.
+// These are menus, so CSS transitions are fine (design system "Motion"); colours come from src/theme as CSS variables.
 
 import type { SceneId } from '@/scenes/catalog.ts';
 import './hub.css';
 import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS, THEMES } from '@/theme/tokens.ts';
 
-/** 坐下后卡片上显示的关卡信息（一关就是一首谱面） */
+/** Level info on the card once seated (one level is one chart) */
 export interface LevelInfo {
-  /** 关卡 id（谱面 id） */
+  /** Level id (chart id) */
   id: string;
   sceneId: SceneId;
-  /** 关卡名（曲名），卡片的标题 */
+  /** Level name (song title), the card's heading */
   label: string;
-  /** 曲名、速度等，一行一条 */
+  /** Title, tempo and so on, one per line */
   details: string[];
-  /** 场景还没有可玩的内容时为 false：卡片照常显示，但不能开始 */
+  /** False while the scene has nothing playable: the card shows but cannot start */
   playable: boolean;
 }
 
@@ -101,7 +101,7 @@ export class HubOverlay {
   constructor(handlers: OverlayHandlers) {
     setThemeVariables(this.element);
 
-    // 开始界面：标题字 + 菜单
+    // Title screen: logo and menu
     const logo = el('h1', 'hub-logo');
     logo.append(el('span', 'hub-logo-word', 'Rhythm'), el('span', 'hub-logo-badge', '2000s'));
     const menu = el('nav', 'hub-menu');
@@ -209,7 +209,7 @@ export class HubOverlay {
     this.lockHint.hidden = !visible;
   }
 
-  /** 进店时在屏幕上方显示店名，几秒后自动消失 */
+  /** Shows the shop name at the top on entering, fading after a few seconds */
   announcePlace(name: string): void {
     this.place.textContent = name;
     this.place.classList.add('is-visible');
@@ -225,7 +225,7 @@ export class HubOverlay {
     }
   }
 
-  /** 坐下后的关卡卡片；record 是最佳成绩的一行文字，还没打过时为 null */
+  /** Level card once seated; record is the best score line, null if never played */
   showCard(level: LevelInfo | null, record: string | null = null): void {
     this.card.hidden = level === null;
     if (!level) return;
@@ -244,7 +244,7 @@ export class HubOverlay {
     this.cardPlay.disabled = !level.playable;
   }
 
-  /** 加载进度（0～1）；null 时收起 */
+  /** Loading progress (0–1); null hides it */
   setLoading(progress: number | null): void {
     this.loading.hidden = progress === null;
     if (progress === null) return;
@@ -259,7 +259,7 @@ export class HubOverlay {
   }
 
   /**
-   * 制作人员与素材署名。鲸鱼娘模型是 CC BY 4.0，必须在游戏里署名并注明修改（assets/README.md）。
+   * Credits and asset attribution. The whale girl model is CC BY 4.0 and must be credited in game with a note of changes (assets/README.md).
    */
   private buildCredits(): void {
     const link = (text: string, href: string) => {
@@ -310,7 +310,7 @@ export class HubOverlay {
     this.pause.hidden = !visible;
   }
 
-  /** 黑场：opacity 0 → 1 用 durationMs 毫秒 */
+  /** Fade to black: opacity 0 → 1 over durationMs */
   setFade(opaque: boolean, durationMs: number): void {
     this.fade.style.transitionDuration = `${durationMs}ms`;
     this.fade.classList.toggle('is-opaque', opaque);

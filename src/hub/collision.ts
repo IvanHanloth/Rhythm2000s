@@ -1,7 +1,7 @@
-// 大厅里的碰撞：角色在地面上是一个圆，墙、柜台、桌子是水平面上的矩形（只看 x、z）。
-// 不依赖 three，单元测试可以直接用。
+// Hub collisions: the character is a circle on the ground; walls, counters and tables are rectangles in the x–z plane.
+// No three.js, so unit tests can use it.
 
-/** 水平面上与坐标轴对齐的矩形 */
+/** Axis-aligned rectangle in the horizontal plane */
 export interface Box {
   minX: number;
   maxX: number;
@@ -14,14 +14,14 @@ export interface Point {
   z: number;
 }
 
-/** 以 (x, z) 为中心、宽 width（x 方向）、深 depth（z 方向）的矩形 */
+/** Rectangle centred at (x, z), `width` along x and `depth` along z */
 export function boxAt(x: number, z: number, width: number, depth: number): Box {
   return { minX: x - width / 2, maxX: x + width / 2, minZ: z - depth / 2, maxZ: z + depth / 2 };
 }
 
 /**
- * 把半径为 radius 的圆从所有矩形里推出去，返回推出后的圆心。
- * 圆心落进矩形内部时，从离得最近的那条边推出。多个矩形相邻时重复几轮，避免卡进夹缝。
+ * Pushes a circle of `radius` out of every rectangle and returns the new centre. A centre inside a rectangle leaves
+ * through the nearest edge. Adjacent rectangles take a few passes so the circle can't wedge into a gap.
  */
 export function pushOut(point: Point, radius: number, boxes: readonly Box[]): Point {
   let { x, z } = point;

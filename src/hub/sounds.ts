@@ -1,5 +1,5 @@
-// 大厅的声音：坐到电脑前时，XP 机器响 XP 的登录声，iMac 响经典 Mac 的开机和弦（原版素材，ADR 0004）。
-// 用到时才下载、解码，之后缓存。音频上下文和节奏关卡共用同一个。
+// Hub sounds: sitting at a computer plays its startup sound, XP's logon for XP machines and the classic Mac chime
+// for iMacs (original assets, ADR 0004). Downloaded and decoded on first use, then cached; shares the game's audio context.
 
 import type { SceneId } from '@/scenes/catalog.ts';
 import xpLogonUrl from '@assets/reference/windows-xp/sounds/Windows XP Logon Sound.wav?url';
@@ -20,7 +20,7 @@ export class HubSounds {
     this.audio = audio;
   }
 
-  /** 这个场景的电脑「开机」；没有对应的声音或下载失败时什么都不做 */
+  /** The scene's computer "boots"; does nothing if the sound fails to load */
   playStartup(sceneId: SceneId): void {
     const url = STARTUP_URLS[sceneId];
     void this.load(url).then((buffer) => {
@@ -41,7 +41,7 @@ export class HubSounds {
         .then((response) => response.arrayBuffer())
         .then((data) => this.audio.decodeAudioData(data))
         .catch((error: unknown) => {
-          console.warn(`大厅音效 ${url} 加载失败`, error);
+          console.warn(`Failed to load hub sound ${url}`, error);
           return null;
         });
       this.cache.set(url, promise);

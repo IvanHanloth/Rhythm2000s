@@ -1,6 +1,6 @@
-// 街区大厅（doc/hub.md，ADR 0005）：开始界面和选关都在这里。
-// 开始界面镜头摇过街道 →「开始游戏」后镜头落到角色身后 → 走进网吧坐到电脑前 → 进入节奏关卡。
-// 大厅不做节奏判定，运动用 requestAnimationFrame 的帧时间（每帧间隔有上限），不用音频时钟（ADR 0005）。
+// The street hub (doc/hub.md, ADR 0005): title screen and level select.
+// The title camera pans along the street → "Start" drops it behind the character → walk into the café and sit at a computer → the level.
+// The hub judges no rhythm, so it moves by requestAnimationFrame time (with a capped step), not the audio clock (ADR 0005).
 
 import type { SceneId } from '@/scenes/catalog.ts';
 import {
@@ -42,25 +42,25 @@ import { buildWorld, type HubSpot, type LevelSpot, type ScreenImage, type World 
 
 export type { LevelInfo } from './overlay.ts';
 
-/** 设备像素比上限：高分屏上不按满分辨率渲染，省一点性能 */
+/** Device pixel ratio cap: high-DPI screens don't render at full resolution, to save some work */
 const MAX_PIXEL_RATIO = 1.5;
-/** 太阳的高度角和方位角（度）：上午，阳光从东南边斜照进街道 */
+/** Sun elevation and azimuth (degrees): morning light slanting into the street from the south-east */
 const SUN_ELEVATION = 38;
 const SUN_AZIMUTH = 150;
-/** 阴影只算角色周围这么大的范围（米，半宽） */
+/** Half-size of the shadow area around the character (m) */
 const SHADOW_RANGE = 22;
-/** 一帧最多算多少秒，切回页面时不会一下子走出很远 */
+/** Longest frame step (s), so returning to the tab doesn't jump the character far */
 const MAX_FRAME_SECONDS = 0.05;
 
 const WALK_SPEED = 3.0;
 const RUN_SPEED = 5.6;
-/** 角色在地面上的半径（米） */
+/** Character radius on the ground (m) */
 const PLAYER_RADIUS = 0.32;
-/** 镜头看点在脚底以上多高 */
+/** Camera target height above the feet */
 const EYE_HEIGHT = 1.45;
-/** 镜头离看点的距离 */
+/** Camera distance from its target */
 const BOOM_LENGTH = 3.6;
-/** 镜头碰到墙时，在墙前面留多少距离 */
+/** Gap the camera keeps in front of a wall it hits */
 const BOOM_MARGIN = 0.25;
 const MOUSE_YAW = 0.0026;
 const MOUSE_PITCH = 0.0022;
@@ -71,16 +71,16 @@ const STAND_SECONDS = 0.7;
 const LAUNCH_SECONDS = 0.8;
 const FADE_MS = 600;
 
-/** 每个场景的电脑长什么样；没登记的场景用 XP 画面 */
+/** What each scene's computer looks like */
 const MACHINE_LOOKS: Record<SceneId, { screen: ScreenImage; imac?: boolean }> = {
   'windows-xp': { screen: 'xp-bliss' },
   'mac-2000': { screen: 'mac-aqua-blue', imac: true },
 };
 
 /**
- * title：开始界面；intro：镜头从开始界面落到角色身后；roam：自由走动；paused：鼠标被放开后的暂停菜单；
- * dialog：看告示、和人说话；sitting / seated / standing：坐下、坐着看关卡卡片、起身；
- * launching：镜头推进屏幕，随后进入关卡。
+ * title: title screen; intro: camera drops behind the character; roam: walking; paused: menu after the pointer is released;
+ * dialog: reading a notice or talking; sitting / seated / standing: sitting down, seated at the level card, getting up;
+ * launching: the camera pushes into the screen and the level starts.
  */
 type State =
   | 'title'
@@ -100,7 +100,7 @@ interface Pose {
 
 interface CameraTween {
   from: Pose;
-  /** 目标每帧重新计算，镜头可以落到一个还在动的位置上 */
+  /** Recomputed every frame, so the camera can land on a moving target */
   to: () => Pose;
   start: number;
   duration: number;
@@ -108,13 +108,13 @@ interface CameraTween {
 }
 
 export interface HubOptions {
-  /** 网吧里的入口电脑（每个场景一台），按顺序摆进网吧（cafe-layout.ts） */
+  /** Entry computers in the café (one per scene), seated in order (cafe-layout.ts) */
   levels: readonly LevelInfo[];
-  /** 坐下后按「开始」：进入这一关 */
+  /** "Start" once seated: enter the level */
   onPlay(levelId: string): void;
-  /** 这一关的最佳成绩（一行文字）；还没打过时为 null */
+  /** The level's best score line; null if never played */
   recordOf(levelId: string): string | null;
-  /** 用来播放坐下时的开机声；不给时大厅没有声音 */
+  /** Plays the startup sound on sitting down; the hub is silent without it */
   audio?: AudioContext;
 }
 
@@ -132,9 +132,9 @@ export class Hub {
   });
   private readonly composer: EffectComposer;
   private readonly bloom: UnrealBloomPass;
-  /** 阳光：投射阴影，光源每帧跟着角色走 */
+  /** Sunlight: casts shadows and follows the character every frame */
   private readonly sun = new DirectionalLight(C.sun, 2.6);
-  /** 太阳所在的方向（单位向量），天空和阳光共用 */
+  /** Direction of the sun (unit vector), shared by sky and sunlight */
   private readonly sunDirection = new Vector3().setFromSphericalCoords(
     1,
     MathUtils.degToRad(90 - SUN_ELEVATION),
@@ -155,7 +155,7 @@ export class Hub {
   private visible = false;
   private frameId = 0;
   private lastFrame = 0;
-  /** 大厅自己的时间（秒），只用于镜头路线和小动画 */
+  /** The hub's own clock (s), only for camera paths and small animations */
   private time = 0;
 
   private position: Point;
@@ -172,7 +172,7 @@ export class Hub {
   private zone: string | null = null;
   private dialogQueue: { name: string; text: string }[] = [];
   private seat: { spot: LevelSpot; from: Point; fromHeading: number; start: number } | null = null;
-  /** 我们自己放开鼠标时为 true，这时不弹暂停菜单 */
+  /** True when we release the pointer ourselves, so no pause menu */
   private releasingPointer = false;
 
   constructor(options: HubOptions) {
@@ -193,9 +193,9 @@ export class Hub {
     this.setUpLighting();
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
-    // 只有亮度超过 1 的东西（灯箱招牌、屏幕、亮着的窗）才发出辉光
-    // 辉光只给专门调亮的自发光（斑马线闪灯、LED 屏、霓虹灯牌、关卡标记，亮度 4～6），带一点梦一样的柔光；
-    // 天空和被阳光照亮的白墙（线性亮度最多 1.5 左右）都在阈值以下，否则整个画面会糊成一片白（2026-10-24 实测）
+    // Only things brighter than 1 bloom: emissives tuned for it (crossing beacons, LED board, neon signs,
+    // level markers, brightness 4–6) get a soft dreamy glow, while the sky and sunlit white walls (up to about 1.5
+    // linear) stay under the threshold so the frame doesn't wash out
     this.bloom = new UnrealBloomPass(new Vector2(1, 1), 0.5, 0.5, 2.0);
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
@@ -224,7 +224,7 @@ export class Hub {
     this.listen();
   }
 
-  /** 显示大厅。从关卡回来时回到原来的座位 */
+  /** Shows the hub; returning from a level puts the character back in their seat */
   show(): void {
     if (this.visible) return;
     this.visible = true;
@@ -240,7 +240,7 @@ export class Hub {
     this.frameId = requestAnimationFrame(this.loop);
   }
 
-  /** 藏起大厅、停止渲染，进入关卡时调用 */
+  /** Hides the hub and stops rendering, when a level starts */
   hide(): void {
     if (!this.visible) return;
     this.visible = false;
@@ -250,7 +250,7 @@ export class Hub {
     if (document.pointerLockElement === this.renderer.domElement) this.releasePointer();
   }
 
-  // ---------- 流程 ----------
+  // ---------- Flow ----------
 
   private start(): void {
     if (this.state !== 'title') return;
@@ -326,7 +326,7 @@ export class Hub {
     this.state = 'standing';
     this.overlay.showCard(null);
     this.player.sit(false);
-    // 从椅子上站起来，往过道退半步
+    // Get up from the chair and step half a pace back into the aisle
     this.position = pushOut(
       { x: spot.seat.x, z: spot.seat.z + 0.55 },
       PLAYER_RADIUS,
@@ -369,7 +369,7 @@ export class Hub {
     return this.options.recordOf(spot.levelId);
   }
 
-  // ---------- 输入 ----------
+  // ---------- Input ----------
 
   private listen(): void {
     const canvas = this.renderer.domElement;
@@ -421,7 +421,7 @@ export class Hub {
         this.releasingPointer = false;
         return;
       }
-      // 玩家按 Esc 放开了鼠标
+      // The player released the pointer with Esc
       if (this.visible && this.state === 'roam') {
         this.state = 'paused';
         this.keys.clear();
@@ -434,7 +434,7 @@ export class Hub {
   private lockPointer(): void {
     const canvas = this.renderer.domElement;
     if (document.pointerLockElement === canvas) return;
-    // 有的浏览器返回 Promise，被拒绝时（例如刚放开鼠标马上又请求）留着「点击画面」的提示就好
+    // Some browsers return a promise that rejects (e.g. requesting right after a release); the "click to play" hint stays
     void Promise.resolve(canvas.requestPointerLock()).catch(() => undefined);
   }
 
@@ -444,7 +444,7 @@ export class Hub {
     document.exitPointerLock();
   }
 
-  // ---------- 每帧 ----------
+  // ---------- Every frame ----------
 
   private readonly loop = (now: number) => {
     if (!this.visible) return;
@@ -504,7 +504,7 @@ export class Hub {
         tween.done();
       }
     }
-    // 镜头离角色太近时把角色藏起来，免得画面被后脑勺挡住
+    // Hide the character when the camera is too close, so the back of the head doesn't fill the screen
     this.player.root.visible =
       this.camera.position.distanceTo(this.player.root.position.clone().setY(this.height + 1.2)) >
       0.7;
@@ -568,7 +568,7 @@ export class Hub {
     return `Sit down · ${level?.label ?? spot.levelId}`;
   }
 
-  /** 坐下的过程：角色从站的地方挪到椅子上，转身面对屏幕 */
+  /** Sitting down: the character moves from where they stood onto the chair and turns to the screen */
   private settleIntoSeat(): void {
     const seat = this.seat;
     if (!seat) return;
@@ -590,7 +590,7 @@ export class Hub {
     this.player.root.rotation.y = this.heading;
   }
 
-  // ---------- 镜头 ----------
+  // ---------- Camera ----------
 
   private applyPose({ position, look }: Pose): void {
     this.camera.position.copy(position);
@@ -608,7 +608,7 @@ export class Hub {
     };
   }
 
-  /** 开始界面：镜头沿街道来回慢慢平移，看向北侧的店面 */
+  /** Title screen: the camera pans slowly along the street, looking at the north shopfronts */
   private titlePose(t: number): Pose {
     const x = Math.sin(t * 0.045) * 19;
     return {
@@ -617,7 +617,7 @@ export class Hub {
     };
   }
 
-  /** 第三人称：镜头在角色身后，碰到墙就往前收 */
+  /** Third person: behind the character, pulling in when it hits a wall */
   private followPose(dt: number): Pose {
     const look = new Vector3(this.position.x, this.height + EYE_HEIGHT, this.position.z);
     const offset = orbitOffset(this.yaw, this.pitch, 1);
@@ -626,7 +626,7 @@ export class Hub {
     this.raycaster.far = BOOM_LENGTH + BOOM_MARGIN;
     const hit = this.raycaster.intersectObjects(this.world.blockers, false)[0];
     const reach = hit ? Math.max(0.3, hit.distance - BOOM_MARGIN) : BOOM_LENGTH;
-    // 往里收要立刻收，免得穿墙；往外放慢一点，免得镜头一跳一跳
+    // Pull in at once so it never goes through a wall; ease back out so it doesn't jitter
     this.boom =
       reach < this.boom || dt === 0
         ? reach
@@ -636,7 +636,7 @@ export class Hub {
     return { position, look };
   }
 
-  /** 坐下后：从右肩后面看屏幕，屏幕偏在画面左边，右边留给关卡卡片 */
+  /** Seated: over the right shoulder, the screen on the left of the frame and the level card on the right */
   private seatedPose(spot: LevelSpot): Pose {
     const { x, z } = spot.seat;
     return {
@@ -646,8 +646,8 @@ export class Hub {
   }
 
   /**
-   * 加载进度：模型、贴图都走 three 的默认加载管理器，按它的计数显示进度条；
-   * 全部完成后收起。之后再有零星的加载（例如自制模型）不再显示。
+   * Loading progress: models and textures go through three's default loading manager, whose counts drive the bar;
+   * it hides when everything is done, and later stragglers (such as custom models) don't show it again.
    */
   private trackLoading(): void {
     let done = false;
@@ -661,11 +661,11 @@ export class Hub {
     };
   }
 
-  // ---------- 渲染设置 ----------
+  // ---------- Rendering ----------
 
   /**
-   * 明亮的白天：风格化的渐变天空当背景，同一片天空生成环境反射；阳光带阴影，天光把阴影照亮，
-   * ACES 色调映射。之前是黄昏的 HDRI，2026-10-24 用户觉得太暗，改成现在这样（ADR 0005 修订）。
+   * Bright daylight: a stylised gradient sky as background and environment map, shadowed sunlight with skylight
+   * filling the shadows, ACES tone mapping (ADR 0005).
    */
   private setUpLighting(): void {
     const renderer = this.renderer;
@@ -689,11 +689,11 @@ export class Hub {
     camera.far = 120;
     sun.shadow.bias = -0.0004;
     sun.shadow.normalBias = 0.03;
-    // 阴影边缘柔一点
+    // Soften shadow edges
     sun.shadow.radius = 4;
     this.scene.add(sun, sun.target);
 
-    // 风格化的渐变天空（dream.ts），同一片天空单独渲染一次生成环境反射，玻璃和金属会映出蓝天
+    // The stylised sky (dream.ts), rendered once more as the environment map so glass and metal reflect the blue
     this.scene.add(createDreamSky(this.sunDirection, 180));
     const pmrem = new PMREMGenerator(renderer);
     const skyOnly = new Scene();
@@ -703,7 +703,7 @@ export class Hub {
     pmrem.dispose();
   }
 
-  /** 阴影只覆盖角色附近：阳光的位置和目标每帧跟着角色（或开始界面的镜头）平移 */
+  /** Shadows cover only the area around the character: the sun and its target follow it (or the title camera) */
   private followSun(): void {
     const center = this.state === 'title' ? this.cameraLook : this.player.root.position;
     this.sun.target.position.set(center.x, 0, center.z);

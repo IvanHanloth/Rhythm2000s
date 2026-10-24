@@ -1,7 +1,7 @@
-// 备用人偶：鲸鱼娘模型（whale-model.ts）下载完成前、或下载失败时显示的玩家角色。
-// 二头身的动漫风人偶，用球、胶囊、锥体拼成，卡通着色（三阶明暗）+ 描边，眼睛是贴花；
-// 外形按鲸鱼娘的常见特征：蓝色长发、鲸鱼尾巴形状的呆毛、水手服 + 百褶裙、身后一条鲸鱼尾巴。
-// 原点在脚底，默认面朝 +z。
+// Stand-in puppet: the player character shown until the whale girl model (whale-model.ts) loads, or if it fails.
+// A two-heads-tall anime figure built from spheres, capsules and cones, toon shaded (three bands) with outlines and decal eyes,
+// following the whale girl's usual look: long blue hair, a whale-tail ahoge, a sailor uniform with a pleated skirt and a whale tail.
+// Origin at the feet, facing +z.
 
 import {
   BackSide,
@@ -29,27 +29,27 @@ import { STREET_COLORS as C } from '@/theme/street.ts';
 import { blushTexture, eyeTexture, mouthTexture } from './textures.ts';
 
 export interface Outfit {
-  /** 上衣 */
+  /** Top */
   shirt: string;
-  /** 裤子；穿裙子时是裙子的颜色 */
+  /** Trousers, or the skirt colour with a skirt */
   pants: string;
   shoes?: string;
   hair?: string;
-  /** 头发暗部 */
+  /** Hair shadow */
   hairShade?: string;
-  /** 瞳色 */
+  /** Eye colour */
   eyes?: string;
-  /** 领子、袖口、领结的颜色；不写时没有水手领 */
+  /** Collar, cuffs and bow; no sailor collar if omitted */
   accent?: string;
-  /** 穿裙子 + 长袜，否则是长裤 */
+  /** Skirt and long socks, otherwise trousers */
   skirt?: boolean;
   socks?: string;
   longHair?: boolean;
-  /** 鲸鱼的呆毛和尾巴 */
+  /** The whale ahoge and tail */
   whale?: boolean;
 }
 
-/** 备用人偶的鲸鱼娘造型 */
+/** The puppet's whale girl outfit */
 export const WHALE_GIRL: Outfit = {
   shirt: C.whaleShirt,
   pants: C.whaleSkirt,
@@ -64,28 +64,28 @@ export const WHALE_GIRL: Outfit = {
   whale: true,
 };
 
-/** 大厅里的人物：鲸鱼娘模型和备用人偶都实现这几个动作 */
+/** A hub character: the whale girl model and the puppet both implement these */
 export interface Figure {
   readonly root: Group;
-  /** 走路姿势：phase 是步伐相位（弧度），amount 是摆动幅度（0 站定，1 走，更大是跑） */
+  /** Walking pose: phase is the stride phase (radians), amount the swing (0 standing, 1 walking, more running) */
   pose(phase: number, amount: number): void;
-  /** 坐下 / 站起 */
+  /** Sit down / stand up */
   sit(sitting: boolean): void;
-  /** 坐着时手指在键盘上动；t 单位是秒 */
+  /** Fingers moving on the keyboard while seated; t in seconds */
   type(t: number): void;
-  /** 每帧调用的小动作（眨眼等）；t 单位是秒 */
+  /** Idle touches every frame (blinking etc.); t in seconds */
   animate?(t: number): void;
 }
 
-/** 坐下时臀部离地的高度，椅面要做成这么高 */
+/** Hip height when seated; chair seats are built to this */
 export const SEAT_HEIGHT = 0.5;
 const HIP_HEIGHT = 0.64;
-/** 描边粗细（米）。太细时离远了会闪 */
+/** Outline thickness (m); thinner flickers at a distance */
 const OUTLINE_WIDTH = 0.009;
 
-// ---------- 材质 ----------
+// ---------- Materials ----------
 
-/** 三阶明暗的色带，做出赛璐璐的感觉 */
+/** Three-band ramp for a cel-shaded look */
 const toonGradient = (() => {
   const texture = new DataTexture(new Uint8Array([90, 175, 255]), 3, 1, RedFormat);
   texture.minFilter = NearestFilter;
@@ -109,7 +109,7 @@ function toon(color: string, doubleSided = false): MeshToonMaterial {
   return m;
 }
 
-/** 描边：把背面沿法线往外推一点，画成深色（inverted hull） */
+/** Outline: back faces pushed out along their normals and drawn dark (inverted hull) */
 const outline = (() => {
   const m = new MeshBasicMaterial({ color: C.whaleEyeDark, side: BackSide });
   m.onBeforeCompile = (shader) => {
@@ -132,7 +132,7 @@ function decal(map: Texture): MeshBasicMaterial {
   });
 }
 
-/** 一个零件：封闭的形状加描边，开口的形状（裙子、头发壳）不描边 */
+/** One part: closed shapes get an outline, open ones (skirt, hair shell) don't */
 function piece(
   parent: Group,
   geometry: BufferGeometry,
@@ -153,9 +153,9 @@ function piece(
   return mesh;
 }
 
-// ---------- 几何体 ----------
+// ---------- Geometry ----------
 
-/** 百褶裙：上窄下宽的开口锥台，下摆一圈一里一外地折 */
+/** Pleated skirt: an open cone, narrow at the top, its hem folding in and out */
 function pleatedSkirt(top: number, bottom: number, height: number): BufferGeometry {
   const geometry = new CylinderGeometry(top, bottom, height, 20, 1, true);
   const position = geometry.attributes.position!;
@@ -170,7 +170,7 @@ function pleatedSkirt(top: number, bottom: number, height: number): BufferGeomet
   return geometry;
 }
 
-/** 两头粗细不同的圆柱，沿 -z 方向伸出（尾巴用） */
+/** A cylinder with different end radii, extending along -z (for the tail) */
 function taper(from: number, to: number, length: number): BufferGeometry {
   const geometry = new CylinderGeometry(to, from, length, 12);
   geometry.rotateX(-Math.PI / 2);
@@ -207,7 +207,7 @@ export class Character implements Figure {
     this.root.add(body);
     const skin = toon(C.skin);
 
-    // 腿：大腿 + 小腿（长袜或裤腿）+ 圆头鞋
+    // Legs: thigh, calf (sock or trouser leg) and a round shoe
     for (const side of [-1, 1]) {
       const leg = new Group();
       leg.position.set(side * 0.07, HIP_HEIGHT, 0);
@@ -229,12 +229,12 @@ export class Character implements Figure {
       });
     }
 
-    // 上身
+    // Torso
     piece(body, new CapsuleGeometry(0.105, 0.15, 6, 14), toon(shirt), [0, HIP_HEIGHT + 0.21, 0], {
       scale: [1, 1, 0.8],
     });
     if (accent) {
-      // 水手服的披肩领 + 胸前领结
+      // Sailor collar and bow
       piece(
         body,
         new SphereGeometry(0.122, 18, 8, 0, Math.PI * 2, 0, Math.PI * 0.36),
@@ -261,7 +261,7 @@ export class Character implements Figure {
       outlined: false,
     });
 
-    // 手臂：泡泡袖 + 袖口 + 小臂 + 手
+    // Arms: puff sleeve, cuff, forearm, hand
     for (const side of [-1, 1]) {
       const arm = new Group();
       arm.position.set(side * 0.13, HIP_HEIGHT + 0.34, 0);
@@ -279,7 +279,7 @@ export class Character implements Figure {
     this.buildHead(hair, hairShade, eyes, longHair, whale);
 
     if (whale) {
-      // 鲸鱼尾巴：从后腰伸出，往下垂再翘起，末端是两片尾鳍
+      // Whale tail: out of the small of the back, drooping then curling up, ending in two flukes
       const tail = new Group();
       tail.position.set(0, HIP_HEIGHT + 0.02, -0.07);
       const blue = toon(C.whaleBlue);
@@ -319,7 +319,7 @@ export class Character implements Figure {
     const R = 0.19;
     piece(head, new SphereGeometry(R, 28, 20), toon(C.skin), [0, 0, 0], { scale: [1, 0.97, 0.95] });
 
-    // 脸：贴花，稍微浮在脸的表面上，朝向脸的法线
+    // Face decals, floating just above the face along its normal
     const onFace = (map: Texture, w: number, h: number, x: number, y: number) => {
       const mesh = new Mesh(new PlaneGeometry(w, h), decal(map));
       const normal = new Vector3(x, y, Math.sqrt(Math.max(0, R * R - x * x - y * y))).normalize();
@@ -335,7 +335,7 @@ export class Character implements Figure {
     onFace(blushTexture(C.blush), 0.06, 0.03, -0.11, -0.075);
     onFace(blushTexture(C.blush), 0.06, 0.03, 0.11, -0.075);
 
-    // 头发：头顶一整块 + 后脑和两侧一块（前面留出脸）+ 刘海
+    // Hair: a crown, a back and sides shell (open at the face) and a fringe
     const hairToon = toon(hair, true);
     const HR = 0.207;
     piece(
@@ -377,7 +377,7 @@ export class Character implements Figure {
         },
       );
     });
-    // 两侧垂在脸边的鬓发
+    // Side locks hanging by the face
     for (const side of [-1, 1]) {
       piece(
         head,
@@ -391,7 +391,7 @@ export class Character implements Figure {
       );
     }
     if (longHair) {
-      // 后面的长发垂到腰，内层颜色深一点
+      // Long hair down to the waist, its inner layer darker
       piece(head, new CapsuleGeometry(0.16, 0.34, 6, 16), strand, [0, -0.3, -0.1], {
         scale: [1.08, 1, 0.38],
       });
@@ -402,7 +402,7 @@ export class Character implements Figure {
     }
 
     if (whale) {
-      // 头顶鲸鱼尾巴形状的呆毛：一根弯的发丝，顶端两片尾鳍
+      // The whale-tail ahoge on top: one curved strand ending in two flukes
       this.ahoge.position.set(0, R * 0.93, 0.02);
       const curve = new CatmullRomCurve3([
         new Vector3(0, 0, 0),
@@ -427,7 +427,7 @@ export class Character implements Figure {
   }
 
   /**
-   * 走路姿势：phase 是步伐相位（弧度，随走过的距离增加），amount 是摆动幅度（0 站定，1 正常走，更大是跑）。
+   * Walking pose: phase is the stride phase (radians, growing with distance), amount the swing (0 standing, 1 walking, more running).
    */
   pose(phase: number, amount: number): void {
     if (this.sitting) return;
@@ -442,7 +442,7 @@ export class Character implements Figure {
     this.ahoge.rotation.z = Math.sin(phase) * 0.18 * amount;
   }
 
-  /** 坐姿：大腿朝前伸，手放在键盘上 */
+  /** Seated: thighs forward, hands on the keyboard */
   sit(sitting: boolean): void {
     this.sitting = sitting;
     this.body.position.y = sitting ? SEAT_HEIGHT - HIP_HEIGHT : 0;
@@ -450,7 +450,7 @@ export class Character implements Figure {
     for (const leg of this.legs) leg.rotation.x = sitting ? -Math.PI / 2 : 0;
     for (const arm of this.arms) arm.rotation.set(sitting ? -1.1 : 0, 0, 0);
     if (sitting && this.tail) {
-      // 尾巴绕到椅子一侧，不穿过椅背
+      // The tail goes round the side of the chair, not through the back
       this.tail.rotation.set(-0.5, 1.3, 0);
       this.tailTip.rotation.set(0.5, 0.4, 0);
     } else {
@@ -458,7 +458,7 @@ export class Character implements Figure {
     }
   }
 
-  /** 坐着时手指在键盘上动；t 单位是秒 */
+  /** Fingers moving on the keyboard while seated; t in seconds */
   type(t: number): void {
     if (!this.sitting) return;
     this.arms[0]!.rotation.x = -1.1 + Math.sin(t * 17) * 0.06;
@@ -467,7 +467,7 @@ export class Character implements Figure {
     this.ahoge.rotation.z = Math.sin(t * 2.2) * 0.08;
   }
 
-  /** 站着时尾巴略向下垂再翘起，sway 是左右摆动的角度 */
+  /** Standing: the tail droops slightly then curls up; sway is its side-to-side angle */
   private restTail(sway: number): void {
     if (!this.tail) return;
     this.tail.rotation.set(-0.4, sway, 0);

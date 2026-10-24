@@ -1,11 +1,11 @@
-// 用 Canvas 现画的贴图：灯箱招牌和海报上的文字（场景里只用英文），以及备用人偶的脸。
-// 墙面、地面等写实贴图是照片素材，见 assets.ts。
+// Textures painted on a canvas: text on light-box signs and posters (English only in the world) and the puppet's face.
+// Realistic wall and floor textures are photographs, see assets.ts.
 
 import { CanvasTexture, NearestFilter, RepeatWrapping, SRGBColorSpace, type Texture } from 'three';
 import { cssFontFamily, FONT_FAMILIES } from '@/theme/tokens.ts';
 import { STREET_COLORS as C } from '@/theme/street.ts';
 
-/** 招牌、海报上的字（场景里只用英文）：粗黑的无衬线体 */
+/** Lettering on signs and posters: a heavy sans-serif */
 const SIGN_FONT = cssFontFamily(['Arial Black', 'Impact', ...FONT_FAMILIES.ui]);
 
 type Draw = (g: CanvasRenderingContext2D, width: number, height: number) => void;
@@ -38,13 +38,13 @@ export interface SignOptions {
   sub?: string;
   background: string;
   color?: string;
-  /** 边框（霓虹灯管）的颜色 */
+  /** Border (neon tube) colour */
   border?: string;
   width?: number;
   height?: number;
 }
 
-/** 店铺招牌：一行大字，可带一行小字 */
+/** Shop sign: one large line, optionally one small line */
 export function signTexture(options: SignOptions): Texture {
   const { text, sub, background, color = C.signText, border, width = 512, height = 128 } = options;
   return paint(
@@ -72,7 +72,7 @@ export function signTexture(options: SignOptions): Texture {
   );
 }
 
-/** 贴在墙上的告示、海报：几行字 */
+/** A notice or poster on a wall: a few lines of text */
 export function posterTexture(lines: string[], background: string, color: string): Texture {
   return paint(
     192,
@@ -97,8 +97,8 @@ export function posterTexture(lines: string[], background: string, color: string
 }
 
 /**
- * LED 点阵滚动屏：琥珀色字，盖一层点阵网格。贴图横向平铺，滚动靠改 offset.x。
- * text 会重复两遍，保证滚动时首尾接得上。
+ * Scrolling LED matrix: amber text under a dot grid. The texture tiles horizontally and scrolls through offset.x;
+ * the text is repeated so the ends meet while scrolling.
  */
 export function ledTexture(text: string, color: string): Texture {
   const height = 48;
@@ -112,7 +112,7 @@ export function ledTexture(text: string, color: string): Texture {
     g.font = `900 34px ${SIGN_FONT}`;
     g.textBaseline = 'middle';
     g.fillText(text, 32, h / 2 + 2);
-    // 点阵：每 4 像素一格，格子之间涂黑
+    // Dot grid: a cell every 4 px, black between cells
     g.fillStyle = '#000000';
     for (let x = 0; x < w; x += 4) g.fillRect(x + 3, 0, 1, h);
     for (let y = 0; y < h; y += 4) g.fillRect(0, y + 3, w, 1);
@@ -121,7 +121,7 @@ export function ledTexture(text: string, color: string): Texture {
   return texture;
 }
 
-/** 动漫风的大眼睛（贴花，透明底，不做最近邻采样）。mirror 为 true 时是左眼，睫毛尾巴朝左 */
+/** Large anime eyes (decal, transparent, not nearest-neighbour). mirror makes the left eye, lashes flicking left */
 export function eyeTexture(iris: string, irisDark: string, lash: string, mirror: boolean): Texture {
   return paint(
     96,
@@ -131,7 +131,7 @@ export function eyeTexture(iris: string, irisDark: string, lash: string, mirror:
         g.translate(w, 0);
         g.scale(-1, 1);
       }
-      // 虹膜：上深下浅
+      // Iris: dark at the top, light at the bottom
       const gradient = g.createLinearGradient(0, 30, 0, 118);
       gradient.addColorStop(0, irisDark);
       gradient.addColorStop(0.55, iris);
@@ -144,7 +144,7 @@ export function eyeTexture(iris: string, irisDark: string, lash: string, mirror:
       g.beginPath();
       g.ellipse(48, 70, 16, 24, 0, 0, Math.PI * 2);
       g.fill();
-      // 高光
+      // Highlight
       g.fillStyle = '#ffffff';
       g.beginPath();
       g.ellipse(34, 52, 12, 14, -0.4, 0, Math.PI * 2);
@@ -152,7 +152,7 @@ export function eyeTexture(iris: string, irisDark: string, lash: string, mirror:
       g.beginPath();
       g.ellipse(62, 98, 6, 6, 0, 0, Math.PI * 2);
       g.fill();
-      // 上睫毛：粗弧线，外眼角上挑
+      // Upper lashes: a thick arc lifting at the outer corner
       g.strokeStyle = lash;
       g.lineCap = 'round';
       g.lineWidth = 11;
@@ -165,7 +165,7 @@ export function eyeTexture(iris: string, irisDark: string, lash: string, mirror:
       g.moveTo(84, 28);
       g.lineTo(94, 16);
       g.stroke();
-      // 下眼线
+      // Lower lash line
       g.lineWidth = 3;
       g.beginPath();
       g.moveTo(26, 120);
@@ -176,7 +176,7 @@ export function eyeTexture(iris: string, irisDark: string, lash: string, mirror:
   );
 }
 
-/** 小嘴 */
+/** Small mouth */
 export function mouthTexture(color: string): Texture {
   return paint(
     64,
@@ -194,7 +194,7 @@ export function mouthTexture(color: string): Texture {
   );
 }
 
-/** 腮红：边缘渐隐的粉色椭圆 */
+/** Blush: a pink ellipse with soft edges */
 export function blushTexture(color: string): Texture {
   return paint(
     64,

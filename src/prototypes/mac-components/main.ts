@@ -1,10 +1,10 @@
-// Mac 部件展示页：把 Mac 场景的界面部件摆在一张 Jaguar 桌面上，可以逐个点开看效果、听声音。
-// 用来对照原版检查外观，不是游戏玩法。说明见 doc/scenes/mac-2000.md「部件展示页」。
+// Mac widget gallery: the Mac scene's widgets on a Jaguar desktop, to open one by one and hear their sounds.
+// For checking the look against the original, not gameplay (doc/scenes/mac-2000.md "Widget gallery").
 //
-// - 点菜单栏的苹果打开苹果菜单，点菜单项响 Tink
-// - 点小喇叭打开音量菜单；拖滑块改本页音量，松开时响 Pop
-// - 页面上的按钮弹出提示框、文稿窗口、表单、iChat 消息窗，让 Dock 图标弹跳、Mail 角标加一、废纸篓变空 / 满、落下桌面文件
-// - 提示框、表单的按钮和窗口的红色关闭按钮可以点掉
+// - Click the menu bar Apple for the Apple menu; items play Tink
+// - Click the speaker for the volume menu; the slider sets this page's volume and plays Pop on release
+// - Page buttons open alerts, document windows, sheets and iChat messages, bounce Dock icons, add to Mail's badge, empty or fill the Trash and drop desktop files
+// - Alert and sheet buttons and the windows' red close buttons dismiss them
 
 import '@/game/style.css';
 import { Container, Graphics, Rectangle, Sprite, type FederatedPointerEvent } from 'pixi.js';
@@ -31,7 +31,7 @@ import { AquaWindow, TITLE_BAR_HEIGHT } from '@/scenes/mac-2000/components/windo
 import { AQUA } from '@/theme/aqua.ts';
 
 const host = document.querySelector<HTMLElement>('#game');
-if (!host) throw new Error('找不到容器 #game');
+if (!host) throw new Error('Container #game not found');
 
 const SCALE = 1.25;
 const WIDTH = DESIGN_WIDTH / SCALE;
@@ -46,7 +46,7 @@ const resumeAudio = () => void clock.resume();
 window.addEventListener('pointerdown', resumeAudio, { once: true });
 window.addEventListener('keydown', resumeAudio, { once: true });
 
-// ---------- 音量（音量菜单的滑块改的是本页的音量） ----------
+// ---------- Volume (the volume menu slider sets this page's volume) ----------
 
 let volume = 0.8;
 const master = audio.createGain();
@@ -60,7 +60,7 @@ function play(name: MacSoundName): void {
   source.start();
 }
 
-// ---------- 桌面 ----------
+// ---------- Desktop ----------
 
 const screen = new Container({ label: 'mac-screen' });
 screen.scale.set(SCALE);
@@ -101,12 +101,12 @@ const menuLayer = new Container({ label: 'menus' });
 screen.addChild(wallpaper, fileLayer, windowLayer, dock.view, menuBar.view, menuLayer);
 canvas.onFrame(() => menuBar.update(new Date()));
 
-// 点桌面空白处：收起菜单
+// Clicking empty desktop closes the menus
 wallpaper.eventMode = 'static';
 wallpaper.hitArea = new Rectangle(0, 0, WIDTH, HEIGHT);
 wallpaper.on('pointerdown', () => closeMenus());
 
-// ---------- 苹果菜单 ----------
+// ---------- Apple menu ----------
 
 let appleMenu: AquaMenu | null = null;
 const appleHit = new Container({ label: 'apple-hit' });
@@ -134,7 +134,7 @@ appleHit.on('pointerdown', () => {
   appleMenu = menu;
 });
 
-/** 菜单里纵坐标 y 处的可选条目 */
+/** The enabled menu item at height y, if any */
 function itemAt(menu: AquaMenu, y: number): string | null {
   for (const entry of APPLE_MENU) {
     if (entry === 'separator' || entry.submenu) continue;
@@ -144,7 +144,7 @@ function itemAt(menu: AquaMenu, y: number): string | null {
   return null;
 }
 
-// ---------- 音量菜单 ----------
+// ---------- Volume menu ----------
 
 let volumeMenu: VolumeMenu | null = null;
 const speakerHit = new Container({ label: 'speaker-hit' });
@@ -176,7 +176,7 @@ speakerHit.on('pointerdown', () => {
   const release = () => {
     if (!menu.view.listenerCount('globalpointermove')) return;
     menu.view.off('globalpointermove', drag);
-    // 原版松开滑块时按新音量响一声
+    // The original plays a beep at the new volume on release
     play('Pop');
   };
   menu.view.on('pointerup', release);
@@ -202,7 +202,7 @@ function closeMenus(): void {
   menuBar.setVolumeExtra({ muted: volume === 0, open: false });
 }
 
-// ---------- 窗口：依次错开排开，点一下提到最前 ----------
+// ---------- Windows: cascaded, a click brings one to the front ----------
 
 let spawned = 0;
 function place(view: Container): void {
@@ -213,7 +213,7 @@ function place(view: Container): void {
   windowLayer.addChild(view);
 }
 
-/** 让按钮可以点：按下变暗，点完执行 onTap */
+/** Makes a button clickable: darker while pressed, runs onTap on click */
 function clickable(view: Container, onTap: () => void): void {
   view.eventMode = 'static';
   view.cursor = 'pointer';
@@ -276,7 +276,7 @@ function showAlert(kind: keyof typeof ALERTS): void {
   play(sound);
 }
 
-/** 文稿窗口，红色关闭按钮可以点掉；withSheet 时同时滑出存储表单 */
+/** A document window, closable with its red button; withSheet also slides out a save sheet */
 function showDocument(withSheet: boolean): void {
   const width = withSheet ? 320 : 260;
   const height = withSheet ? 200 : 160;
@@ -316,7 +316,7 @@ function showDocument(withSheet: boolean): void {
   });
   sheet.view.position.set(width / 2, TITLE_BAR_HEIGHT);
   window.view.addChild(sheet.view);
-  // 表单 0.2 秒滑出
+  // The sheet slides out over 0.2 s
   const start = performance.now();
   canvas.onFrame(() => {
     if (sheet.view.destroyed) return;
@@ -344,7 +344,7 @@ function showChat(): void {
   play('Submarine');
 }
 
-// ---------- Dock、桌面文件 ----------
+// ---------- Dock and desktop files ----------
 
 const ICHAT_INDEX = 2;
 const MAIL_INDEX = 1;
@@ -353,7 +353,7 @@ let unread = 0;
 let mailChanged = -Infinity;
 let trashFull = false;
 canvas.onFrame(() => {
-  // 弹跳：先高高跳起，之后小跳，共 2 秒
+  // Bounce: one high jump, then small hops, 2 s in all
   const t = (performance.now() - bounceStart) / 1000;
   const lift =
     t < 0.5
@@ -403,7 +403,7 @@ function dropFile(): void {
   play('Purr');
 }
 
-// ---------- 页面上的按钮（开发工具，文字和游戏界面一样用英文） ----------
+// ---------- Page buttons (a dev tool, in English like the game) ----------
 
 const toolbar = document.createElement('nav');
 toolbar.className = 'dev-panel';
@@ -440,5 +440,5 @@ function toolbarButton(label: string, onClick: () => void): HTMLButtonElement {
   return button;
 }
 
-// 开发时把画面挂到全局，便于在浏览器控制台里截取放大图对照原版
+// Expose the view globally in development, for grabbing zoomed captures in the console to compare with the original
 if (import.meta.env.DEV) Object.assign(globalThis, { macDebug: { app: canvas.app, screen } });

@@ -1,4 +1,4 @@
-// 延迟测试的输入记录与分组统计。
+// Latency test input records and grouped statistics.
 
 import { suggestCalibration, summarize, type Summary } from '@/latency/stats.ts';
 
@@ -20,20 +20,20 @@ export const METHOD_LABELS: Record<Method, string> = {
 };
 
 export interface TapRecord {
-  /** 第几次输入，从 0 开始 */
+  /** Input number, from 0 */
   seq: number;
   kind: InputKind;
-  /** event.timeStamp（毫秒） */
+  /** event.timeStamp (ms) */
   eventTimeStamp: number;
-  /** event.timeStamp 不可信时改用了回调时的 performance.now() */
+  /** event.timeStamp was unusable, so the callback's performance.now() was used */
   timeStampFallback: boolean;
-  /** 最近的拍序号 */
+  /** Nearest beat number */
   beat: number;
-  /** 方法 A 的偏差（毫秒）；该方法不可用时为 null */
+  /** Offset by method A (ms); null when the method is unavailable */
   offsetA: number | null;
-  /** 方法 B 的偏差（毫秒） */
+  /** Offset by method B (ms) */
   offsetB: number;
-  /** 输入时浏览器报告的延迟（毫秒） */
+  /** Latency the browser reported at the input (ms) */
   baseLatencyMs: number;
   outputLatencyMs: number;
 }
@@ -42,11 +42,11 @@ export interface StatsRow {
   kind: InputKind;
   method: Method;
   summary: Summary;
-  /** 建议校准值（毫秒）；样本不够时为 null */
+  /** Suggested calibration (ms); null without enough samples */
   calibration: number | null;
 }
 
-/** 按「输入类型 × 换算方法」分组统计。taps 必须按时间顺序排列。 */
+/** Statistics grouped by input type × conversion method. taps must be in time order. */
 export function buildStatsRows(taps: readonly TapRecord[]): StatsRow[] {
   const rows: StatsRow[] = [];
   for (const kind of INPUT_KINDS) {

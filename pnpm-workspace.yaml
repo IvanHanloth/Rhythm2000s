@@ -8,8 +8,8 @@ peerDependencyRules:
     - vite
   allowedVersions:
     vite: '*'
-# 2026-10-24：在 Windows 上，Vite+ 1.4.0 开发服务器的原生解析器无法解析 pnpm 默认（isolated）
-# 布局下项目根 node_modules 里的 pixi.js（构建正常，只有 vp dev 报 "Failed to resolve import"）。
-# 改用 hoisted 布局后正常。升级 Vite+ 后可以去掉这一行验证问题是否已修复；
-# 切换布局后要删除 node_modules 再重新安装，否则 vp check 会找不到 tsgolint。
+# On Windows, the Vite+ 1.4.0 dev server's native resolver can't resolve pixi.js in the root node_modules under
+# pnpm's default isolated layout (builds work; only vp dev fails with "Failed to resolve import"). The hoisted
+# layout works. After upgrading Vite+, try removing this line to see whether it is fixed; after switching
+# layouts, delete node_modules and reinstall, or vp check won't find tsgolint.
 nodeLinker: hoisted

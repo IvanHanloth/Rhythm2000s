@@ -1,9 +1,9 @@
 # ==============================
 # Rhythm 2000s .gitignore
-# 技术栈：TypeScript + PixiJS + Vite+，pnpm 管理依赖（见 doc/decisions/0001-技术栈选型.md）
+# Stack: TypeScript + PixiJS + Vite+, dependencies via pnpm (doc/decisions/0001-tech-stack.md)
 # ==============================
 
-# ---------- 操作系统 ----------
+# ---------- Operating systems ----------
 .DS_Store
 .AppleDouble
 .LSOverride
@@ -15,7 +15,7 @@ Desktop.ini
 $RECYCLE.BIN/
 *.lnk
 
-# ---------- 编辑器 / IDE ----------
+# ---------- Editors / IDEs ----------
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
@@ -26,14 +26,14 @@ $RECYCLE.BIN/
 *~
 *.sublime-workspace
 
-# ---------- 环境变量与密钥 ----------
+# ---------- Environment and secrets ----------
 .env
 .env.*
 !.env.example
 *.pem
 *.key
 
-# ---------- 日志与临时文件 ----------
+# ---------- Logs and temporary files ----------
 logs/
 *.log
 *.tmp
@@ -42,7 +42,7 @@ tmp/
 temp/
 
 # ---------- Node / Vite ----------
-# pnpm-lock.yaml 需要提交，不要忽略
+# pnpm-lock.yaml is committed; don't ignore it
 *.local
 vite.config.*.timestamp-*
 node_modules/
@@ -63,20 +63,20 @@ pnpm-debug.log*
 *.tsbuildinfo
 coverage/
 
-# ---------- 构建产物 ----------
+# ---------- Build output ----------
 dist/
 build/
 out/
 release/
 
-# ---------- 音频/美术工程的中间文件 ----------
-# 只提交导出的最终素材；工程源文件如需版本管理，建议改用 Git LFS
+# ---------- Audio / art project intermediates ----------
+# Commit only exported assets; use Git LFS if project files need versioning
 *.reapeaks
 *.bak
 *.autosave
 
-# ---------- AI 助手本地配置 ----------
-# 共享的项目记忆在 memory/ 中，需要提交；以下是个人本地配置
+# ---------- Local AI assistant settings ----------
+# Shared project memory in memory/ is committed; these are personal local settings
 .claude/settings.local.json
-# Playwright MCP 浏览器工具的快照和临时脚本
+# Snapshots and scratch scripts from the Playwright MCP browser tool
 .playwright-mcp/

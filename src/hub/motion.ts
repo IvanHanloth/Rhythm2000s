@@ -1,9 +1,9 @@
-// 大厅里角色和镜头的运动计算：按键 → 移动方向、镜头环绕位置、平滑转向、找身边能互动的东西。
-// 不依赖 three，单元测试可以直接用。
+// Character and camera movement in the hub: keys to direction, camera orbit, smooth turning, nearest interaction.
+// No three.js, so unit tests can use it.
 
 import type { Point } from './collision.ts';
 
-/** 第三人称镜头的仰角范围（弧度）：不能钻到地下，也不能翻到头顶 */
+/** Third-person camera pitch range (radians): not below the ground, not over the top */
 export const PITCH_MIN = -0.35;
 export const PITCH_MAX = 1.2;
 
@@ -15,8 +15,8 @@ export interface MoveKeys {
 }
 
 /**
- * 按键换成水平面上的单位移动方向，相对镜头朝向：W 是镜头看过去的方向。
- * 镜头在角色的 (sin yaw, cos yaw) 一侧，所以「向前」是它的反方向。没有按键时返回 null。
+ * Keys to a unit direction on the ground relative to the camera: W is where the camera looks.
+ * The camera sits on the (sin yaw, cos yaw) side of the character, so forward is the opposite. Null with no keys.
  */
 export function moveDirection(keys: MoveKeys, yaw: number): Point | null {
   const ahead = Number(keys.forward) - Number(keys.back);
@@ -30,7 +30,7 @@ export function moveDirection(keys: MoveKeys, yaw: number): Point | null {
   return { x: x / length, z: z / length };
 }
 
-/** 镜头相对看点的偏移：yaw 绕竖轴，pitch 是仰角，distance 是到看点的距离 */
+/** Camera offset from its target: yaw about the vertical axis, pitch upwards, distance from the target */
 export function orbitOffset(
   yaw: number,
   pitch: number,
@@ -44,12 +44,12 @@ export function clampPitch(pitch: number): number {
   return Math.max(PITCH_MIN, Math.min(PITCH_MAX, pitch));
 }
 
-/** 角色面朝 direction 时的朝向角（模型默认面朝 +z） */
+/** Heading of a character facing `direction` (models face +z) */
 export function headingOf(direction: Point): number {
   return Math.atan2(direction.x, direction.z);
 }
 
-/** 从角度 from 转到 to 的 k 倍（0 到 1），走较短的一边 */
+/** From angle `from` towards `to` by fraction k (0–1), the short way round */
 export function lerpAngle(from: number, to: number, k: number): number {
   let delta = (to - from) % (Math.PI * 2);
   if (delta > Math.PI) delta -= Math.PI * 2;
@@ -57,20 +57,20 @@ export function lerpAngle(from: number, to: number, k: number): number {
   return from + delta * k;
 }
 
-/** 把角度从 current 平滑地转向 target；rate 越大转得越快，dt 单位是秒 */
+/** Turns `current` smoothly towards `target`; higher rate turns faster; dt in seconds */
 export function dampAngle(current: number, target: number, rate: number, dt: number): number {
   return lerpAngle(current, target, 1 - Math.exp(-rate * dt));
 }
 
-/** 可以互动的东西：门、电脑、店员 */
+/** Something to interact with: a door, a computer, the clerk */
 export interface Spot {
   x: number;
   z: number;
-  /** 离它多近时可以互动（米） */
+  /** How close counts as in reach (m) */
   reach: number;
 }
 
-/** 角色身边最近、够得着的互动点；没有时返回 null */
+/** The nearest interaction in reach of the character; null when none */
 export function nearestSpot<T extends Spot>(position: Point, spots: readonly T[]): T | null {
   let best: T | null = null;
   let bestDist = Infinity;

@@ -1,4 +1,4 @@
-/* 街区大厅（doc/hub.md）。颜色都是 overlay.ts 从 src/theme 注入的 --hub-* 变量 */
+/* The street hub (doc/hub.md). Every colour is a --hub-* variable injected by overlay.ts from src/theme */
 
 .hub {
   position: fixed;
@@ -47,7 +47,7 @@
   text-align: center;
 }
 
-/* ---------- 按钮 ---------- */
+/* ---------- Buttons ---------- */
 
 .hub-button {
   display: inline-block;
@@ -84,7 +84,7 @@
   color: var(--hub-on-titlebar);
 }
 
-/* ---------- 开始界面 ---------- */
+/* ---------- Title screen ---------- */
 
 .hub-title {
   position: absolute;
@@ -184,7 +184,7 @@
   color: var(--hub-ink-muted);
 }
 
-/* ---------- 制作人员 ---------- */
+/* ---------- Credits ---------- */
 
 .hub-credits {
   position: absolute;
@@ -219,7 +219,7 @@
   pointer-events: auto;
 }
 
-/* ---------- 加载进度：XP 开机画面那种蓝色小方块进度条 ---------- */
+/* ---------- Loading: the small blue blocks of the XP boot screen ---------- */
 
 .hub-loading {
   position: absolute;
@@ -251,7 +251,7 @@
   transition: width 0.2s;
 }
 
-/* ---------- 走动时的提示 ---------- */
+/* ---------- Walking hints ---------- */
 
 .hub-hud {
   position: absolute;
@@ -308,7 +308,7 @@
   font-size: 15px;
 }
 
-/* ---------- 对话框 ---------- */
+/* ---------- Dialogue ---------- */
 
 .hub-dialog {
   position: absolute;
@@ -342,7 +342,7 @@
   color: var(--hub-ink-muted);
 }
 
-/* ---------- 坐下后的关卡卡片：XP 窗口的样子 ---------- */
+/* ---------- Level card once seated: an XP window ---------- */
 
 .hub-card {
   position: absolute;
@@ -397,7 +397,7 @@
   padding: 0.4em 1em;
 }
 
-/* ---------- 暂停 ---------- */
+/* ---------- Pause ---------- */
 
 .hub-pause {
   position: absolute;
@@ -415,7 +415,7 @@
   font: 800 40px var(--hub-font-display);
 }
 
-/* ---------- 黑场 ---------- */
+/* ---------- Fade to black ---------- */
 
 .hub-fade {
   position: absolute;
@@ -430,7 +430,7 @@
   opacity: 1;
 }
 
-/* 从关卡回到网吧时，左下角的返回提示也属于这一套 */
+/* The back hint shown after returning from a level belongs to this set too */
 .back-hint {
   position: fixed;
   left: 12px;

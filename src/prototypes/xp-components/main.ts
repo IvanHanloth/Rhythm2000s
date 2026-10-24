@@ -1,10 +1,10 @@
-// XP 部件展示页：把重新设计的 XP 界面部件摆在一张桌面上，可以逐个点开看效果、听声音。
-// 用来对照原版检查外观，不是游戏玩法。说明见 doc/scenes/windows-xp.md「界面部件」。
+// XP widget gallery: the redesigned XP widgets on a desktop, to open one by one and hear their sounds.
+// For checking the look against the original, not gameplay (doc/scenes/windows-xp.md "Widgets").
 //
-// - 点「开始」打开开始菜单，点菜单项响「菜单命令」声
-// - 点托盘小喇叭打开音量控制；拖动滑块改本页音量，松开时响默认提示音；「静音」同步到托盘图标
-// - 右上角按钮弹出四种消息框（各带提示音）和托盘气泡；消息框可以拖标题栏、点按钮或关闭按钮关掉
-// - 「File download」弹出下载进度窗，进度条 2 秒走满后「Open」亮起，点「Open」或「Close」关掉
+// - Click Start for the Start menu; items play Menu Command
+// - Click the tray speaker for the volume control; the slider sets this page's volume and plays Default Beep on release; Mute shows on the tray icon
+// - The top right buttons open the four message boxes (with sounds) and a tray balloon; drag boxes by the title bar, close them with a button or the close box
+// - "File download" opens the download window; the bar fills in 2 s, Open lights up, and Open or Close dismisses it
 
 import '@/game/style.css';
 import { Container, Rectangle, type FederatedPointerEvent } from 'pixi.js';
@@ -31,7 +31,7 @@ import { XpResultsWindow } from '@/scenes/windows-xp/results-window.ts';
 import { summarizeResult, type HitResult } from '@/rhythm/result-summary.ts';
 
 const host = document.querySelector<HTMLElement>('#game');
-if (!host) throw new Error('找不到容器 #game');
+if (!host) throw new Error('Container #game not found');
 
 const clock = new AudioClock();
 const audio = clock.context;
@@ -39,12 +39,12 @@ const canvas = await GameCanvas.create(host);
 const assets = await preloadXpAssets(audio);
 host.style.cursor = XP_CURSOR;
 
-// 浏览器要求在用户操作里恢复音频
+// Browsers only resume audio inside a user gesture
 const resumeAudio = () => void clock.resume();
 window.addEventListener('pointerdown', resumeAudio, { once: true });
 window.addEventListener('keydown', resumeAudio, { once: true });
 
-// ---------- 音量 ----------
+// ---------- Volume ----------
 
 let volume = 0.8;
 let muted = false;
@@ -62,7 +62,7 @@ function play(name: XpSoundName): void {
   source.start();
 }
 
-// ---------- 桌面 ----------
+// ---------- Desktop ----------
 
 const screen = new Container({ label: 'xp-screen' });
 screen.scale.set(XP_SCALE);
@@ -76,7 +76,7 @@ const popupLayer = new Container({ label: 'popups' });
 screen.addChild(desktop.view, windowLayer, taskbar.view, popupLayer);
 canvas.onFrame(() => taskbar.setClock(new Date()));
 
-// 点桌面空白处：关掉开始菜单和音量控制，所有窗口变成非活动
+// Clicking empty desktop closes the Start menu and volume control and deactivates every window
 desktop.view.eventMode = 'static';
 desktop.view.hitArea = new Rectangle(0, 0, XP_SCREEN_WIDTH, WORK_AREA_HEIGHT);
 desktop.view.on('pointerdown', () => {
@@ -84,7 +84,7 @@ desktop.view.on('pointerdown', () => {
   activate(null);
 });
 
-// ---------- 开始菜单 ----------
+// ---------- Start menu ----------
 
 let startMenu: XpStartMenu | null = null;
 const startButton = taskbar.startButton;
@@ -106,7 +106,7 @@ startButton.view.on('pointerdown', () => {
   startButton.setPressed(true);
 });
 
-// ---------- 音量控制 ----------
+// ---------- Volume control ----------
 
 let volumeControl: XpVolumeControl | null = null;
 taskbar.volumeIcon.eventMode = 'static';
@@ -122,7 +122,7 @@ taskbar.volumeIcon.on('pointerdown', () => {
     onChange: (value, released) => {
       volume = value;
       applyVolume();
-      // 原版松开滑块时按新音量响一声默认提示音
+      // The original plays the default beep at the new volume on release
       if (released) play('defaultBeep');
     },
     onMuteChange: (value) => {
@@ -148,7 +148,7 @@ function closePopups(): void {
   volumeControl = null;
 }
 
-// ---------- 消息框 ----------
+// ---------- Message boxes ----------
 
 const SAMPLE_TEXTS: Record<DialogKind, { title: string; text: string }> = {
   'dialog-info': {
@@ -175,7 +175,7 @@ let spawned = 0;
 function openDialog(kind: DialogKind): void {
   closePopups();
   const dialog = new XpMessageBox({ kind, ...SAMPLE_TEXTS[kind] });
-  // 依次错开排开，和原版层叠窗口一样
+  // Cascaded like the original's stacked windows
   const step = spawned++ % 8;
   dialog.view.position.set(300 + step * 26, 150 + step * 26);
   windowLayer.addChild(dialog.view);
@@ -194,7 +194,7 @@ function wireDialog(dialog: XpMessageBox): void {
     activate(dialog);
   });
 
-  // 拖动标题栏移动窗口
+  // Drag the title bar to move the window
   const caption = new Container({ label: 'caption-drag' });
   caption.eventMode = 'static';
   caption.hitArea = new Rectangle(0, 0, dialog.width - 30, CAPTION_HEIGHT);
@@ -249,11 +249,11 @@ function closeDialog(dialog: XpMessageBox): void {
   activate(dialogs.at(-1) ?? null);
 }
 
-// ---------- 托盘气泡 ----------
+// ---------- Tray balloon ----------
 
 let balloon: XpBalloon | null = null;
 
-// ---------- 结算窗口（示例数据：31 下命中、2 下 Miss，略偏晚） ----------
+// ---------- Results window (sample data: 31 hits, 2 Misses, slightly late) ----------
 
 let results: XpResultsWindow | null = null;
 
@@ -305,7 +305,7 @@ function showBalloon(): void {
   play('balloon');
 }
 
-// ---------- 下载进度窗（progress-download 动作的部件） ----------
+// ---------- Download window (the progress-download widget) ----------
 
 let download: XpDownloadDialog | null = null;
 let downloadStart = 0;
@@ -320,7 +320,7 @@ function showDownload(): void {
   });
   download.view.position.set(XP_SCREEN_WIDTH / 2, WORK_AREA_HEIGHT / 2);
   download.view.eventMode = 'static';
-  // 走满之前点不了；走满后点窗口任意处都当作点「Open」，只是展示用
+  // Disabled until full; once full, a click anywhere counts as Open (gallery only)
   download.view.on('pointertap', () => {
     if (performance.now() - downloadStart < DOWNLOAD_SECONDS * 1000) return;
     play('downloadOpen');
@@ -336,7 +336,7 @@ canvas.onFrame(() => {
   download?.setProgress((performance.now() - downloadStart) / (DOWNLOAD_SECONDS * 1000));
 });
 
-// ---------- 页面上的按钮 ----------
+// ---------- Page buttons ----------
 
 const toolbar = document.createElement('nav');
 toolbar.className = 'dev-panel';
@@ -365,5 +365,5 @@ function toolbarButton(label: string, onClick: () => void): HTMLButtonElement {
   return button;
 }
 
-// 开发时把画面挂到全局，便于在浏览器控制台里截取放大图对照原版
+// Expose the view globally in development, for grabbing zoomed captures in the console to compare with the original
 if (import.meta.env.DEV) Object.assign(globalThis, { xpDebug: { app: canvas.app, screen } });

@@ -6,7 +6,7 @@ const ids = (row: Seat<{ id: string }>[]) =>
   row.map((s) => (s.kind === 'level' ? s.level.id : s.kind));
 
 describe('arrangeMachines', () => {
-  it('每个场景从新的一排开始，空位轮流放点缀', () => {
+  it('starts each scene on a new row and fills empty seats with props in turn', () => {
     const { seats, overflow } = arrangeMachines(
       [
         level('x1', 'xp'),
@@ -26,7 +26,7 @@ describe('arrangeMachines', () => {
     expect(overflow).toEqual([]);
   });
 
-  it('排不满时下一个场景跳到下一排', () => {
+  it('moves the next scene to the next row when a row is not full', () => {
     const { seats } = arrangeMachines([level('x1', 'xp'), level('m1', 'mac')], 2, 4);
     expect(seats.map(ids)).toEqual([
       ['x1', 'repair', 'busy', 'off'],
@@ -34,7 +34,7 @@ describe('arrangeMachines', () => {
     ]);
   });
 
-  it('坐不下的关卡放进 overflow', () => {
+  it('puts levels that do not fit into overflow', () => {
     const { overflow } = arrangeMachines(
       [level('a', 'xp'), level('b', 'xp'), level('c', 'xp')],
       1,

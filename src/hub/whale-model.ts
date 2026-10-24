@@ -1,7 +1,7 @@
-// 玩家角色：DeepSeek 鲸鱼娘的 3D 模型（public/models/whale-girl.glb）。
-// 模型来自 ai-girls-3d（Manny / ningfangtianwai-pixel，CC BY 4.0），经 glTF-Transform 压缩，见 assets/README.md。
-// 模型没有动画，走路、坐下、打字都由代码转动骨骼；眨眼用模型自带的形态键。
-// 模型下载完之前先显示代码生成的人偶（character.ts），下载失败也一直用人偶。
+// The player character: the DeepSeek whale girl model (public/models/whale-girl.glb), from ai-girls-3d
+// (Manny / ningfangtianwai-pixel, CC BY 4.0), compressed with glTF-Transform; see assets/README.md.
+// It has no animations: walking, sitting and typing turn its bones in code; blinking uses its own morph targets.
+// The code-built puppet (character.ts) shows until it loads, and stays if loading fails.
 
 import {
   Box3,
@@ -18,20 +18,20 @@ import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.j
 import { Character, SEAT_HEIGHT, WHALE_GIRL, type Figure } from './character.ts';
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/whale-girl.glb`;
-/** 游戏里的身高（米）。和椅子、桌子、镜头高度配套 */
+/** In-game height (m), matched to the chairs, desks and camera */
 const HEIGHT = 1.6;
-/** 多久眨一次眼（秒） */
+/** How often she blinks (s) */
 const BLINK_PERIOD = 3.7;
 const BLINK_SECONDS = 0.16;
 
-/** 角色自身坐标系里的轴：模型面朝 +z，+x 是她的左手边 */
+/** Axes in the character's frame: the model faces +z and +x is her left */
 const SIDE_AXIS = new Vector3(1, 0, 0);
 const UP_AXIS = new Vector3(0, 1, 0);
 
 /**
- * 按「角色坐标系里的轴」转骨骼。骨骼按模型里的原名查找（如 `thigh.L`）；
- * GLTFLoader 会把名字里的「.」等字符去掉（`thighL`），查找时按同样的规则换算。骨骼自己的局部轴方向因模型而异，
- * 所以先把角色坐标系里的轴换算到骨骼父节点的坐标系，再乘在静止姿势上。
+ * Turns bones about axes in the character's frame. Bones are looked up by their original names (e.g. `thigh.L`);
+ * GLTFLoader strips characters such as "." (`thighL`), so lookups apply the same rule. Each bone's local axes differ,
+ * so the axis is first converted into the bone parent's frame and then applied on top of the rest pose.
  */
 class BoneRig {
   private readonly bones = new Map<
@@ -54,12 +54,12 @@ class BoneRig {
     });
   }
 
-  /** 回到静止姿势 */
+  /** Back to the rest pose */
   reset(): void {
     for (const { bone, rest } of this.bones.values()) bone.quaternion.copy(rest);
   }
 
-  /** 在当前姿势上，绕角色坐标系里的 axis 再转 angle（弧度） */
+  /** Rotates by `angle` (radians) about `axis` in the character's frame, on top of the current pose */
   turn(name: string, axis: Vector3, angle: number): void {
     const entry = this.bones.get(PropertyBinding.sanitizeNodeName(name));
     if (!entry || angle === 0) return;
@@ -73,9 +73,9 @@ export class WhaleAvatar implements Figure {
   private readonly fallback = new Character(WHALE_GIRL);
   private rig: BoneRig | null = null;
   private model: Group | null = null;
-  /** 坐下时模型整体下沉多少 */
+  /** How far the model sinks when seated */
   private sitDrop = 0.3;
-  /** 眨眼：形态键所在的网格和下标 */
+  /** Blinking: the mesh holding the morph target and its index */
   private blinkTargets: { mesh: Mesh; index: number }[] = [];
   private sitting = false;
   private phase = 0;
@@ -93,7 +93,7 @@ export class WhaleAvatar implements Figure {
     try {
       gltf = await loader.loadAsync(MODEL_URL);
     } catch (error) {
-      console.error('鲸鱼娘模型加载失败，继续使用代码生成的人偶', error);
+      console.error('Failed to load the whale girl model; keeping the code-built puppet', error);
       return;
     }
     const model = gltf.scene;
@@ -101,7 +101,7 @@ export class WhaleAvatar implements Figure {
     model.traverse((node) => {
       const mesh = node as Mesh;
       if (!mesh.isMesh) return;
-      // 蒙皮网格的包围盒按绑定姿势算，转动骨骼后可能被误裁掉
+      // Skinned mesh bounds come from the bind pose and can wrongly cull once bones turn
       mesh.frustumCulled = false;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
@@ -112,7 +112,7 @@ export class WhaleAvatar implements Figure {
       }
     });
 
-    // 缩放到游戏里的身高，脚底放在原点
+    // Scale to the in-game height with the feet at the origin
     const box = new Box3().setFromObject(model, true);
     const scale = HEIGHT / (box.max.y - box.min.y);
     model.scale.setScalar(scale);
@@ -125,7 +125,7 @@ export class WhaleAvatar implements Figure {
     this.root.updateMatrixWorld(true);
     this.rig = new BoneRig(model);
 
-    // 坐下时骨盆要落在椅面上
+    // Seated, the pelvis must rest on the chair seat
     const pelvis = model.getObjectByName('pelvis');
     if (pelvis) {
       const hip = pelvis.getWorldPosition(new Vector3());
@@ -150,10 +150,10 @@ export class WhaleAvatar implements Figure {
     const rig = this.rig;
     rig.reset();
     const swing = Math.sin(phase) * 0.42 * amount;
-    // 向前迈腿是绕侧轴的负方向
+    // Stepping forward is negative rotation about the side axis
     rig.turn('thigh.L', SIDE_AXIS, -swing);
     rig.turn('thigh.R', SIDE_AXIS, swing);
-    // 腿在身后时膝盖弯一点
+    // Bend the knee a little when the leg is behind
     rig.turn('shin.L', SIDE_AXIS, Math.max(0, -swing) * 1.1);
     rig.turn('shin.R', SIDE_AXIS, Math.max(0, swing) * 1.1);
     rig.turn('skirt.L', SIDE_AXIS, -swing * 0.4);
@@ -177,14 +177,14 @@ export class WhaleAvatar implements Figure {
     rig.reset();
     this.model!.position.y = sitting ? -this.sitDrop : 0;
     if (!sitting) return;
-    // 腿部权重扛不住 90° 弯曲，袜子和裙边会被撕开；裙摆一起往前转，正好盖住
+    // The leg weights can't take a 90° bend and tear the socks and skirt hem; turning the skirt forward too covers it
     for (const side of ['L', 'R']) {
       rig.turn(`thigh.${side}`, SIDE_AXIS, -Math.PI / 2);
       rig.turn(`shin.${side}`, SIDE_AXIS, Math.PI / 2);
       rig.turn(`skirt.${side}`, SIDE_AXIS, -0.8);
     }
     this.typingPose(0);
-    // 尾巴绕到椅子左侧并放低：坐下后的镜头在右肩后面，不能让尾巴挡住屏幕
+    // The tail goes round the left of the chair and lower: the seated camera is over the right shoulder, so it must not block the screen
     rig.turn('tail.01', UP_AXIS, -0.9);
     rig.turn('tail.01', SIDE_AXIS, -0.4);
   }
@@ -194,12 +194,12 @@ export class WhaleAvatar implements Figure {
       this.fallback.type(t);
       return;
     }
-    // 只重算手臂：先把手臂恢复成坐姿里的样子
+    // Recompute the arms only, starting from their seated pose
     this.sit(true);
     this.typingPose(t);
   }
 
-  /** 每帧调用：眨眼 */
+  /** Every frame: blinking */
   animate(t: number): void {
     const k = (t % BLINK_PERIOD) / BLINK_SECONDS;
     const closed = k < 1 ? Math.sin(k * Math.PI) : 0;
@@ -209,8 +209,8 @@ export class WhaleAvatar implements Figure {
   }
 
   /**
-   * 手放到键盘上，小臂跟着时间轻轻动。
-   * 这个模型手臂附近的蒙皮权重不干净，大臂转多了（尤其往里收）会把袖子拉成片，所以幅度要小（2026-10-24 实测）。
+   * Hands on the keyboard, forearms moving slightly over time.
+   * The model's skin weights near the arms are messy and large upper-arm turns (inwards especially) tear the sleeves, so keep it small.
    */
   private typingPose(t: number): void {
     const rig = this.rig!;

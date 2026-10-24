@@ -1,4 +1,4 @@
-// 延迟测试原型的入口：连接音频时钟、节拍器、输入和画面。
+// Latency test prototype entry: wires the audio clock, metronome, input and view together.
 
 import './style.css';
 import { AudioClock } from '@/audio/audio-clock.ts';
@@ -16,12 +16,12 @@ import { KIND_COLORS, LatencyView } from './view.ts';
 
 const MIN_BPM = 60;
 const MAX_BPM = 200;
-/** 设备信息面板的刷新间隔（毫秒），只影响显示 */
+/** Refresh interval of the device info panel (ms); display only */
 const ENV_REFRESH_MS = 250;
 
 function $<T extends HTMLElement>(selector: string): T {
   const el = document.querySelector<T>(selector);
-  if (!el) throw new Error(`找不到元素 ${selector}`);
+  if (!el) throw new Error(`Element not found: ${selector}`);
   return el;
 }
 
@@ -40,7 +40,7 @@ const metronome = new Metronome(clock);
 const view = await LatencyView.create(stageEl);
 const taps: TapRecord[] = [];
 
-// ---------- 格式化 ----------
+// ---------- Formatting ----------
 
 function ms(value: number | null | undefined, digits = 1): string {
   return value == null || Number.isNaN(value) ? '—' : value.toFixed(digits);
@@ -51,7 +51,7 @@ function signedMs(value: number | null): string {
   return `${value > 0 ? '+' : ''}${value.toFixed(1)}`;
 }
 
-// ---------- 开始 / 停止 ----------
+// ---------- Start / stop ----------
 
 function readBpm(): number {
   const value = Math.round(Number(bpmInput.value));
@@ -74,7 +74,7 @@ function stop(reason?: string): void {
 }
 
 startButton.addEventListener('click', () => {
-  // 去掉焦点，避免之后按空格又触发这个按钮
+  // Drop focus so a later Space doesn't press this button again
   startButton.blur();
   if (metronome.running) {
     stop();
@@ -94,18 +94,18 @@ resetButton.addEventListener('click', () => {
   renderStats();
 });
 
-// 切到后台时浏览器会降频，计时不再可靠，直接停止
+// Throttled background tabs make timing unreliable, so stop
 document.addEventListener('visibilitychange', () => {
   if (document.hidden && metronome.running) {
     stop('The page went into the background, so the test stopped. Please start again.');
   }
 });
 
-// ---------- 输入 ----------
+// ---------- Input ----------
 
 /**
- * event.timeStamp 应与 performance.now() 同一时间轴。
- * 个别旧浏览器给的是纪元时间或 0，这时退回回调时的 performance.now()，并在记录里标出来。
+ * event.timeStamp should share performance.now()'s timeline. Some old browsers give an epoch time or 0;
+ * then the callback's performance.now() is used instead and the record says so.
  */
 function resolveTimeStamp(eventTimeStamp: number): { time: number; fallback: boolean } {
   const now = performance.now();
@@ -147,7 +147,7 @@ window.addEventListener('keydown', (event) => {
   if (isTextField(event.target)) return;
   const isTapKey = event.code === 'Space' || /^Key[A-Z]$/.test(event.code);
   if (!isTapKey) return;
-  // 阻止空格滚动页面或触发按钮
+  // Keep Space from scrolling the page or pressing a button
   event.preventDefault();
   recordTap('keyboard', event.timeStamp);
 });
@@ -162,7 +162,7 @@ stageEl.addEventListener('pointerdown', (event) => {
 
 stageEl.addEventListener('contextmenu', (event) => event.preventDefault());
 
-// ---------- 面板 ----------
+// ---------- Panels ----------
 
 function renderLegend(): void {
   legendEl.replaceChildren(
@@ -244,7 +244,7 @@ function renderEnv(): void {
   );
 }
 
-// ---------- 导出 ----------
+// ---------- Export ----------
 
 exportButton.addEventListener('click', () => {
   exportButton.blur();
@@ -270,7 +270,7 @@ exportButton.addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
-// ---------- 每帧 ----------
+// ---------- Every frame ----------
 
 let lastEnvRefresh = -Infinity;
 

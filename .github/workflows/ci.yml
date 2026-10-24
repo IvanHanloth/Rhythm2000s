@@ -1,4 +1,4 @@
-# 每次推送和 PR 都跑一遍提交前要求的检查（AGENTS.md「常用命令」）：格式 / 代码检查 / 类型检查、单元测试、构建。
+# Runs the pre-commit checks (AGENTS.md "Commands") on every push and PR: format / lint / types, unit tests, build.
 name: CI
 
 on:
@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # pnpm 版本与 package.json 的 devEngines.packageManager 保持一致
+      # Keep in step with devEngines.packageManager in package.json
       - uses: pnpm/action-setup@v4
         with:
           version: 12.15.0
@@ -24,11 +24,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: 格式、代码检查、类型检查
+      - name: Format, lint and type check
         run: pnpm exec vp check
 
-      - name: 单元测试（包括 public/charts/ 下全部谱面的校验）
+      - name: Unit tests (including validation of every chart in public/charts/)
         run: pnpm exec vp test
 
-      - name: 类型检查 + 构建
+      - name: Type check and build
         run: pnpm exec vp run build

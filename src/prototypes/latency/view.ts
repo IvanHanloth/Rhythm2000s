@@ -1,13 +1,13 @@
-// 延迟测试的 PixiJS 画面：拍点闪光 + 偏差分布条。
-// 画面只读取外部传入的拍位置（来自音频时钟），自己不计时。
+// Latency test PixiJS view: a beat flash and an offset distribution bar.
+// It only reads the beat position passed in (from the audio clock) and keeps no time of its own.
 
 import { Application, Container, Graphics, Text } from 'pixi.js';
 import { INPUT_KINDS, type InputKind, type TapRecord } from './records.ts';
 
-/** 偏差条的显示范围（毫秒）。只是可视化刻度，不代表判定窗口。 */
+/** Range of the offset bar (ms); a visual scale only, not a judgement window. */
 const RANGE_MS = 150;
 const TICKS_MS = [-150, -100, -50, 0, 50, 100, 150];
-/** 偏差条上最多显示最近几次输入 */
+/** Most recent inputs shown on the offset bar */
 const MAX_DOTS = 40;
 
 const COLORS = {
@@ -27,7 +27,7 @@ export const KIND_COLORS: Record<InputKind, number> = {
 };
 
 export interface ViewState {
-  /** 当前听到的拍位置（小数）；未开始时为 null */
+  /** Current heard beat position (fractional); null before starting */
   beatPosition: number | null;
   beatsPerBar: number;
   taps: readonly TapRecord[];
@@ -74,7 +74,7 @@ export class LatencyView {
     return new LatencyView(app);
   }
 
-  /** 每帧回调，回调里拿到的是 Pixi 的 requestAnimationFrame 节奏。 */
+  /** Frame callback, driven by Pixi's requestAnimationFrame. */
   onFrame(callback: () => void): void {
     this.app.ticker.add(callback);
   }
@@ -83,7 +83,7 @@ export class LatencyView {
     const { width, height } = this.app.screen;
     const g = this.shapes.clear();
 
-    // ---- 拍点闪光 ----
+    // ---- Beat flash ----
     const cx = width / 2;
     const cy = height * 0.32;
     const radius = Math.max(24, Math.min(width, height) * 0.14);
@@ -104,7 +104,7 @@ export class LatencyView {
       });
     }
 
-    // 小节内的拍位置
+    // Beat position within the bar
     const dotGap = radius * 0.5;
     const dotsY = cy + radius * 1.5;
     for (let i = 0; i < beatsPerBar; i++) {
@@ -113,7 +113,7 @@ export class LatencyView {
       g.circle(x, dotsY, 6).fill(lit ? (i === 0 ? COLORS.accent : COLORS.beat) : COLORS.dim);
     }
 
-    // ---- 偏差分布条 ----
+    // ---- Offset distribution bar ----
     const left = width * 0.08;
     const right = width * 0.92;
     const axisY = height * 0.72;
@@ -133,7 +133,7 @@ export class LatencyView {
     this.earlyLabel.position.set(left + 20, axisY + 28);
     this.lateLabel.position.set(right - 20, axisY + 28);
 
-    // 每种输入一行，越新的点越亮；超出范围的点画在边缘、改成方块
+    // One row per input type, newer dots brighter; dots out of range sit at the edge as squares
     const recent = taps.slice(-MAX_DOTS);
     recent.forEach((tap, i) => {
       const offset = tap.offsetA ?? tap.offsetB;

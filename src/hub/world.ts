@@ -1,9 +1,9 @@
-// 街区的全部布景：2000 年英国商业街（High Street）的黄昏，北侧三家能进的店（唱片行、网吧、街机厅），
-// 南侧是不能进的楼和街边设施。英国元素是 2026-10-24 用户的要求（项目参加英国的黑客松）。
-// 布局、店名、文案都是第一版占位（doc/hub.md「暂定内容」）。场景里的招牌、海报一律用英文（2026-10-24 用户要求）。
-// 写实风格：墙面、地面用 PBR 照片贴图，道具用现成模型（assets.ts）；需要定制的道具先用简单形体占位，
-// 等用户用 Tripo / Blender 做好后放进 public/models/custom/（规格见 doc/hub-assets.md）。
-// 坐标：x 沿街道（西负东正），z 从北向南，y 向上，单位米。马路在 |z| < 4，两侧人行道到 |z| = 7。
+// The whole street set: a British high street around 2000. Three shops on the north side can be entered
+// (record shop, net café, arcade); the south side has buildings and street furniture only.
+// Layout, shop names and texts are first-pass placeholders (doc/hub.md). Signs and posters are in English.
+// Realistic style: PBR photo textures on walls and ground, stock models for props (assets.ts); bespoke props use simple
+// placeholder shapes until the user's Tripo / Blender models go into public/models/custom/ (spec: doc/hub-assets.md).
+// Axes: x along the street (west negative), z from north to south, y up, in metres. Road at |z| < 4, pavements out to |z| = 7.
 
 import type { SceneId } from '@/scenes/catalog.ts';
 import {
@@ -37,35 +37,35 @@ import { boxAt, type Box } from './collision.ts';
 import type { Spot } from './motion.ts';
 import { ledTexture, posterTexture, signTexture } from './textures.ts';
 
-/** 人行道比马路高出的高度 */
+/** Kerb height of the pavement above the road */
 const CURB_HEIGHT = 0.12;
 const ROAD_HALF_WIDTH = 4;
 const SIDEWALK_EDGE = 7;
-/** 街道两头的路障 */
+/** Barriers at both ends of the street */
 const STREET_END = 33;
-/** 店面一层的层高 */
+/** Ground floor height of the shops */
 const STOREY = 3.4;
-/** 楼上每层的层高 */
+/** Height of each upper floor */
 const UPPER_STOREY = 3.0;
 const WALL = 0.25;
 const DOOR_HALF_WIDTH = 0.9;
 const DOOR_HEIGHT = 2.5;
 
-/** 坐到电脑前开始关卡 */
+/** Sit at a computer to start a level */
 export interface LevelSpot extends Spot {
   kind: 'level';
-  /** 关卡 id（谱面 id） */
+  /** Level id (chart id) */
   levelId: string;
-  /** 坐下后角色的位置和朝向 */
+  /** Character position and heading when seated */
   seat: { x: number; z: number; heading: number };
-  /** 屏幕中心（世界坐标），镜头最后推进到这里；自制电脑模型加载后会更新 */
+  /** Screen centre (world), where the camera finally pushes in; updated when a custom computer model loads */
   screen: Vector3;
 }
 
-/** 看一眼、说句话：显示几行文字 */
+/** Look at something or talk: shows a few lines of text */
 export interface ReadSpot extends Spot {
   kind: 'read';
-  /** 提示里的动词，例如「Examine」 */
+  /** The verb in the hint, e.g. "Examine" */
   verb: string;
   name: string;
   lines: string[];
@@ -73,54 +73,54 @@ export interface ReadSpot extends Spot {
 
 export type HubSpot = LevelSpot | ReadSpot;
 
-/** 一家店的范围，进门时显示店名 */
+/** A shop's area; entering shows its name */
 export interface Zone extends Box {
   name: string;
 }
 
 export interface World {
   root: Group;
-  /** 角色不能穿过的东西 */
+  /** What the character can't walk through */
   colliders: Box[];
-  /** 镜头不能穿过的东西（墙、天花板、楼） */
+  /** What the camera can't pass through (walls, ceilings, buildings) */
   blockers: Object3D[];
   spots: HubSpot[];
   zones: Zone[];
-  /** 出生点：街道西头，面朝东 */
+  /** Spawn point: the west end of the street, facing east */
   spawn: { x: number; z: number; heading: number };
-  /** 脚下地面的高度：马路比人行道低一个路沿 */
+  /** Ground height underfoot: the road is a kerb lower than the pavement */
   groundHeight(x: number, z: number): number;
-  /** 每帧调用，t 单位是秒：提示标记上下浮动 */
+  /** Call every frame, t in seconds: the hint markers bob up and down */
   update(t: number): void;
 }
 
-/** 显示器画面：用原版系统壁纸（assets/reference/，ADR 0004）缩小后的图 */
+/** Monitor images: the original system wallpapers (assets/reference/, ADR 0004), scaled down */
 export type ScreenImage = 'xp-bliss' | 'xp-azul' | 'xp-autumn' | 'xp-desert' | 'mac-aqua-blue';
 
-/** 入口电脑：每个场景一台，坐下后进这个场景的关卡列表（场景 id 见 src/scenes/catalog.ts） */
+/** Entry computer: one per scene; sitting down opens that scene's level list (scene ids in src/scenes/catalog.ts) */
 export interface LevelMachine {
   levelId: string;
   sceneId: SceneId;
-  /** 屏幕上显示的壁纸（public/textures/screens/） */
+  /** Wallpaper on its screen (public/textures/screens/) */
   screen: ScreenImage;
-  /** 半透明外壳的一体机；否则是米色 CRT */
+  /** Translucent all-in-one; otherwise a beige CRT */
   imac?: boolean;
 }
 
 interface BoxOptions {
-  /** 角色撞得上 */
+  /** The character collides with it */
   solid?: boolean;
-  /** 挡镜头；默认和 solid 一样 */
+  /** Blocks the camera; same as solid by default */
   blockCamera?: boolean;
-  /** 投射阴影，默认 true */
+  /** Casts shadows; true by default */
   castShadow?: boolean;
 }
 
-/** UV 以米为单位的长方体：配合 surface() 的平铺，砖块大小和墙的大小无关 */
+/** A box with UVs in metres: with surface() tiling, brick size doesn't depend on wall size */
 function meterBox(w: number, h: number, d: number): BufferGeometry {
   const geometry = new BoxGeometry(w, h, d);
   const uv = geometry.attributes.uv!;
-  // 六个面依次是 +x、-x、+y、-y、+z、-z，每面 4 个顶点
+  // Faces in order +x, -x, +y, -y, +z, -z, 4 vertices each
   const faces: [number, number][] = [
     [d, h],
     [d, h],
@@ -142,7 +142,7 @@ function meterPlane(w: number, h: number): BufferGeometry {
   return geometry;
 }
 
-/** 占位形体用的长方体：(x, z) 是底面中心，y 是底面高度 */
+/** Placeholder box: (x, z) is the centre of its base, y the base height */
 function placeholderBox(
   w: number,
   h: number,
@@ -166,11 +166,11 @@ class Builder {
   readonly spots: HubSpot[] = [];
   readonly zones: Zone[] = [];
   readonly animations: ((t: number) => void)[] = [];
-  /** 楼面上的窗户，最后合成几个 InstancedMesh */
+  /** Windows on the facades, merged into a few InstancedMeshes at the end */
   private readonly windows: { matrix: Matrix4; lit: boolean }[] = [];
   private readonly plainCache = new Map<string, MeshStandardMaterial>();
 
-  /** 没有贴图的写实材质：塑料、金属、漆面 */
+  /** Untextured realistic materials: plastic, metal, paint */
   plain(color: string, roughness = 0.7, metalness = 0): MeshStandardMaterial {
     const key = `${color}/${roughness}/${metalness}`;
     let m = this.plainCache.get(key);
@@ -179,7 +179,7 @@ class Builder {
     return m;
   }
 
-  /** 自己发光的面（灯箱招牌、屏幕、灯）：亮度大于 1 时会被辉光效果放大 */
+  /** Self-lit surfaces (light boxes, screens, lamps); brightness above 1 is picked up by the bloom */
   glow(map: Texture | null, color: string, intensity: number): MeshStandardMaterial {
     return new MeshStandardMaterial({
       color: '#000000',
@@ -196,7 +196,7 @@ class Builder {
     return this.glow(map, '#ffffff', 1.1);
   }
 
-  /** 长方体：(x, z) 是底面中心，y 是底面高度 */
+  /** A box: (x, z) is the centre of its base, y the base height */
   box(
     w: number,
     h: number,
@@ -219,8 +219,8 @@ class Builder {
   }
 
   /**
-   * 竖着的面板（招牌、海报、横幅），整张图铺满一块，UV 是 0 到 1。
-   * facing 是它朝向的角度：0 朝 +z（南），π 朝 -z（北）
+   * An upright panel (sign, poster, banner) with one image filling it, UVs 0 to 1.
+   * facing is its heading: 0 faces +z (south), π faces -z (north)
    */
   panel(
     w: number,
@@ -239,7 +239,7 @@ class Builder {
     return mesh;
   }
 
-  /** 平铺在地上的面 */
+  /** A flat surface on the ground */
   floor(w: number, d: number, x: number, y: number, z: number, material: Material): Mesh {
     const mesh = new Mesh(meterPlane(w, d), material);
     mesh.rotation.x = -Math.PI / 2;
@@ -255,7 +255,7 @@ class Builder {
     this.root.add(light);
   }
 
-  /** 现成模型（public/models/props/）：放在 (x, y, z)，可选碰撞盒 */
+  /** Stock model (public/models/props/) at (x, y, z), with an optional collision box */
   prop(
     name: string,
     x: number,
@@ -270,7 +270,7 @@ class Builder {
     if (options.collider) this.colliders.push(boxAt(x, z, ...options.collider));
   }
 
-  /** 自制模型槽位：先放占位形体（在锚点坐标系里搭），自制模型到了就替换 */
+  /** Custom model slot: a placeholder built in the anchor's frame, replaced when the custom model arrives */
   custom(
     slot: string,
     x: number,
@@ -299,7 +299,7 @@ class Builder {
     this.spots.push({ kind: 'read', name, verb, x, z, reach, lines });
   }
 
-  /** 在楼面上开窗：从 x0 到 x1、从高度 y0 起 floors 层；z 是墙面位置，facing 是墙面朝向（+1 朝南，-1 朝北） */
+  /** Windows on a facade: from x0 to x1, `floors` storeys up from y0; z is the wall, facing its direction (+1 south, -1 north) */
   windowGrid(
     x0: number,
     x1: number,
@@ -327,7 +327,7 @@ class Builder {
     }
   }
 
-  /** 把所有窗户合成三个 InstancedMesh：窗框、暗着的玻璃、亮灯的玻璃 */
+  /** Merges every window into three InstancedMeshes: frames, dark glass, lit glass */
   flushWindows(): void {
     const lit = this.windows.filter((w) => w.lit);
     const dark = this.windows.filter((w) => !w.lit);
@@ -343,12 +343,12 @@ class Builder {
       new MeshStandardMaterial({ color: C.windowDark, roughness: 0.08, metalness: 0.3 }),
       dark.length,
     );
-    // 玻璃比窗框往外凸一点点，避免和窗框抢深度
+    // Glass sits a hair proud of the frame so they don't fight over depth
     const nudge = new Matrix4().makeTranslation(0, 0, 0.035);
     this.windows.forEach((w, i) => frames.setMatrixAt(i, w.matrix));
     lit.forEach((w, i) => litGlass.setMatrixAt(i, w.matrix.clone().multiply(nudge)));
     dark.forEach((w, i) => darkGlass.setMatrixAt(i, w.matrix.clone().multiply(nudge)));
-    // 亮灯的窗户颜色略有差别，看起来是不同人家
+    // Lit windows vary slightly in colour, like different homes
     const tints = [C.windowLit, '#ffe7b8', '#fff3d8', '#ffc98a'];
     lit.forEach((_, i) => litGlass.setColorAt(i, new Color(tints[i % tints.length]!)));
     for (const mesh of [frames, litGlass, darkGlass]) {
@@ -384,14 +384,14 @@ export function buildWorld(levels: readonly LevelMachine[]): World {
   };
 }
 
-// ---------- 街道 ----------
+// ---------- Street ----------
 
 function buildStreet(b: Builder): void {
   const length = (STREET_END + 8) * 2;
   b.floor(240, 240, 0, -CURB_HEIGHT - 0.01, 0, surface('asphalt_02', { tile: 4, tint: '#8a8a8a' }));
   b.floor(length, ROAD_HALF_WIDTH * 2, 0, -CURB_HEIGHT, 0, surface('asphalt_02', { tile: 3 }));
 
-  // 路面标线
+  // Road markings
   const paint = b.plain(C.roadLine, 0.6);
   for (let x = -STREET_END - 6; x < STREET_END + 6; x += 4) {
     if (Math.abs(x) < 3) continue;
@@ -399,13 +399,13 @@ function buildStreet(b: Builder): void {
   }
   for (let z = -2.6; z <= 2.65; z += 0.75) b.floor(3, 0.4, 0, -CURB_HEIGHT + 0.004, z, paint);
 
-  // 英国街道：路边的双黄线（禁止停车），斑马线前写着 LOOK RIGHT（靠左行驶，两边路沿最近的车道都是从右边来车）
+  // British road: double yellow lines at the kerb, and LOOK RIGHT before the crossing (traffic drives on the left, so the near lane comes from the right on both sides)
   const yellow = b.plain(C.roadYellow, 0.6);
   for (const side of [-1, 1]) {
     for (const offset of [0.25, 0.4]) {
       b.floor(length, 0.08, 0, -CURB_HEIGHT + 0.004, side * (ROAD_HALF_WIDTH - offset), yellow);
     }
-    // 路面上的字只有白漆，没有底色
+    // Road lettering is white paint only, no background
     const look = signTexture({
       text: 'LOOK RIGHT',
       background: 'transparent',
@@ -421,11 +421,11 @@ function buildStreet(b: Builder): void {
       side * (ROAD_HALF_WIDTH - 0.6),
       new MeshStandardMaterial({ map: look, transparent: true, roughness: 0.8 }),
     );
-    // 让站在这一侧路沿、面朝马路的人读起来是正的
+    // Reads upright for someone on this kerb facing the road
     if (side < 0) text.rotation.z = Math.PI;
   }
 
-  // 斑马线两头的黄色闪灯（自制槽位 belisha-beacon）：黑白条纹杆子顶着一个黄色灯球，一秒亮一次
+  // Belisha beacons at both ends of the zebra crossing (custom slot belisha-beacon): a striped pole topped by a yellow globe, flashing once a second
   const beaconLights: MeshStandardMaterial[] = [];
   for (const [bx, bz] of [
     [-1.9, -4.3],
@@ -451,7 +451,7 @@ function buildStreet(b: Builder): void {
     for (const light of beaconLights) light.emissiveIntensity = on ? 5 : 0.15;
   });
 
-  // 人行道和路沿
+  // Pavements and kerbs
   const sidewalkWidth = SIDEWALK_EDGE - ROAD_HALF_WIDTH;
   const pavers = surface('square_concrete_pavers', { tile: 1.6 });
   const curb = surface('painted_plaster_wall', { tile: 1, tint: '#b8b2a6' });
@@ -463,10 +463,10 @@ function buildStreet(b: Builder): void {
     });
   }
 
-  // 井盖
+  // Manhole covers
   for (const x of [-18, 6, 22]) b.prop('water_manhole_cover', x, -CURB_HEIGHT, 1.8, { width: 0.7 });
 
-  // 路灯：北侧四盏、南侧三盏。白天不亮
+  // Street lamps: four on the north side, three on the south. Off by day
   const lamps: [number, number][] = [
     [-24, -4.6],
     [-8, -4.6],
@@ -480,13 +480,13 @@ function buildStreet(b: Builder): void {
     b.prop('street_lamp_01', x, 0, z, { height: 4.2, collider: [0.35, 0.35] });
   }
 
-  // 街边：垃圾桶、配电箱
+  // Street furniture: bins, a utility cabinet
   b.prop('metal_trash_can', -20, 0, -4.7, { width: 1.4, collider: [1.4, 0.5] });
   b.prop('metal_trash_can', 12, 0, 4.7, { width: 1.4, rotation: Math.PI, collider: [1.4, 0.5] });
   b.prop('utility_box_01', -12.6, 0, -6.6, { height: 1.1, collider: [0.55, 0.45] });
   b.prop('utility_box_01', 27, 0, 6.6, { height: 1.1, rotation: Math.PI, collider: [0.55, 0.45] });
 
-  // 街道两头的施工路障，后面再挡一栋楼
+  // Roadworks barriers at both ends, with a building behind each
   const barrier = b.plain(C.signYellow, 0.5);
   const closed = signTexture({
     text: 'ROAD CLOSED',
@@ -512,10 +512,10 @@ function buildStreet(b: Builder): void {
   }
 }
 
-// ---------- 南侧：不能进的楼面和街边设施 ----------
+// ---------- South side: facades and street furniture ----------
 
 function buildSouthSide(b: Builder): void {
-  // 英国商业街：维多利亚式红砖楼为主，夹着刷了涂料的楼和一栋 60 年代的贴砖楼
+  // A British high street: mostly Victorian red brick, with painted fronts and one tiled 1960s block
   const facades = [
     surface('red_brick_03', { tile: 2 }),
     surface('painted_plaster_wall', { tile: 2.5, tint: '#e2d3b0' }),
@@ -524,7 +524,7 @@ function buildSouthSide(b: Builder): void {
     surface('painted_plaster_wall', { tile: 2.5, tint: '#c8d4dc' }),
   ];
   const shutter = surface('painted_metal_shutter', { tile: 2 });
-  // 2000 年前后英国商业街上常见的店：录像出租、手机话费、一小时冲印、报刊店、炸鱼薯条、投注站……
+  // Shops typical of a British high street around 2000: video rental, mobile top-up, one-hour photo, newsagent, chippy, bookies…
   const shopSigns = [
     'VIDEO & DVD RENTAL',
     'MOBILE PHONES',
@@ -535,7 +535,7 @@ function buildSouthSide(b: Builder): void {
     'BOOKMAKERS',
     'OFF LICENCE',
   ];
-  // 卷帘门上贴的小广告
+  // Flyers stuck on the shutters
   const flyers: [string[], string, string][] = [
     [['PC 2000', 'PIII 600', '128MB RAM', '£899'], C.signText, C.signBlue],
     [['PAY AS', 'YOU GO', 'TOP UP HERE'], C.signYellow, C.signRed],
@@ -555,7 +555,7 @@ function buildSouthSide(b: Builder): void {
       solid: true,
     });
     b.windowGrid(x + 0.4, x + width - 0.4, STOREY, floors, SIDEWALK_EDGE, -1, 11 + i * 7);
-    // 一层的店面：卷帘门 + 灯箱招牌
+    // Ground floor shopfront: shutter and light-box sign
     b.box(width - 1, 2.6, 0.08, cx, 0, SIDEWALK_EDGE - 0.04, shutter);
     for (let k = 0; k < 2; k++) {
       const [lines, background, color] = flyers[(i * 2 + k) % flyers.length]!;
@@ -591,7 +591,7 @@ function buildSouthSide(b: Builder): void {
     i++;
   }
 
-  // 屋顶广告牌
+  // Rooftop billboard
   const billboard = signTexture({
     text: 'BROADBAND 512K',
     sub: '£29.99 / MONTH · GOODBYE DIAL-UP',
@@ -602,7 +602,7 @@ function buildSouthSide(b: Builder): void {
   for (const dx of [-3.5, 3.5])
     b.box(0.2, 3, 0.2, 4 + dx, 10.5, SIDEWALK_EDGE + 1.2, b.plain(C.metalDark, 0.5, 0.7));
 
-  // 报摊（自制槽位 newsstand）
+  // Newsstand (custom slot newsstand)
   const kx = -9;
   const kz = 5.6;
   b.custom('newsstand', kx, kz, Math.PI, (p) => {
@@ -616,7 +616,7 @@ function buildSouthSide(b: Builder): void {
     'Tucked beside it are a few free CD-ROMs off computer magazines, their covers bleached by the sun.',
   ]);
 
-  // 红色电话亭（自制槽位 phone-box）和红色邮筒（自制槽位 pillar-box）
+  // Red phone box (custom slot phone-box) and red pillar box (custom slot pillar-box)
   const px = 4.5;
   const pz = 5.7;
   b.custom('phone-box', px, pz, Math.PI, (p) => {
@@ -652,7 +652,7 @@ function buildSouthSide(b: Builder): void {
     "A red pillar box. Last collection today: 5:30 pm. You've missed it.",
   ]);
 
-  // 公交站（自制槽位 bus-stop）
+  // Bus stop (custom slot bus-stop)
   const bx = 19;
   const bz = 6.3;
   b.custom('bus-stop', bx, bz, Math.PI, (p) => {
@@ -691,26 +691,26 @@ function buildSouthSide(b: Builder): void {
   ]);
 }
 
-// ---------- 北侧：店铺外壳 ----------
+// ---------- North side: shop shells ----------
 
 interface ShopOptions {
   name: string;
   x: number;
   width: number;
   depth: number;
-  /** 外墙材质 */
+  /** Outer wall material */
   facade: Material;
-  /** 内墙材质 */
+  /** Inner wall material */
   inner: Material;
   sign: Texture;
   floor: Material;
   light: string;
   lightIntensity: number;
-  /** 天花板上日光灯的排数 */
+  /** Rows of fluorescent tubes on the ceiling */
   lightRows: number;
 }
 
-/** 店铺：一层是能走进去的房间（前墙有门和玻璃橱窗），上面再叠两层楼面。返回店里的边界 */
+/** A shop: a walk-in ground floor (door and display windows in front) with two storeys above. Returns the interior bounds */
 function shop(b: Builder, o: ShopOptions): { back: number; left: number; right: number } {
   const front = -SIDEWALK_EDGE;
   const back = front - o.depth;
@@ -723,14 +723,14 @@ function shop(b: Builder, o: ShopOptions): { back: number; left: number; right: 
   b.floor(o.width, o.depth, o.x, 0.005, mid, o.floor);
   b.box(o.width, 0.15, o.depth, o.x, STOREY, mid, b.plain(C.ceiling, 0.9), { blockCamera: true });
 
-  // 墙：朝外的面贴外墙材质，朝里的面刷涂料。盒子各面的顺序：+x、-x、+y、-y、+z、-z
+  // Walls: outer faces get the facade material, inner faces paint. Box face order: +x, -x, +y, -y, +z, -z
   const f = o.facade;
   const n = o.inner;
   b.box(o.width, STOREY, WALL, o.x, 0, back + WALL / 2, [n, n, n, n, n, f], solid);
   b.box(WALL, STOREY, o.depth, left + WALL / 2, 0, mid, [n, f, n, n, n, n], solid);
   b.box(WALL, STOREY, o.depth, right - WALL / 2, 0, mid, [f, n, n, n, n, n], solid);
 
-  // 前墙：门两边是矮墙 + 玻璃橱窗，门上是门楣
+  // Front wall: low walls and display windows either side of the door, a lintel above it
   const frontFaces = [f, f, f, f, f, n];
   const glass = new MeshStandardMaterial({
     color: C.glass,
@@ -759,13 +759,13 @@ function shop(b: Builder, o: ShopOptions): { back: number; left: number; right: 
     b.box(DOOR_HALF_WIDTH * 2, STOREY - DOOR_HEIGHT, WALL, o.x, DOOR_HEIGHT, fz, frontFaces),
   );
 
-  // 楼上两层：和店面同一面外墙，开窗
+  // Two upper storeys in the same facade, with windows
   b.box(o.width, UPPER_STOREY * 2 + 0.4, o.depth, o.x, STOREY + 0.15, mid, o.facade, {
     blockCamera: true,
   });
   b.windowGrid(left + 0.4, right - 0.4, STOREY + 0.55, 2, front, 1, Math.round(o.x * 7 + 50));
 
-  // 灯箱招牌 + 门头壁灯（白天不点亮）
+  // Light-box sign and door lamp (unlit by day)
   const signWidth = o.width * 0.86;
   b.box(
     signWidth + 0.2,
@@ -782,7 +782,7 @@ function shop(b: Builder, o: ShopOptions): { back: number; left: number; right: 
     groundAlign: false,
   });
 
-  // 屋里：主灯 + 天花板上的日光灯
+  // Inside: a main light and fluorescent tubes on the ceiling
   b.light(o.light, o.lightIntensity, o.x, STOREY - 1.4, mid, 0);
   for (let row = 0; row < o.lightRows; row++) {
     const z = front - (o.depth / (o.lightRows + 1)) * (row + 1);
@@ -793,7 +793,7 @@ function shop(b: Builder, o: ShopOptions): { back: number; left: number; right: 
   return { back, left, right };
 }
 
-/** 店与店之间、街道两头不能进的楼 */
+/** Buildings between the shops and at the street ends that can't be entered */
 function buildFillers(b: Builder): void {
   const spans: [number, number, Material][] = [
     [-STREET_END - 3, -21, surface('rectangular_facade_tiles', { tile: 2, tint: '#e0e6ee' })],
@@ -818,9 +818,9 @@ function buildFillers(b: Builder): void {
   });
 }
 
-// ---------- 网吧 ----------
+// ---------- Net café ----------
 
-/** 网吧里三排电脑的桌子中心 z，以及每排 4 台的 x 偏移：前排 XP 区，后两排 Mac 区（按 cafe-layout.ts 分配） */
+/** Desk centre z of the café's three rows, and the x offsets of their 4 seats: XP in front, Mac in the back two (allocated by cafe-layout.ts) */
 const CAFE_ROWS = [-11.2, -14.2, -17.2];
 const CAFE_COLUMNS = [-5.3, -3.1, -0.9, 1.3];
 
@@ -830,7 +830,7 @@ type Machine =
   | { kind: 'repair' }
   | { kind: 'off' };
 
-/** 有人在用的机器屏幕上轮流放的画面 */
+/** Screens shown in turn on machines someone is using */
 const BUSY_SCREENS: readonly ScreenImage[] = ['xp-azul', 'xp-autumn', 'xp-desert', 'mac-aqua-blue'];
 
 function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[]): void {
@@ -853,10 +853,12 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
     lightRows: 3,
   });
 
-  // 每个场景一台入口电脑；空位放有人占着、维修中、没开机的机器
+  // One entry computer per scene; empty seats get occupied, out-of-order or switched-off machines
   const layout = arrangeMachines(levels, CAFE_ROWS.length, CAFE_COLUMNS.length);
   if (layout.overflow.length > 0) {
-    console.warn(`网吧里坐不下这些关卡：${layout.overflow.map((l) => l.levelId).join('、')}`);
+    console.warn(
+      `No room in the café for levels: ${layout.overflow.map((l) => l.levelId).join(', ')}`,
+    );
   }
   let busy = 0;
   const machines: Machine[][] = layout.seats.map((row) =>
@@ -875,7 +877,7 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
     }
   });
 
-  // 吊扇、监控、门口的盆栽
+  // Ceiling fans, a camera and potted plants by the door
   b.prop('ceiling_fan', x - 2, STOREY, -12.7, { width: 1.3, groundAlign: false });
   b.prop('ceiling_fan', x - 2, STOREY, -15.7, { width: 1.3, groundAlign: false });
   b.prop('security_camera_01', right - 0.4, STOREY - 0.35, -7.6, {
@@ -890,7 +892,7 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
     collider: [0.55, 0.55],
   });
 
-  // 前台（自制槽位 cafe-counter）
+  // Front desk (custom slot cafe-counter)
   const cx = x + 4.6;
   const cz = -9.3;
   b.custom('cafe-counter', cx, cz, 0, (p) => {
@@ -904,7 +906,7 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
     'A Post-it note beside it: "The ones with yellow markers are free. Help yourself."',
   ]);
 
-  // 墙上的告示
+  // Notices on the wall
   const prices = posterTexture(
     ['PRICES', '£1 / 30 MINS', 'PRINTING 10p', 'TEA 80p'],
     C.wallCream,
@@ -929,8 +931,8 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
 }
 
 /**
- * 一张电脑桌：桌子（自制槽位 computer-desk）、电脑（crt-pc 或 imac-g3）、椅子（office-chair）。
- * 自制电脑模型里名为 SCREEN 的网格会被换成屏幕画面。
+ * A computer desk: desk (custom slot computer-desk), computer (crt-pc or imac-g3) and chair (office-chair).
+ * A mesh named SCREEN in a custom computer model is replaced by the screen image.
  */
 function computerDesk(b: Builder, x: number, z: number, machine: Machine): void {
   b.custom('computer-desk', x, z, 0, (p) => {
@@ -978,7 +980,7 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
       p.add(screen);
     },
     (model) => {
-      // 自制电脑模型：把 SCREEN 网格换成屏幕画面，镜头推进的目标改成它的中心
+      // Custom computer model: swap its SCREEN mesh for the screen image and aim the camera push at its centre
       const screen = model.getObjectByName('SCREEN') as Mesh | undefined;
       if (!screen) return;
       screen.material = screenMaterial;
@@ -989,7 +991,7 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
     },
   );
 
-  // 椅子（自制槽位 office-chair）
+  // Chair (custom slot office-chair)
   const seatZ = z + 0.85;
   b.custom('office-chair', x, seatZ, 0, (p) => {
     const fabric = b.plain(C.plasticDark, 0.8);
@@ -1052,7 +1054,7 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
   }
 }
 
-// ---------- 音像店 ----------
+// ---------- Record shop ----------
 
 function buildMusicShop(b: Builder, x: number): void {
   const { back, left, right } = shop(b, {
@@ -1074,7 +1076,7 @@ function buildMusicShop(b: Builder, x: number): void {
     lightRows: 2,
   });
 
-  // 靠墙和店中间的铁货架，上面放着纸箱（以后换成自制的 CD 架）
+  // Steel shelving along the walls and down the middle with boxes on it (custom CD racks later)
   const shelves: [number, number, number][] = [
     [left + WALL + 0.35, back + 4.2, Math.PI / 2],
     [right - WALL - 0.35, back + 4.2, -Math.PI / 2],
@@ -1088,7 +1090,7 @@ function buildMusicShop(b: Builder, x: number): void {
   b.prop('plastic_crate_01', x + 3.2, 0, -7.8, { height: 0.3, rotation: 0.4 });
   b.prop('plastic_crate_01', x + 3.25, 0.3, -7.85, { height: 0.3, rotation: 0.2 });
 
-  // 柜台（自制槽位 shop-counter）
+  // Counter (custom slot shop-counter)
   const cz = back + 1.6;
   b.custom('shop-counter', x, cz, 0, (p) => {
     p.add(placeholderBox(3, 1.0, 0.7, 0, 0, 0, b.plain(C.woodLight, 0.5)));
@@ -1111,7 +1113,7 @@ function buildMusicShop(b: Builder, x: number): void {
   b.panel(1.2, 1.6, x - 2.2, 1.8, backInner, 0, b.glow(original, '#ffffff', 0.35));
 }
 
-// ---------- 电玩城 ----------
+// ---------- Arcade ----------
 
 function buildArcade(b: Builder, x: number): void {
   const { back, left } = shop(b, {
@@ -1135,7 +1137,7 @@ function buildArcade(b: Builder, x: number): void {
   });
   b.light(C.neonCyan, 8, x + 3, 2.2, back + 2, 8);
 
-  // 靠后墙的四台街机（自制槽位 arcade-cabinet）
+  // Four arcade cabinets along the back wall (custom slot arcade-cabinet)
   const notes = [
     ['A note over the coin slot: "OUT OF ORDER".'],
     ["The attract mode loops on and on. You haven't got a 10p coin."],
@@ -1162,8 +1164,8 @@ function buildArcade(b: Builder, x: number): void {
     b.read('Arcade machine', 'Examine', cx, cz + 1.3, notes[i]!, 0.9);
   });
 
-  // 跳舞机（自制槽位 dance-machine）
-  // 游戏机试玩台：矮柜（自制槽位 tv-stand）上放老电视、游戏机和手柄
+  // Dance machine (custom slot dance-machine)
+  // Console demo stand: a low cabinet (custom slot tv-stand) with an old TV, console and controllers
   const sx = x + 3.4;
   const sz = back + 5.5;
   b.custom('tv-stand', sx, sz, -Math.PI / 2, (p) => {
@@ -1197,11 +1199,11 @@ function buildArcade(b: Builder, x: number): void {
   b.read('Dance machine', 'Examine', dx, dz, ['A sign stuck on the dance pad: "OUT OF USE".'], 1.0);
 }
 
-// ---------- 千禧年的英国商业街 ----------
+// ---------- A millennial British high street ----------
 
-/** 横幅、LED 滚动屏、橱窗海报、路牌、酒吧挂牌：2000 年前后英国商业街上随处可见的东西（文字只用英文） */
+/** Banners, LED tickers, window posters, street signs, pub signs: the things all over a British high street around 2000 (English text only) */
 function buildMillennium(b: Builder): void {
-  // HIGH STREET 路牌：英国标准的白底黑字、红色边框，钉在楼的一层上方
+  // HIGH STREET sign: the standard British black on white with a red border, fixed above a ground floor
   const plate = signTexture({
     text: 'HIGH STREET',
     sub: 'CITY CENTRE',
@@ -1215,7 +1217,7 @@ function buildMillennium(b: Builder): void {
   b.panel(1.6, 0.4, -9, 3.15, -SIDEWALK_EDGE + 0.02, 0, plateMaterial);
   b.panel(1.6, 0.4, -27.5, 3.9, SIDEWALK_EDGE - 0.02, Math.PI, plateMaterial);
 
-  // 酒吧的挂牌：从墙上伸出一根铁杆，下面吊一块两面都有字的牌子
+  // Pub sign: an iron bracket off the wall with a two-sided board hanging below
   const pub = signTexture({
     text: 'THE MILLENNIUM ARMS',
     sub: 'FREE HOUSE · EST. 1999',
@@ -1240,7 +1242,7 @@ function buildMillennium(b: Builder): void {
   }
   b.box(0.03, 0.66, 0.94, pubX, 3.02, -SIDEWALK_EDGE + 0.6, b.plain(C.wood, 0.6));
 
-  // 横跨马路的布横幅，两头用绳子拴在楼上
+  // A cloth banner across the road, tied to the buildings at both ends
   const banners: [number, string, string][] = [
     [-12, 'WELCOME TO THE NEW MILLENNIUM · 2000', C.signRed],
     [10, 'HIGH STREET MILLENNIUM FESTIVAL', C.signBlue],
@@ -1251,7 +1253,7 @@ function buildMillennium(b: Builder): void {
       map: signTexture({ text, background, color: C.signYellow, width: 1024, height: 72 }),
       roughness: 0.9,
     });
-    // 两块单面背对背：从街道两头看过去字都是正的
+    // Two single-sided panels back to back, so it reads correctly from both ends of the street
     for (const facing of [Math.PI / 2, -Math.PI / 2]) {
       const banner = b.panel(11, 0.8, bx + Math.sign(facing) * 0.005, 6.2, 0, facing, cloth);
       banner.castShadow = true;
@@ -1265,12 +1267,12 @@ function buildMillennium(b: Builder): void {
     }
   }
 
-  // 南侧楼顶的 LED 滚动屏
+  // LED ticker on a south rooftop
   const led = ledTexture(
     '★ HAPPY NEW MILLENNIUM ★ 2000 ★ COUNTDOWN COMPLETE ★ Y2K OK ★',
     C.signYellow,
   );
-  // 面板 7.2 × 0.9 米；贴图高 48 像素对应 0.9 米，横向只显示其中一段
+  // Panel 7.2 × 0.9 m; the texture's 48 px height maps to 0.9 m and only part of its width shows
   const ledWidth = (led.image as HTMLCanvasElement).width;
   led.repeat.set(((7.2 / 0.9) * 48) / ledWidth, 1);
   const ledX = -4;
@@ -1281,7 +1283,7 @@ function buildMillennium(b: Builder): void {
     led.offset.x = (t * 0.06) % 1;
   });
 
-  // 电器行门口的电视墙：货架上摆两层 CRT 电视，都开着
+  // TV wall at the electrical shop: two shelves of CRTs, all switched on
   const tvX = 13;
   const tvZ = SIDEWALK_EDGE - 0.6;
   b.box(3.0, 0.5, 0.6, tvX, 0, tvZ, b.plain(C.metalDark, 0.5, 0.6), { solid: true });
@@ -1313,7 +1315,7 @@ function buildMillennium(b: Builder): void {
     1.3,
   );
 
-  // 楼顶第二块广告牌：整机广告
+  // Second rooftop billboard: a computer advert
   const pcAd = signTexture({
     text: 'PC 2000 · PENTIUM III',
     sub: '128MB RAM · 20GB HDD · 17" CRT · £899 INC VAT',
@@ -1325,7 +1327,7 @@ function buildMillennium(b: Builder): void {
   for (const dx of [-3, 3])
     b.box(0.2, 2.4, 0.2, -26 + dx, 10.4, -SIDEWALK_EDGE - 0.7, b.plain(C.metalDark, 0.5, 0.7));
 
-  // 电玩城门头里面的 LED 滚动屏
+  // LED ticker inside the arcade's entrance
   const coin = ledTexture('10p A GO ★ INSERT COIN ★ HIGH SCORE ★ 2 PLAYERS ★', C.neonPink);
   coin.repeat.set(((3.2 / 0.4) * 48) / (coin.image as HTMLCanvasElement).width, 1);
   b.panel(3.2, 0.4, 16, 2.25, -SIDEWALK_EDGE - WALL - 0.03, 0, b.glow(coin, '#ffffff', 4.5));
@@ -1333,7 +1335,7 @@ function buildMillennium(b: Builder): void {
     coin.offset.x = (t * 0.09) % 1;
   });
 
-  // 网吧橱窗里的霓虹灯牌
+  // Neon sign in the café window
   const open = signTexture({
     text: 'OPEN 7 DAYS',
     background: '#000000',
@@ -1344,7 +1346,7 @@ function buildMillennium(b: Builder): void {
   });
   b.panel(1.1, 0.42, 4.2, 2.0, -SIDEWALK_EDGE - WALL - 0.03, 0, b.glow(open, '#ffffff', 5));
 
-  // 报摊门口：两只塑料筐叠起来当柜台，上面摆着卖的随身听
+  // Outside the newsstand: two stacked plastic crates as a counter, with portable stereos for sale
   b.prop('plastic_crate_01', -9.1, 0, 4.7, {
     height: 0.3,
     rotation: Math.PI / 2,
@@ -1354,7 +1356,7 @@ function buildMillennium(b: Builder): void {
   b.prop('portable_cassette_player', -9.2, 0.6, 4.65, { width: 0.14, rotation: 2.6 });
   b.prop('cassette_player', -8.95, 0.6, 4.7, { height: 0.15, rotation: 3.4 });
 
-  // 橱窗里贴的海报（贴在玻璃内侧，朝外）
+  // Posters in the shop windows (inside the glass, facing out)
   const windowPosters: [number, string[], string, string][] = [
     [-19.5, ['NEW!', 'MP3 PLAYER', '64 MB', '£149'], C.signYellow, C.signRed],
     [-4.8, ['Y2K READY', 'ALL PCs', 'TESTED'], C.signText, C.signBlue],

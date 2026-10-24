@@ -1,5 +1,5 @@
-// 大厅的素材加载：GLB 模型、PBR 贴图。素材来源与授权登记在 assets/README.md。
-// 模型都是异步加载的：布景先放一个空的锚点，模型下载完再挂上去，所以画面不用等全部素材。
+// Hub asset loading: GLB models and PBR textures. Sources and licences are listed in assets/README.md.
+// Models load asynchronously: the set places empty anchors and attaches each model when it arrives, so nothing waits for everything.
 
 import {
   Box3,
@@ -23,11 +23,11 @@ const gltfLoader = new GLTFLoader();
 gltfLoader.setMeshoptDecoder(MeshoptDecoder);
 const textureLoader = new TextureLoader();
 
-// ---------- 模型 ----------
+// ---------- Models ----------
 
 const modelCache = new Map<string, Promise<Group | null>>();
 
-/** 加载 public/models/ 下的一个 GLB；失败时返回 null（调用方保留占位） */
+/** Loads a GLB under public/models/; null on failure (the caller keeps its placeholder) */
 export function loadModel(path: string): Promise<Group | null> {
   let promise = modelCache.get(path);
   if (!promise) {
@@ -38,7 +38,7 @@ export function loadModel(path: string): Promise<Group | null> {
           if (!mesh.isMesh) return;
           mesh.castShadow = true;
           mesh.receiveShadow = true;
-          // 现成模型自带的自发光（灯管、指示灯）不进辉光：辉光只留给游戏自己的灯箱和闪灯（hub.ts）
+          // Stock models' own emissive parts (tubes, indicator lights) stay out of the bloom, which is reserved for our signs and lights (hub.ts)
           for (const material of [mesh.material].flat()) {
             const standard = material as MeshStandardMaterial;
             if (standard.isMeshStandardMaterial && standard.emissiveIntensity > 1) {
@@ -49,7 +49,7 @@ export function loadModel(path: string): Promise<Group | null> {
         return gltf.scene;
       },
       (error: unknown) => {
-        console.warn(`模型 ${path} 加载失败`, error);
+        console.warn(`Failed to load model ${path}`, error);
         return null;
       },
     );
@@ -59,19 +59,19 @@ export function loadModel(path: string): Promise<Group | null> {
 }
 
 export interface PropOptions {
-  /** 把模型缩放到这个高度（米）；不写时按原尺寸 */
+  /** Scale the model to this height (m); original size if omitted */
   height?: number;
-  /** 把模型缩放到这个宽度（米，x 方向）；和 height 只用一个 */
+  /** Scale the model to this width (m, along x); use either this or height */
   width?: number;
-  /** 绕竖轴转多少（弧度） */
+  /** Rotation about the vertical axis (radians) */
   rotation?: number;
-  /** 底面中心对齐到锚点（默认）；false 时保留模型自己的原点（吊扇、壁挂物） */
+  /** Centre the model's base on the anchor (default); false keeps the model's own origin (ceiling fans, wall pieces) */
   groundAlign?: boolean;
 }
 
 /**
- * 在 anchor 下挂一份模型的副本。加载完成前 placeholder（如果有）先顶着，加载成功后移除。
- * 同一个模型可以挂很多份，几何体和材质共用。
+ * Attaches a copy of a model under `anchor`. A placeholder, if given, stands in until it loads and is removed on success.
+ * Many copies of one model share its geometry and materials.
  */
 export function attachModel(
   anchor: Group,
@@ -101,9 +101,9 @@ export function attachModel(
   });
 }
 
-// ---------- PBR 贴图 ----------
+// ---------- PBR textures ----------
 
-/** public/textures/ 下的贴图套装（Poly Haven，CC0）：颜色、法线、粗糙度 */
+/** Texture sets under public/textures/ (Poly Haven, CC0): colour, normal and roughness */
 export type SurfaceName =
   | 'asphalt_02'
   | 'square_concrete_pavers'
@@ -115,9 +115,9 @@ export type SurfaceName =
   | 'dirty_carpet';
 
 export interface SurfaceOptions {
-  /** 贴图一格对应多少米 */
+  /** Metres per texture tile */
   tile: number;
-  /** 乘在颜色贴图上的颜色，用来把同一套墙面染成不同的楼 */
+  /** Tint multiplied into the colour map, to make one wall set into different buildings */
   tint?: string;
   doubleSided?: boolean;
 }
@@ -137,8 +137,8 @@ function texture(path: string, color: boolean): Texture {
 }
 
 /**
- * 写实表面材质。贴图按「每米多少格」平铺：几何体的 UV 要以米为单位（见 world.ts 的 meterBox），
- * 材质再按 1 / tile 缩放，所以同一种材质贴在大小不同的墙上，砖块大小一致。
+ * Realistic surface material, tiled per metre: geometry UVs must be in metres (see meterBox in world.ts).
+ * The material is scaled by 1 / tile, so walls of any size share the same brick size.
  */
 export function surface(name: SurfaceName, options: SurfaceOptions): MeshStandardMaterial {
   const repeat = 1 / options.tile;
@@ -156,12 +156,12 @@ export function surface(name: SurfaceName, options: SurfaceOptions): MeshStandar
   });
 }
 
-// ---------- 自制模型槽位 ----------
+// ---------- Custom model slots ----------
 
 /**
- * 需要定制的模型（网吧电脑、街机、报刊亭……）由用户用 Tripo / Blender 制作，规格见 doc/hub-assets.md。
- * 文件放在 public/models/custom/<槽位>.glb，并把槽位名加进同目录的 manifest.json；
- * 清单里没有的槽位不去请求，直接用占位形体。
+ * Bespoke models (café computers, arcade cabinets, the newsstand…) are made by the user in Tripo / Blender to the spec in
+ * doc/hub-assets.md, saved as public/models/custom/<slot>.glb and listed in that folder's manifest.json;
+ * slots missing from the manifest are never requested and keep their placeholder.
  */
 let customSlots: Promise<Set<string>> | null = null;
 function loadCustomSlots(): Promise<Set<string>> {
@@ -176,8 +176,8 @@ function loadCustomSlots(): Promise<Set<string>> {
 }
 
 /**
- * 自制模型：清单里有这个槽位时加载 custom/<槽位>.glb 替换占位，否则一直用占位。
- * 自制模型按 doc/hub-assets.md 的规格做，原尺寸使用，不缩放。onLoaded 在模型挂上去之后调用。
+ * Custom model: loads custom/<slot>.glb over the placeholder when the manifest lists the slot, otherwise keeps the placeholder.
+ * Custom models are built to doc/hub-assets.md and used at original size. onLoaded runs once the model is attached.
  */
 export function attachCustom(
   anchor: Group,

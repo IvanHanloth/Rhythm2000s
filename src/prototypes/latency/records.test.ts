@@ -16,7 +16,7 @@ function tap(seq: number, kind: InputKind, offsetA: number | null, offsetB: numb
 }
 
 describe('buildStatsRows', () => {
-  it('按输入类型分组，每组给出 A、B 两种方法', () => {
+  it('groups by input type with methods A and B for each', () => {
     const rows = buildStatsRows([tap(0, 'keyboard', 10, 12), tap(1, 'mouse', 20, 25)]);
     expect(rows.map((row) => `${row.kind}/${row.method}`)).toEqual([
       'keyboard/A',
@@ -28,14 +28,14 @@ describe('buildStatsRows', () => {
     expect(rows[3]!.summary.mean).toBe(25);
   });
 
-  it('方法 A 全部不可用时只给出方法 B', () => {
+  it('gives only method B when method A is never available', () => {
     const rows = buildStatsRows([tap(0, 'touch', null, 40), tap(1, 'touch', null, 50)]);
     expect(rows).toHaveLength(1);
     expect(rows[0]!.method).toBe('B');
     expect(rows[0]!.summary.median).toBe(45);
   });
 
-  it('没有输入时返回空列表', () => {
+  it('returns an empty list without input', () => {
     expect(buildStatsRows([])).toEqual([]);
   });
 });
