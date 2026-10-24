@@ -29,6 +29,7 @@
 ├── README.md
 ├── index.html         # 游戏入口页（目前只列出原型链接）
 ├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/index.html
+├── promo/             # 宣发视频（HyperFrames：HTML + GSAP 渲染成 MP4），独立于游戏工程，说明见 promo/AGENTS.md
 ├── src/
 │   ├── audio/         # 音频时钟、节拍器、合成音效（游戏会复用）
 │   ├── rhythm/        # 拍 ↔ 音频时间换算
@@ -52,6 +53,7 @@
 
 - 单元测试与被测文件放在一起，命名为 `*.test.ts`，从 `vite-plus/test` 导入测试 API。
 - 新增原型页面时，在 `vite.config.ts` 的 `build.rolldownOptions.input` 中登记入口。
+- `promo/` 不属于游戏构建：它用 `npx hyperframes`（版本钉在 `promo/package.json`）预览和渲染，不进游戏的 pnpm 依赖。做视频前先用 `/hyperframes` 技能。
 
 ## 技术栈
 
