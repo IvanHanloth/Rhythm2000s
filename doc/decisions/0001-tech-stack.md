@@ -1,44 +1,35 @@
-# 0001 技术栈选型
+# 0001 Tech stack
 
-- 状态：已采纳
-- 日期：2026-10-24（提议并经用户确认采纳）
+- Status: Accepted
+- Date: 2026-10-24
 
-## 背景
+## Context
 
-需要确定游戏的渲染平台和技术栈。用户的初步倾向是浏览器渲染；如果浏览器的交互能力不够，再考虑客户端。
+The game needs a rendering platform and stack. The user leaned towards the browser, falling back to a native client only if the browser couldn't handle the interaction.
 
-核心约束：判定和动画必须以音频时钟为准（AGENTS.md 第 4 条）；需要输入延迟校准；画面是 2D 复古桌面；只需要少量按键或鼠标点击。
+Constraints: judging and animation follow the audio clock (AGENTS.md, rule 4); input latency calibration is required; the visuals are 2D retro desktops; only a few keys or mouse clicks are needed. Research: [tech-research.md](../tech-research.md).
 
-详细调研见 [tech-research.md](../tech-research.md)。
+## Options
 
-## 候选方案
+1. **TypeScript + native Web Audio + PixiJS (built with Vite / Vite+)**: full control of the audio clock, small, playable in a browser, wrappable for desktop later. No visual editor; the audio conductor has to be written.
+2. **Godot 4**: an editor, and one project exports to web and native. Large web builds; web audio sync unmeasured.
+3. **Unity**: mature ecosystem, but limited WebGL audio and heavy for a small 2D game.
+4. **Fully native client**: lowest latency, but expensive to build and gives up the web for little gain here.
 
-1. **TypeScript + 原生 Web Audio + PixiJS（Vite / Vite+ 构建）**：音频时钟完全可控，包体小，网页直接玩，之后可以套桌面壳。缺点是没有可视化编辑器，音频「指挥」模块要自己写。
-2. **Godot 4**：有编辑器，一个工程可导出 Web 和原生。缺点是 Web 包体大，Web 平台音频同步精度缺少实测资料。
-3. **Unity**：生态成熟，但 WebGL 平台音频功能受限，对这种 2D 小游戏偏重。
-4. **纯原生客户端**：延迟最低，但开发成本高，也放弃了网页传播，对本玩法收益不明显。
+## Decision
 
-## 决定
+Option 1, **web first**:
 
-采用方案 1：**Web 优先**。用户确认的核心技术栈：
+- **TypeScript + PixiJS + Vite+**. [Vite+](https://viteplus.dev/guide) (`vite-plus`, MIT) bundles Vite, Vitest, Oxlint, Oxfmt and Rolldown behind the `vp` command and one `vite.config.ts`, which settles testing, linting and formatting too.
+- pnpm as package manager, invoked by Vite+ from `packageManager` and the lockfile.
+- PixiJS draws the game; the DOM handles menus and settings.
+- Web Audio directly, with our own conductor for beat maths, scheduled playback and judging.
+- Input uses `event.timeStamp`, converted to the audio timeline with `getOutputTimestamp()`, minus `outputLatency` and the player's calibration.
+- Electron (or Tauri) as the wrapper if the game goes to Steam.
 
-- **TypeScript + PixiJS + Vite+**
-- 工具链：[Vite+](https://viteplus.dev/guide)（`vite-plus`，MIT 许可，2026-10-24 时为 1.4.0）。它把 Vite、Vitest、Oxlint、Oxfmt、Rolldown 等工具统一到 `vp` 命令和一个 `vite.config.ts` 中，测试、代码检查、格式化也随之确定，不再另行选型
-- 包管理器：pnpm（由 Vite+ 根据 `packageManager` 字段和锁文件自动调用）
+Research found no hard blocker in the browser; only distribution could call for a native client, and a wrapper reuses all the code.
 
-> 修订记录：2026-10-24 最初采纳的是 Vite，同日由用户改为 Vite+。
+## Consequences
 
-随本决定一起采用的实现方向（原型阶段可以根据实测结果调整）：
-
-- PixiJS 渲染游戏画面，DOM 负责菜单和设置界面
-- 直接使用 Web Audio API，自己写「指挥」模块（拍点换算、预约播放、判定）
-- 输入使用 `event.timeStamp`，通过 `getOutputTimestamp()` 换算到音频时间轴，并扣除 `outputLatency` 和玩家校准值
-- 需要上架 Steam 时用 Electron 套壳（备选 Tauri）
-
-理由：调研没有发现浏览器无法支撑本玩法的硬性障碍；需要客户端的理由只会来自发行渠道，而不是交互能力，而套壳可以复用全部代码。
-
-## 影响
-
-- 先做一个最小延迟测试原型，验证 [tech-research.md 第 5 节](../tech-research.md#5-需要原型验证的风险) 列出的风险。如果实测发现浏览器延迟或精度无法接受，重新评估方案 2。
-- 关卡编排没有现成编辑器，后续可能需要一个简单的谱面/时间轴编辑工具。
-- AGENTS.md 的「技术栈」「常用命令」两节已随本决定更新。
+- A minimal latency prototype comes first, to check the risks in [tech-research.md, section 5](../tech-research.md#5-risks-to-verify-with-the-latency-prototype). If browser latency or accuracy proves unacceptable, revisit option 2.
+- With no ready-made editor, a simple chart / timeline tool may be needed later.

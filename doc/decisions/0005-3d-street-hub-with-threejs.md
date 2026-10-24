@@ -1,48 +1,40 @@
-# 0005 开始界面与选关大厅用 Three.js 做 3D 街区
+# 0005 A 3D street built with Three.js for the title screen and level select
 
-- 状态：已采纳
-- 日期：2026-10-24（渲染方式、操作方式、范围、开始界面经用户确认）
+- Status: Accepted
+- Date: 2026-10-24
 
-> 修订记录（都在 2026-10-24）：
-> 1. 用户看过第一版后要求场景改用写实风格、不要代码拼的简陋造型，最初的低多边形像素风废弃。
-> 2. 用户觉得黄昏的写实画面「太 GTA、太昏暗」，要「原神的明亮和梦核感」：改成明亮的白天、风格化的渐变天空、梦核调色。
-> 3. 项目参加英国的黑客松，街区从中国千禧年街头改成 2000 年的英国商业街（High Street）。
+## Context
 
-## 背景
+The game needs a title screen and level select. The user wanted level select as a small open world: after "Start", the player walks a 2000s street into a net café and sits at a computer to start a level. Everything so far is 2D PixiJS (ADR 0001, 0002). To decide: rendering, controls, scope and the title screen.
 
-需要开始界面和关卡选择界面。用户希望选关做成一个半开放世界：点「开始游戏」后操作角色，在 2000 年代风格的街道上走动，走进网吧，找一台电脑坐下，开始这一关。
+## Options
 
-现有画面全部用 PixiJS 画 2D（ADR 0001、0002）。要定的事：街区用什么渲染、怎么操作、第一版做多大、开始界面长什么样。
+Rendering:
 
-## 候选方案
+1. **Three.js 3D**: a new `three` dependency used only for the hub; levels stay in PixiJS. Costs a second renderer and switching between two canvases.
+2. **PixiJS 2D / pseudo-3D**: no new dependency, but walking into a café and sitting down feels far less spatial.
+3. **PixiJS side-scroller**: least work, least open.
 
-渲染：
+Controls: fixed isometric view with WASD; third-person follow with mouse look; click-to-move.
 
-1. **Three.js 低多边形 3D**：新增 `three` 依赖，只用于大厅；节奏关卡继续用 PixiJS。PS1 / PS2 式低模、低分辨率、最近邻放大的画面本身就有那个年代的味道。全部几何体、贴图用代码生成，不需要模型文件。代价是多一套渲染器，大厅和关卡之间要切换两块画布。
-2. **PixiJS 2D / 伪 3D**：不加依赖，沿用现有画布和场景接口，做成俯视角或等距像素街道。「走进网吧坐下」的空间感比 3D 弱。
-3. **PixiJS 横版卷轴**：开发量最小，开放感最弱。
+## Decision
 
-操作：固定斜俯视 + WASD；第三人称跟随 + 鼠标转视角；点击地面寻路。
+- **Rendering**: option 1, Three.js (`three`), only in `src/hub/`.
+  - **Style: realistic models and materials with a bright, dreamcore mood.** PBR materials with photo textures, shadows that follow the character, ACES tone mapping, rendered at window resolution. Daytime under our own gradient sky (saturated blue to a pinkish-white horizon), which also provides the environment map; post-processing adds a dreamcore grade (more saturation, pastel shadows, whitened edges) and drifting motes. Bloom is reserved for emissives tuned above the threshold (crossing beacons, LED tickers, neon, level markers); three's physical sky and HDRIs are far brighter than 1 and flood the bloom, so neither is used. (The first low-poly, pixelated direction and a dusk version were both dropped at the user's request.)
+  - **Setting: a British high street around 2000**: red brick, double yellow lines, a zebra crossing with Belisha beacons, a red phone box and pillar box, a net café, record shop, arcade, chippy and pub; prices in pounds.
+  - **Assets**: generic textures and props from commercially usable sources (Poly Haven, CC0); period props made by the user in Tripo / Blender ([hub-assets.md](../hub-assets.md)), with simple placeholders until then. Code places, animates and lights; it no longer builds shapes as final art.
+  - **Lead character**: the DeepSeek whale girl, a ready-made GLB (ai-girls-3d, CC BY 4.0), walked and seated by turning its bones in code.
+  - Sign and poster text is still drawn on canvases, in English.
+  - The hub fills the whole window, outside ADR 0002's 1280×720 stage: it isn't a PixiJS scene and needs no fixed logical coordinates.
+- **Controls**: third-person follow with mouse look. WASD to move, Shift to run, mouse to turn (Pointer Lock), E to interact.
+- **Scope**: one street with a few shops to enter. The café's computers are the level entries; the other shops are interiors only, as future scene entries.
+- **Title screen**: the street as backdrop with the camera panning slowly and the title and menu on top; "Start" drops the camera behind the character seamlessly.
+- **Time**: the hub judges no rhythm, so movement and camera use `requestAnimationFrame` time (with a capped step), not the audio clock. Anything added later that moves to the music follows the audio clock.
 
-## 决定
+## Consequences
 
-- **渲染**：方案 1，Three.js（npm 包名 `three`，2026-10-24 时为 0.186.1）。只在 `src/hub/` 里使用，不进节奏关卡。
-  - **画面风格：写实的模型和材质 + 明亮的梦核氛围**（修订）。PBR 材质 + 照片贴图、跟随角色的阴影、ACES 色调映射，按窗口分辨率渲染。白天，天空是自写的渐变天空（饱和的蓝过渡到地平线的粉白），同一片天空生成环境反射；后处理加梦核调色（提饱和、暗部抬成粉彩、边缘泛白）和空中漂浮的光点。辉光阈值定在 2，只给专门调亮的自发光（斑马线闪灯、LED 屏、霓虹灯牌、关卡标记）：three 自带的物理天空亮度远大于 1，会让辉光糊满整个画面，所以没用它，也不再用 HDRI。
-  - **街景：2000 年的英国商业街**（修订）。红砖楼、双黄线、斑马线和黄色闪灯、红色电话亭和邮筒、网吧、唱片行、街机厅、炸鱼薯条店、酒吧挂牌；价格用英镑。
-  - **素材**：通用的贴图和道具用现成的可商用素材（Poly Haven，CC0）；有年代特征的道具由用户用 Tripo / Blender 制作，规格见 [hub-assets.md](../hub-assets.md)，做好之前用简单形体占位。代码不再拼造型充当正式美术，只负责摆放、动画、交互和渲染设置。
-  - **主角**：DeepSeek 鲸鱼娘，用现成的 GLB 模型（ai-girls-3d，CC BY 4.0），代码转动骨骼做走路、坐下。
-  - 招牌、海报上的文字仍用 Canvas 生成，只用英文。
-  - ~~场景全部用代码程序化生成；画面按低分辨率渲染、最近邻放大~~（最初的方案，已废弃）
-  - 大厅铺满整个窗口，不受 ADR 0002 的 1280×720 舞台限制：它不是 PixiJS 场景，3D 画面也不需要固定的逻辑坐标。
-- **操作**：第三人称跟随 + 鼠标转视角。WASD 移动，Shift 跑，鼠标转镜头（Pointer Lock），E 互动。
-- **范围**：一条街，街上有几家可以走进去的店。网吧里的电脑是关卡入口；其他店先只做内景，作为以后新场景的入口。
-- **开始界面**：街景当背景，镜头慢慢摇过黄昏的街道，上面叠标题和菜单。点「开始游戏」后镜头直接落到角色身后，无缝进入大厅。
-- **时间来源**：大厅不做节奏判定，角色移动和镜头用 `requestAnimationFrame` 给的帧时间（每帧间隔有上限），不用音频时钟。AGENTS.md 第 4 条只约束判定和节奏动画，大厅不在其中；如果以后大厅里加入跟着音乐动的东西，那部分仍按音频时钟算。
-
-## 影响
-
-- 新增运行时依赖 `three` 和开发依赖 `@types/three`；AGENTS.md 技术栈表格加上一行。GLB 加载器、meshopt 解码、HDR 加载、后处理都用 `three/examples` 里自带的，不另加依赖。
-- 素材放在 `public/models/`、`public/textures/`，压缩方法和来源登记在 assets/README.md。目前合计约 13 MB，会随自制模型增加；标题界面下方有加载进度条。
-- 游戏入口默认打开街区（`#street`），网址末尾写场景标识（如 `#windows-xp`）仍然直接打开那个场景，方便开发。
-- 从网吧坐下进入关卡后，按 Esc 回到原来的座位。
-- 设计细节（街道布局、店铺、关卡电脑）见 [hub.md](../hub.md)，均为暂定。
+- New runtime dependency `three` and dev dependency `@types/three`. GLB loading, meshopt decoding and post-processing come from `three/examples`, with no other dependencies.
+- Assets live in `public/models/` and `public/textures/`, with compression and sources in assets/README.md (about 13 MB now, growing with custom models); a loading bar shows under the title.
+- The game opens on the street by default (`#street`); a scene id in the URL (e.g. `#windows-xp`) still opens that scene directly for development.
+- Esc in a level entered from the café returns to the seat.
+- Street layout, shops and level computers are provisional, see [hub.md](../hub.md).

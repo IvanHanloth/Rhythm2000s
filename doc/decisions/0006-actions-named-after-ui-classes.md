@@ -1,32 +1,29 @@
-# 0006 动作按界面部件类名命名
+# 0006 Actions named after UI widget classes
 
-- 状态：已采纳（取代 [ADR 0003](0003-chart-data-format.md) 中「动作怎么命名」一项）
-- 日期：2026-10-24
+- Status: Accepted (supersedes the action naming in [ADR 0003](0003-chart-data-format.md))
+- Date: 2026-10-24
 
-## 背景
+## Context
 
-ADR 0003 规定动作 ID 按「玩家做的事」命名，MVP 只有一个 `close-window`。重新设计 XP 场景的界面部件（对话框、托盘气泡、开始菜单等）时，用户要求改成「`dialog-info` 这种，用类似 Windows 类名来命名」。
+ADR 0003 named action IDs after what the player does, and the MVP had a single `close-window`. When the XP widgets were redesigned (dialogs, tray balloons, Start menu…), the user asked for names "like `dialog-info`, after Windows class names". The old naming had two problems:
 
-原来的命名有两个问题：
+- An information, warning or error box all "close a window" but differ in icon and sound, which `close-window` can't express.
+- Chart authors think "an error box pops up on this beat", not "the player closes a window here".
 
-- 同样是「关窗」，弹出的是信息框、警告框还是错误框，图标和提示音都不一样，`close-window` 表达不出来。
-- 谱面作者写谱时想的是「这一拍弹一个错误框」，而不是「这一拍玩家关一下窗」。
+## Options
 
-## 候选方案
+1. **By what the player does** (as was): `close-window`; the scene decides what appears in the call.
+2. **By widget class**: `<widget>-<variant>`, e.g. `dialog-info`, `dialog-error`; the chart says what appears and the widget decides how it is handled.
 
-1. **按玩家做的事**（现状）：`close-window`。场景决定示范段弹什么，谱面无法指定。
-2. **按界面部件类名**：`<部件>-<变体>`，如 `dialog-info`、`dialog-error`。谱面写「出现什么」，玩家怎么处理由部件决定。
+## Decision
 
-## 决定
+Option 2.
 
-选方案 2。
+- Action IDs are `<widget>-<variant>`, lowercase and hyphenated, from the original system's class or constant names. XP's message box icons `MB_ICONINFORMATION` / `MB_ICONWARNING` / `MB_ICONERROR` / `MB_ICONQUESTION` become `dialog-info` / `dialog-warning` / `dialog-error` / `dialog-question`, matching the icon files in `assets/reference/windows-xp/icons/`.
+- An action ID names **the widget that appears in the call**; what the player does with it in the response is in the action table of [chart-format.md](../chart-format.md).
+- `close-window` was removed and existing charts switched to `dialog-info`. The format was unpublished, so the version stayed 1.
 
-- 动作 ID 写成 `<部件>-<变体>`，全小写、连字符分隔，取自原版系统里的类名或常量名。例如 XP 消息框的图标常量是 `MB_ICONINFORMATION` / `MB_ICONWARNING` / `MB_ICONERROR` / `MB_ICONQUESTION`，对应 `dialog-info` / `dialog-warning` / `dialog-error` / `dialog-question`（与 `assets/reference/windows-xp/icons/` 里的图标文件名一致）。
-- 动作 ID 描述**示范段出现的部件**；跟打段玩家要对它做什么（关闭、点掉……）写在 [chart-format.md](../chart-format.md) 的动作表里。
-- `close-window` 删除，现有谱面全部改成 `dialog-info`。格式尚未对外发布，版本号仍为 1。
+## Consequences
 
-## 影响
-
-- 加新动作时先想清楚它对应哪个部件，再按部件命名，不再按动词命名。
-- 四种消息框的玩法相同（弹出 → 关闭），只是图标、提示音不同。谱面里可以混用。
-- 以后 Mac 场景的动作也按同样规则取名（取 Mac 自己的类名），具体名字等做 Mac 场景时再定。
+- New actions are named after their widget, never a verb; Mac actions use Mac class names.
+- The four message boxes play the same (pop up → close) with different icons and sounds, and can be mixed in a chart.

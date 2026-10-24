@@ -1,25 +1,22 @@
-# 0004 界面贴近原版
+# 0004 Look close to the original systems
 
-- 状态：已采纳
-- 日期：2026-10-24
+- Status: Accepted
+- Date: 2026-10-24
 
-## 背景
+## Context
 
-原来的约定是「像那个年代，不复制原物」：微软、苹果的原版素材只放在 `assets/reference/` 作参考，游戏和宣发视频里的美术与音效要原创，不做像素级复制。
+The earlier rule was "evoke the era, don't copy": Microsoft and Apple assets stayed in `assets/reference/` as reference only, and the game's art and sounds were to be original. After seeing the first interface designs, the user asked for an "almost original" look and stated that the project is for academic use only.
 
-2026-10-24 用户看过第一版界面设计稿后，要求界面「几乎原版」，并说明本项目仅作学术用途，原来的约定不再需要。
+## Options
 
-## 候选方案
+1. **Original look-alikes**: borrow palettes and structure, draw and record everything ourselves. Far from "almost original".
+2. **Close to the originals, using original assets**: windows, taskbar, Start menu, Finder and so on rebuilt at original structure and size, with wallpapers, icons, sounds and fonts taken from `assets/reference/`.
 
-1. **保持原创仿制**：只借配色和结构，图形、音效全部原创。和用户要的「几乎原版」差距大。
-2. **界面贴近原版，可直接使用原版素材**：窗口、任务栏、开始菜单、Finder 等按原版的结构和尺寸还原，壁纸、图标、音效、字体可以直接取自 `assets/reference/`。
+## Decision
 
-## 决定
+Option 2; the asset restriction in AGENTS.md is removed.
 
-选方案 2。删除 AGENTS.md 中「素材与版权」一节的限制。
+## Consequences
 
-## 影响
-
-- 原版素材的版权仍属于微软、苹果。「学术用途」是项目的使用定位，不会改变素材的版权归属；仓库是公开的，这些文件会随仓库一起公开分发。以后如果要公开发行或商用，需要重新评估并替换素材。
-- 设计系统提案的原则「像那个年代，不复制原物」随之作废；界面外观以[主要界面设计稿](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB)为参照（尚未定稿）。
-- 现有代码里的窗口、桌面是原创绘制的，可以逐步换成贴近原版的版本。
+- The original assets remain Microsoft's and Apple's. "Academic use" describes the project, not the copyright; the repository is public, so these files are distributed with it. A public release or commercial use needs the assets reassessed and replaced.
+- The design system's "don't copy" principle is void; the [main screen designs](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB) (not final) are the visual reference.
