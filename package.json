@@ -9,9 +9,11 @@
     "preview": "vp preview"
   },
   "dependencies": {
-    "pixi.js": "^8.22.0"
+    "pixi.js": "^8.22.0",
+    "three": "^0.186.1"
   },
   "devDependencies": {
+    "@types/three": "^0.186.0",
     "typescript": "~6.0.3",
     "vite": "catalog:",
     "vite-plus": "catalog:"
@@ -19,7 +21,7 @@
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": "10.33.4",
+      "version": "12.15.0",
       "onFail": "download"
     }
   }

@@ -191,10 +191,10 @@ class Mac2000Scene implements Scene {
 
   // ---------- 流程 ----------
 
-  /** ↑ ↓ 选谱面；结果出来后按 Esc 或 ↑ ↓ 回到谱面列表 */
+  /** ↑ ↓ 选谱面；结果出来后按 ↑ ↓ 回到谱面列表（Esc 留给全局的「回到街区」） */
   private readonly onKeyDown = (event: KeyboardEvent) => {
     const step = event.code === 'ArrowUp' ? -1 : event.code === 'ArrowDown' ? 1 : 0;
-    if (this.state === 'result' && (step !== 0 || event.code === 'Escape')) {
+    if (this.state === 'result' && step !== 0) {
       event.preventDefault();
       this.backToList();
       return;
@@ -250,7 +250,7 @@ class Mac2000Scene implements Scene {
     this.showDialog({
       icon: drawFinderIcon(64),
       message: `「${title}」完成。`,
-      informative: `Perfect ${perfect}　　Good ${good}　　Miss ${miss}\n\n按空格键或点击画面再来一次，按 Esc 回到谱面列表。`,
+      informative: `Perfect ${perfect}　　Good ${good}　　Miss ${miss}\n\n按空格键或点击画面再来一次，按 ↑ ↓ 回到谱面列表。`,
       buttons: [{ label: '谱面列表' }, { label: '再来一次', isDefault: true }],
     });
     this.playNow(this.sounds.result);

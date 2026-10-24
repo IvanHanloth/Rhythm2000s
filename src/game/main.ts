@@ -1,7 +1,11 @@
 // 游戏入口：创建画布和音频时钟，登记场景，每帧把音频时间交给当前场景，并转发玩家输入。
+// 默认打开街区大厅（开始界面 + 选关，ADR 0005）；在网吧里坐下开始关卡后切到节奏场景的画布。
 
 import './style.css';
 import { AudioClock } from '../audio/audio-clock.ts';
+import { Hub, type LevelInfo } from '../hub/hub.ts';
+import { ACTION_LABELS } from '../rhythm/actions.ts';
+import { SCENE_CATALOG } from '../scenes/catalog.ts';
 import { mac2000Scene } from '../scenes/mac-2000/scene.ts';
 import { windowsXpScene } from '../scenes/windows-xp/scene.ts';
 import { fetchChartFromSite, loadCharts } from './chart-loader.ts';
@@ -41,14 +45,50 @@ window.addEventListener('keydown', resumeAudio, { once: true });
 listenForTaps(clock, host, (tap) => director.tap(tap));
 canvas.onFrame(() => director.update({ audioTime: clock.heardNow() }));
 
+/** 街区大厅的网址标识；网址里没有写场景时也打开大厅 */
+const HUB_ROUTE = 'street';
+
+/** 网吧里每台关卡电脑坐下后显示的信息 */
+const levels: LevelInfo[] = director.entries.map(({ id, label }) => {
+  const sceneCharts = charts.filter((chart) => chart.scene === id);
+  const actions = SCENE_CATALOG[id].actions.map((action) => ACTION_LABELS[action]);
+  const details = sceneCharts.map((chart) => `曲目：${chart.title}（${chart.bpm} BPM）`);
+  if (actions.length > 0) details.push(`动作：${actions.join('、')}`);
+  if (details.length === 0) details.push('这台机器上还没有可玩的关卡。');
+  return { sceneId: id, label, details, playable: sceneCharts.length > 0 };
+});
+
+/** 当前关卡是从网吧坐下进来的；直接用网址打开时按 Esc 也回网吧，但大厅从开始界面开始 */
+let cameFromHub = false;
+
+const hub = new Hub({
+  levels,
+  onPlay: (sceneId) => {
+    // 进关卡后按 Esc 回到网吧
+    cameFromHub = true;
+    location.hash = sceneId;
+  },
+});
+document.body.append(hub.element);
+
+const backHint = document.createElement('div');
+backHint.className = 'back-hint';
+backHint.textContent = 'Esc 回到网吧';
+backHint.hidden = true;
+document.body.append(backHint);
+
+window.addEventListener('keydown', (event) => {
+  if (event.code === 'Escape' && currentRoute() !== HUB_ROUTE) location.hash = HUB_ROUTE;
+});
+
 // 网址里的 #场景标识 决定打开哪个场景，刷新后停在原场景
-function sceneFromHash(): string {
+function currentRoute(): string {
   const id = decodeURIComponent(location.hash.slice(1));
-  return director.entries.some((e) => e.id === id) ? id : director.entries[0]!.id;
+  return director.entries.some((e) => e.id === id) ? id : HUB_ROUTE;
 }
 
 const panel = createDevPanel({
-  scenes: director.entries,
+  scenes: [{ id: HUB_ROUTE, label: '街区（开始 / 选关）' }, ...director.entries],
   onSelectScene: (id) => {
     location.hash = id;
   },
@@ -63,13 +103,27 @@ document.body.append(panel.element);
 
 const gameHost: HTMLElement = host;
 
-function showSceneFromHash(): void {
-  const id = sceneFromHash();
-  director.show(id);
+function showRoute(): void {
+  const id = currentRoute();
   panel.setActive(id);
+  if (id === HUB_ROUTE) {
+    director.clear();
+    canvas.app.ticker.stop();
+    backHint.hidden = true;
+    gameHost.style.cursor = '';
+    hub.show();
+    return;
+  }
+  hub.hide();
+  canvas.app.ticker.start();
+  director.show(id);
   // PixiJS 默认让画布继承容器的指针，所以设在容器上
   gameHost.style.cursor = director.entries.find((e) => e.id === id)?.cursor ?? '';
+  backHint.hidden = false;
+  backHint.textContent = cameFromHub ? 'Esc 回到网吧' : 'Esc 回到街区';
+  // 只对这一次进关卡有效：之后从开发面板或网址直接进来的不算
+  cameFromHub = false;
 }
 
-window.addEventListener('hashchange', showSceneFromHash);
-showSceneFromHash();
+window.addEventListener('hashchange', showRoute);
+showRoute();

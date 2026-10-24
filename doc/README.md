@@ -5,6 +5,8 @@
 | [game-design.md](game-design.md) | 游戏设计总览：核心玩法、判定、场景列表、待定问题 | 草稿 |
 | [scenes/windows-xp.md](scenes/windows-xp.md) | 场景：Windows XP 桌面；界面部件（桌面、开始菜单、消息框、托盘、音量控制）与音效对应表 | 草稿 |
 | [scenes/mac-2000.md](scenes/mac-2000.md) | 场景：2000 年前后的 Mac 桌面 | 草稿 |
+| [hub.md](hub.md) | 开始界面与街区大厅：流程、操作、暂定的街道和店铺 | 草稿 |
+| [hub-assets.md](hub-assets.md) | 街区的自制模型：规格（尺寸、朝向、原点、SCREEN 网格）和槽位清单 | 草稿 |
 | [chart-format.md](chart-format.md) | 谱面 JSON 格式：文件位置、字段、动作 ID、校验规则 | 草稿 |
 | [tech-research.md](tech-research.md) | 技术调研：浏览器能力、候选技术栈对比、待验证风险 | 草稿 |
 | [prototypes/latency-test.md](prototypes/latency-test.md) | 原型：延迟测试（要回答的问题、时间换算方法、测试记录） | 草稿 |

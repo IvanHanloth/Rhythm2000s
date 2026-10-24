@@ -19,6 +19,8 @@ body {
 /* 开发面板：浮在右上角，平时半透明，悬停或聚焦时才完全显示；按 ` 键隐藏 / 显示 */
 .dev-panel {
   position: fixed;
+  /* 盖在街区大厅（z-index 5）上面 */
+  z-index: 10;
   top: 8px;
   right: 8px;
   opacity: 0.45;

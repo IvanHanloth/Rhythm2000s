@@ -98,7 +98,7 @@ public/charts/
 
 ### 动作 ID
 
-动作 ID 是**示范段出现的界面部件**，按原版系统的类名或常量名取名（[ADR 0005](decisions/0005-动作按界面部件类名命名.md)）：
+动作 ID 是**示范段出现的界面部件**，按原版系统的类名或常量名取名（[ADR 0006](decisions/0006-动作按界面部件类名命名.md)）：
 
 - 写成 `<部件>-<变体>`，全小写、连字符分隔，如 `dialog-info`。
 - 部件和变体取自原版：XP 消息框的图标常量 `MB_ICONINFORMATION` → `dialog-info`，`MB_ICONERROR` → `dialog-error`。名字与 `assets/reference/` 里对应图标的文件名保持一致。

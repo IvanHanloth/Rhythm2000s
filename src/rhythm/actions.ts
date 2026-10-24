@@ -1,4 +1,4 @@
-// 动作 ID：示范段出现的界面部件，按原版系统的类名或常量名取名（doc/chart-format.md、ADR 0005）。
+// 动作 ID：示范段出现的界面部件，按原版系统的类名或常量名取名（doc/chart-format.md、ADR 0006）。
 // 写成「部件-变体」，例如 XP 消息框的 MB_ICONINFORMATION → dialog-info，Mac 的 kAlertNoteAlert → alert-note。
 // 玩家在跟打段要对它做什么由部件决定；每个场景声明自己支持哪些动作。
 

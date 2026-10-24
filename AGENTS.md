@@ -16,7 +16,7 @@
 
 ## 当前阶段
 
-**开始开发游戏本体**。技术栈见 [ADR 0001](doc/decisions/0001-技术栈选型.md)；游戏画布和场景结构已搭好（[ADR 0002](doc/decisions/0002-游戏画布与场景结构.md)）。Windows XP 场景有一个可玩的 [MVP「弹窗 → 关窗」](doc/prototypes/mvp.md)，输入、判定窗口、谱面都是暂定值，等试玩后调整；Mac 场景按 Mac OS X 10.0–10.2 的早期 Aqua 还原了桌面和界面部件，有提示框、Dock 弹跳、新邮件、最小化四类动作和 5 首谱面，玩法与 XP 相同，场景里用 Finder 列表视图选谱面（[doc/scenes/mac-2000.md](doc/scenes/mac-2000.md)）。谱面已与游戏代码分离，以 JSON 存放在 `public/charts/`（[ADR 0003](doc/decisions/0003-谱面数据格式.md)，格式见 [doc/chart-format.md](doc/chart-format.md)）。
+**开始开发游戏本体**。技术栈见 [ADR 0001](doc/decisions/0001-技术栈选型.md)；游戏画布和场景结构已搭好（[ADR 0002](doc/decisions/0002-游戏画布与场景结构.md)）。Windows XP 场景有一个可玩的 [MVP「弹窗 → 关窗」](doc/prototypes/mvp.md)，输入、判定窗口、谱面都是暂定值，等试玩后调整；Mac 场景按 Mac OS X 10.0–10.2 的早期 Aqua 还原了桌面和界面部件，有提示框、Dock 弹跳、新邮件、最小化四类动作和 5 首谱面，玩法与 XP 相同，场景里用 Finder 列表视图选谱面（[doc/scenes/mac-2000.md](doc/scenes/mac-2000.md)）。谱面已与游戏代码分离，以 JSON 存放在 `public/charts/`（[ADR 0003](doc/decisions/0003-谱面数据格式.md)，格式见 [doc/chart-format.md](doc/chart-format.md)）。开始界面和选关是一个写实风格的 3D 街区（[ADR 0005](doc/decisions/0005-街区大厅用Three.js.md)，设计见 [doc/hub.md](doc/hub.md)），在网吧里坐到电脑前进入关卡；年代道具的模型等用户用 Tripo / Blender 制作，规格见 [doc/hub-assets.md](doc/hub-assets.md)。
 
 - 只使用已确定的技术栈；要引入新的运行时依赖（尤其是音频、渲染、状态管理类库）前，先向用户说明理由和取舍。
 - 已完成[延迟测试原型](doc/prototypes/latency-test.md)，下一步是在不同设备、浏览器、耳机上实测，把结果登记到该文档的「测试记录」。
@@ -30,12 +30,15 @@
 ├── index.html         # 游戏入口页：游戏画布 + 开发面板（切换场景、打开原型）
 ├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/、prototypes/xp-components/（XP 界面部件展示）
 ├── public/charts/     # 谱面 JSON：index.json 清单 + 每首一个文件，运行时下载
+├── public/models/     # 大厅用的 3D 模型（GLB）：props/ 现成道具，custom/ 自制模型（规格见 doc/hub-assets.md）
+├── public/textures/   # 大厅的 PBR 贴图和显示器画面；public/hdri/ 是环境光。来源与授权都登记在 assets/README.md
 ├── assets/            # 共用素材：原版系统素材参考、字体等，来源与授权见 assets/README.md
 ├── promo/             # 宣发视频（HyperFrames：HTML + GSAP 渲染成 MP4），独立于游戏工程，说明见 promo/AGENTS.md
 ├── src/
 │   ├── game/          # 游戏画布（1280×720 等比缩放）、场景接口、场景切换器、输入、设置、入口
-│   ├── scenes/        # 各场景，一个场景一个目录；catalog.ts 登记各场景支持的动作；windows-xp/components/ 是贴近原版的 XP 界面部件
-│   ├── theme/         # 场景主题颜色、字体、判定颜色、动画拍数（取自设计系统提案）；xp-luna.ts 是 XP Luna 原版配色
+│   ├── hub/           # 3D 街区大厅：开始界面 + 选关（Three.js，ADR 0005）
+│   ├── scenes/        # 各场景，一个场景一个目录；catalog.ts 登记各场景支持的动作；windows-xp/components/、mac-2000/components/ 是贴近原版的界面部件
+│   ├── theme/         # 场景主题颜色、字体、判定颜色、动画拍数（取自设计系统提案）；xp-luna.ts、aqua.ts 是 XP Luna、Mac Aqua 的原版配色
 │   ├── ui/            # 跨场景共用的画面部件（判定字样、缓动函数）
 │   ├── audio/         # 音频时钟、节拍器、音序器、合成鼓点与音效
 │   ├── rhythm/        # 拍 ↔ 音频时间换算、动作 ID、谱面校验与展开、判定、轮次提示
@@ -72,8 +75,9 @@ Web 优先，以浏览器为主要运行平台；需要上架 Steam 时再用 El
 | 语言 | TypeScript | |
 | 工具链 | [Vite+](https://viteplus.dev/guide)（npm 包名 `vite-plus`） | 统一提供开发服务器（Vite）、构建（Rolldown）、测试（Vitest）、代码检查（Oxlint）、格式化（Oxfmt）；所有配置写在根目录 `vite.config.ts`，从 `vite-plus` 导入 `defineConfig`。不要再单独安装 ESLint、Prettier、Jest 等同类工具 |
 | 渲染 | PixiJS（npm 包名 `pixi.js`） | 负责游戏画面；菜单、设置等界面可用 DOM |
+| 3D 大厅 | Three.js（npm 包名 `three`） | 只用于开始界面和选关的 3D 街区（`src/hub/`），见 [ADR 0005](doc/decisions/0005-街区大厅用Three.js.md)；GLB 模型放在 `public/models/` |
 | 音频 | 原生 Web Audio API | 自写「指挥」模块，负责拍点换算、预约播放和判定；不用 Howler.js 之类的播放封装 |
-| 包管理器 | pnpm 10 | 版本写在 `package.json` 的 `devEngines.packageManager`；Vite+ 据此和锁文件自动调用。使用 `nodeLinker: hoisted` 布局，原因见 `pnpm-workspace.yaml` 注释 |
+| 包管理器 | pnpm 12 | 版本写在 `package.json` 的 `devEngines.packageManager`；Vite+ 据此和锁文件自动调用。使用 `nodeLinker: hoisted` 布局，原因见 `pnpm-workspace.yaml` 注释 |
 | 运行环境 | Node.js 24 | 2026-10-24 本机版本 |
 
 音频与输入时序的实现原则（详见 [doc/tech-research.md](doc/tech-research.md) 第 2 节）：
@@ -94,7 +98,7 @@ vp preview     # 本地预览构建结果
 vp add <包名>  # 添加依赖
 ```
 
-- 游戏：开发服务器启动后打开 `http://localhost:5173/`，网址末尾的 `#场景标识`（如 `#mac-2000`）决定打开哪个场景；按 `` ` `` 键隐藏 / 显示开发面板。
+- 游戏：开发服务器启动后打开 `http://localhost:5173/`，默认是 3D 街区（开始界面 + 选关）；网址末尾写 `#场景标识`（如 `#mac-2000`）直接打开那个场景，关卡里按 Esc 回街区；按 `` ` `` 键隐藏 / 显示开发面板。
 - 延迟测试原型：开发服务器启动后打开 `http://localhost:5173/prototypes/latency/`。
 - `dev`、`build`、`test` 等内置命令不读取 `package.json` 的 scripts。`vp build` 只构建、不做类型检查；要连 `tsc` 一起跑，用 `vp run build`。
 - 没有全局安装 `vp` 时（安装方法见 [Vite+ 文档](https://viteplus.dev/guide)），在命令前加 `pnpm exec`，例如 `pnpm exec vp dev`。
@@ -107,7 +111,7 @@ vp add <包名>  # 添加依赖
 | 示范段（call） | 游戏演示动作与节奏的段落，玩家只听和看 |
 | 跟打段（response） | 玩家重复示范动作与节奏的段落 |
 | 拍（beat） | 以 BPM 为基础的时间单位；谱面时间一律以拍为单位记录，不直接写毫秒 |
-| 动作（action） | 谱面里的一个事件：示范段出现的界面部件，跟打段玩家要处理它。动作 ID 按原版类名命名，如 `dialog-info`（[ADR 0005](doc/decisions/0005-动作按界面部件类名命名.md)） |
+| 动作（action） | 谱面里的一个事件：示范段出现的界面部件，跟打段玩家要处理它。动作 ID 按原版类名命名，如 `dialog-info`（[ADR 0006](doc/decisions/0006-动作按界面部件类名命名.md)） |
 | 判定窗口 | 输入时间与目标拍点之间允许的误差范围，分 Perfect / Good / Miss 等级别 |
 | 谱面（chart） | 一首曲子中所有示范与跟打事件的时间表 |
 | 场景（scene） | 一个主题小游戏，如「Windows XP 桌面」 |
