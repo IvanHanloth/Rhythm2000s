@@ -355,14 +355,25 @@ export const LUNA = {
     mute: '#e0301e',
   },
 
-  /** Combo effects on the desktop (doc/combo.md): Bliss sky light, clouds, and the 3D Pipes screen saver's pipes */
+  /** Combo effects on the desktop (doc/combo.md): the Media Player visualization and the Solitaire win cascade */
   combo: {
-    skyLight: '#ffffff',
-    cloud: '#ffffff',
-    pipes: [
-      { base: '#c8281e', light: '#ff9a8a', dark: '#5e0d08' },
-      { base: '#1f9a35', light: '#9cf0a8', dark: '#0b4316' },
-      { base: '#2457c9', light: '#9ec0ff', dark: '#0d2460' },
-    ],
+    visualizer: {
+      /** The dark layer over Bliss */
+      backdrop: '#000814',
+      /** One colour per swirl */
+      swirls: ['#2ee6d6', '#7a5cff', '#2f8cff'],
+      ring: '#9fe8ff',
+      /** Spectrum bars: bottom and top of each bar, and the falling peak cap */
+      barBottom: '#0b5bd3',
+      barTop: '#5ff0ff',
+      peak: '#ffffff',
+    },
+    /** Solitaire card faces */
+    card: {
+      face: '#ffffff',
+      edge: '#000000',
+      red: '#ff0000',
+      black: '#000000',
+    },
   },
 } as const;

@@ -1,27 +1,24 @@
-// Combo effects on the Mac desktop (doc/combo.md "Tiers"): tier 1 swells the Dock icons in a wave on each beat,
-// tier 2 makes the menu bar and the Dock shelf glow on each beat, tier 3 flows iTunes-visualizer bands across the
-// wallpaper. The glow and bands lie right over the wallpaper, under every window and the Dock, so nothing covers a
-// target. A break of 10 or more shows the spinning wait cursor for a beat ("Combo break"). Drawn from beats and audio time.
+// Combo effects on the Mac desktop (doc/combo.md "Tiers"): tier 1 sends Aqua bubbles up the wallpaper, tier 2 makes
+// the menu bar and the Dock shelf glow on each beat, tier 3 dims the wallpaper for the Flurry screen saver's ribbons.
+// Nothing moves the Dock icons, since that is the dock-bounce action. Everything lies right over the wallpaper, under
+// every window and the Dock, so nothing covers a target. A break of COMBO_BREAK_MIN or more shows the spinning wait
+// cursor for a beat ("Combo break"). Drawn from beats and audio time.
 
 import { Container, Graphics } from 'pixi.js';
 import type { ComboTier } from '@/rhythm/combo.ts';
 import { AQUA } from '@/theme/aqua.ts';
 import { clamp01 } from '@/ui/easing.ts';
+import { bubblesAt, drawBubbles } from './aqua-bubbles.ts';
 import { DOCK_HEIGHT, type Dock } from './components/dock.ts';
 import { MENU_BAR_HEIGHT } from './components/menu-bar.ts';
+import { Flurry } from './flurry.ts';
 
-/** Largest swell (0.14 = 14 % bigger) and how many icons wide the wave is */
-const SWELL = 0.14;
-const WAVE_WIDTH = 1.6;
-/** The glow and bands fade in over this many beats */
+/** Each effect fades in over this many beats */
 const FADE_BEATS = 1;
 const GLOW_LAYERS = 6;
 const GLOW_REACH = 18;
-/** Visualizer bands: centre line, height and how fast they flow */
-const BAND_Y = 0.42;
-const BAND_AMPLITUDE = 46;
-const BAND_SPEED = 1.3;
-const BAND_STEP = 16;
+/** Gap between the bubbles and the menu bar and Dock (px) */
+const BUBBLE_MARGIN = 6;
 const BEACH_BALL_RADIUS = 11;
 
 export interface MacComboEffectsOptions {
@@ -36,22 +33,25 @@ export class MacComboEffects {
   /** The spinning wait cursor; the scene places it beside the hit counter, above everything */
   readonly beachBall: Graphics;
   private readonly options: MacComboEffectsOptions;
+  private readonly bubbles = new Graphics();
   private readonly glow = new Graphics();
-  private readonly bands = new Graphics();
+  private readonly flurry: Flurry;
   /** Beat each tier was reached, by tier (index 0 unused); null while below it */
   private readonly reachedAt: (number | null)[] = [null, null, null, null];
   private brokeAt: number | null = null;
 
   constructor(options: MacComboEffectsOptions) {
     this.options = options;
+    this.flurry = new Flurry(options.screenWidth, options.screenHeight);
     this.drawGlow();
-    this.backLayer.addChild(this.bands, this.glow);
+    this.backLayer.addChild(this.flurry.view, this.bubbles, this.glow);
+    this.flurry.view.visible = false;
     this.glow.visible = false;
     this.beachBall = drawBeachBall();
     this.beachBall.visible = false;
   }
 
-  /** A combo of 10 or more broke at heard time `audioTime` */
+  /** A combo of COMBO_BREAK_MIN or more broke at heard time `audioTime` */
   showBreak(audioTime: number): void {
     this.brokeAt = audioTime;
   }
@@ -62,14 +62,18 @@ export class MacComboEffects {
       else this.reachedAt[t] ??= beat;
     }
     const phase = beat - Math.floor(beat);
-    const { dock } = this.options;
+    const { screenWidth, screenHeight } = this.options;
 
-    // The wave crosses the Dock left to right during each beat, peaking on the first icon right on the beat
-    const count = dock.iconCount;
-    for (let i = 0; i < count; i++) {
-      const distance = (phase * (count + WAVE_WIDTH) - i) / WAVE_WIDTH;
-      const swell = tier >= 1 ? SWELL * Math.exp(-distance * distance * 2) : 0;
-      dock.setSwell(i, swell);
+    this.bubbles.clear();
+    const bubbleStart = this.reachedAt[1] ?? null;
+    if (bubbleStart !== null) {
+      const area = {
+        width: screenWidth,
+        top: MENU_BAR_HEIGHT + BUBBLE_MARGIN,
+        bottom: screenHeight - DOCK_HEIGHT - BUBBLE_MARGIN,
+      };
+      const fade = clamp01((beat - bubbleStart) / FADE_BEATS);
+      drawBubbles(this.bubbles, bubblesAt(bubbleStart, beat, area), fade);
     }
 
     const glowStart = this.reachedAt[2] ?? null;
@@ -79,10 +83,10 @@ export class MacComboEffects {
       this.glow.alpha = clamp01((beat - glowStart) / FADE_BEATS) * (0.35 + 0.65 * pulse);
     }
 
-    this.bands.clear();
-    const bandStart = this.reachedAt[3] ?? null;
-    if (bandStart !== null) {
-      this.drawBands(audioTime, phase, clamp01((beat - bandStart) / FADE_BEATS));
+    const flurryStart = this.reachedAt[3] ?? null;
+    this.flurry.view.visible = flurryStart !== null;
+    if (flurryStart !== null) {
+      this.flurry.update(beat, audioTime, clamp01((beat - flurryStart) / FADE_BEATS));
     }
 
     const ball = this.brokeAt;
@@ -90,13 +94,13 @@ export class MacComboEffects {
     this.beachBall.rotation = audioTime * 14;
   }
 
-  /** Puts the Dock back and hides everything (leaving a round) */
+  /** Hides everything (leaving a round) */
   clear(): void {
     this.reachedAt.fill(null);
     this.brokeAt = null;
-    for (let i = 0; i < this.options.dock.iconCount; i++) this.options.dock.setSwell(i, 0);
+    this.bubbles.clear();
     this.glow.visible = false;
-    this.bands.clear();
+    this.flurry.view.visible = false;
     this.beachBall.visible = false;
   }
 
@@ -127,24 +131,6 @@ export class MacComboEffects {
         )
         .fill({ color, alpha });
     }
-  }
-
-  private drawBands(audioTime: number, phase: number, fade: number): void {
-    const { screenWidth, screenHeight } = this.options;
-    const kick = 1 + 0.35 * (1 - phase) ** 2;
-    AQUA.combo.bands.forEach((color, i) => {
-      const center = screenHeight * BAND_Y + (i - 1.5) * 22;
-      const offset = audioTime * BAND_SPEED * (1 + i * 0.25) + i * 1.7;
-      const points: number[] = [];
-      for (let x = -BAND_STEP; x <= screenWidth + BAND_STEP; x += BAND_STEP) {
-        const wave = Math.sin(x / 140 + offset) + 0.5 * Math.sin(x / 61 - offset * 1.4);
-        points.push(x, center + wave * BAND_AMPLITUDE * kick * 0.6);
-      }
-      this.bands
-        .poly(points, false)
-        .stroke({ width: 16, color, alpha: 0.22 * fade, join: 'round' });
-      this.bands.poly(points, false).stroke({ width: 3, color, alpha: 0.7 * fade, join: 'round' });
-    });
   }
 }
 

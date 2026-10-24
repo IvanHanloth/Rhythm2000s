@@ -3,7 +3,7 @@
 import type { JudgementLevel } from './judge.ts';
 
 /** Combo where each tier starts (doc/combo.md "Tiers") */
-export const COMBO_TIERS = [10, 25, 50] as const;
+export const COMBO_TIERS = [8, 16, 30] as const;
 /** Losing at least this many plays the scene's break effect; shorter combos only reset the counter */
 export const COMBO_BREAK_MIN = 10;
 

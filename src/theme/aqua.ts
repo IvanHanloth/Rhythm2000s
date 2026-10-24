@@ -165,10 +165,23 @@ export const AQUA = {
     knob: { rim: '#163f94', dark: '#2f6fe0', light: '#bfe6ff' } satisfies BallColors,
   },
 
-  /** Combo effects (doc/combo.md): Aqua glow, iTunes-visualizer bands, the spinning wait cursor */
+  /** Combo effects (doc/combo.md): Aqua bubbles, Aqua glow, Flurry ribbons, the spinning wait cursor */
   combo: {
+    bubble: {
+      /** See-through body, its rim, the shine at the top and the ring of a pop */
+      body: '#3d9bff',
+      rim: '#9fd4ff',
+      shine: '#ffffff',
+      pop: '#c9e8ff',
+    },
     glow: '#8fd0ff',
-    bands: ['#ff4fb0', '#8a63ff', '#33d6ff', '#62f59a'],
+    flurry: {
+      /** The dark layer over the wallpaper */
+      backdrop: '#000000',
+      /** One colour per ribbon, and the hot core near the source */
+      ribbons: ['#ff4f9a', '#5f8bff', '#3dffd0', '#ffb23d'],
+      core: '#ffffff',
+    },
     beachBall: ['#ff3b30', '#ff9500', '#ffd60a', '#34c759', '#0a84ff', '#bf5af2'],
     beachBallEdge: '#4a4a4a',
   },
