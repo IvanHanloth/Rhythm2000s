@@ -19,6 +19,14 @@ export function measureCaption(title: string): number {
   return CanvasTextMetrics.measureText(title, new TextStyle(CAPTION_STYLE)).width;
 }
 
+/** 标题放不下时和原版一样截断，末尾加「...」 */
+function fitCaption(title: string, maxWidth: number): string {
+  if (measureCaption(title) <= maxWidth) return title;
+  let end = title.length;
+  while (end > 0 && measureCaption(`${title.slice(0, end).trimEnd()}...`) > maxWidth) end--;
+  return `${title.slice(0, end).trimEnd()}...`;
+}
+
 export interface XpWindowFrameOptions {
   title: string;
   width: number;
@@ -36,6 +44,8 @@ export class XpWindowFrame {
   private readonly active: Graphics;
   private readonly inactive: Graphics;
   private readonly titleText: Text;
+  /** 标题文字最多多宽：从标题起点到最左边的标题栏按钮 */
+  private readonly titleMaxWidth: number;
   private readonly captionButtons: Container[] = [];
   private isActive = true;
 
@@ -74,11 +84,13 @@ export class XpWindowFrame {
       }
     }
     this.view.addChild(...this.captionButtons);
+    this.titleMaxWidth = x - 4 - this.titleText.x;
+    this.titleText.text = fitCaption(title, this.titleMaxWidth);
   }
 
   /** 改标题（下载窗的标题随进度变化） */
   setTitle(title: string): void {
-    this.titleText.text = title;
+    this.titleText.text = fitCaption(title, this.titleMaxWidth);
   }
 
   /** 活动窗口是深蓝标题栏；非活动窗口是浅蓝灰，关闭按钮变淡 */

@@ -58,29 +58,29 @@ const START_BUTTON_CENTER_X = 50;
 
 /** 气泡文案：模仿当年的系统通知，全部原创 */
 const BALLOON_TEXTS = [
-  { title: '发现新硬件', text: 'USB 大容量存储设备', icon: 'dialog-info' },
-  { title: 'Windows Messenger', text: '小明 刚刚登录。', icon: 'windows-messenger' },
-  { title: '自动更新', text: '有新的更新可以下载。', icon: 'dialog-info' },
-  { title: '本地连接', text: '网络电缆没有插好。', icon: 'dialog-warning' },
-  { title: '安全中心', text: '您的计算机可能有风险。', icon: 'dialog-warning' },
+  { title: 'Found New Hardware', text: 'USB Mass Storage Device', icon: 'dialog-info' },
+  { title: 'Windows Messenger', text: 'Jamie has just signed in.', icon: 'windows-messenger' },
+  { title: 'Automatic Updates', text: 'New updates are ready to download.', icon: 'dialog-info' },
+  { title: 'Local Area Connection', text: 'A network cable is unplugged.', icon: 'dialog-warning' },
+  { title: 'Security Center', text: 'Your computer might be at risk.', icon: 'dialog-warning' },
 ];
 
 /** 回收站要扔的文件 */
 const FILES = [
-  { icon: 'text-document', label: '新建文本文档.txt' },
-  { icon: 'music-file', label: '七里香.mp3' },
+  { icon: 'text-document', label: 'New Text Document.txt' },
+  { icon: 'music-file', label: 'Hey Ya!.mp3' },
   { icon: 'unknown-file', label: 'setup.exe' },
-  { icon: 'paint', label: '未命名.bmp' },
-  { icon: 'folder', label: '新建文件夹' },
-  { icon: 'text-document', label: '作业(1).doc' },
+  { icon: 'paint', label: 'untitled.bmp' },
+  { icon: 'folder', label: 'New Folder' },
+  { icon: 'text-document', label: 'homework(1).doc' },
 ];
 
 /** 开始菜单里会被点到的程序，按顺序轮换 */
 const MENU_ITEMS = [
-  '记事本',
-  '画图',
-  '扫雷',
-  '计算器',
+  'Notepad',
+  'Paint',
+  'Minesweeper',
+  'Calculator',
   'Windows Media Player',
   'Windows Messenger',
 ];

@@ -1,6 +1,6 @@
-// 选关：Jaguar Finder 的「我的关卡」窗口（图标视图）+ 右边的「简介」窗口
+// 选关：Jaguar Finder 的「My Levels」窗口（图标视图）+ 右边的简介（Get Info）窗口
 // （doc/level-select.md、doc/scenes/mac-2000.md「选谱面」）。按原版像素尺寸绘制。
-// 单击图标选中，双击或点「简介」里的「开始」开始；「后退」「返回」回到网吧。原点在虚拟屏幕左上角。
+// 单击图标选中，双击或点简介窗口里的「Start」开始；「Back」回到网吧。原点在虚拟屏幕左上角。
 
 import { Container, Graphics, Rectangle, type Text } from 'pixi.js';
 import type { Chart } from '../../rhythm/chart.ts';
@@ -16,7 +16,8 @@ import { AquaWindow, TITLE_BAR_HEIGHT } from './components/window.ts';
 
 /** Finder 窗口和简介窗口在虚拟屏幕上的位置和大小（设计稿换算到 1024×576） */
 const FINDER = { x: 56, y: 40, width: 616, height: 445 };
-const INFO = { x: 704, y: 74, width: 256, height: 252 };
+// 宽度要放得下「Take Out the Trash Info」这样的英文标题，不压到左边三颗按钮
+const INFO = { x: 688, y: 74, width: 296, height: 252 };
 
 const TOOLBAR_HEIGHT = 58;
 const GRID_PADDING_X = 21;
@@ -26,13 +27,12 @@ const CELL_HEIGHT = 100;
 const ICON_BOX = 60;
 const ICON_SIZE = 48;
 
-/** 「简介」里动作一栏的叫法：按部件种类合并（三种提示框都算「提示框」），免得混音关一长串 */
+/** 简介窗口里「Actions」一栏的叫法：按部件种类合并（三种提示框都算「Alert」），免得混音关一长串 */
 const KIND_LABELS: Record<MacTargetKind, string> = {
-  alert: '提示框',
-  dock: 'Dock 弹跳',
-  mail: '新邮件',
-  window: '最小化窗口',
-  // 2026-10-24 起新增的玩家可见文字只用英文
+  alert: 'Alert',
+  dock: 'Dock bounce',
+  mail: 'New mail',
+  window: 'Minimize',
   menu: 'Apple menu',
   file: 'Trash',
   sheet: 'Save sheet',
@@ -56,9 +56,9 @@ const KIND_ICONS: Record<MacTargetKind, AppIconName | 'caution' | 'trash'> = {
 export interface MacLevelSelectOptions {
   /** 这台电脑上的全部谱面，按清单顺序 */
   charts: readonly Chart[];
-  /** 开始第 index 关（双击图标、「开始」、回车） */
+  /** 开始第 index 关（双击图标、「Start」、回车） */
   onStart(index: number): void;
-  /** 回到网吧（工具栏「后退」、简介窗口「返回」） */
+  /** 回到网吧（工具栏、简介窗口的「Back」） */
   onBack(): void;
 }
 
@@ -81,12 +81,12 @@ export class MacLevelSelect {
     this.options = options;
     const { charts } = options;
     this.finder = new AquaWindow({
-      title: '我的关卡',
+      title: 'My Levels',
       width: FINDER.width,
       height: FINDER.height,
       content: 'white',
       toolbarHeight: TOOLBAR_HEIGHT,
-      statusText: `${charts.length} 项，单击选中，双击开始`,
+      statusText: `${charts.length} ${charts.length === 1 ? 'item' : 'items'}, double-click a level to start`,
     });
     this.finder.view.position.set(FINDER.x + FINDER.width / 2, FINDER.y + FINDER.height / 2);
     this.finder.toolbar.addChild(this.toolbar());
@@ -116,7 +116,7 @@ export class MacLevelSelect {
     this.select(this.selected + dx + dy * GRID_COLUMNS);
   }
 
-  /** 每帧传入音频时间，让「开始」按钮呼吸 */
+  /** 每帧传入音频时间，让「Start」按钮呼吸 */
   update(audioTime: number): void {
     this.info?.update(audioTime);
   }
@@ -208,10 +208,10 @@ export class MacLevelSelect {
       bar.addChild(item);
       x += width + 8;
     };
-    add(drawBackButton(), 32, '后退', () => this.options.onBack());
-    add(drawViewButtons(), 90, '显示');
-    add(drawComputerIcon(), 32, '电脑');
-    add(drawHomeIcon(), 32, '个人');
+    add(drawBackButton(), 32, 'Back', () => this.options.onBack());
+    add(drawViewButtons(), 90, 'View');
+    add(drawComputerIcon(), 32, 'Computer');
+    add(drawHomeIcon(), 32, 'Home');
     add(drawFolderIcon(), 32, 'rhythm');
 
     // 右边的搜索框
@@ -225,7 +225,7 @@ export class MacLevelSelect {
       .moveTo(14.5, 12)
       .lineTo(17.5, 15)
       .stroke({ width: 1.4, color: AQUA.inkMuted });
-    const hint = aquaText('搜索', { size: 11, color: AQUA.inkMuted });
+    const hint = aquaText('Search', { size: 11, color: AQUA.inkMuted });
     hint.anchor.set(0, 0.5);
     hint.position.set(24, 10);
     search.addChild(field, hint);
@@ -253,16 +253,16 @@ function levelIcon(chart: Chart, size: number): Container {
 
 // ---------- 简介窗口 ----------
 
-/** 「显示简介」窗口：大图标、名字，「一般信息」里列动作、速度、乐句、时长，右下「返回」「开始」 */
+/** 简介（Get Info）窗口：大图标、名字，「General」里列动作、速度、乐句、时长，右下「Back」「Start」 */
 class InfoWindow {
   readonly view: Container;
   private readonly window: AquaWindow;
   private readonly buttons: PushButton[] = [];
 
   constructor(chart: Chart | null, handlers: { onStart: () => void; onBack: () => void }) {
-    const name = chart?.title ?? '没有关卡';
+    const name = chart?.title ?? 'No Levels';
     this.window = new AquaWindow({
-      title: `${name} 简介`,
+      title: `${name} Info`,
       width: INFO.width,
       height: INFO.height,
       toolbarButton: false,
@@ -275,11 +275,11 @@ class InfoWindow {
     if (chart) content.addChild(levelIcon(chart, 48)).position.set(14, 12);
     const title = aquaText(name, { size: 14, bold: true });
     title.position.set(72, 16);
-    const kind = aquaText('rhythm2000s 关卡', { size: 11, color: AQUA.inkSoft });
+    const kind = aquaText('rhythm2000s level', { size: 11, color: AQUA.inkSoft });
     kind.position.set(72, 36);
     content.addChild(title, kind);
 
-    const disclosure = aquaText('▾ 一般信息：', { size: 12 });
+    const disclosure = aquaText('▾ General:', { size: 12 });
     disclosure.position.set(14, 72);
     content.addChild(disclosure);
 
@@ -288,17 +288,17 @@ class InfoWindow {
           const summary = summarizeChart(chart);
           return [
             [
-              '动作：',
+              'Actions:',
               chartKinds(chart)
                 .map((k) => KIND_LABELS[k])
-                .join('、'),
+                .join(', '),
             ],
-            ['速度：', `${chart.bpm} BPM`],
-            ['乐句：', `${summary.phrases} 句`],
-            ['时长：', formatDuration(summary.seconds)],
+            ['Tempo:', `${chart.bpm} BPM`],
+            ['Phrases:', String(summary.phrases)],
+            ['Length:', formatDuration(summary.seconds)],
           ];
         })()
-      : [['', '这台电脑上还没有可玩的关卡。']];
+      : [['', 'There are no playable levels on this computer.']];
     // 一行字太长会换行，所以按实际高度往下排，最后再画外框
     const groupTop = 92;
     const group = new Graphics();
@@ -321,8 +321,8 @@ class InfoWindow {
     // 右下角的按钮，默认按钮在最右
     const contentHeight = INFO.height - TITLE_BAR_HEIGHT;
     const buttonTop = contentHeight - PUSH_BUTTON_HEIGHT - 14;
-    const back = new PushButton({ label: '返回' });
-    const start = new PushButton({ label: '开始', isDefault: chart !== null });
+    const back = new PushButton({ label: 'Back' });
+    const start = new PushButton({ label: 'Start', isDefault: chart !== null });
     let right = INFO.width - 14;
     for (const [button, onTap] of [
       [start, handlers.onStart],

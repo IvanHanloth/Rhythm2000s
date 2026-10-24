@@ -32,7 +32,7 @@ const REFRESH_SPOTS: readonly Point[] = [
   { x: 300, y: 250 },
   { x: 700, y: 250 },
 ];
-const REFRESH_ITEM = '刷新(E)';
+const REFRESH_ITEM = 'Refresh';
 /** 点下去时指针缩一下、桌面刷新时图标消失的时长（拍） */
 const PRESS_BEATS = 1 / 8;
 const FLICKER_BEATS = 1 / 8;

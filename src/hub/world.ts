@@ -64,7 +64,7 @@ export interface LevelSpot extends Spot {
 /** 看一眼、说句话：显示几行文字 */
 export interface ReadSpot extends Spot {
   kind: 'read';
-  /** 提示里的动词，例如「说话」「查看」 */
+  /** 提示里的动词，例如「Examine」 */
   verb: string;
   name: string;
   lines: string[];
@@ -610,9 +610,9 @@ function buildSouthSide(b: Builder): void {
     p.add(placeholderBox(2.6, 0.12, 1.9, 0, 2.3, 0.15, green));
   });
   b.colliders.push(boxAt(kx, kz, 2.2, 1.4));
-  b.read('报摊', '查看', kx, kz - 1.3, [
-    '报摊：晚报的头版标题写着「千年虫没有来」。',
-    '旁边夹着几张电脑杂志送的光盘，封面已经被晒褪色了。',
+  b.read('Newsstand', 'Examine', kx, kz - 1.3, [
+    'The evening paper\'s front page: "MILLENNIUM BUG A NO-SHOW".',
+    'Tucked beside it are a few free CD-ROMs off computer magazines, their covers bleached by the sun.',
   ]);
 
   // 红色电话亭（自制槽位 phone-box）和红色邮筒（自制槽位 pillar-box）
@@ -634,8 +634,8 @@ function buildSouthSide(b: Builder): void {
     p.add(sign);
   });
   b.colliders.push(boxAt(px, pz, 1.0, 1.0));
-  b.read('电话亭', '查看', px, pz - 0.8, [
-    '红色电话亭：投币口只收 10p 和 20p 的硬币。你口袋里只有一张 5 英镑的纸币。',
+  b.read('Phone box', 'Examine', px, pz - 0.8, [
+    "A red phone box. The slot only takes 10p and 20p coins. All you've got is a fiver.",
   ]);
   const mx = -17;
   const mz = 5.9;
@@ -647,7 +647,9 @@ function buildSouthSide(b: Builder): void {
     p.add(body, cap, placeholderBox(0.3, 0.04, 0.02, 0, 1.05, 0.27, b.plain(C.signTextDark, 0.5)));
   });
   b.colliders.push(boxAt(mx, mz, 0.6, 0.6));
-  b.read('邮筒', '查看', mx, mz - 0.7, ['红色邮筒：今天最后一次收信是下午 5:30。已经过了。']);
+  b.read('Postbox', 'Examine', mx, mz - 0.7, [
+    "A red pillar box. Last collection today: 5:30 pm. You've missed it.",
+  ]);
 
   // 公交站（自制槽位 bus-stop）
   const bx = 19;
@@ -683,8 +685,8 @@ function buildSouthSide(b: Builder): void {
     height: 96,
   });
   b.panel(1.4, 0.5, bx - 1.2, 2.9, bz - 0.2, Math.PI, b.glow(busSign, '#ffffff', 1.3));
-  b.read('公交站', '查看', bx, bz - 0.7, [
-    '站牌：24 路，开往市中心和大学。时刻表上的下一班车被人用笔改成了「迟早会来」。',
+  b.read('Bus stop', 'Examine', bx, bz - 0.7, [
+    'Route 24 to the city centre and the university. Someone has scribbled over the next bus time: "EVENTUALLY".',
   ]);
 }
 
@@ -896,9 +898,9 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
   });
   b.colliders.push(boxAt(cx, cz, 2.6, 0.8));
   b.prop('classic_laptop', cx + 0.6, 1.1, cz, { width: 0.45, rotation: Math.PI });
-  b.read('前台', '查看', cx - 0.4, cz + 0.85, [
-    '前台没人。价目表上写着：上网 30 分钟 1 英镑，打印一页 10 便士。',
-    '旁边贴着一张便签：「头顶有黄色标记的那几台空着，随便坐。」',
+  b.read('Front desk', 'Examine', cx - 0.4, cz + 0.85, [
+    'Nobody at the desk. The price list says: internet £1 per 30 minutes, printing 10p a page.',
+    'A Post-it note beside it: "The ones with yellow markers are free. Help yourself."',
   ]);
 
   // 墙上的告示
@@ -1017,20 +1019,34 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
     }
     case 'busy':
       b.read(
-        '电脑',
-        '查看',
+        'Computer',
+        'Examine',
         x,
         seatZ,
-        ['这台有人占着：外套搭在椅背上，桌上放着一杯凉掉的茶和半包薯片。'],
+        ['Taken: a coat over the chair, a cold cup of tea and half a bag of crisps on the desk.'],
         0.9,
       );
       b.colliders.push(boxAt(x, seatZ, 0.6, 0.6));
       break;
     case 'repair':
-      b.read('电脑', '查看', x, seatZ, ['屏幕上贴着一张纸条：「维修中，请换一台」。'], 0.9);
+      b.read(
+        'Computer',
+        'Examine',
+        x,
+        seatZ,
+        ['A note taped to the screen: "OUT OF ORDER. Use another one."'],
+        0.9,
+      );
       break;
     case 'off':
-      b.read('电脑', '查看', x, seatZ, ['按了好几下开机键，机器没有反应。'], 0.9);
+      b.read(
+        'Computer',
+        'Examine',
+        x,
+        seatZ,
+        ['You press the power button a few times. Nothing.'],
+        0.9,
+      );
       break;
   }
 }
@@ -1081,9 +1097,9 @@ function buildMusicShop(b: Builder, x: number): void {
   b.prop('boombox', x - 0.7, 1.0, cz, { width: 0.6, rotation: 0.15 });
   b.prop('cassette_player', x + 0.2, 1.0, cz + 0.1, { height: 0.16, rotation: -0.4 });
   b.prop('portable_cassette_player', x + 0.5, 1.0, cz + 0.15, { width: 0.14, rotation: 0.5 });
-  b.read('柜台', '查看', x, cz + 0.9, [
-    '柜台后面没人，收音机里放着本周排行榜的第一名。',
-    '纸条上写着：「任选两张 CD 只要 20 英镑。试听机坏了。」',
+  b.read('Counter', 'Examine', x, cz + 0.9, [
+    "Nobody behind the counter. The radio is playing this week's number one.",
+    'A handwritten sign: "ANY 2 CDs FOR £20. LISTENING POST BROKEN."',
   ]);
   b.prop('ceiling_fan', x, STOREY, back + 4.5, { width: 1.2, groundAlign: false });
 
@@ -1120,10 +1136,10 @@ function buildArcade(b: Builder, x: number): void {
 
   // 靠后墙的四台街机（自制槽位 arcade-cabinet）
   const notes = [
-    ['投币口贴着纸条：「维修中」。'],
-    ['屏幕上一直放着演示画面。你口袋里没有 10 便士的硬币。'],
-    ['两个人正在这台机器上对战……不对，屏幕上是演示画面。'],
-    ['摇杆歪了，拨一下就卡住。'],
+    ['A note over the coin slot: "OUT OF ORDER".'],
+    ["The attract mode loops on and on. You haven't got a 10p coin."],
+    ["Two players are going head to head… no, it's just the demo."],
+    ['The joystick is bent and sticks every time you push it.'],
   ];
   const bodies = [C.signRed, C.signBlue, C.plasticDark, C.signGreen];
   const marquees = [C.signYellow, C.neonCyan, C.neonPink, C.signText];
@@ -1142,7 +1158,7 @@ function buildArcade(b: Builder, x: number): void {
       p.add(placeholderBox(0.86, 0.12, 0.35, 0, 0.95, 0.45, b.plain(C.plasticDark, 0.5)));
     });
     b.colliders.push(boxAt(cx, cz, 0.9, 0.8));
-    b.read('街机', '查看', cx, cz + 1.3, notes[i]!, 0.9);
+    b.read('Arcade machine', 'Examine', cx, cz + 1.3, notes[i]!, 0.9);
   });
 
   // 跳舞机（自制槽位 dance-machine）
@@ -1157,11 +1173,13 @@ function buildArcade(b: Builder, x: number): void {
   b.prop('gaming_console', sx + 0.05, 0.55, sz + 0.4, { width: 0.3, rotation: -Math.PI / 2 });
   b.prop('gamepad', sx - 0.6, 0, sz + 0.2, { width: 0.16, rotation: -1.2 });
   b.read(
-    '试玩台',
-    '查看',
+    'Demo pod',
+    'Examine',
     sx - 0.9,
     sz,
-    ['电视里放着游戏机的开机画面。手柄的线被人缠成了一团。'],
+    [
+      "The telly shows the console's start-up screen. Someone has tied the controller lead in knots.",
+    ],
     1.0,
   );
 
@@ -1175,7 +1193,7 @@ function buildArcade(b: Builder, x: number): void {
     p.add(screen);
   });
   b.colliders.push(boxAt(dx, dz - 1.0, 1.6, 0.4));
-  b.read('跳舞机', '查看', dx, dz, ['跳舞机：踏板上贴着「暂停使用」。'], 1.0);
+  b.read('Dance machine', 'Examine', dx, dz, ['A sign stuck on the dance pad: "OUT OF USE".'], 1.0);
 }
 
 // ---------- 千禧年的英国商业街 ----------
@@ -1284,11 +1302,13 @@ function buildMillennium(b: Builder): void {
     b.panel(0.44, 0.33, tx, ty + 0.3, tvZ - 0.26, Math.PI, b.screen(image));
   });
   b.read(
-    '电视墙',
-    '查看',
+    'TV wall',
+    'Examine',
     tvX,
     tvZ - 1.0,
-    ['六台电视放着同一个频道的天气预报：明天还是有雨。店主说今年流行纯平电视。'],
+    [
+      'Six tellies, one weather forecast: more rain tomorrow. The shopkeeper says flat-screen tubes are all the rage this year.',
+    ],
     1.3,
   );
 

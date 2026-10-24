@@ -1,5 +1,5 @@
-// XP 界面文字。中文版 XP 的界面字体是宋体 9 磅（12 像素），英文部分是 Tahoma；
-// 标题栏英文是 Trebuchet MS 粗体。Tahoma 由 assets.ts 从本地素材加载，宋体、Trebuchet MS 用系统里装的。
+// XP 界面文字。参照英文版 XP：界面字体是 Tahoma 8 磅（12 像素），标题栏是 Trebuchet MS 粗体。
+// Tahoma 由 assets.ts 从本地素材加载，Trebuchet MS 用系统里装的；后面的中文字体只是兜底。
 
 import { Text, type TextStyleOptions } from 'pixi.js';
 import { LUNA } from '../../../theme/xp-luna.ts';

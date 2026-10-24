@@ -93,7 +93,7 @@ dock.view.position.set(Math.round((WIDTH - dock.width) / 2), HEIGHT - DOCK_HEIGH
 const menuBar = new MenuBar({
   width: WIDTH,
   appName: 'Finder',
-  menus: ['文件', '编辑', '显示', '前往', '窗口', '帮助'],
+  menus: ['File', 'Edit', 'View', 'Go', 'Window', 'Help'],
 });
 const fileLayer = new Container({ label: 'files' });
 const windowLayer = new Container({ label: 'windows' });
@@ -403,27 +403,27 @@ function dropFile(): void {
   play('Purr');
 }
 
-// ---------- 页面上的按钮（开发工具，文字和 XP 部件页一致用中文） ----------
+// ---------- 页面上的按钮（开发工具，文字和游戏界面一样用英文） ----------
 
 const toolbar = document.createElement('nav');
 toolbar.className = 'dev-panel';
-toolbar.setAttribute('aria-label', 'Mac 部件');
+toolbar.setAttribute('aria-label', 'Mac components');
 const buttons: [string, () => void][] = [
-  ['提示框 alert-note', () => showAlert('note')],
-  ['警告提示框 alert-caution', () => showAlert('caution')],
-  ['停止提示框 alert-stop', () => showAlert('stop')],
-  ['文稿窗口', () => showDocument(false)],
-  ['表单 sheet-save', () => showDocument(true)],
-  ['iChat 消息 ichat-message', showChat],
-  ['Dock 弹跳', bounce],
-  ['新邮件', newMail],
-  ['废纸篓空 / 满', toggleTrash],
-  ['桌面文件', dropFile],
+  ['Note alert-note', () => showAlert('note')],
+  ['Caution alert-caution', () => showAlert('caution')],
+  ['Stop alert-stop', () => showAlert('stop')],
+  ['Document window', () => showDocument(false)],
+  ['Sheet sheet-save', () => showDocument(true)],
+  ['iChat message ichat-message', showChat],
+  ['Dock bounce', bounce],
+  ['New mail', newMail],
+  ['Trash empty / full', toggleTrash],
+  ['Desktop file', dropFile],
 ];
 for (const [label, onClick] of buttons) toolbar.append(toolbarButton(label, onClick));
 const back = document.createElement('a');
 back.href = '/';
-back.textContent = '回到游戏';
+back.textContent = 'Back to game';
 toolbar.append(back);
 document.body.append(toolbar);
 

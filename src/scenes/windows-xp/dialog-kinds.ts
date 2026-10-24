@@ -21,25 +21,25 @@ export const DIALOG_KINDS: Record<DialogKind, DialogKindInfo> = {
   'dialog-info': {
     constant: 'MB_ICONINFORMATION',
     icon: 'dialog-info',
-    buttons: ['确定'],
+    buttons: ['OK'],
     sound: 'asterisk',
   },
   'dialog-warning': {
     constant: 'MB_ICONWARNING',
     icon: 'dialog-warning',
-    buttons: ['确定'],
+    buttons: ['OK'],
     sound: 'exclamation',
   },
   'dialog-error': {
     constant: 'MB_ICONERROR',
     icon: 'dialog-error',
-    buttons: ['确定'],
+    buttons: ['OK'],
     sound: 'criticalStop',
   },
   'dialog-question': {
     constant: 'MB_ICONQUESTION',
     icon: 'dialog-question',
-    buttons: ['是(Y)', '否(N)'],
+    buttons: ['Yes', 'No'],
     sound: 'question',
   },
 };

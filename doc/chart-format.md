@@ -29,7 +29,7 @@ public/charts/
 {
   "format": 1,
   "id": "xp-popup-mvp",
-  "title": "弹窗大扫除",
+  "title": "Pop-up Sweep",
   "scene": "windows-xp",
   "bpm": 120,
   "beatsPerBar": 4,

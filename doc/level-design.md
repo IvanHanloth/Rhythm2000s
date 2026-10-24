@@ -93,21 +93,21 @@
 
 | 谱面 | BPM | 乐句 | 时长 |
 | --- | --- | --- | --- |
-| `xp-popup-mvp` 弹窗大扫除 | 120 | 8 | 36.0 秒 |
-| `xp-error-storm` 错误连连 | 128 | 8 | 33.8 秒 |
-| `xp-yes-no` 是还是否 | 104 | 8 | 41.5 秒 |
-| `xp-crash` 蓝屏前夜 | 138 | 8 | 31.3 秒 |
-| `xp-desktop-refresh` 右键刷新 | 120 | 6 | 28.0 秒 |
-| `xp-tray` 托盘气泡 | 120 | 8 | 36.0 秒 |
-| `xp-minimize` 最小化 | 112 | 8 | 38.6 秒 |
-| `xp-start-menu` 开始 | 116 | 8 | 37.2 秒 |
-| `xp-recycle` 回收站 | 124 | 8 | 34.8 秒 |
-| `xp-remix-1` XP 混音 1 | 128 | 8 | 33.8 秒 |
-| `mac-alert-basics` 提示框入门 | 104 | 8 | 41.5 秒 |
-| `mac-dock-hop` Dock 弹弹跳 | 116 | 8 | 37.2 秒 |
-| `mac-mail-rush` 新邮件来啦 | 120 | 8 | 36.0 秒 |
-| `mac-minimize` 窗口收纳 | 112 | 8 | 38.6 秒 |
-| `mac-remix-1` Mac 混音 1 | 124 | 10 | 42.6 秒 |
+| `xp-popup-mvp` Pop-up Sweep | 120 | 8 | 36.0 秒 |
+| `xp-error-storm` Error Storm | 128 | 8 | 33.8 秒 |
+| `xp-yes-no` Yes or No? | 104 | 8 | 41.5 秒 |
+| `xp-crash` Before the Blue Screen | 138 | 8 | 31.3 秒 |
+| `xp-desktop-refresh` Right-Click Refresh | 120 | 6 | 28.0 秒 |
+| `xp-tray` Tray Balloons | 120 | 8 | 36.0 秒 |
+| `xp-minimize` Minimize All | 112 | 8 | 38.6 秒 |
+| `xp-start-menu` Start Me Up | 116 | 8 | 37.2 秒 |
+| `xp-recycle` Empty the Bin | 124 | 8 | 34.8 秒 |
+| `xp-remix-1` XP Remix 1 | 128 | 8 | 33.8 秒 |
+| `mac-alert-basics` Alert 101 | 104 | 8 | 41.5 秒 |
+| `mac-dock-hop` Dock Hop | 116 | 8 | 37.2 秒 |
+| `mac-mail-rush` Mail Rush | 120 | 8 | 36.0 秒 |
+| `mac-minimize` Into the Dock | 112 | 8 | 38.6 秒 |
+| `mac-remix-1` Mac Remix 1 | 124 | 10 | 42.6 秒 |
 
 ## 候选 / 待讨论
 

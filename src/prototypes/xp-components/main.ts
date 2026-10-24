@@ -151,10 +151,22 @@ function closePopups(): void {
 // ---------- 消息框 ----------
 
 const SAMPLE_TEXTS: Record<DialogKind, { title: string; text: string }> = {
-  'dialog-info': { title: '网络连接', text: '已连接到 Internet。\n速度：56.0 Kbps' },
-  'dialog-warning': { title: '磁盘空间不足', text: '本地磁盘 (C:) 的空间不足。' },
-  'dialog-error': { title: '应用程序错误', text: '该程序执行了非法操作，即将关闭。' },
-  'dialog-question': { title: '记事本', text: '是否保存对「无标题」的更改？' },
+  'dialog-info': {
+    title: 'Network Connection',
+    text: 'You are now connected to the Internet.\nSpeed: 56.0 Kbps',
+  },
+  'dialog-warning': {
+    title: 'Low Disk Space',
+    text: 'You are running out of disk space on Local Disk (C:).',
+  },
+  'dialog-error': {
+    title: 'Application Error',
+    text: 'This program has performed an illegal operation and will be shut down.',
+  },
+  'dialog-question': {
+    title: 'Notepad',
+    text: 'The text in the Untitled file has changed.\nDo you want to save the changes?',
+  },
 };
 
 const dialogs: XpMessageBox[] = [];
@@ -263,7 +275,7 @@ function showResults(): void {
     results = null;
   };
   results = new XpResultsWindow({
-    title: '弹窗大扫除',
+    title: 'Pop-up Sweep',
     summary: summarizeResult(hits),
     newRecord: true,
     hasNext: true,
@@ -279,8 +291,8 @@ function showResults(): void {
 function showBalloon(): void {
   balloon?.destroy();
   balloon = new XpBalloon({
-    title: '发现新硬件',
-    text: 'USB 大容量存储设备\n新硬件已安装并可以使用了。',
+    title: 'Found New Hardware',
+    text: 'USB Mass Storage Device\nYour new hardware is installed and ready to use.',
     onClose: () => {
       balloon?.destroy();
       balloon = null;
@@ -327,16 +339,16 @@ canvas.onFrame(() => {
 
 const toolbar = document.createElement('nav');
 toolbar.className = 'dev-panel';
-toolbar.setAttribute('aria-label', 'XP 部件');
+toolbar.setAttribute('aria-label', 'XP components');
 for (const kind of Object.keys(DIALOG_KINDS) as DialogKind[]) {
-  toolbar.append(toolbarButton(`${kind}（${ACTION_LABELS[kind]}）`, () => openDialog(kind)));
+  toolbar.append(toolbarButton(`${kind} (${ACTION_LABELS[kind]})`, () => openDialog(kind)));
 }
-toolbar.append(toolbarButton('托盘气泡', showBalloon));
-toolbar.append(toolbarButton('结算窗口', showResults));
+toolbar.append(toolbarButton('Tray balloon', showBalloon));
+toolbar.append(toolbarButton('Results window', showResults));
 toolbar.append(toolbarButton('File download', showDownload));
 const back = document.createElement('a');
 back.href = '/';
-back.textContent = '回到游戏';
+back.textContent = 'Back to game';
 toolbar.append(back);
 document.body.append(toolbar);
 

@@ -62,7 +62,7 @@ export class XpVolumeControl {
       bottom: LUNA.edgeShadow,
     });
 
-    const labels = options.labels ?? { title: '音量', mute: '静音' };
+    const labels = options.labels ?? { title: 'Volume', mute: 'Mute' };
     const title = xpText(labels.title);
     title.anchor.set(0.5, 0);
     title.position.set(cx, 9);

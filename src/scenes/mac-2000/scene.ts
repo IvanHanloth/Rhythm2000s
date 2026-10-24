@@ -1,4 +1,4 @@
-// 场景：2000 年前后的 Mac 桌面（doc/scenes/mac-2000.md），按简体中文版 Mac OS X 10.0–10.2 的早期 Aqua 还原。
+// 场景：2000 年前后的 Mac 桌面（doc/scenes/mac-2000.md），按美国英文版 Mac OS X 10.0–10.2 的早期 Aqua 还原。
 // 玩法与 XP 的 MVP 相同：示范小节里电脑按节奏「出事」，跟打小节里玩家按同样的节奏逐个处理。
 // 进场景先在 Finder 里用鼠标选关（doc/level-select.md）。
 // 进关后先跑系统演示：谱面用到的每种动作各一轮小谱面，成功才进下一种，全部成功后才开始正文（doc/level-design.md「规则 1」）。
@@ -49,7 +49,7 @@ const BANNER_Y = 62;
 /** 演示提示条的左边（画布坐标）：轮次横幅（宽 240）右边再留一点空 */
 const CAPTION_X = DESIGN_WIDTH / 2 + 136;
 
-const MENUS = ['文件', '编辑', '显示', '前往', '窗口', '帮助'];
+const MENUS = ['File', 'Edit', 'View', 'Go', 'Window', 'Help'];
 
 /** Dock：Finder、Mail 一直在运行；其余 8 个给 dock-bounce 弹跳用（targets-view.ts 的 BOUNCE_DOCK_INDICES） */
 const DOCK_ITEMS: DockItem[] = [
@@ -180,9 +180,10 @@ class Mac2000Scene implements Scene {
     if (this.charts.length === 0) {
       this.showDialog({
         icon: drawCautionIcon(64),
-        message: '没有可用的谱面。',
-        informative: '谱面没有加载成功，原因见浏览器控制台。谱面文件放在 public/charts/ 目录下。',
-        buttons: [{ label: '好', isDefault: true, onTap: () => this.hideDialog() }],
+        message: 'No charts are available.',
+        informative:
+          'The charts could not be loaded. See the browser console for details. Chart files belong in the public/charts/ folder.',
+        buttons: [{ label: 'OK', isDefault: true, onTap: () => this.hideDialog() }],
       });
     }
     // 网址 #mac-2000/谱面 直接打开某一关：Finder 里选中它，跳过列表

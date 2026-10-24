@@ -1,6 +1,6 @@
 // 菜单栏：22 像素高的白色细条纹，横贯屏幕顶端。左边蓝色苹果、加粗的程序名和各菜单，
 // 右边音量小工具（黑色小喇叭）和时钟。
-// 菜单名用简体中文版 Finder 的说法。
+// 菜单名用美国英文版 Finder 的说法。
 
 import { Container, Graphics, type Text } from 'pixi.js';
 import { AQUA } from '../../../theme/aqua.ts';
@@ -18,10 +18,10 @@ const FIRST_MENU_X = 40;
 /** 菜单名左右各留的空白 */
 const MENU_PADDING = 10;
 const CLOCK_RIGHT = 14;
-/** 小喇叭标题的左沿离右边多远：留出时钟「周六 下午12:59」的宽度 */
+/** 小喇叭标题的左沿离右边多远：留出时钟「Sat 12:59 PM」的宽度 */
 const SPEAKER_FROM_RIGHT = 150;
 const SPEAKER_TITLE_WIDTH = VOLUME_MENU_WIDTH;
-const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export interface MenuBarOptions {
   width: number;
@@ -141,10 +141,10 @@ export class MenuBar {
     this.speakerWhiteMuted.visible = muted;
   }
 
-  /** 显示本机时间，例如「周四 下午3:01」。分钟变了才重画文字。 */
+  /** 显示本机时间，例如「Thu 3:01 PM」。分钟变了才重画文字。 */
   update(now: Date): void {
     const hours = now.getHours();
-    const label = `${WEEKDAYS[now.getDay()]} ${hours < 12 ? '上午' : '下午'}${hours % 12 || 12}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const label = `${WEEKDAYS[now.getDay()]} ${hours % 12 || 12}:${String(now.getMinutes()).padStart(2, '0')} ${hours < 12 ? 'AM' : 'PM'}`;
     if (label === this.clockLabel) return;
     this.clockLabel = label;
     this.clock.text = label;

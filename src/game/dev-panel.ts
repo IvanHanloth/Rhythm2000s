@@ -66,7 +66,7 @@ export function createDevPanel(options: DevPanelOptions): DevPanel {
 
   // 新增的显示文字只用英文
   const skip = document.createElement('label');
-  skip.title = '进关后不再演示动作，直接从谱面正文开始';
+  skip.title = 'Skip the demo of each action and start straight from the main chart';
   const checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
   checkbox.checked = options.skipTutorial;

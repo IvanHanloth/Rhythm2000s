@@ -14,7 +14,7 @@ XP 场景最早只有「弹出消息框 → 关掉」一种玩法，桌面上已
 | --- | --- | --- | --- | --- |
 | `balloon-info` | 托盘气泡（`Shell_NotifyIcon` 的 `NIIF_INFO`） | 在拍点上从托盘图标冒出气泡，响 `Windows XP Balloon.wav` | 在拍点上点气泡右上角的关闭按钮，气泡收起 | 1 |
 | `window-minimize` | 程序窗口的最小化按钮（`SC_MINIMIZE`） | 在拍点上弹出一个程序窗口（记事本、画图、IE……），任务栏多出它的按钮，响 `Windows XP Restore.wav` | 在拍点上点最小化，窗口缩进自己的任务栏按钮，响 `Windows XP Minimize.wav` | 1 |
-| `start-menu` | 开始菜单 | 拍点上按「开始」弹出开始菜单（点击声）；**0.5 拍后**点菜单里的一个程序，菜单收起，响 `Windows XP Menu Command.wav` | 同样按两下：拍点上一下（开始），0.5 拍后一下（菜单项） | 2 |
+| `start-menu` | 开始菜单 | 拍点上按「start」弹出开始菜单（点击声）；**0.5 拍后**点菜单里的一个程序，菜单收起，响 `Windows XP Menu Command.wav` | 同样按两下：拍点上一下（start），0.5 拍后一下（菜单项） | 2 |
 | `recycle-bin` | 回收站（`SHFileOperation` 的 `FO_DELETE`，允许撤销） | 在拍点上桌面落下一个文件图标，响 `Windows XP Default.wav`（暂定） | 在拍点上把文件扔进右下角的回收站，回收站图标由空变满，响 `Windows XP Recycle.wav` | 1 |
 
 - `start-menu` 和 `desktop-refresh` 一样是「一个事件、固定间隔」的两下，谱面里只写第一下的拍位置；最后一下最晚在第 3.25 拍，所以 `start-menu` 最晚放在第 2.75 拍（120 BPM 时）。
@@ -25,8 +25,8 @@ XP 场景最早只有「弹出消息框 → 关掉」一种玩法，桌面上已
 | 动作 | 位置 | 示范段 | 跟打段 · 命中 | 跟打段 · Miss |
 | --- | --- | --- | --- | --- |
 | `balloon-info` | 第 1、2、3 个气泡依次指向托盘的网络连接、Messenger、音量图标，从下往上叠 | 拍点上从尖角处弹开 | 缩小淡出 | 气泡左右抖一下，留到乐句结束再淡出 |
-| `window-minimize` | 和消息框共用屏幕上的 6 个位置；任务栏按钮排在「我的关卡」按钮右边 | 从自己的任务栏按钮处放大弹出，标题栏是活动色 | 缩小飞向自己的任务栏按钮，按钮由按下变弹起 | 标题栏闪几下，留到乐句结束再淡出 |
-| `start-menu` | 开始菜单贴着「开始」按钮向上展开 | 第一下：「开始」按钮按下，菜单弹出；第二下：菜单项蓝底高亮，菜单收起 | 同示范 | 第一下 Miss：菜单不弹出；第二下 Miss：菜单停在原处，到乐句结束收起 |
+| `window-minimize` | 和消息框共用屏幕上的 6 个位置；任务栏按钮排在「My Levels」按钮右边 | 从自己的任务栏按钮处放大弹出，标题栏是活动色 | 缩小飞向自己的任务栏按钮，按钮由按下变弹起 | 标题栏闪几下，留到乐句结束再淡出 |
+| `start-menu` | 开始菜单贴着「start」按钮向上展开 | 第一下：「start」按钮按下，菜单弹出；第二下：菜单项蓝底高亮，菜单收起 | 同示范 | 第一下 Miss：菜单不弹出；第二下 Miss：菜单停在原处，到乐句结束收起 |
 | `recycle-bin` | 文件图标排在任务栏上方一行（最多 6 个），从左往右 | 从上方落下，轻弹一下 | 沿弧线飞进回收站，回收站变满 | 图标左右抖一下，留到乐句结束再淡出 |
 
 每个乐句开始时回收站清空、任务栏上的程序按钮收起。
@@ -38,17 +38,18 @@ XP 场景最早只有「弹出消息框 → 关掉」一种玩法，桌面上已
 | 目标 | 每个乐句最多 | 原因 |
 | --- | --- | --- |
 | 消息框 + 程序窗口 | 6 | 屏幕上 6 个位置 |
-| `window-minimize` | 4 | 任务栏上除「我的关卡」外只放得下 4 个程序按钮 |
+| `window-minimize` | 4 | 任务栏上除「My Levels」外只放得下 4 个程序按钮 |
 | `balloon-info` | 3 | 托盘里只有 3 个图标 |
 | `recycle-bin` | 6 | 桌面那一行只摆得下 6 个文件 |
 
 ### 文案
 
-全部原创，模仿当年系统提示的腔调。
+全部原创，模仿当年英文版系统提示的腔调（2026-10-24 起玩家看到的文字一律用英文）。
 
-- 气泡：「发现新硬件 / USB 大容量存储设备」「Windows Messenger / 小明 刚刚登录。」「自动更新 / 有新的更新可以下载。」「本地连接 / 网络电缆没有插好。」「安全中心 / 您的计算机可能有风险。」
-- 程序窗口：「无标题 - 记事本」「未命名 - 画图」「空白页 - Microsoft Internet Explorer」「Windows Media Player」「扫雷」「计算器」
-- 回收站的文件：「新建文本文档.txt」「作业(1).doc」「未命名.bmp」「七里香.mp3」「setup.exe」「新建文件夹」
+- 气泡：「Found New Hardware / USB Mass Storage Device」「Windows Messenger / Jamie has just signed in.」「Automatic Updates / New updates are ready to download.」「Local Area Connection / A network cable is unplugged.」「Security Center / Your computer might be at risk.」
+- 程序窗口（标题栏 / 任务栏按钮）：「Untitled - Notepad」「untitled - Paint」「about:blank - Microsoft Internet Explorer」（标题栏放不下时截断成「...」，任务栏按钮上是「about:blank - Micr...」）「Minesweeper」
+- 开始菜单里轮流点到的程序：「Notepad」「Paint」「Minesweeper」「Calculator」「Windows Media Player」「Windows Messenger」
+- 回收站的文件：「New Text Document.txt」「Hey Ya!.mp3」「setup.exe」「untitled.bmp」「New Folder」「homework(1).doc」
 
 ## 等待与长按：下载进度窗、音量控制（2026-10-24）
 
@@ -100,18 +101,18 @@ XP 场景最早只有「弹出消息框 → 关掉」一种玩法，桌面上已
 
 ## 关卡（谱面）
 
-列表里的顺序就是 `public/charts/index.json` 里的顺序。前四首只用消息框。2026-10-24 合并远端时，远端也加了两首只用消息框的谱面，和这里原有的「错误连环」「是还是否」很像，用户选了留远端的两首。
+列表里的顺序就是 `public/charts/index.json` 里的顺序。前四首只用消息框。2026-10-24 合并远端时，远端也加了两首只用消息框的谱面，和这里原有的「错误连环」「是还是否」很像，用户选了留远端的两首。曲名 2026-10-24 起改成英文（玩家看到的文字一律用英文）。
 
 | 谱面 | 曲名 | BPM | 用到的动作 | 设计意图 |
 | --- | --- | --- | --- | --- |
-| `xp-popup-mvp` | 弹窗大扫除 | 120 | `dialog-info` | 原有的 MVP，只练节奏 |
-| `xp-error-storm` | 错误连连 | 128 | 错误、警告、询问消息框 | 远端加的，混着来，带反拍 |
-| `xp-yes-no` | 是还是否 | 104 | 询问消息框为主 | 远端加的，切分和反拍 |
-| `xp-crash` | 蓝屏前夜 | 138 | 四种消息框 | 快速，单个乐句最多 6 个消息框 |
-| `xp-desktop-refresh` | 右键刷新 | 120 | `desktop-refresh` 和消息框 | 另一个会话做的右键刷新关卡，见 [windows-xp.md](windows-xp.md) 的「桌面右键菜单与刷新」 |
-| `xp-tray` | 托盘气泡 | 120 | `balloon-info`、`dialog-info` | 气泡声音很短，练干脆的点；后半段和消息框交替 |
-| `xp-minimize` | 最小化 | 112 | `window-minimize`、`dialog-warning` | 窗口弹出有一个上扬的声音，后半段混入警告框 |
-| `xp-start-menu` | 开始 | 116 | `start-menu`、`dialog-info` | 练「一下 + 半拍后一下」的两下动作 |
-| `xp-recycle` | 回收站 | 124 | `recycle-bin`、`dialog-question` | 「是否删除？」和扔文件交替 |
+| `xp-popup-mvp` | Pop-up Sweep | 120 | `dialog-info` | 原有的 MVP，只练节奏 |
+| `xp-error-storm` | Error Storm | 128 | 错误、警告、询问消息框 | 远端加的，混着来，带反拍 |
+| `xp-yes-no` | Yes or No? | 104 | 询问消息框为主 | 远端加的，切分和反拍 |
+| `xp-crash` | Before the Blue Screen | 138 | 四种消息框 | 快速，单个乐句最多 6 个消息框 |
+| `xp-desktop-refresh` | Right-Click Refresh | 120 | `desktop-refresh` 和消息框 | 另一个会话做的右键刷新关卡，见 [windows-xp.md](windows-xp.md) 的「桌面右键菜单与刷新」 |
+| `xp-tray` | Tray Balloons | 120 | `balloon-info`、`dialog-info` | 气泡声音很短，练干脆的点；后半段和消息框交替 |
+| `xp-minimize` | Minimize All | 112 | `window-minimize`、`dialog-warning` | 窗口弹出有一个上扬的声音，后半段混入警告框 |
+| `xp-start-menu` | Start Me Up | 116 | `start-menu`、`dialog-info` | 练「一下 + 半拍后一下」的两下动作 |
+| `xp-recycle` | Empty the Bin | 124 | `recycle-bin`、`dialog-question` | 询问框和扔文件交替 |
 | `xp-download` | Download Complete | 112 | `progress-download`、`volume-mute`、`dialog-info`、`balloon-info` | 按[官方关卡规范](../level-design.md)写的第一首：16 个乐句、约 73 秒。前两句各只练一种新动作；中段加入反拍、在长按前后插消息框；后段两次长按连着来，下载窗挪到反拍（第 0.25 拍）弹出。下载窗加长到 3 拍后，每个下载乐句只有下载窗一个动作，和前后的密集乐句交替，当作休止气泡和音量小窗都在托盘附近，同一乐句里不混用，免得叠在一起 |
-| `xp-remix-1` | XP 混音 1 | 128 | 全部 XP 动作 | 每个乐句换一种组合，最后两句全部混用 |
+| `xp-remix-1` | XP Remix 1 | 128 | 全部 XP 动作 | 每个乐句换一种组合，最后两句全部混用 |

@@ -29,31 +29,31 @@ interface ProgramSpec {
 
 export const PROGRAMS: Record<ProgramKind, ProgramSpec> = {
   notepad: {
-    title: '无标题 - 记事本',
+    title: 'Untitled - Notepad',
     icon: 'notepad',
-    taskLabel: '无标题 - 记事本',
-    menu: '文件(F)  编辑(E)  格式(O)  查看(V)  帮助(H)',
+    taskLabel: 'Untitled - Notepad',
+    menu: 'File   Edit   Format   View   Help',
     draw: drawNotepad,
   },
   paint: {
-    title: '未命名 - 画图',
+    title: 'untitled - Paint',
     icon: 'paint',
-    taskLabel: '未命名 - 画图',
-    menu: '文件(F)  编辑(E)  查看(V)  图像(I)  颜色(C)',
+    taskLabel: 'untitled - Paint',
+    menu: 'File   Edit   View   Image   Colors   Help',
     draw: drawPaint,
   },
   ie: {
-    title: '空白页 - Microsoft Internet Explorer',
+    title: 'about:blank - Microsoft Internet Explorer',
     icon: 'internet-explorer',
-    taskLabel: '空白页 - Microsoft...',
-    menu: '文件(F)  编辑(E)  查看(V)  收藏(A)  工具(T)',
+    taskLabel: 'about:blank - Micr...',
+    menu: 'File   Edit   View   Favorites   Tools   Help',
     draw: drawInternetExplorer,
   },
   minesweeper: {
-    title: '扫雷',
+    title: 'Minesweeper',
     icon: 'minesweeper',
-    taskLabel: '扫雷',
-    menu: '游戏(G)  帮助(H)',
+    taskLabel: 'Minesweeper',
+    menu: 'Game   Help',
     draw: drawMinesweeper,
   },
 };
@@ -121,7 +121,7 @@ function sunkenPaper(x: number, y: number, w: number, h: number): Graphics {
 }
 
 function drawNotepad(client: Container, w: number, h: number): void {
-  const text = xpText('今天是 2003 年 6 月 1 日。\n下午去网吧上网，\n顺便把作业抄完。|', {
+  const text = xpText('June 1, 2003\nNet café this afternoon,\nthen copy my homework.|', {
     lineHeight: 16,
   });
   text.position.set(5, 4);
@@ -158,13 +158,13 @@ function drawPaint(client: Container, w: number, h: number): void {
 
 function drawInternetExplorer(client: Container, w: number, h: number): void {
   const bar = new Graphics().rect(0, 0, w, 22).fill(LUNA.face);
-  const label = xpText('地址(D)', { fill: LUNA.inkDisabled });
+  const label = xpText('Address', { fill: LUNA.inkDisabled });
   label.position.set(4, 4);
-  const address = sunkenPaper(48, 3, w - 52, 16);
+  const address = sunkenPaper(52, 3, w - 56, 16);
   const url = xpText('about:blank');
-  url.position.set(52, 4);
+  url.position.set(56, 4);
   const page = sunkenPaper(1, 24, w - 2, h - 25);
-  const link = xpText('欢迎光临我的个人主页！\n您是第 000123 位访客', {
+  const link = xpText('Welcome to my homepage!\nYou are visitor #000123', {
     fill: XP_PROGRAMS.link,
     lineHeight: 16,
   });

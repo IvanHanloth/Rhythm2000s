@@ -1,6 +1,6 @@
-// 开始菜单（XP 样式）：顶部蓝色用户栏 + 橙色分隔线；左栏白底（固定项、常用程序、「所有程序」），
-// 右栏浅蓝底（系统文件夹和工具）；底部蓝条「注销」「关闭计算机」。鼠标移上去是蓝底白字。
-// 本地缺「控制面板」「我最近的文档」「设定程序访问和默认值」的图标，这三项暂时不放。原点在左上角。
+// 开始菜单（XP 样式）：顶部蓝色用户栏 + 橙色分隔线；左栏白底（固定项、常用程序、「All Programs」），
+// 右栏浅蓝底（系统文件夹和工具）；底部蓝条「Log Off」「Turn Off Computer」。鼠标移上去是蓝底白字。
+// 本地缺「Control Panel」「My Recent Documents」「Set Program Access and Defaults」的图标，这三项暂时不放。原点在左上角。
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
 import { LUNA } from '../../../theme/xp-luna.ts';
@@ -29,32 +29,32 @@ type Entry = ItemSpec | 'separator';
 
 const PINNED: ItemSpec[] = [
   { icon: 'internet-explorer', label: 'Internet', subtitle: 'Internet Explorer', bold: true },
-  { icon: 'outlook-express', label: '电子邮件', subtitle: 'Outlook Express', bold: true },
+  { icon: 'outlook-express', label: 'E-mail', subtitle: 'Outlook Express', bold: true },
 ];
 const FREQUENT: ItemSpec[] = [
   { icon: 'windows-media-player', label: 'Windows Media Player' },
   { icon: 'windows-messenger', label: 'Windows Messenger' },
-  { icon: 'notepad', label: '记事本' },
-  { icon: 'paint', label: '画图' },
-  { icon: 'calculator', label: '计算器' },
-  { icon: 'minesweeper', label: '扫雷' },
+  { icon: 'notepad', label: 'Notepad' },
+  { icon: 'paint', label: 'Paint' },
+  { icon: 'calculator', label: 'Calculator' },
+  { icon: 'minesweeper', label: 'Minesweeper' },
 ];
 const RIGHT: Entry[] = [
-  { icon: 'my-documents', label: '我的文档', bold: true },
-  { icon: 'my-pictures', label: '图片收藏', bold: true },
-  { icon: 'my-music', label: '我的音乐', bold: true },
-  { icon: 'my-computer', label: '我的电脑', bold: true },
+  { icon: 'my-documents', label: 'My Documents', bold: true },
+  { icon: 'my-pictures', label: 'My Pictures', bold: true },
+  { icon: 'my-music', label: 'My Music', bold: true },
+  { icon: 'my-computer', label: 'My Computer', bold: true },
   'separator',
-  { icon: 'network-global', label: '网上邻居' },
-  { icon: 'printer', label: '打印机和传真' },
+  { icon: 'network-global', label: 'My Network Places' },
+  { icon: 'printer', label: 'Printers and Faxes' },
   'separator',
-  { icon: 'help', label: '帮助和支持' },
-  { icon: 'search', label: '搜索' },
-  { icon: 'run', label: '运行...' },
+  { icon: 'help', label: 'Help and Support' },
+  { icon: 'search', label: 'Search' },
+  { icon: 'run', label: 'Run...' },
 ];
 
 export interface StartMenuOptions {
-  /** 点了某一项（菜单项、「所有程序」、「注销」「关闭计算机」） */
+  /** 点了某一项（菜单项、「All Programs」、「Log Off」「Turn Off Computer」） */
   onSelect?: (label: string) => void;
 }
 
@@ -180,8 +180,8 @@ export class XpStartMenu {
     footer.y = top;
     let right = START_MENU_WIDTH - 8;
     for (const { icon, label } of [
-      { icon: 'shut-down', label: '关闭计算机' },
-      { icon: 'log-off', label: '注销' },
+      { icon: 'shut-down', label: 'Turn Off Computer' },
+      { icon: 'log-off', label: 'Log Off' },
     ]) {
       const item = new Container({ label: `footer-${label}` });
       const hot = new Graphics();
@@ -213,7 +213,7 @@ export class XpStartMenu {
       .rect(2, 0, COLUMN_WIDTH - 4, ALL_PROGRAMS_HEIGHT)
       .fill(LUNA.selection);
     hot.visible = false;
-    const text = xpText('所有程序', { fontWeight: '700' });
+    const text = xpText('All Programs', { fontWeight: '700' });
     text.anchor.set(0, 0.5);
     const arrowSize = 17;
     const totalWidth = text.width + 8 + arrowSize;
@@ -229,7 +229,7 @@ export class XpStartMenu {
     item.addChild(hot, text, arrow);
     this.makeInteractive(
       item,
-      '所有程序',
+      'All Programs',
       new Rectangle(2, 0, COLUMN_WIDTH - 4, ALL_PROGRAMS_HEIGHT),
       (on) => {
         hot.visible = on;

@@ -564,7 +564,7 @@ export class Hub {
   private promptFor(spot: HubSpot): string {
     if (spot.kind === 'read') return `${spot.verb} · ${spot.name}`;
     const level = this.levelOf(spot);
-    return `坐下 · ${level?.label ?? spot.levelId}`;
+    return `Sit down · ${level?.label ?? spot.levelId}`;
   }
 
   /** 坐下的过程：角色从站的地方挪到椅子上，转身面对屏幕 */

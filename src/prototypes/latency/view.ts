@@ -47,10 +47,10 @@ export class LatencyView {
     const style = { fontFamily: 'system-ui, sans-serif', fontSize: 12, fill: COLORS.text };
 
     this.tickLabels = TICKS_MS.map((ms) => new Text({ text: `${ms > 0 ? '+' : ''}${ms}`, style }));
-    this.earlyLabel = new Text({ text: '← 早', style });
-    this.lateLabel = new Text({ text: '晚 →', style });
+    this.earlyLabel = new Text({ text: '← Early', style });
+    this.lateLabel = new Text({ text: 'Late →', style });
     this.hint = new Text({
-      text: '点击「开始」，然后跟着听到的拍子\n按空格键，或点击 / 触摸这里',
+      text: 'Click "Start", then press Space or click / tap here\nalong with the beat you hear',
       style: { ...style, fontSize: 16, align: 'center' },
     });
     for (const label of [...this.tickLabels, this.earlyLabel, this.lateLabel, this.hint]) {

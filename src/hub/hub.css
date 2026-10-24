@@ -262,6 +262,7 @@
   position: absolute;
   left: 20px;
   top: 18px;
+  max-width: calc(100% - 40px);
   padding: 6px 12px;
   border-left: 4px solid var(--hub-perfect);
   background: rgb(0 0 0 / 0.55);

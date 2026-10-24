@@ -1,4 +1,4 @@
-// 任务栏（Shell_TrayWnd）：30 像素高的蓝色渐变条，左边绿色「开始」按钮，右边通知区域（托盘）。
+// 任务栏（Shell_TrayWnd）：30 像素高的蓝色渐变条，左边绿色「start」按钮，右边通知区域（托盘）。
 // 托盘里有网络连接、Messenger、音量小喇叭和时钟。原点在任务栏左上角。
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
@@ -7,7 +7,7 @@ import { xpAssets } from '../assets.ts';
 import { verticalGradient } from './draw.ts';
 import { TASKBAR_HEIGHT, XP_SCREEN_WIDTH } from './screen.ts';
 import { drawMuteBadge } from './mute-badge.ts';
-import { hardShadow, xpText } from './xp-text.ts';
+import { hardShadow, xpText, XP_FONTS } from './xp-text.ts';
 
 const START_WIDTH = 99;
 const START_RADIUS = 11;
@@ -52,7 +52,7 @@ export class XpTaskbar {
       sprite.setSize(TRAY_ICON);
       return sprite;
     });
-    this.clock = xpText('00:00', { fill: LUNA.taskbar.text });
+    this.clock = xpText('00:00 PM', { fill: LUNA.taskbar.text });
     this.clock.anchor.set(0, 0.5);
 
     const speaker = new Sprite(xpAssets().icon('speaker'));
@@ -71,7 +71,7 @@ export class XpTaskbar {
     this.volumeIcon.position.set(x, iconTop);
     x += TRAY_ICON + TRAY_GAP + 2;
     this.clock.position.set(x, TASKBAR_HEIGHT / 2);
-    // 时钟宽度按最宽的「00:00」留，走动时托盘不变宽
+    // 时钟宽度按最宽的「00:00 PM」留，走动时托盘不变宽
     const trayWidth = Math.ceil(x + this.clock.width + TRAY_PADDING);
 
     const trayFace = new Graphics()
@@ -95,9 +95,11 @@ export class XpTaskbar {
     this.setClock(new Date());
   }
 
-  /** 时钟显示本机时间（24 小时制）；每帧调用也只在分钟变化时重画 */
+  /** 时钟显示本机时间（英文版的 12 小时制，如「5:49 PM」）；每帧调用也只在分钟变化时重画 */
   setClock(now: Date): void {
-    const text = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const text = `${hours % 12 || 12}:${minutes} ${hours < 12 ? 'AM' : 'PM'}`;
     if (text === this.clockText) return;
     this.clockText = text;
     this.clock.text = text;
@@ -150,8 +152,11 @@ export class StartButton {
     }
     flag.position.set(8, (TASKBAR_HEIGHT - FLAG_SIZE) / 2);
 
-    const label = xpText('开始', {
-      fontSize: 16,
+    // 英文版按钮上是小写斜体的「start」
+    const label = xpText('start', {
+      fontFamily: XP_FONTS.caption,
+      fontSize: 18,
+      fontStyle: 'italic',
       fontWeight: '700',
       fill: s.text,
       dropShadow: hardShadow(s.textShadow),

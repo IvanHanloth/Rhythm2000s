@@ -22,7 +22,7 @@ export interface XpMessageBoxOptions {
   kind: DialogKind;
   title: string;
   text: string;
-  /** 不传时按消息框种类（「确定」或「是」「否」） */
+  /** 不传时按消息框种类（「OK」或「Yes」「No」） */
   buttons?: readonly string[];
   /** 正文超过这个宽度就换行 */
   maxTextWidth?: number;

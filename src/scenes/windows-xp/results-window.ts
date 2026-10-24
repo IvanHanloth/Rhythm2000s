@@ -1,5 +1,5 @@
 // 结算窗口（doc/results.md）：Luna 窗口，里面是共用的结算内容（src/ui/results-panel.ts），
-// 底部「重试」「选关」「下一关」三个按钮可以用鼠标点。原点在窗口中心，方便做弹出动画。
+// 底部「Retry」「Levels」「Next Level」三个按钮可以用鼠标点。原点在窗口中心，方便做弹出动画。
 
 import { Container, Graphics } from 'pixi.js';
 import type { ResultSummary } from '../../rhythm/result-summary.ts';
@@ -20,7 +20,7 @@ export interface XpResultsOptions {
   title: string;
   summary: ResultSummary;
   newRecord: boolean;
-  /** 列表里还有下一关；没有时「下一关」灰掉，默认按钮换成「重试」 */
+  /** 列表里还有下一关；没有时「Next Level」灰掉，默认按钮换成「Retry」 */
   hasNext: boolean;
   onRetry: () => void;
   onList: () => void;
@@ -69,7 +69,7 @@ export class XpResultsWindow {
     const width = RESULTS_WIDTH;
     const height = RESULTS_HEIGHT;
     this.view.pivot.set(width / 2, height / 2);
-    this.frame = new XpWindowFrame({ title: `结算 — ${options.title}`, width, height });
+    this.frame = new XpWindowFrame({ title: `Results — ${options.title}`, width, height });
     this.frame.closeButton.view.eventMode = 'static';
     this.frame.closeButton.view.on('pointertap', options.onList);
 
@@ -87,17 +87,20 @@ export class XpResultsWindow {
       kit,
     });
 
-    const hint = xpText(`回车 ${options.hasNext ? '下一关' : '重试'} · R 重试 · Esc 选关`, {
-      fill: kit.muted,
-    });
+    const hint = xpText(
+      `Enter: ${options.hasNext ? 'Next Level' : 'Retry'} · R: Retry · Esc: Levels`,
+      {
+        fill: kit.muted,
+      },
+    );
     hint.anchor.set(0, 0.5);
     hint.position.set(0, buttonsTop + BUTTON_HEIGHT / 2);
     client.addChild(panel, hint);
 
     const buttons: [string, () => void, boolean][] = [
-      ['重试', options.onRetry, !options.hasNext],
-      ['选关', options.onList, false],
-      ['下一关', options.onNext, options.hasNext],
+      ['Retry', options.onRetry, !options.hasNext],
+      ['Levels', options.onList, false],
+      ['Next Level', options.onNext, options.hasNext],
     ];
     let right = clientWidth;
     for (const [label, onTap, isDefault] of buttons.reverse()) {
@@ -105,7 +108,7 @@ export class XpResultsWindow {
       right -= button.width;
       button.view.position.set(right, buttonsTop);
       right -= 6;
-      const enabled = label !== '下一关' || options.hasNext;
+      const enabled = label !== 'Next Level' || options.hasNext;
       if (enabled) wireButton(button, onTap);
       else button.view.alpha = 0.45;
       client.addChild(button.view);

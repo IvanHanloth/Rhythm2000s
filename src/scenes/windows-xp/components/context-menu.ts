@@ -8,17 +8,17 @@ import { xpText } from './xp-text.ts';
 
 export type MenuEntry = { label: string; submenu?: boolean; disabled?: boolean } | 'separator';
 
-/** 中文版 XP 桌面空白处的右键菜单 */
+/** 英文版 XP 桌面空白处的右键菜单 */
 export const DESKTOP_MENU: readonly MenuEntry[] = [
-  { label: '排列图标(I)', submenu: true },
-  { label: '刷新(E)' },
+  { label: 'Arrange Icons By', submenu: true },
+  { label: 'Refresh' },
   'separator',
-  { label: '粘贴(P)', disabled: true },
-  { label: '粘贴快捷方式(S)', disabled: true },
+  { label: 'Paste', disabled: true },
+  { label: 'Paste Shortcut', disabled: true },
   'separator',
-  { label: '新建(W)', submenu: true },
+  { label: 'New', submenu: true },
   'separator',
-  { label: '属性(R)' },
+  { label: 'Properties' },
 ];
 
 const ITEM_HEIGHT = 19;

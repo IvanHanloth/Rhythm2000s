@@ -8,15 +8,15 @@ export type Method = 'A' | 'B';
 export const INPUT_KINDS: readonly InputKind[] = ['keyboard', 'mouse', 'touch', 'pen'];
 
 export const INPUT_KIND_LABELS: Record<InputKind, string> = {
-  keyboard: '键盘',
-  mouse: '鼠标',
-  touch: '触摸',
-  pen: '触控笔',
+  keyboard: 'Keyboard',
+  mouse: 'Mouse',
+  touch: 'Touch',
+  pen: 'Pen',
 };
 
 export const METHOD_LABELS: Record<Method, string> = {
-  A: 'A：getOutputTimestamp',
-  B: 'B：currentTime − 延迟',
+  A: 'A: getOutputTimestamp',
+  B: 'B: currentTime − latency',
 };
 
 export interface TapRecord {

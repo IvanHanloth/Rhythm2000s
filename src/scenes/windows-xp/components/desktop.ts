@@ -17,12 +17,12 @@ const CELL_HEIGHT = DESKTOP_CELL_HEIGHT;
 const MARGIN_TOP = 8;
 
 const LEFT_COLUMN = [
-  { icon: 'my-documents', label: '我的文档' },
-  { icon: 'my-computer', label: '我的电脑' },
-  { icon: 'network-global', label: '网上邻居' },
+  { icon: 'my-documents', label: 'My Documents' },
+  { icon: 'my-computer', label: 'My Computer' },
+  { icon: 'network-global', label: 'My Network Places' },
   { icon: 'internet-explorer', label: 'Internet Explorer' },
 ];
-const RECYCLE_BIN = { icon: 'recycle-bin-empty', label: '回收站' };
+const RECYCLE_BIN = { icon: 'recycle-bin-empty', label: 'Recycle Bin' };
 
 export class XpDesktop {
   readonly view = new Container({ label: 'desktop' });

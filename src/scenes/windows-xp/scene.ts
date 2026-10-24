@@ -66,25 +66,40 @@ const POPUP_TEXT_WIDTH = 210;
 /** 消息框文案：模仿当年弹窗广告和系统提示的腔调，全部原创 */
 const POPUP_TEXTS: Record<DialogKind, { title: string; text: string }[]> = {
   'dialog-info': [
-    { title: '恭喜您！', text: '您是本站第 100000 位访客，请点击领取大奖。' },
-    { title: '新消息', text: '您有 1 条新的好友请求。' },
-    { title: '网络连接', text: '已连接到 Internet。速度：56.0 Kbps' },
-    { title: '温馨提示', text: '您的邮箱已满，请及时清理。' },
+    {
+      title: 'Congratulations!',
+      text: 'You are our 100,000th visitor! Click here to claim your prize.',
+    },
+    { title: 'New Message', text: 'You have 1 new friend request.' },
+    {
+      title: 'Network Connection',
+      text: 'You are now connected to the Internet. Speed: 56.0 Kbps',
+    },
+    { title: 'Reminder', text: 'Your mailbox is full. Please delete some messages.' },
   ],
   'dialog-warning': [
-    { title: '安全警告', text: '发现 3 个可疑文件，建议立即扫描。' },
-    { title: '磁盘空间不足', text: '本地磁盘 (C:) 的空间不足。' },
-    { title: '电池电量低', text: '电池电量只剩 5%，请接上电源。' },
+    { title: 'Security Warning', text: '3 suspicious files were found. Scan your computer now.' },
+    { title: 'Low Disk Space', text: 'You are running out of disk space on Local Disk (C:).' },
+    { title: 'Low Battery', text: 'Your battery is at 5%. Plug in your computer now.' },
   ],
   'dialog-error': [
-    { title: '应用程序错误', text: '该程序执行了非法操作，即将关闭。' },
-    { title: '找不到文件', text: '找不到文件 C:\\WINDOWS\\system32\\fun.dll。' },
-    { title: '网页错误', text: '无法显示网页。请检查网络连接。' },
+    {
+      title: 'Application Error',
+      text: 'This program has performed an illegal operation and will be shut down.',
+    },
+    { title: 'File Not Found', text: 'Cannot find the file C:\\WINDOWS\\system32\\fun.dll.' },
+    { title: 'Page Error', text: 'The page cannot be displayed. Check your network connection.' },
   ],
   'dialog-question': [
-    { title: '免费下载', text: '是否下载最新动态屏保？完全免费！' },
-    { title: '系统提示', text: '您的电脑运行缓慢，是否立即优化？' },
-    { title: '记事本', text: '是否保存对「无标题」的更改？' },
+    {
+      title: 'Free Download',
+      text: 'Download the newest animated screensaver? It is totally FREE!',
+    },
+    { title: 'System Alert', text: 'Your computer is running slowly. Optimize it now?' },
+    {
+      title: 'Notepad',
+      text: 'The text in the Untitled file has changed.\nDo you want to save the changes?',
+    },
   ],
 };
 
@@ -104,7 +119,7 @@ const RESULT_INPUT_DELAY_MS = 600;
 type State = 'select' | 'ready' | 'starting' | 'playing' | 'result';
 
 /** 资源管理器窗口在虚拟屏幕上的位置和大小（设计稿 1120×630 换算到 1024×576） */
-const EXPLORER = { x: 64, y: 19, width: 896, height: 504 };
+const EXPLORER = { x: 80, y: 19, width: 864, height: 504 };
 
 interface ActiveJudgement {
   record: JudgementRecord;
@@ -222,9 +237,9 @@ class WindowsXpScene implements Scene {
     if (this.charts.length === 0) {
       this.showDialog({
         kind: 'dialog-error',
-        title: '没有可用的谱面',
-        text: '谱面没有加载成功，原因见浏览器控制台。\n谱面文件放在 public/charts/ 目录下。',
-        buttons: [{ label: '确定', onTap: () => this.hideDialog() }],
+        title: 'No Charts Available',
+        text: 'The charts could not be loaded. See the browser console for details.\nChart files go in the public/charts/ folder.',
+        buttons: [{ label: 'OK', onTap: () => this.hideDialog() }],
       });
     }
     // 网址 #windows-xp/谱面 直接打开某一关：资源管理器里选中它，跳过列表

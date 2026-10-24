@@ -1,6 +1,6 @@
-// 选关：XP 资源管理器（CabinetWClass）里的「我的关卡」文件夹（doc/level-select.md、doc/scenes/windows-xp.md「选关」）。
+// 选关：XP 资源管理器（CabinetWClass）里的「My Levels」文件夹（doc/level-select.md、doc/scenes/windows-xp.md「选关」）。
 // 菜单栏、标准按钮工具栏、地址栏、左边任务窗格、右边平铺视图、底部状态栏，按原版像素尺寸绘制。
-// 单击图标选中，双击或点任务窗格的「开始这一关」开始；工具栏「后退」回到网吧。原点在窗口左上角。
+// 单击图标选中，双击或点任务窗格的「Play this level」开始；工具栏「Back」回到网吧。原点在窗口左上角。
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
 import { ACTION_LABELS } from '../../rhythm/actions.ts';
@@ -19,8 +19,8 @@ import { CAPTION_HEIGHT, FRAME_WIDTH, XpWindowFrame } from './components/window-
 import { xpText } from './components/xp-text.ts';
 import { DIALOG_KINDS, isDialogKind } from './dialog-kinds.ts';
 
-export const EXPLORER_TITLE = '我的关卡';
-const ADDRESS = 'C:\\rhythm2000s\\我的关卡\\XP 桌面';
+export const EXPLORER_TITLE = 'My Levels';
+const ADDRESS = 'C:\\rhythm2000s\\My Levels\\XP Desktop';
 
 const MENU_HEIGHT = 20;
 const TOOLBAR_HEIGHT = 38;
@@ -39,16 +39,16 @@ const TILE_GAP_X = 18;
 const TILE_GAP_Y = 10;
 const TILE_ICON = 48;
 
-const MENUS = ['文件(F)', '编辑(E)', '查看(V)', '收藏(A)', '工具(T)', '帮助(H)'];
+const MENUS = ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'];
 
 export interface XpLevelSelectOptions {
   /** 这台电脑上的全部谱面，按清单顺序 */
   charts: readonly Chart[];
   width: number;
   height: number;
-  /** 开始第 index 关（双击图标、「开始这一关」、回车） */
+  /** 开始第 index 关（双击图标、「Play this level」、回车） */
   onStart(index: number): void;
-  /** 回到网吧（工具栏「后退」、任务窗格「回到网吧」） */
+  /** 回到网吧（工具栏「Back」、任务窗格「Back to the café」） */
   onBack(): void;
 }
 
@@ -94,8 +94,8 @@ export class XpLevelSelect {
 
     const status = statusBar(
       clientWidth,
-      `${charts.length} 个对象`,
-      '单击选中，双击开始　　Esc 回到网吧',
+      `${charts.length} ${charts.length === 1 ? 'object' : 'objects'}`,
+      'Click to select, double-click to play    Esc: back to the café',
     );
     status.y = clientHeight - STATUS_HEIGHT;
 
@@ -115,7 +115,7 @@ export class XpLevelSelect {
     return this.selected;
   }
 
-  /** 选中第 index 关，刷新图标高亮和「详细信息」 */
+  /** 选中第 index 关，刷新图标高亮和「Details」 */
   select(index: number): void {
     const count = this.options.charts.length;
     if (count === 0) {
@@ -153,7 +153,7 @@ export class XpLevelSelect {
     const { charts } = this.options;
     if (charts.length === 0) return root;
 
-    const title = xpText('所有关卡', { fontWeight: '700', fill: LUNA.explorer.viewGroupTitle });
+    const title = xpText('All Levels', { fontWeight: '700', fill: LUNA.explorer.viewGroupTitle });
     title.position.set(VIEW_PADDING_X, VIEW_PADDING_Y);
     const line = new Graphics()
       .rect(VIEW_PADDING_X, VIEW_PADDING_Y + 18, width - VIEW_PADDING_X * 2, 1)
@@ -215,14 +215,14 @@ export class XpLevelSelect {
         .fill(verticalGradient(LUNA.explorer.taskPane)),
     );
 
-    const tasks = taskGroup('关卡任务', [
-      { icon: drawPlayIcon(), label: '开始这一关', onTap: () => this.startSelected() },
-      { icon: drawBackIcon(16), label: '回到网吧', onTap: () => this.options.onBack() },
+    const tasks = taskGroup('Level Tasks', [
+      { icon: drawPlayIcon(), label: 'Play this level', onTap: () => this.startSelected() },
+      { icon: drawBackIcon(16), label: 'Back to the café', onTap: () => this.options.onBack() },
     ]);
     tasks.view.position.set(GROUP_MARGIN, GROUP_MARGIN);
 
     const detailsHeight = 112;
-    const details = taskGroupFrame('详细信息', detailsHeight);
+    const details = taskGroupFrame('Details', detailsHeight);
     details.position.set(GROUP_MARGIN, GROUP_MARGIN + tasks.height + GROUP_MARGIN);
     this.details.position.set(10, GROUP_HEADER_HEIGHT + 8);
     details.addChild(this.details);
@@ -240,7 +240,10 @@ export class XpLevelSelect {
     const wrap = TASK_PANE_WIDTH - GROUP_MARGIN * 2 - 20;
     if (!chart) {
       this.details.addChild(
-        xpText('这台电脑上还没有可玩的关卡。', { wordWrap: true, wordWrapWidth: wrap }),
+        xpText('There are no levels on this computer yet.', {
+          wordWrap: true,
+          wordWrapWidth: wrap,
+        }),
       );
       return;
     }
@@ -248,10 +251,10 @@ export class XpLevelSelect {
     const name = xpText(chart.title, { fontWeight: '700' });
     const lines = xpText(
       [
-        `动作：${summary.actions.map((a) => ACTION_LABELS[a]).join('、')}`,
-        `速度：${chart.bpm} BPM`,
-        `乐句：${summary.phrases} 句`,
-        `时长：${formatDuration(summary.seconds)}`,
+        `Actions: ${summary.actions.map((a) => ACTION_LABELS[a]).join(', ')}`,
+        `Tempo: ${chart.bpm} BPM`,
+        `Phrases: ${summary.phrases}`,
+        `Length: ${formatDuration(summary.seconds)}`,
       ].join('\n'),
       { wordWrap: true, wordWrapWidth: wrap, breakWords: true, lineHeight: 17 },
     );
@@ -292,16 +295,16 @@ export class XpLevelSelect {
       x += 8;
     };
 
-    const back = toolbarButton(drawBackIcon(26), '后退', true, () => this.options.onBack());
+    const back = toolbarButton(drawBackIcon(26), 'Back', true, () => this.options.onBack());
     add(back.view, back.width + 2);
     const forward = toolbarButton(drawForwardIcon(), '', true, null);
     add(forward.view, forward.width + 2);
     const up = toolbarButton(drawUpIcon(), '', false, null);
     add(up.view, up.width);
     separator();
-    const search = toolbarButton(iconSprite('search', 24), '搜索', false, null);
+    const search = toolbarButton(iconSprite('search', 24), 'Search', false, null);
     add(search.view, search.width);
-    const folders = toolbarButton(iconSprite('folder-open', 24), '文件夹', false, null);
+    const folders = toolbarButton(iconSprite('folder-open', 24), 'Folders', false, null);
     add(folders.view, folders.width);
     separator();
     const views = toolbarButton(drawViewsIcon(), '', true, null);
@@ -317,7 +320,7 @@ function levelIcon(actions: readonly string[]): string {
 }
 
 function actionText(actions: readonly (keyof typeof ACTION_LABELS)[]): string {
-  return actions.length === 1 ? ACTION_LABELS[actions[0]!] : `${actions.length} 种消息框`;
+  return actions.length === 1 ? ACTION_LABELS[actions[0]!] : `${actions.length} action types`;
 }
 
 function iconSprite(name: string, size: number): Sprite {
@@ -354,7 +357,7 @@ function addressBar(width: number): Container {
       .fill(e.bandDark),
   );
 
-  const label = xpText('地址(D)', { fill: e.addressLabel });
+  const label = xpText('Address', { fill: e.addressLabel });
   label.anchor.set(0, 0.5);
   label.position.set(6, ADDRESS_HEIGHT / 2);
 
@@ -395,7 +398,7 @@ function addressBar(width: number): Container {
     .lineTo(9.5, 12.5)
     .stroke({ width: 2, color: LUNA.white });
   go.position.set(width - goWidth, (ADDRESS_HEIGHT - 18) / 2);
-  const goText = xpText('转到');
+  const goText = xpText('Go');
   goText.anchor.set(0, 0.5);
   goText.position.set(width - goWidth + 22, ADDRESS_HEIGHT / 2);
 
@@ -530,7 +533,7 @@ function drawViewsIcon(): Graphics {
   return g;
 }
 
-/** 任务窗格「开始这一关」的绿色播放图标 */
+/** 任务窗格「Play this level」的绿色播放图标 */
 function drawPlayIcon(): Graphics {
   return new Graphics()
     .circle(8, 8, 7)

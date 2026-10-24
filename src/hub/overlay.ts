@@ -81,7 +81,7 @@ export class HubOverlay {
   private readonly objective = el('div', 'hub-objective');
   private readonly place = el('div', 'hub-place');
   private readonly prompt = el('div', 'hub-prompt');
-  private readonly lockHint = el('div', 'hub-lock-hint', '点击画面转动视角');
+  private readonly lockHint = el('div', 'hub-lock-hint', 'Click to look around');
   private readonly dialog = el('div', 'hub-dialog');
   private readonly dialogName = el('div', 'hub-dialog-name');
   private readonly dialogText = el('div', 'hub-dialog-text');
@@ -104,20 +104,20 @@ export class HubOverlay {
     const logo = el('h1', 'hub-logo');
     logo.append(el('span', 'hub-logo-word', 'rhythm'), el('span', 'hub-logo-badge', '2000s'));
     const menu = el('nav', 'hub-menu');
-    menu.setAttribute('aria-label', '主菜单');
+    menu.setAttribute('aria-label', 'Main menu');
     menu.append(
-      button('开始游戏', 'hub-button hub-button-primary', handlers.onStart),
-      button('操作说明', 'hub-button', () => this.toggleHelp()),
-      button('制作人员', 'hub-button', () => this.toggleCredits()),
+      button('Start', 'hub-button hub-button-primary', handlers.onStart),
+      button('Controls', 'hub-button', () => this.toggleHelp()),
+      button('Credits', 'hub-button', () => this.toggleCredits()),
     );
-    const latency = el('a', 'hub-button', '延迟测试');
+    const latency = el('a', 'hub-button', 'Latency test');
     latency.href = `${import.meta.env.BASE_URL}prototypes/latency/`;
     menu.append(latency);
     this.title.append(
       logo,
-      el('p', 'hub-tagline', '弹窗、关窗、收邮件——跟着节拍来。'),
+      el('p', 'hub-tagline', 'Pop-ups, close boxes, new mail — all on the beat.'),
       menu,
-      el('p', 'hub-press', '按 Enter 开始'),
+      el('p', 'hub-press', 'Press Enter to start'),
     );
 
     this.buildCredits();
@@ -126,35 +126,40 @@ export class HubOverlay {
     this.loading.append(this.loadingText, track);
     this.loading.hidden = true;
 
-    this.help.append(el('div', 'hub-help-title', '操作说明'));
+    this.help.append(el('div', 'hub-help-title', 'Controls'));
     const keys: [string, string][] = [
-      ['W A S D', '移动'],
-      ['Shift', '跑'],
-      ['鼠标', '转动视角（先点击画面）'],
-      ['E', '进门后和人说话、坐到电脑前'],
-      ['Esc', '暂停；坐着时起身；关卡里回到网吧'],
+      ['W A S D', 'Walk'],
+      ['Shift', 'Run'],
+      ['Mouse', 'Look around (click the screen first)'],
+      ['E', 'Examine things; sit down at a computer'],
+      ['Esc', 'Pause; stand up when seated; leave a level for the café'],
     ];
     const list = el('dl', 'hub-keys');
     for (const [key, what] of keys) list.append(el('dt', '', key), el('dd', '', what));
     this.help.append(list);
     this.help.hidden = true;
 
-    this.objective.textContent = '去 CYBERSPACE CAFÉ 网吧，找一台头顶有黄色标记的电脑坐下';
+    this.objective.textContent =
+      'Go into the CYBERSPACE CAFÉ and sit at a PC with a yellow marker over it';
     this.hud.append(this.objective, this.place, this.prompt, this.lockHint);
 
-    this.dialog.append(this.dialogName, this.dialogText, el('div', 'hub-dialog-next', 'E 继续'));
+    this.dialog.append(
+      this.dialogName,
+      this.dialogText,
+      el('div', 'hub-dialog-next', 'E  Continue'),
+    );
 
-    this.cardPlay = button('开始', 'hub-button hub-button-primary', handlers.onPlayLevel);
+    this.cardPlay = button('Play', 'hub-button hub-button-primary', handlers.onPlayLevel);
     const cardActions = el('div', 'hub-card-actions');
-    cardActions.append(this.cardPlay, button('起身', 'hub-button', handlers.onStandUp));
+    cardActions.append(this.cardPlay, button('Stand up', 'hub-button', handlers.onStandUp));
     const titlebar = el('div', 'hub-card-titlebar');
     titlebar.append(this.cardTitle);
     this.card.append(titlebar, this.cardBody, cardActions);
 
     this.pause.append(
-      el('div', 'hub-pause-title', '已暂停'),
-      button('继续', 'hub-button hub-button-primary', handlers.onResume),
-      button('回到标题', 'hub-button', handlers.onQuitToTitle),
+      el('div', 'hub-pause-title', 'Paused'),
+      button('Resume', 'hub-button hub-button-primary', handlers.onResume),
+      button('Quit to title', 'hub-button', handlers.onQuitToTitle),
     );
 
     this.element.append(
@@ -226,13 +231,13 @@ export class HubOverlay {
     this.cardTitle.textContent = level.label;
     const lines = level.details.map((line) => el('p', '', line));
     const best = el('p', 'hub-card-record');
-    best.append(el('b', '', '最佳　'), record ?? '还没有记录');
+    best.append(el('b', '', 'Best\u2003'), record ?? 'No record yet');
     lines.push(best);
     const keys = el('p', 'hub-card-keys');
     keys.append(
-      ...(level.playable ? [el('kbd', '', 'E'), ' 开始　'] : []),
+      ...(level.playable ? [el('kbd', '', 'E'), ' Play\u2003'] : []),
       el('kbd', '', 'Esc'),
-      ' 起身',
+      ' Stand up',
     );
     this.cardBody.replaceChildren(...lines, keys);
     this.cardPlay.disabled = !level.playable;
@@ -244,7 +249,7 @@ export class HubOverlay {
     if (progress === null) return;
     const percent = Math.round(progress * 100);
     this.loadingBar.style.width = `${percent}%`;
-    this.loadingText.textContent = `正在载入街区…… ${percent}%`;
+    this.loadingText.textContent = `Loading the high street… ${percent}%`;
   }
 
   toggleCredits(): void {
@@ -265,15 +270,21 @@ export class HubOverlay {
     };
     const items: (string | HTMLElement)[][] = [
       [
-        '鲸鱼娘 3D 模型：Manny / ningfangtianwai-pixel，',
+        'DeepSeek whale girl 3D model: Manny / ningfangtianwai-pixel, ',
         link('AI Girls 3D', 'https://github.com/ningfangtianwai-pixel/ai-girls-3d'),
-        '，',
+        ', ',
         link('CC BY 4.0', 'https://creativecommons.org/licenses/by/4.0/'),
-        '。修改：压缩了网格和贴图。DeepSeek 鲸鱼娘是同人形象，与官方无关。',
+        '. Changes: mesh and textures compressed. The DeepSeek whale girl is fan art and not affiliated with DeepSeek.',
       ],
-      ['街区的贴图和道具模型：', link('Poly Haven', 'https://polyhaven.com/'), '（CC0）。'],
-      ['Windows XP、Mac OS 的界面素材和音效版权归 Microsoft、Apple 所有，本项目仅作学术用途。'],
-      ['其余素材的来源见仓库里的 assets/README.md。'],
+      [
+        'High street textures and prop models: ',
+        link('Poly Haven', 'https://polyhaven.com/'),
+        ' (CC0).',
+      ],
+      [
+        'Windows XP and Mac OS interface artwork and sounds are © Microsoft and Apple. This project is for academic use only.',
+      ],
+      ['Sources for all other assets are listed in assets/README.md in the repository.'],
     ];
     const list = el('ul', 'hub-credits-list');
     for (const parts of items) {
@@ -282,10 +293,14 @@ export class HubOverlay {
       list.append(li);
     }
     this.credits.append(
-      el('div', 'hub-help-title', '制作人员'),
-      el('p', '', 'rhythm2000s —— 一款《节奏天国》式的节奏游戏，题材是 21 世纪初的电脑日常。'),
+      el('div', 'hub-help-title', 'Credits'),
+      el(
+        'p',
+        '',
+        'rhythm2000s — a Rhythm Heaven-style rhythm game about everyday computing in the early 2000s.',
+      ),
       list,
-      button('关闭', 'hub-button', () => this.toggleCredits()),
+      button('Close', 'hub-button', () => this.toggleCredits()),
     );
     this.credits.hidden = true;
   }

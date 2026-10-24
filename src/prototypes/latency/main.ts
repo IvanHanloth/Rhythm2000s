@@ -63,14 +63,14 @@ function readBpm(): number {
 async function start(): Promise<void> {
   await clock.resume();
   metronome.start(readBpm());
-  startButton.textContent = '停止';
-  statusEl.textContent = `正在播放：${metronome.bpm} BPM，每小节 ${metronome.beatsPerBar} 拍（第 1 拍是高音）`;
+  startButton.textContent = 'Stop';
+  statusEl.textContent = `Playing: ${metronome.bpm} BPM, ${metronome.beatsPerBar} beats per bar (beat 1 is the high click)`;
 }
 
 function stop(reason?: string): void {
   metronome.stop();
-  startButton.textContent = '开始';
-  statusEl.textContent = reason ?? '已停止';
+  startButton.textContent = 'Start';
+  statusEl.textContent = reason ?? 'Stopped';
 }
 
 startButton.addEventListener('click', () => {
@@ -97,7 +97,7 @@ resetButton.addEventListener('click', () => {
 // 切到后台时浏览器会降频，计时不再可靠，直接停止
 document.addEventListener('visibilitychange', () => {
   if (document.hidden && metronome.running) {
-    stop('页面切到了后台，已自动停止，请重新开始');
+    stop('The page went into the background, so the test stopped. Please start again.');
   }
 });
 
@@ -181,7 +181,7 @@ function renderStats(): void {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
     td.colSpan = 7;
-    td.textContent = '还没有输入记录';
+    td.textContent = 'No taps recorded yet';
     tr.append(td);
     statsBody.replaceChildren(tr);
     return;
@@ -216,21 +216,21 @@ function renderEnv(): void {
   const heardB = clock.heardTimeB(now);
 
   const entries: [string, string][] = [
-    ['浏览器', navigator.userAgent],
-    ['音频状态', ctx.state],
-    ['采样率', `${ctx.sampleRate} Hz`],
+    ['Browser', navigator.userAgent],
+    ['Audio state', ctx.state],
+    ['Sample rate', `${ctx.sampleRate} Hz`],
     ['baseLatency', `${ms(clock.baseLatency * 1000)} ms`],
     ['outputLatency', `${ms(clock.outputLatency * 1000)} ms`],
     [
       'getOutputTimestamp',
       !clock.supportsOutputTimestamp
-        ? '不支持'
+        ? 'Not supported'
         : stamp
-          ? `可用（contextTime ${stamp.contextTime.toFixed(3)} s）`
-          : '暂无有效值（音频未开始）',
+          ? `Available (contextTime ${stamp.contextTime.toFixed(3)} s)`
+          : 'No valid value yet (audio not started)',
     ],
-    ['方法 A − 方法 B', heardA == null ? '—' : `${signedMs((heardA - heardB) * 1000)} ms`],
-    ['输入次数', String(taps.length)],
+    ['Method A − method B', heardA == null ? '—' : `${signedMs((heardA - heardB) * 1000)} ms`],
+    ['Taps', String(taps.length)],
   ];
 
   envEl.replaceChildren(

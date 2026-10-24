@@ -91,56 +91,67 @@ const ALERT_TEXTS: Record<
   'alert-note': [
     {
       app: 'System Preferences',
-      message: '有新的软件可用。',
-      informative: '「软件更新」找到了 3 个适用于这台电脑的更新。',
+      message: 'New software is available.',
+      informative: 'Software Update found 3 updates for your computer.',
     },
-    { app: 'Safari', message: '下载已完成。', informative: '「iTunes.dmg」已存放到桌面上。' },
-    { app: 'iChat', message: '有人邀请你聊天。', informative: '「小明」想和你开始一个聊天。' },
+    {
+      app: 'Safari',
+      message: 'Download complete.',
+      informative: '“iTunes.dmg” was saved to your desktop.',
+    },
+    {
+      app: 'iChat',
+      message: 'You have a chat invitation.',
+      informative: '“jenny2002” would like to chat with you.',
+    },
   ],
   'alert-caution': [
     {
       app: 'finder',
-      message: '确定要清倒废纸篓吗？',
-      informative: '废纸篓里有 12 个项目。此操作不能撤销。',
+      message: 'Are you sure you want to empty the Trash?',
+      informative: 'The Trash contains 12 items. You cannot undo this action.',
     },
     {
       app: 'System Preferences',
-      message: '电池电量不足。',
-      informative: '请接上电源适配器，否则电脑很快会进入睡眠。',
+      message: 'Your battery is running low.',
+      informative: 'Plug in your power adapter, or your computer will go to sleep soon.',
     },
     {
       app: 'finder',
-      message: '磁盘「Macintosh HD」几乎已满。',
-      informative: '请删除一些文件，腾出磁盘空间。',
+      message: 'The disk “Macintosh HD” is almost full.',
+      informative: 'Delete some files to free up disk space.',
     },
   ],
   'alert-stop': [
     {
       app: 'iTunes',
-      message: '应用程序「iTunes」意外退出。',
-      informative: '系统和其他应用程序未受影响。',
+      message: 'The application iTunes has unexpectedly quit.',
+      informative: 'The system and other applications have not been affected.',
     },
     {
       app: 'Mail',
-      message: '无法连接到邮件服务器。',
-      informative: '请检查网络设置，然后再试一次。',
+      message: 'Can’t connect to the mail server.',
+      informative: 'Check your network settings, then try again.',
     },
     {
       app: 'TextEdit',
-      message: '找不到文稿「作业.rtf」。',
-      informative: '原始文件可能已被移动或删除。',
+      message: 'The document “Homework.rtf” could not be found.',
+      informative: 'The original file may have been moved or deleted.',
     },
   ],
 };
 
 /** 文稿窗口：标题和正文，全部原创 */
 const DOCUMENTS = [
-  { title: '未命名', text: '亲爱的：\n今天天气很好，我们去公园吧。' },
-  { title: '读我.rtf', text: '感谢您选购本软件。\n安装前请先阅读以下说明。' },
-  { title: '购物清单.txt', text: '牛奶\n鸡蛋\nZip 磁盘 ×2' },
-  { title: '日记.rtf', text: '2002 年 8 月 24 日\n今天升级到了 Jaguar。' },
-  { title: '作业.rtf', text: '第三章 习题\n1. 请说明……' },
-  { title: '歌单.txt', text: '1. 晴天\n2. 七里香\n3. ……' },
+  { title: 'Untitled', text: 'Dear Sam,\nThe weather is great today.\nLet’s go to the park!' },
+  {
+    title: 'Read Me.rtf',
+    text: 'Thanks for choosing this software.\nPlease read this before installing.',
+  },
+  { title: 'Shopping List.txt', text: 'Milk\nEggs\nZip disks ×2' },
+  { title: 'Diary.rtf', text: 'August 24, 2002\nUpgraded to Jaguar today!' },
+  { title: 'Homework.rtf', text: 'Chapter 3 Exercises\n1. Explain why…' },
+  { title: 'Mix CD.txt', text: '1. Complicated\n2. In the End\n3. …' },
 ];
 
 interface WindowLike {
@@ -328,7 +339,7 @@ export class MacTargetsView {
           scale = 1 - 0.92 * easeOutCubic(p);
           visible = p < 1;
         } else {
-          // 按下「好」：提示框缩小淡出
+          // 按下「OK」：提示框缩小淡出
           const p = since / BEATS.windowClose;
           visible = p < 1;
           scale = 1 - 0.2 * clamp01(p);
@@ -614,7 +625,7 @@ function createScreenTarget(target: MacTarget): { window: WindowLike; alert: Aqu
       icon: alertIcon(action, app),
       message,
       informative,
-      buttons: [{ label: '好', isDefault: true }],
+      buttons: [{ label: 'OK', isDefault: true }],
       width: ALERT_WIDTH,
     });
     return { window: alert, alert };
