@@ -1,7 +1,16 @@
 import { defineConfig } from 'vite-plus';
 
-/** AI 助手和工具生成的目录，不参与格式化和代码检查 */
-const TOOLING_DIRS = ['.agents/**', '.claude/**', '.playwright-mcp/**'];
+/**
+ * 不参与格式化和代码检查的文件：AI 助手和工具生成的目录、技能包锁文件，
+ * 以及独立维护的宣发视频工程 promo/（有自己的工具链，见 promo/AGENTS.md）
+ */
+const TOOLING_DIRS = [
+  '.agents/**',
+  '.claude/**',
+  '.playwright-mcp/**',
+  'skills-lock.json',
+  'promo/**',
+];
 
 export default defineConfig({
   build: {
