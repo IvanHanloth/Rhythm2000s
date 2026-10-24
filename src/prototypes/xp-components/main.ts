@@ -4,6 +4,7 @@
 // - 点「开始」打开开始菜单，点菜单项响「菜单命令」声
 // - 点托盘小喇叭打开音量控制；拖动滑块改本页音量，松开时响默认提示音；「静音」同步到托盘图标
 // - 右上角按钮弹出四种消息框（各带提示音）和托盘气泡；消息框可以拖标题栏、点按钮或关闭按钮关掉
+// - 「File download」弹出下载进度窗，进度条 2 秒走满后「Open」亮起，点「Open」或「Close」关掉
 
 import '../../game/style.css';
 import { Container, Rectangle, type FederatedPointerEvent } from 'pixi.js';
@@ -13,6 +14,7 @@ import { ACTION_LABELS } from '../../rhythm/actions.ts';
 import { preloadXpAssets, XP_CURSOR, type XpSoundName } from '../../scenes/windows-xp/assets.ts';
 import { XpBalloon } from '../../scenes/windows-xp/components/balloon.ts';
 import { XpDesktop } from '../../scenes/windows-xp/components/desktop.ts';
+import { XpDownloadDialog } from '../../scenes/windows-xp/components/download-dialog.ts';
 import { XpMessageBox } from '../../scenes/windows-xp/components/message-box.ts';
 import {
   WORK_AREA_HEIGHT,
@@ -290,6 +292,37 @@ function showBalloon(): void {
   play('balloon');
 }
 
+// ---------- 下载进度窗（progress-download 动作的部件） ----------
+
+let download: XpDownloadDialog | null = null;
+let downloadStart = 0;
+const DOWNLOAD_SECONDS = 2;
+
+function showDownload(): void {
+  download?.destroy();
+  download = new XpDownloadDialog({
+    fileName: 'setup.exe',
+    sizeKb: 1240,
+    host: 'www.example-files.com',
+  });
+  download.view.position.set(XP_SCREEN_WIDTH / 2, WORK_AREA_HEIGHT / 2);
+  download.view.eventMode = 'static';
+  // 走满之前点不了；走满后点窗口任意处都当作点「Open」，只是展示用
+  download.view.on('pointertap', () => {
+    if (performance.now() - downloadStart < DOWNLOAD_SECONDS * 1000) return;
+    play('downloadOpen');
+    download?.destroy();
+    download = null;
+  });
+  windowLayer.addChild(download.view);
+  downloadStart = performance.now();
+  play('downloadStart');
+}
+
+canvas.onFrame(() => {
+  download?.setProgress((performance.now() - downloadStart) / (DOWNLOAD_SECONDS * 1000));
+});
+
 // ---------- 页面上的按钮 ----------
 
 const toolbar = document.createElement('nav');
@@ -300,6 +333,7 @@ for (const kind of Object.keys(DIALOG_KINDS) as DialogKind[]) {
 }
 toolbar.append(toolbarButton('托盘气泡', showBalloon));
 toolbar.append(toolbarButton('结算窗口', showResults));
+toolbar.append(toolbarButton('File download', showDownload));
 const back = document.createElement('a');
 back.href = '/';
 back.textContent = '回到游戏';

@@ -31,6 +31,10 @@ export interface PopupSounds {
   result: AudioBuffer;
   /** 气泡、程序窗口、开始菜单、回收站：示范段出现时的声音（没有则为 null）和跟打段命中时的声音 */
   shell: Record<ShellAction, { appear: AudioBuffer | null; handled: AudioBuffer }>;
+  /** progress-download：下载窗弹出（示范段、跟打段都响）、走满后点「Open」 */
+  download: { appear: AudioBuffer; open: AudioBuffer };
+  /** volume-mute 松开滑块；按下用 close 点击声 */
+  volumeRelease: AudioBuffer;
 }
 
 export function createPopupSounds(context: BaseAudioContext, xp: XpSounds): PopupSounds {
@@ -55,6 +59,8 @@ export function createPopupSounds(context: BaseAudioContext, xp: XpSounds): Popu
         { appear: info.appear ? xp[info.appear] : null, handled: xp[info.handled] },
       ]),
     ) as PopupSounds['shell'],
+    download: { appear: xp.downloadStart, open: xp.downloadOpen },
+    volumeRelease: xp.volumeRelease,
   };
 }
 
@@ -64,6 +70,9 @@ export function createPopupSounds(context: BaseAudioContext, xp: XpSounds): Popu
  */
 export function clickSound(sounds: PopupSounds, action: ActionType, step: number): AudioBuffer {
   if (action === 'desktop-refresh') return step === 0 ? sounds.rightClick : sounds.menuCommand;
+  if (action === 'progress-download') return sounds.download.open;
+  // 音量：按下是点击声，松开响 volumeRelease
+  if (action === 'volume-mute') return step === 0 ? sounds.close : sounds.volumeRelease;
   // 开始菜单：第一下按「开始」是点击声，第二下点菜单项
   if (action === 'start-menu') return step === 0 ? sounds.close : sounds.shell[action].handled;
   if (isShellAction(action)) return sounds.shell[action].handled;
@@ -73,6 +82,7 @@ export function clickSound(sounds: PopupSounds, action: ActionType, step: number
 /**
  * 伴奏：预备小节打节拍器，示范 / 跟打小节「底鼓、军鼓交替，每半拍踩镲」，空档只有踩镲，结尾只收一下；
  * 再加上示范段的提示音：消息框弹出的提示音，以及虚拟鼠标示范 desktop-refresh 的两下。
+ * progress-download 的下载窗在跟打段也会自己弹出，弹出声两段都响。
  */
 export function buildBackingTrack(chart: Chart, sounds: PopupSounds): SequencedSound[] {
   const { beatsPerBar } = chart;
@@ -109,6 +119,12 @@ export function buildBackingTrack(chart: Chart, sounds: PopupSounds): SequencedS
     const appear = isShellAction(call.action) ? sounds.shell[call.action].appear : null;
     if (isDialogKind(call.action)) {
       track.push({ beat: call.beat, buffer: sounds.dialogs[call.action] });
+    } else if (call.action === 'progress-download') {
+      // 示范段：弹出 → 走满那一拍虚拟鼠标点「Open」
+      track.push({ beat: call.beat, buffer: sounds.download.appear });
+      actionTapOffsets(call.action).forEach((offset, step) => {
+        track.push({ beat: call.beat + offset, buffer: clickSound(sounds, call.action, step) });
+      });
     } else if (appear) {
       // 气泡、程序窗口、文件：示范段只是出现，响出现的声音
       track.push({ beat: call.beat, buffer: appear });
@@ -116,6 +132,12 @@ export function buildBackingTrack(chart: Chart, sounds: PopupSounds): SequencedS
       actionTapOffsets(call.action).forEach((offset, step) => {
         track.push({ beat: call.beat + offset, buffer: clickSound(sounds, call.action, step) });
       });
+    }
+  }
+  // 跟打段自己弹出的下载窗
+  for (const response of chart.responses) {
+    if (response.action === 'progress-download') {
+      track.push({ beat: response.beat, buffer: sounds.download.appear });
     }
   }
   return track;

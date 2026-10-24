@@ -11,7 +11,7 @@ export interface FrameInfo {
   audioTime: number;
 }
 
-/** 玩家的一次动作输入（按空格或点击画面）。 */
+/** 玩家的一次动作输入（按空格或点击画面），或一次松开。 */
 export interface TapInfo {
   /** 输入那一刻扬声器正在播放的音频时间（秒）。还没有扣除玩家校准值。 */
   audioTime: number;
@@ -43,6 +43,8 @@ export interface Scene {
   update(frame: FrameInfo): void;
   /** 玩家输入；不需要输入的场景可以不实现 */
   onTap?(tap: TapInfo): void;
+  /** 玩家松开了空格或鼠标 / 触摸（长按动作用）；没有长按动作的场景可以不实现 */
+  onRelease?(tap: TapInfo): void;
   /**
    * 玩家按了 Esc。场景自己处理了（例如从关卡回到关卡列表）就返回 true；
    * 返回 false 或不实现时，由游戏入口回到街区大厅。

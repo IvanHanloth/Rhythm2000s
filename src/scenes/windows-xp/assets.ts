@@ -21,6 +21,9 @@ import restoreUrl from '../../../assets/reference/windows-xp/sounds/Windows XP R
 import minimizeUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Minimize.wav?url';
 import recycleUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Recycle.wav?url';
 import defaultSoundUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Default.wav?url';
+import hardwareInsertUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Hardware Insert.wav?url';
+import notifyUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Notify.wav?url';
+import chordUrl from '../../../assets/reference/windows-xp/sounds/chord.wav?url';
 import arrowCursorUrl from '../../../assets/reference/windows-xp/icons/default_arrow.cur?url';
 import { XP_FONT_FAMILY } from './components/xp-text.ts';
 
@@ -66,6 +69,12 @@ const SOUND_FILES = {
   recycle: { url: recycleUrl, peak: 0.6 },
   /** Windows XP Default.wav：recycle-bin 示范段桌面落下文件，暂定 */
   fileDrop: { url: defaultSoundUrl, peak: 0.5 },
+  /** progress-download 弹出下载窗，暂定（原版下载开始没有声音） */
+  downloadStart: { url: hardwareInsertUrl, peak: 0.55 },
+  /** progress-download 下载完点「Open」，暂定 */
+  downloadOpen: { url: notifyUrl, peak: 0.55 },
+  /** volume-mute 松开滑块。原版是 Ding，但游戏里 Ding 是 Miss 的声音，换成 chord，暂定 */
+  volumeRelease: { url: chordUrl, peak: 0.55 },
 } satisfies Record<string, { url: string } & SampleOptions>;
 
 export type XpSoundName = keyof typeof SOUND_FILES;

@@ -1,6 +1,8 @@
 // 一局里的虚拟鼠标和右键菜单（doc/scenes/windows-xp.md「虚拟鼠标」「桌面右键菜单与刷新」）。
 // 示范段：鼠标自己示范（滑到新弹出的消息框上；desktop-refresh 在拍点上右键、0.5 拍后点「刷新」）。
 // 跟打段：提前滑到下一个目标上停好，玩家按键时在原地点下去，判定完才离开。
+// progress-download 示范段在进度条走满那一拍点「Open」；volume-mute 示范段按住滑块 1 拍再松开，
+// 跟打段从按下命中一直按到松开，鼠标从掉到底的滑块移到原位，滑块跟着它走（wait-hold-view.ts）。
 // 画面每帧只根据拍位置计算。坐标都是虚拟 XP 屏幕坐标。
 
 import { Container, Sprite } from 'pixi.js';
@@ -75,6 +77,11 @@ export class VirtualMouse {
     return REFRESH_SPOTS[state.call.index % REFRESH_SPOTS.length]!;
   }
 
+  /** 指针此刻的位置（虚拟屏幕坐标），update 之后读 */
+  get position(): Point {
+    return { x: this.pointer.x, y: this.pointer.y };
+  }
+
   update(beat: number): void {
     // 跟打段的停靠点：判定完（命中或 Miss）才离开，还没判定时最多停到 Good 窗口关闭
     for (const { stop, click } of this.stops) {
@@ -89,7 +96,8 @@ export class VirtualMouse {
       { leadBeats: this.leadBeats, holdBeats: HOLD_BEATS },
     );
     this.pointer.position.set(position.x, position.y);
-    const pressed = this.clickBeats().some((b) => beat >= b && beat < b + PRESS_BEATS);
+    const pressed =
+      this.clickBeats().some((b) => beat >= b && beat < b + PRESS_BEATS) || this.holding(beat);
     this.pointer.scale.set(pressed ? 0.85 : 1);
 
     this.renderMenu(beat);
@@ -129,7 +137,8 @@ export class VirtualMouse {
   private clickBeats(): number[] {
     const beats: number[] = [];
     for (const state of this.session.windows) {
-      if (state.call.action === 'desktop-refresh') {
+      const action = state.call.action;
+      if (action === 'desktop-refresh' || action === 'progress-download') {
         for (const click of state.clicks)
           beats.push(click.beat - state.response.beat + state.call.beat);
       }
@@ -138,6 +147,22 @@ export class VirtualMouse {
       }
     }
     return beats;
+  }
+
+  /** volume-mute 按着滑块的时候：示范段从按下到松开，跟打段从按下命中到松开判定 */
+  private holding(beat: number): boolean {
+    const session = this.session;
+    return session.windows.some((state) => {
+      if (state.call.action !== 'volume-mute') return false;
+      const [press, release] = state.clicks;
+      if (!press || !release) return false;
+      const callPress = state.call.beat;
+      const callRelease = callPress + (release.beat - press.beat);
+      if (beat >= callPress && beat < callRelease) return true;
+      if (press.hitAt === null || beat < session.beatAt(press.hitAt)) return false;
+      const ended = release.hitAt ?? release.missedAt;
+      return ended === null || beat < session.beatAt(ended);
+    });
   }
 
   /** 右键菜单：同一时间最多一个；刷新那一刻桌面图标消失一下 */

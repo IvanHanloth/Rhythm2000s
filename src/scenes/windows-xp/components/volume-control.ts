@@ -23,6 +23,8 @@ export interface VolumeControlOptions {
   /** 音量改变；released 为 true 表示松开了滑块 */
   onChange?(volume: number, released: boolean): void;
   onMuteChange?(muted: boolean): void;
+  /** 界面文字；不传时用中文版的「音量」「静音」。2026-10-24 起新增的用法传英文 */
+  labels?: { title: string; mute: string };
 }
 
 export class XpVolumeControl {
@@ -60,7 +62,8 @@ export class XpVolumeControl {
       bottom: LUNA.edgeShadow,
     });
 
-    const title = xpText('音量');
+    const labels = options.labels ?? { title: '音量', mute: '静音' };
+    const title = xpText(labels.title);
     title.anchor.set(0.5, 0);
     title.position.set(cx, 9);
 
@@ -97,7 +100,7 @@ export class XpVolumeControl {
       .fill(LUNA.checkbox.border)
       .rect(1, 1, CHECK_SIZE - 2, CHECK_SIZE - 2)
       .fill(verticalGradient(LUNA.checkbox.fill));
-    const label = xpText('静音');
+    const label = xpText(labels.mute);
     label.anchor.set(0, 0.5);
     label.position.set(CHECK_SIZE + 5, CHECK_SIZE / 2);
     checkbox.addChild(box, this.check, label);
@@ -110,6 +113,28 @@ export class XpVolumeControl {
     this.view.addChild(face, title, slider, checkbox);
     this.drawThumb();
     this.drawCheck();
+  }
+
+  /** 由外部摆滑块（游戏里的 volume-mute 动作），不触发 onChange；dragging 时滑块边框变橙 */
+  setVolume(volume: number, dragging = false): void {
+    const next = clamp01(volume);
+    if (next === this.volume && dragging === this.dragging) return;
+    this.volume = next;
+    this.dragging = dragging;
+    this.drawThumb();
+  }
+
+  /** 音量为 volume 时滑块中心的位置（相对小窗左上角） */
+  thumbCenter(volume: number): { x: number; y: number } {
+    return {
+      x: Math.round(VOLUME_CONTROL_WIDTH / 2),
+      y: TRACK_TOP + Math.round((1 - clamp01(volume)) * TRACK_LENGTH),
+    };
+  }
+
+  /** thumbCenter 的反算：滑块中心在 y（相对小窗左上角）时的音量 */
+  volumeAtY(y: number): number {
+    return clamp01(1 - (y - TRACK_TOP) / TRACK_LENGTH);
   }
 
   setMuted(muted: boolean, notify = false): void {

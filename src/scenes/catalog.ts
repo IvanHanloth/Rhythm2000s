@@ -31,6 +31,8 @@ export const SCENE_CATALOG: Record<SceneId, SceneInfo> = {
       'window-minimize',
       'start-menu',
       'recycle-bin',
+      'progress-download',
+      'volume-mute',
     ],
     checkChart: checkWindowsXpChart,
   },

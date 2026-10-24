@@ -76,6 +76,11 @@ export class XpWindowFrame {
     this.view.addChild(...this.captionButtons);
   }
 
+  /** 改标题（下载窗的标题随进度变化） */
+  setTitle(title: string): void {
+    this.titleText.text = title;
+  }
+
   /** 活动窗口是深蓝标题栏；非活动窗口是浅蓝灰，关闭按钮变淡 */
   setActive(active: boolean): void {
     if (this.isActive === active) return;

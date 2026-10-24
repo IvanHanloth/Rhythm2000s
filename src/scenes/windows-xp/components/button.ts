@@ -23,7 +23,9 @@ export class XpButton {
   readonly width: number;
   readonly height: number;
   private readonly face = new Graphics();
+  private readonly label: ReturnType<typeof xpText>;
   private readonly isDefault: boolean;
+  private enabled = true;
   private hot = false;
   private pressed = false;
 
@@ -41,7 +43,16 @@ export class XpButton {
     const text = xpText(label);
     text.anchor.set(0.5);
     text.position.set(Math.round(width / 2), Math.round(height / 2));
+    this.label = text;
     this.view.addChild(this.face, text);
+    this.redraw();
+  }
+
+  /** 灰掉的按钮：文字变灰、没有默认按钮的蓝色内框 */
+  setEnabled(enabled: boolean): void {
+    if (this.enabled === enabled) return;
+    this.enabled = enabled;
+    this.label.style.fill = enabled ? LUNA.ink : LUNA.inkDisabled;
     this.redraw();
   }
 
@@ -65,13 +76,14 @@ export class XpButton {
     g.roundRect(0, 0, w, h, RADIUS).fill(style.border);
     g.roundRect(1, 1, w - 2, h - 2, RADIUS - 1).fill(verticalGradient(fill));
 
-    const rings = this.pressed
-      ? null
-      : this.hot
-        ? style.hotRings
-        : this.isDefault
-          ? style.defaultRings
-          : null;
+    const rings =
+      this.pressed || !this.enabled
+        ? null
+        : this.hot
+          ? style.hotRings
+          : this.isDefault
+            ? style.defaultRings
+            : null;
     rings?.forEach(([top, sides, bottom], i) => {
       edgeRing(g, 1 + i, 1 + i, w - 2 - 2 * i, h - 2 - 2 * i, {
         top,

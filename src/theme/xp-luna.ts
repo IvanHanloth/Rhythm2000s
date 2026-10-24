@@ -110,6 +110,17 @@ export const LUNA = {
     check: '#21a121',
   },
 
+  /** 进度条（msctls_progress32）：灰色圆角细边、白底、一格格绿色方块 */
+  progress: {
+    border: '#686868',
+    track: '#ffffff',
+    chunk: [
+      [0, '#d2f7d2'],
+      [0.45, '#3fd23f'],
+      [1, '#8ce68c'],
+    ] as GradientStops,
+  },
+
   trackbar: {
     channelFill: '#f4f3ee',
     channelDark: '#9d9c99',

@@ -32,6 +32,7 @@ import { XpResultsWindow } from './results-window.ts';
 import { ShellTargetsView, windowSlotIndex } from './shell-targets-view.ts';
 import { createPopupSounds, type PopupSounds } from './song.ts';
 import { VirtualMouse } from './virtual-mouse.ts';
+import { WaitHoldView } from './wait-hold-view.ts';
 
 const theme = THEMES.xp;
 
@@ -137,6 +138,8 @@ class WindowsXpScene implements Scene {
   private popups: (XpMessageBox | null)[] = [];
   /** 托盘气泡、程序窗口、开始菜单、回收站文件（doc/scenes/windows-xp-levels.md） */
   private shellView: ShellTargetsView | null = null;
+  /** 下载进度窗、音量控制（doc/scenes/windows-xp-levels.md「等待与长按」） */
+  private waitHoldView: WaitHoldView | null = null;
   private virtualMouse: VirtualMouse | null = null;
   private judgementViews: ActiveJudgement[] = [];
   private shownJudgements = 0;
@@ -218,6 +221,7 @@ class WindowsXpScene implements Scene {
     this.renderPopups(session, beat);
     this.shellView?.update(beat, this.focusedWindow(session, beat));
     this.virtualMouse?.update(beat);
+    if (this.virtualMouse) this.waitHoldView?.update(beat, this.virtualMouse.position);
     this.renderJudgements(session, beat);
     this.renderTurnBanner(beat);
 
@@ -228,6 +232,11 @@ class WindowsXpScene implements Scene {
   onTap({ audioTime }: TapInfo): void {
     if (this.state === 'playing') this.session?.tap(audioTime);
     else if (this.state === 'ready' && this.chart) void this.start(this.chart);
+  }
+
+  /** 松开：只有一局进行中、正按住 volume-mute 时才有意义 */
+  onRelease({ audioTime }: TapInfo): void {
+    if (this.state === 'playing') this.session?.release(audioTime);
   }
 
   /** 关卡里、结果框上按 Esc 回到关卡列表；关卡列表上交给游戏入口回网吧 */
@@ -342,6 +351,8 @@ class WindowsXpScene implements Scene {
       this.shellView.overlayLayer,
       this.screen.getChildIndex(this.pointerLayer),
     );
+    this.waitHoldView = new WaitHoldView({ session, taskbar: this.taskbar });
+    this.screen.addChildAt(this.waitHoldView.layer, this.screen.getChildIndex(this.pointerLayer));
     this.virtualMouse = new VirtualMouse(this.session, this.desktop, (state, event) =>
       this.clickPoints(state, event),
     );
@@ -408,6 +419,8 @@ class WindowsXpScene implements Scene {
     this.popups = [];
     this.shellView?.destroy();
     this.shellView = null;
+    this.waitHoldView?.destroy();
+    this.waitHoldView = null;
     this.virtualMouse?.destroy();
     this.virtualMouse = null;
     this.cursorCover.eventMode = 'none';
@@ -537,6 +550,9 @@ class WindowsXpScene implements Scene {
       const button = popup.buttonCenter();
       return [{ x: popup.view.x + button.x, y: popup.view.y + button.y }];
     }
+    // 下载窗点「Open」，音量控制按下、松开在滑块上
+    const waitHold = this.waitHoldView?.clickPoints(event);
+    if (waitHold) return waitHold;
     // 气泡点关闭、程序窗口点最小化、开始菜单点「开始」和菜单项、文件点它自己
     const shell = this.shellView?.clickPoints(event);
     if (shell) return shell;
@@ -579,7 +595,9 @@ class WindowsXpScene implements Scene {
       const view = createJudgementView(record.level);
       const state = session.windows[record.event]!;
       const popup = this.popups[record.event];
-      const shellAnchor = this.shellView?.judgementAnchor(record.event);
+      const shellAnchor =
+        this.shellView?.judgementAnchor(record.event) ??
+        this.waitHoldView?.judgementAnchor(record.event);
       if (popup) {
         const slot = SLOTS[windowSlotIndex(session, record.event) % SLOTS.length]!;
         view.position.set(slot.x * XP_SCALE, (slot.y - popup.height / 2) * XP_SCALE - 20);

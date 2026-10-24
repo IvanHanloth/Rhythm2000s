@@ -58,6 +58,11 @@ export class SceneDirector {
     this.current?.scene.onTap?.(tap);
   }
 
+  /** 玩家松开，转给当前场景。 */
+  release(tap: TapInfo): void {
+    this.current?.scene.onRelease?.(tap);
+  }
+
   /** 玩家按了 Esc，转给当前场景；场景自己处理了返回 true。 */
   escape(): boolean {
     return this.current?.scene.onEscape?.() ?? false;

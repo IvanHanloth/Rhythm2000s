@@ -49,7 +49,12 @@ const resumeAudio = () => void clock.resume();
 window.addEventListener('pointerdown', resumeAudio, { once: true });
 window.addEventListener('keydown', resumeAudio, { once: true });
 
-listenForTaps(clock, host, (tap) => director.tap(tap));
+listenForTaps(
+  clock,
+  host,
+  (tap) => director.tap(tap),
+  (tap) => director.release(tap),
+);
 canvas.onFrame(() => director.update({ audioTime: clock.heardNow() }));
 
 const sceneIds = director.entries.map((e) => e.id);

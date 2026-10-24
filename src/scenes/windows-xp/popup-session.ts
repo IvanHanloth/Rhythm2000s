@@ -1,13 +1,21 @@
 // 一局 XP 关卡：谱面、伴奏、判定串在一起，不负责画面。
 // 时间都是音频时间（秒）。画面用「听到的」时间；判定用扣除校准值之后的时间。
 // 一个谱面事件可能要按几下（desktop-refresh 先右键、再点「刷新」），每一下单独判定。
+// 长按的动作（volume-mute）第二下是「松开」：按下命中后开始按住，松开时对松开的目标判定
+// （doc/scenes/windows-xp-levels.md「判定（暂定）」）。按下的目标交给 ResponseJudge，松开的目标在这里判。
 
 import { Sequencer } from '../../audio/sequencer.ts';
 import type { SceneContext } from '../../game/scene.ts';
-import { actionTapOffsets } from '../../rhythm/actions.ts';
+import { actionTapKind, actionTapOffsets } from '../../rhythm/actions.ts';
 import { beatToTime, timeToBeat } from '../../rhythm/beat.ts';
 import type { Chart, ChartCue } from '../../rhythm/chart.ts';
-import { ResponseJudge, type Judgement, type JudgementLevel } from '../../rhythm/judge.ts';
+import {
+  levelForOffset,
+  MVP_WINDOWS,
+  ResponseJudge,
+  type Judgement,
+  type JudgementLevel,
+} from '../../rhythm/judge.ts';
 import { buildBackingTrack, clickSound, type PopupSounds } from './song.ts';
 
 /** 按下开始后，第 0 拍延后多久（秒） */
@@ -49,6 +57,13 @@ interface TapTarget {
   step: number;
 }
 
+/** 长按的松开目标 */
+interface ReleaseTarget extends TapTarget {
+  /** 目标时间（音频时间，秒） */
+  time: number;
+  judged: boolean;
+}
+
 export class PopupSession {
   readonly chart: Chart;
   readonly startTime: number;
@@ -61,8 +76,12 @@ export class PopupSession {
   private readonly output: GainNode;
   private readonly sequencer: Sequencer;
   private readonly judge: ResponseJudge;
-  /** 判定目标（每一下）对应哪个事件的第几下，按时间排 */
+  /** 按下的判定目标（每一下）对应哪个事件的第几下，按时间排 */
   private readonly targets: TapTarget[] = [];
+  /** 松开的判定目标，按时间排 */
+  private readonly releases: ReleaseTarget[] = [];
+  /** 正按住的长按：releases 的下标；没有按住时为 null */
+  private holding: number | null = null;
 
   constructor(context: SceneContext, chart: Chart, sounds: PopupSounds) {
     const audio = context.clock.context;
@@ -95,7 +114,13 @@ export class PopupSession {
     });
     // 谱面校验保证下一个事件在上一个事件的最后一下之后，所以按事件顺序展开就是按时间排好的
     this.windows.forEach((state, event) => {
-      state.clicks.forEach((_, step) => this.targets.push({ event, step }));
+      state.clicks.forEach((click, step) => {
+        if (actionTapKind(state.response.action, step) === 'release') {
+          this.releases.push({ event, step, time: this.timeAt(click.beat), judged: false });
+        } else {
+          this.targets.push({ event, step });
+        }
+      });
     });
     this.judge = new ResponseJudge(
       this.targets.map(({ event, step }) => this.timeAt(this.windows[event]!.clicks[step]!.beat)),
@@ -121,6 +146,7 @@ export class PopupSession {
     for (const judgement of this.judge.expire(audioTime - calibration)) {
       this.recordMiss(judgement, judgement.time + calibration);
     }
+    this.expireReleases(audioTime - calibration, calibration);
   }
 
   /**
@@ -138,7 +164,48 @@ export class PopupSession {
     const record = { ...judgement, event, step, shownAt: audioTime };
     this.judgements.push(record);
     this.playNow(clickSound(this.sounds, state.response.action, step));
+    // 长按的按下命中：开始按住，等松开
+    const release = this.releases.findIndex((r) => r.event === event && r.step === step + 1);
+    if (release >= 0) this.holding = release;
     return record;
+  }
+
+  /**
+   * 玩家松开（听到的时间）。正按住长按时对它的松开目标判定：在 Good 窗口里算命中，否则算 Miss
+   * （松早了，或者窗口关了还按着——后者通常已在 update 里记过）。没有按住时返回 null。
+   */
+  release(audioTime: number): JudgementRecord | null {
+    const index = this.holding;
+    this.holding = null;
+    const target = index === null ? undefined : this.releases[index];
+    if (!target || target.judged) return null;
+    const time = audioTime - this.context.calibration();
+    const offset = time - target.time;
+    const level = levelForOffset(offset, MVP_WINDOWS);
+    if (!level) return this.recordReleaseMiss(index!, time, audioTime, true);
+
+    target.judged = true;
+    const { event, step } = target;
+    const state = this.windows[event]!;
+    state.clicks[step]!.hitAt = audioTime;
+    if (step === state.clicks.length - 1) state.closedAt = audioTime;
+    const record: JudgementRecord = {
+      target: this.targets.length + index!,
+      level,
+      offset,
+      time,
+      event,
+      step,
+      shownAt: audioTime,
+    };
+    this.judgements.push(record);
+    this.playNow(clickSound(this.sounds, state.response.action, step));
+    return record;
+  }
+
+  /** 正按住长按的谱面事件（windows 的下标）；没有按住时为 null。画面用它决定滑块跟不跟着走 */
+  get heldEvent(): number | null {
+    return this.holding === null ? null : (this.releases[this.holding]?.event ?? null);
   }
 
   counts(): Record<JudgementLevel, number> {
@@ -160,6 +227,50 @@ export class PopupSession {
     const record = { ...judgement, event, step, shownAt };
     this.judgements.push(record);
     this.playNow(this.sounds.miss);
+    return record;
+  }
+
+  /**
+   * 松开目标的 Miss：按下这一下 Miss 了（松开也跟着丢，不再响一次 Miss 声），
+   * 或者松开窗口关闭时还按着 / 还没按下。time 是扣除校准值后的时间。
+   */
+  private expireReleases(time: number, calibration: number): void {
+    this.releases.forEach((target, index) => {
+      if (target.judged) return;
+      const press = this.windows[target.event]!.clicks[target.step - 1];
+      if (press?.missedAt != null) {
+        this.recordReleaseMiss(index, press.missedAt - calibration, press.missedAt, false);
+      } else if (time > target.time + MVP_WINDOWS.good) {
+        const closeTime = target.time + MVP_WINDOWS.good;
+        this.recordReleaseMiss(index, closeTime, closeTime + calibration, true);
+      }
+    });
+  }
+
+  private recordReleaseMiss(
+    index: number,
+    time: number,
+    shownAt: number,
+    withSound: boolean,
+  ): JudgementRecord {
+    const target = this.releases[index]!;
+    target.judged = true;
+    if (this.holding === index) this.holding = null;
+    const { event, step } = target;
+    const state = this.windows[event]!;
+    state.clicks[step]!.missedAt = shownAt;
+    state.missedAt ??= shownAt;
+    const record: JudgementRecord = {
+      target: this.targets.length + index,
+      level: 'miss',
+      offset: null,
+      time,
+      event,
+      step,
+      shownAt,
+    };
+    this.judgements.push(record);
+    if (withSound) this.playNow(this.sounds.miss);
     return record;
   }
 
