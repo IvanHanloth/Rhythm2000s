@@ -26,6 +26,7 @@ export function fakeContext(calibration = 0) {
       return source;
     },
   };
-  const context = { clock: { context: audio }, calibration: () => calibration };
+  const cutaway = { prepare() {}, show() {}, hide() {} };
+  const context = { clock: { context: audio }, calibration: () => calibration, cutaway };
   return { context: context as unknown as SceneContext, played, scheduled };
 }

@@ -5,6 +5,7 @@
 import type { SceneId } from '@/scenes/catalog.ts';
 import {
   ACESFilmicToneMapping,
+  CanvasTexture,
   DefaultLoadingManager,
   DirectionalLight,
   Fog,
@@ -16,11 +17,14 @@ import {
   PerspectiveCamera,
   Raycaster,
   Scene,
+  SRGBColorSpace,
   Vector3,
   WebGLRenderer,
+  type Texture,
 } from 'three';
 import { STREET_COLORS as C } from '@/theme/street.ts';
 import { pushOut, type Point } from './collision.ts';
+import { cutawayPhase } from './cutaway.ts';
 import {
   clampPitch,
   dampAngle,
@@ -71,6 +75,28 @@ const STAND_SECONDS = 0.7;
 const LAUNCH_SECONDS = 0.8;
 const FADE_MS = 600;
 
+/** chair-swivel's wide shot: up, back and to the right of the seat (m), looking down at the chair (provisional) */
+const CUTAWAY_WIDE = new Vector3(1.25, 2.35, 1.9);
+const CUTAWAY_LOOK_HEIGHT = 0.95;
+/** The level as drawn on the 3D monitor: the CRT is 4:3, so the 16:9 level gets bars above and below */
+const MONITOR_IMAGE = { width: 1024, height: 768 };
+
+/** The level on the 3D monitor, letterboxed into the CRT's 4:3 */
+function monitorTexture(desktop: HTMLCanvasElement): CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = MONITOR_IMAGE.width;
+  canvas.height = MONITOR_IMAGE.height;
+  const g = canvas.getContext('2d');
+  if (!g) throw new Error('No 2D context for the monitor image');
+  g.fillStyle = C.monitorLetterbox;
+  g.fillRect(0, 0, canvas.width, canvas.height);
+  const height = (canvas.width * desktop.height) / desktop.width;
+  g.drawImage(desktop, 0, (canvas.height - height) / 2, canvas.width, height);
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  return texture;
+}
+
 /** What each scene's computer looks like */
 const MACHINE_LOOKS: Record<SceneId, { screen: ScreenImage; imac?: boolean }> = {
   'windows-xp': { screen: 'xp-bliss' },
@@ -105,6 +131,12 @@ interface CameraTween {
   start: number;
   duration: number;
   done: () => void;
+}
+
+/** chair-swivel's cutaway in progress: the computer it happens at and how to put everything back */
+interface Cutaway {
+  spot: LevelSpot;
+  restore: () => void;
 }
 
 export interface HubOptions {
@@ -176,6 +208,10 @@ export class Hub {
   private seat: { spot: LevelSpot; from: Point; fromHeading: number; start: number } | null = null;
   /** True when we release the pointer ourselves, so no pause menu */
   private releasingPointer = false;
+  /** chair-swivel's cutaway is drawing the café (doc/cross-dimension.md) */
+  private cutaway: Cutaway | null = null;
+  /** The café has been rendered once for the cutaway, so its shaders and textures are ready */
+  private cutawayWarm = false;
 
   constructor(options: HubOptions) {
     this.options = options;
@@ -251,6 +287,103 @@ export class Hub {
     cancelAnimationFrame(this.frameId);
     this.keys.clear();
     if (document.pointerLockElement === this.renderer.domElement) this.releasePointer();
+  }
+
+  // ---------- chair-swivel's cutaway (doc/cross-dimension.md) ----------
+
+  /**
+   * A round with chair-swivel is starting while a level hides the hub: render the café once, invisibly, so the first
+   * spin doesn't stall on the beat compiling shaders and uploading textures.
+   */
+  prepareCutaway(levelId: string): void {
+    if (this.cutawayWarm || this.visible || this.cutaway) return;
+    this.element.style.visibility = 'hidden';
+    this.renderCutaway(levelId, 0.5, null);
+    this.endCutaway();
+    this.element.style.visibility = '';
+    this.cutawayWarm = true;
+  }
+
+  /**
+   * One frame of the cutaway at the computer of `levelId`, `progress` (0–1) of the way through. The level calls it
+   * every frame from the audio clock; the hub's own loop stays stopped. The first frame seats the character there
+   * (even if the level was opened from a URL) and puts `desktop`, the level as it looked, on the monitor.
+   */
+  renderCutaway(levelId: string, progress: number, desktop: HTMLCanvasElement | null): void {
+    if (this.visible) throw new Error('The cutaway only runs while a level hides the hub');
+    this.cutaway ??= this.enterCutaway(this.levelSpot(levelId), desktop);
+    const { spot } = this.cutaway;
+    const { path, spin } = cutawayPhase(progress);
+    const stops = [this.monitorPose(spot), this.seatedPose(spot), this.cutawayWidePose(spot)];
+    const leg = Math.min(Math.floor(path), stops.length - 2);
+    const from = stops[leg]!;
+    const to = stops[leg + 1]!;
+    const k = path - leg;
+    this.applyPose({
+      position: from.position.clone().lerp(to.position, k),
+      look: from.look.clone().lerp(to.look, k),
+    });
+    this.player.root.rotation.y = spot.seat.heading + spin;
+    spot.chair.rotation.y = spin;
+    this.hidePlayerWhenClose();
+    this.followSun(this.player.root.position);
+    this.composer.render(0);
+  }
+
+  /** Back to the level: everything the cutaway moved goes back, and the hub hides again */
+  endCutaway(): void {
+    this.cutaway?.restore();
+    this.cutaway = null;
+  }
+
+  private levelSpot(levelId: string): LevelSpot {
+    const spot = this.world.spots.find(
+      (s): s is LevelSpot => s.kind === 'level' && s.levelId === levelId,
+    );
+    if (!spot) throw new Error(`No café computer for ${levelId}`);
+    return spot;
+  }
+
+  private enterCutaway(spot: LevelSpot, desktop: HTMLCanvasElement | null): Cutaway {
+    const saved = {
+      position: { ...this.position },
+      height: this.height,
+      heading: this.heading,
+      sitting: this.player.isSitting,
+      pose: { position: this.camera.position.clone(), look: this.cameraLook.clone() },
+      hidden: this.element.hidden,
+    };
+    const material = spot.screenMaterial;
+    const wallpaper: Texture | null = material.emissiveMap;
+    const texture = desktop ? monitorTexture(desktop) : null;
+    if (texture) material.emissiveMap = texture;
+
+    this.position = { x: spot.seat.x, z: spot.seat.z };
+    this.height = 0;
+    this.heading = spot.seat.heading;
+    this.placePlayer();
+    this.player.sit(true);
+    this.element.hidden = false;
+    this.element.classList.add('is-cutaway');
+    this.resize();
+
+    return {
+      spot,
+      restore: () => {
+        spot.chair.rotation.y = 0;
+        material.emissiveMap = wallpaper;
+        texture?.dispose();
+        this.position = saved.position;
+        this.height = saved.height;
+        this.heading = saved.heading;
+        this.placePlayer();
+        this.player.sit(saved.sitting);
+        this.player.root.visible = true;
+        this.applyPose(saved.pose);
+        this.element.hidden = saved.hidden;
+        this.element.classList.remove('is-cutaway');
+      },
+    };
   }
 
   // ---------- Flow ----------
@@ -356,9 +489,9 @@ export class Hub {
     this.state = 'launching';
     this.overlay.showCard(null);
     this.overlay.setFade(true, LAUNCH_SECONDS * 1000);
-    const screen = seat.spot.screen;
+    const spot = seat.spot;
     this.tweenCamera(
-      () => ({ position: screen.clone().add(new Vector3(0, 0, 0.3)), look: screen.clone() }),
+      () => this.monitorPose(spot),
       LAUNCH_SECONDS,
       () => this.options.onPlay(seat.spot.levelId),
     );
@@ -468,7 +601,7 @@ export class Hub {
     this.lastFrame = now;
     this.time += dt;
     this.update(dt);
-    this.followSun();
+    this.followSun(this.state === 'title' ? this.cameraLook : this.player.root.position);
     this.motes.update(
       this.time,
       this.state === 'title' ? this.cameraLook : this.player.root.position,
@@ -519,7 +652,11 @@ export class Hub {
         tween.done();
       }
     }
-    // Hide the character when the camera is too close, so the back of the head doesn't fill the screen
+    this.hidePlayerWhenClose();
+  }
+
+  /** Hides the character when the camera is too close, so the back of the head doesn't fill the screen */
+  private hidePlayerWhenClose(): void {
     this.player.root.visible =
       this.camera.position.distanceTo(this.player.root.position.clone().setY(this.height + 1.2)) >
       0.7;
@@ -660,6 +797,20 @@ export class Hub {
     };
   }
 
+  /** Right in front of the monitor, where entering a level ends and chair-swivel's cutaway starts and ends */
+  private monitorPose(spot: LevelSpot): Pose {
+    return { position: spot.screen.clone().add(new Vector3(0, 0, 0.3)), look: spot.screen.clone() };
+  }
+
+  /** chair-swivel's wide shot: from above and behind, so the whole spin shows */
+  private cutawayWidePose(spot: LevelSpot): Pose {
+    const { x, z } = spot.seat;
+    return {
+      position: new Vector3(x, 0, z).add(CUTAWAY_WIDE),
+      look: new Vector3(x, CUTAWAY_LOOK_HEIGHT, z),
+    };
+  }
+
   /**
    * Loading progress: models and textures go through three's default loading manager, whose counts drive the bar;
    * it hides when everything is done, and later stragglers (such as custom models) don't show it again.
@@ -719,8 +870,7 @@ export class Hub {
   }
 
   /** Shadows cover only the area around the character: the sun and its target follow it (or the title camera) */
-  private followSun(): void {
-    const center = this.state === 'title' ? this.cameraLook : this.player.root.position;
+  private followSun(center: Vector3): void {
     this.sun.target.position.set(center.x, 0, center.z);
     this.sun.position.copy(this.sunDirection).multiplyScalar(40).add(this.sun.target.position);
   }

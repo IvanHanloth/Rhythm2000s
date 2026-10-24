@@ -167,6 +167,11 @@ export class WhaleAvatar implements Figure {
     this.model!.position.y = Math.abs(Math.cos(phase)) * 0.025 * Math.min(amount, 1.5);
   }
 
+  /** Seated on a chair (sit(true)) */
+  get isSitting(): boolean {
+    return this.sitting;
+  }
+
   sit(sitting: boolean): void {
     this.sitting = sitting;
     if (!this.rig) {

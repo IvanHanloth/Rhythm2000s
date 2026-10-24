@@ -26,6 +26,8 @@ export interface XpSongSounds extends DrumKit {
   download: { appear: AudioBuffer; open: AudioBuffer };
   /** volume-mute releasing the slider; the press uses `close` */
   volumeRelease: AudioBuffer;
+  /** chair-swivel landing back in the monitor; the press uses `close` (provisional, doc/cross-dimension.md) */
+  chairLand: AudioBuffer;
 }
 
 export function createXpSongSounds(context: BaseAudioContext, xp: XpSounds): XpSongSounds {
@@ -48,6 +50,7 @@ export function createXpSongSounds(context: BaseAudioContext, xp: XpSounds): XpS
     ) as XpSongSounds['shell'],
     download: { appear: xp.downloadStart, open: xp.downloadOpen },
     volumeRelease: xp.volumeRelease,
+    chairLand: xp.restore,
   };
 }
 
@@ -56,6 +59,7 @@ export function hitSound(sounds: XpSongSounds, action: ActionType, step: number)
   if (action === 'desktop-refresh') return step === 0 ? sounds.rightClick : sounds.menuCommand;
   if (action === 'progress-download') return sounds.download.open;
   if (action === 'volume-mute') return step === 0 ? sounds.close : sounds.volumeRelease;
+  if (action === 'chair-swivel') return step === 0 ? sounds.close : sounds.chairLand;
   if (action === 'start-menu') return step === 0 ? sounds.close : sounds.shell[action].handled;
   if (isShellAction(action)) return sounds.shell[action].handled;
   return sounds.close;

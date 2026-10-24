@@ -120,6 +120,7 @@ const HINTS: Record<ActionType, TutorialHint> = {
   'sheet-save': { name: 'Save sheet', how: "Close the window, then Don't Save half a beat later" },
   'ichat-message': { name: 'iChat message', how: 'Click it on the beat' },
   'menu-volume': { name: 'Volume', how: 'Grab the slider on the beat' },
+  'chair-swivel': { name: 'Swivel chair', how: 'Press on the beat and spin in 3D' },
 };
 
 export function tutorialHint(action: ActionType): TutorialHint {

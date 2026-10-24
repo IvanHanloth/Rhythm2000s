@@ -60,6 +60,10 @@ export interface LevelSpot extends Spot {
   seat: { x: number; z: number; heading: number };
   /** Screen centre (world), where the camera finally pushes in; updated when a custom computer model loads */
   screen: Vector3;
+  /** The screen's self-lit material; chair-swivel's cutaway shows the level on it (doc/cross-dimension.md) */
+  screenMaterial: MeshStandardMaterial;
+  /** The swivel chair, turned about its centre by the cutaway */
+  chair: Object3D;
 }
 
 /** Look at something or talk: shows a few lines of text */
@@ -270,7 +274,10 @@ class Builder {
     if (options.collider) this.colliders.push(boxAt(x, z, ...options.collider));
   }
 
-  /** Custom model slot: a placeholder built in the anchor's frame, replaced when the custom model arrives */
+  /**
+   * Custom model slot: a placeholder built in the anchor's frame, replaced when the custom model arrives.
+   * Returns the anchor, which carries whichever of the two is shown.
+   */
   custom(
     slot: string,
     x: number,
@@ -278,7 +285,7 @@ class Builder {
     rotation: number,
     buildPlaceholder: (placeholder: Group) => void,
     onLoaded?: (model: Object3D) => void,
-  ): void {
+  ): Group {
     const anchor = new Group();
     anchor.position.set(x, 0, z);
     this.root.add(anchor);
@@ -293,6 +300,7 @@ class Builder {
       }
     });
     attachCustom(anchor, slot, placeholder, { rotation, onLoaded });
+    return anchor;
   }
 
   read(name: string, verb: string, x: number, z: number, lines: string[], reach = 1.2): void {
@@ -993,7 +1001,7 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
 
   // Chair (custom slot office-chair)
   const seatZ = z + 0.85;
-  b.custom('office-chair', x, seatZ, 0, (p) => {
+  const chair = b.custom('office-chair', x, seatZ, 0, (p) => {
     const fabric = b.plain(C.plasticDark, 0.8);
     p.add(placeholderBox(0.5, 0.08, 0.5, 0, SEAT_HEIGHT - 0.08, 0, fabric));
     p.add(placeholderBox(0.5, 0.6, 0.06, 0, SEAT_HEIGHT, 0.25, fabric));
@@ -1017,6 +1025,8 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
         reach: 1.0,
         seat: { x, z: seatZ, heading: Math.PI },
         screen: screenCenter,
+        screenMaterial,
+        chair,
       });
       break;
     }

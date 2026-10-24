@@ -16,11 +16,12 @@ export type MacAction = Extract<
   | 'sheet-save'
   | 'ichat-message'
   | 'menu-volume'
+  | 'chair-swivel'
 >;
 
 /**
  * Widget kinds: alert, Dock bounce, new mail, document window, Apple menu, file for the Trash,
- * window with a save sheet, iChat message, menu bar volume
+ * window with a save sheet, iChat message, menu bar volume, and the café's swivel chair (doc/cross-dimension.md)
  */
 export type MacTargetKind =
   | 'alert'
@@ -31,7 +32,8 @@ export type MacTargetKind =
   | 'file'
   | 'sheet'
   | 'chat'
-  | 'volume';
+  | 'volume'
+  | 'chair';
 
 /** File names under assets/reference/mac-os-x/sounds/ (without .aiff) */
 export type MacSoundName =
@@ -78,6 +80,8 @@ export const MAC_ACTIONS: Record<MacAction, MacActionInfo> = {
   'ichat-message': { kind: 'chat', sound: 'Submarine' },
   // Grab the slider, then release (the original plays a beep at the new volume; provisional)
   'menu-volume': { kind: 'volume', sound: 'Tink', handled: ['Tink', 'Pop'] },
+  // Prototype: a click on the desktop cuts to the 3D café, landing 2 beats later (doc/cross-dimension.md; provisional)
+  'chair-swivel': { kind: 'chair', sound: 'Tink', handled: ['Tink', 'Pop'] },
 };
 
 export const MAC_ACTION_TYPES = Object.keys(MAC_ACTIONS) as MacAction[];

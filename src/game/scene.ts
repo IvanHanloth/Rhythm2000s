@@ -18,6 +18,22 @@ export interface TapInfo {
   audioTime: number;
 }
 
+/**
+ * The 3D café behind the level, for chair-swivel's cutaway (doc/cross-dimension.md). The scene drives it from the
+ * audio clock; the shell draws the café under the level's canvas.
+ */
+export interface CutawayStage {
+  /** A round with a cutaway is starting: get the café ready at this scene's computer, so the first one doesn't stall */
+  prepare(sceneId: SceneId): void;
+  /**
+   * Draws the café `progress` (0–1) of the way through the cutaway. On the first frame `desktop` (the scene's desktop,
+   * filling the 1280×720 canvas at its scale) is captured onto the 3D monitor.
+   */
+  show(sceneId: SceneId, progress: number, desktop: Container): void;
+  /** Back to 2D */
+  hide(): void;
+}
+
 /** Shared resources a scene gets when created. */
 export interface SceneContext {
   clock: AudioClock;
@@ -37,6 +53,8 @@ export interface SceneContext {
   chartFiles: ChartFiles;
   /** Leave the scene and go back to the street hub ("Back" in the level select) */
   leave(): void;
+  /** The 3D café for chair-swivel's cutaway */
+  cutaway: CutawayStage;
   /** The chart to play (when #scene/chart opens a level directly); without it the scene shows its level list first */
   chartId?: string;
   /**

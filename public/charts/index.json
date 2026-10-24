@@ -12,6 +12,7 @@
     "xp-recycle.json",
     "xp-download.json",
     "xp-remix-1.json",
+    "xp-chair-spin.json",
     "mac-alert-basics.json",
     "mac-dock-hop.json",
     "mac-mail-rush.json",
@@ -21,6 +22,7 @@
     "mac-save-sheet.json",
     "mac-ichat.json",
     "mac-volume.json",
-    "mac-remix-1.json"
+    "mac-remix-1.json",
+    "mac-chair-spin.json"
   ]
 }

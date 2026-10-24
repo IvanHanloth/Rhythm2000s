@@ -81,6 +81,8 @@ const FILES: { label: string; app: AppIconName | 'folder' }[] = [
 const FILE_ROW_LEFT = 120;
 const FILE_ROW_STEP = 92;
 const FILE_ROW_Y = 466;
+/** chair-swivel: the virtual mouse clicks empty desktop here, and its judgement shows above (provisional) */
+const CHAIR_SPOT: Point = { x: 512, y: 270 };
 
 type AlertAction = Extract<MacAction, `alert-${string}`>;
 
@@ -264,6 +266,8 @@ export class MacTargetsView {
       case 'chat':
       case 'volume':
         return this.extras.clickPoints(event);
+      case 'chair':
+        return [CHAIR_SPOT, CHAIR_SPOT];
     }
   }
 
@@ -577,6 +581,7 @@ export class MacTargetsView {
       // Right of the menu, below the menu bar
       return { x: this.menuOrigin.x + this.menu.width + 60, y: this.menuOrigin.y + 50 };
     }
+    if (target.kind === 'chair') return { x: CHAIR_SPOT.x, y: CHAIR_SPOT.y - 30 };
     if (target.kind === 'file') {
       const file = this.files.find((f) => f.target === target)!;
       return { x: file.center.x, y: file.center.y - FILE_ICON_SIZE / 2 - 4 };

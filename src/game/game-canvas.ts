@@ -1,10 +1,10 @@
 // Game canvas: one PixiJS Application filling its host element.
 // Scenes draw on a 1280×720 stage, scaled to fit and centred, letterboxed in black (ADR 0002).
+// The canvas itself is transparent and the black comes from its host (style.css), so chair-swivel's cutaway can show
+// the 3D café underneath (doc/cross-dimension.md).
 
 import { Application, Container, Graphics } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH, fitToScreen } from './layout.ts';
-
-const LETTERBOX_COLOR = 0x000000;
 
 export class GameCanvas {
   readonly app: Application;
@@ -29,7 +29,7 @@ export class GameCanvas {
     const app = new Application();
     await app.init({
       resizeTo: host,
-      background: LETTERBOX_COLOR,
+      backgroundAlpha: 0,
       antialias: true,
       autoDensity: true,
       resolution: window.devicePixelRatio,

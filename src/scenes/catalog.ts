@@ -33,6 +33,8 @@ export const SCENE_CATALOG: Record<SceneId, SceneInfo> = {
       'recycle-bin',
       'progress-download',
       'volume-mute',
+      // Prototype: cuts to the 3D café (doc/cross-dimension.md)
+      'chair-swivel',
     ],
     checkChart: checkWindowsXpChart,
   },

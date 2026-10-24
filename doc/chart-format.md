@@ -120,6 +120,7 @@ An action ID names **the widget that appears in the call**, after the original s
 | `recycle-bin` | Recycle Bin (`SHFileOperation`, `FO_DELETE`) | `windows-xp` | A file lands on the desktop on the beat with `Windows XP Default.wav` (provisional) | Throw it in the bin on the beat, with `Windows XP Recycle.wav` |
 | `progress-download` | IE6 download window (`msctls_progress32`) | `windows-xp` | Opens on the beat; the bar fills over **3 beats** and the virtual mouse clicks Open as it fills | The window opens by itself on the beat; click **3 beats later** as the bar fills |
 | `volume-mute` | Tray volume control (`msctls_trackbar32`); visual only | `windows-xp` | The pop-up opens before the beat; the virtual mouse grabs the slider on the beat and drags it to 0 over **1 beat**, releasing on the beat | The slider starts at 0; press on the beat (the only judged press), then the slider returns over 1 beat and releases by itself |
+| `chair-swivel` | The café's swivel chair, in 3D (**prototype**, [cross-dimension.md](cross-dimension.md)) | `windows-xp`, `mac-2000` | The virtual mouse clicks the desktop on the beat; the view cuts to the 3D café, the character spins once, and **2 beats** later the view is back in the monitor | Press on the beat (the only judged press); a hit plays the same cutaway, landing by itself 2 beats later |
 | `alert-note` | Mac note alert (`kAlertNoteAlert`, application icon) | `mac-2000` | Pops up on the beat with `Glass` | Click OK on the beat |
 | `alert-caution` | Mac caution alert (`kAlertCautionAlert`, yellow triangle) | `mac-2000` | Pops up on the beat with `Funk` | Same |
 | `alert-stop` | Mac stop alert (`kAlertStopAlert`) | `mac-2000` | Pops up on the beat with `Basso` | Same |
@@ -132,7 +133,7 @@ An action ID names **the widget that appears in the call**, after the original s
 | `ichat-message` | iChat message window | `mac-2000` | Pops up above iChat in the Dock on the beat with `Submarine` | Click it on the beat; it shrinks back into iChat |
 | `menu-volume` | Menu bar volume extra (`NSMenuExtra`); visual only | `mac-2000` | The volume menu drops before the beat with the slider at the bottom; the virtual mouse grabs it on the beat (`Tink`) and drags it to the top over **1 beat**, releasing (`Pop`) | Press on the beat; the game releases 1 beat later, only the press is judged (as `volume-mute`) |
 
-Actions of a scene can be mixed freely within a phrase. Two-press actions (`desktop-refresh`, `start-menu`, `menu-apple`, `sheet-save`) have their second press fixed half a beat after the first, and the chart only gives the first beat. `progress-download` is judged at +3 beats; the volume actions are pressed at 0 and released by the game at +1. Designs for the XP actions are in [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md), the Mac sounds in [scenes/mac-2000.md](scenes/mac-2000.md#sounds). Other designed actions (XP mail etc.) join this table when implemented. A chart using an action its scene doesn't support is an error.
+Actions of a scene can be mixed freely within a phrase. Two-press actions (`desktop-refresh`, `start-menu`, `menu-apple`, `sheet-save`) have their second press fixed half a beat after the first, and the chart only gives the first beat. `progress-download` is judged at +3 beats; the volume actions are pressed at 0 and released by the game at +1. `chair-swivel` is pressed at 0 and lands by itself at +2. Designs for the XP actions are in [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md), the Mac sounds in [scenes/mac-2000.md](scenes/mac-2000.md#sounds). Other designed actions (XP mail etc.) join this table when implemented. A chart using an action its scene doesn't support is an error.
 
 ## Official levels
 
@@ -147,7 +148,7 @@ Official levels also follow [level-design.md](level-design.md): easy to hard, at
 
 ## Timing limits
 
-The "Follow me / Your turn" banner switches half a beat before the call and response bars end ([prototypes/mvp.md](prototypes/mvp.md#turn-cue)), so the last press in either bar must have its Good window closed by then. At 120 BPM with Good ±100 ms the last press is at beat 3.25 at the latest; two-press actions start by 2.75, the volume actions by 2.25 and `progress-download` by 0.25. Charts that break this fail validation.
+The "Follow me / Your turn" banner switches half a beat before the call and response bars end ([prototypes/mvp.md](prototypes/mvp.md#turn-cue)), so the last press in either bar must have its Good window closed by then. At 120 BPM with Good ±100 ms the last press is at beat 3.25 at the latest; two-press actions start by 2.75, the volume actions by 2.25, `chair-swivel` by 1.25 and `progress-download` by 0.25. Charts that break this fail validation.
 
 ## Validation
 

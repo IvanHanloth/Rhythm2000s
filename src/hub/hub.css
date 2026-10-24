@@ -421,3 +421,13 @@
 .back-hint[hidden] {
   display: none;
 }
+
+/* chair-swivel cutaway (doc/cross-dimension.md): the cafe shows under the level canvas, which keeps the input */
+.hub.is-cutaway {
+  pointer-events: none;
+}
+
+/* Only the café shows: whatever the hub was showing when the level hid it (title, seated card, pause) stays hidden */
+.hub.is-cutaway .hub-ui {
+  display: none;
+}

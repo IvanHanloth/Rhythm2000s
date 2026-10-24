@@ -13,6 +13,7 @@
 | [level-design.md](level-design.md) | Official level design guidelines: the system demonstrates every action first, easy to hard, at least 1 minute of chart | Draft |
 | [beat-guide.md](beat-guide.md) | Beat guide: the `((((O))))` beat cue, toggled with H and flagged on scores | Draft |
 | [settings.md](settings.md) | Settings window in the XP / Mac system menus: latency calibration, skip tutorial, Beat Guide, keyboard shortcuts | Draft |
+| [cross-dimension.md](cross-dimension.md) | Cross-dimension action prototype: a press cuts to the 3D café, the character spins on the swivel chair, back to the level | Draft (prototype) |
 | [chart-format.md](chart-format.md) | Chart JSON format: location, fields, action IDs, validation | Draft |
 | [chart-import-export.md](chart-import-export.md) | Importing charts into the browser and exporting any chart, from the level list | Draft |
 | [tech-research.md](tech-research.md) | Technical research: browser capabilities, stack comparison, risks to verify | Draft |

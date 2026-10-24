@@ -10,6 +10,14 @@ body {
 #game {
   position: fixed;
   inset: 0;
+  /* The letterbox: the canvas is transparent (game-canvas.ts) */
+  background: #000;
+}
+
+/* chair-swivel's cutaway (doc/cross-dimension.md): over the 3D café, which shows through */
+#game.is-cutaway {
+  z-index: 6;
+  background: transparent;
 }
 
 #game canvas {

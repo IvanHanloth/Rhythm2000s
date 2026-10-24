@@ -34,6 +34,7 @@ import { clamp01 } from '@/ui/easing.ts';
 import { TurnBanner } from '@/ui/turn-banner.ts';
 import { TutorialCaption } from '@/ui/tutorial-caption.ts';
 import { SCENE_CATALOG, type SceneId } from '@/scenes/catalog.ts';
+import { cutawayDesktopAlpha, cutawayProgress, hasCutaway } from './cutaway.ts';
 import type { RoundSession } from './round-session.ts';
 
 /** How long after the results appear before Retry / Next accept input (ms), against mashing through */
@@ -178,6 +179,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   private resultDefault: () => void = () => {};
   private resultShownAt = 0;
   private destroyed = false;
+  /** chair-swivel's 3D cutaway is showing (doc/cross-dimension.md) */
+  private inCutaway = false;
 
   constructor(context: SceneContext, options: LevelSceneOptions) {
     this.context = context;
@@ -405,6 +408,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     session.update(audioTime);
     const beat = session.beatAt(audioTime);
     this.renderRound(session, beat, audioTime);
+    this.renderCutaway(session, beat);
     this.renderTurnBanner(beat);
     this.renderCaption();
     this.renderBeatGuide(beat);
@@ -650,6 +654,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.setListVisible(false);
     this.turnCues = buildTurnCues(chart);
     this.beatGuide.setRound(chart);
+    // Before the session books its first beats: getting the café ready can take a moment
+    if (hasCutaway(chart)) this.context.cutaway.prepare(this.sceneId);
     const session = this.createSession(chart);
     this.session = session;
     this.buildRound(session);
@@ -684,6 +690,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   }
 
   private endRound(): void {
+    this.leaveCutaway();
     this.session?.stop();
     if (this.session) this.clearRound();
     this.session = null;
@@ -692,6 +699,28 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.turnBanner.show(null);
     this.caption.show(null);
     this.beatGuide.view.visible = false;
+  }
+
+  /**
+   * chair-swivel's cutaway: the 3D café shows under this canvas while the desktop crossfades out and back in;
+   * banners, judgements and the beat guide stay on top. The café is captured from the desktop before it fades.
+   */
+  private renderCutaway(session: S, beat: number): void {
+    const progress = cutawayProgress(session, beat);
+    if (progress === null) {
+      this.leaveCutaway();
+      return;
+    }
+    this.context.cutaway.show(this.sceneId, progress, this.screen);
+    this.inCutaway = true;
+    this.screen.alpha = cutawayDesktopAlpha(progress);
+  }
+
+  private leaveCutaway(): void {
+    if (!this.inCutaway) return;
+    this.inCutaway = false;
+    this.screen.alpha = 1;
+    this.context.cutaway.hide();
   }
 
   /** Demo caption: which practice this is (or "Try again") and how to handle the action */

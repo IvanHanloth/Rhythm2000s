@@ -25,6 +25,7 @@ export const ACTION_TYPES = [
   'sheet-save',
   'ichat-message',
   'menu-volume',
+  'chair-swivel',
 ] as const;
 
 export type ActionType = (typeof ACTION_TYPES)[number];
@@ -52,13 +53,18 @@ export const ACTION_LABELS: Record<ActionType, string> = {
   'sheet-save': 'Save sheet',
   'ichat-message': 'iChat message',
   'menu-volume': 'Volume menu',
+  'chair-swivel': 'Swivel chair spin',
 };
+
+/** Length of chair-swivel's 3D cutaway (beats): from the press until the view is back in the monitor (provisional) */
+export const CHAIR_SWIVEL_BEATS = 2;
 
 /**
  * Offsets (beats) of each press from the event's beat; most actions take a single press ([0]).
  * Two-click actions (a click, then a menu item or button) follow half a beat apart; progress-download is
  * clicked when its bar fills 3 beats in; the volume actions are pressed on the beat and released 1 beat later
- * (doc/chart-format.md "Actions").
+ * (doc/chart-format.md "Actions"). chair-swivel is pressed on the beat and lands by itself when the 3D
+ * cutaway ends (doc/cross-dimension.md).
  */
 const TAP_OFFSETS: Partial<Record<ActionType, readonly number[]>> = {
   'desktop-refresh': [0, 0.5],
@@ -68,16 +74,19 @@ const TAP_OFFSETS: Partial<Record<ActionType, readonly number[]>> = {
   'progress-download': [3],
   'volume-mute': [0, 1],
   'menu-volume': [0, 1],
+  'chair-swivel': [0, CHAIR_SWIVEL_BEATS],
 };
 
 /**
  * Whether the player makes a press or the game completes it after the previous press hits
- * (visuals and sound as normal, not judged or scored). volume-mute and menu-volume release by themselves.
+ * (visuals and sound as normal, not judged or scored). volume-mute and menu-volume release by themselves;
+ * chair-swivel lands by itself.
  */
 export type TapKind = 'press' | 'auto';
 const TAP_KINDS: Partial<Record<ActionType, readonly TapKind[]>> = {
   'volume-mute': ['press', 'auto'],
   'menu-volume': ['press', 'auto'],
+  'chair-swivel': ['press', 'auto'],
 };
 
 export function actionTapKind(action: ActionType, step: number): TapKind {

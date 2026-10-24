@@ -39,6 +39,7 @@ const KIND_LABELS: Record<MacTargetKind, string> = {
   sheet: 'Save sheet',
   chat: 'iChat',
   volume: 'Volume',
+  chair: 'Swivel chair',
 };
 
 /** Icon standing for each widget kind; levels mixing several use iTunes (a remix) */
@@ -52,6 +53,8 @@ const KIND_ICONS: Record<MacTargetKind, AppIconName | 'caution' | 'trash'> = {
   sheet: 'TextEdit',
   chat: 'iChat',
   volume: 'iTunes',
+  // The cutaway is a little film of the café (provisional)
+  chair: 'QuickTime Player',
 };
 
 export interface MacLevelSelectOptions {

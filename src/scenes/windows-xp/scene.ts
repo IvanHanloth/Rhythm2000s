@@ -54,6 +54,8 @@ const SLOTS = [
   { x: 578, y: 312 },
   { x: 842, y: 368 },
 ];
+/** chair-swivel: the virtual mouse clicks empty desktop here, and its judgement shows above (virtual screen, provisional) */
+const CHAIR_SPOT = { x: XP_SCREEN_WIDTH / 2, y: 260 };
 /** Body text wraps beyond this width */
 const POPUP_TEXT_WIDTH = 210;
 
@@ -406,6 +408,7 @@ class WindowsXpScene extends LevelScene<XpSession> {
 
   /** Where the virtual mouse presses for each step (virtual screen); desktop-refresh is handled by VirtualMouse */
   private clickPoints(target: XpTarget, event: number, turn: Turn): { x: number; y: number }[] {
+    if (target.call.action === 'chair-swivel') return [CHAIR_SPOT, CHAIR_SPOT];
     const popup = this.popups[event];
     if (popup) {
       const button = popup.buttonCenter();
@@ -452,6 +455,8 @@ class WindowsXpScene extends LevelScene<XpSession> {
         view.position.set(slot.x * XP_SCALE, (slot.y - popup.height / 2) * XP_SCALE - 20);
       } else if (anchor) {
         view.position.set(anchor.x * XP_SCALE, anchor.y * XP_SCALE - 20);
+      } else if (target.call.action === 'chair-swivel') {
+        view.position.set(CHAIR_SPOT.x * XP_SCALE, CHAIR_SPOT.y * XP_SCALE - 40);
       } else {
         // desktop-refresh: above the right-click spot
         const spot = VirtualMouse.refreshSpot(target);

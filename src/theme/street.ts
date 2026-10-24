@@ -73,4 +73,6 @@ export const STREET_COLORS = {
   imacShell: '#2ab3c9',
   /** Marker above computers where a level can start */
   marker: '#f2b705',
+  /** The bars round the 16:9 level on a 4:3 CRT during chair-swivel's cutaway */
+  monitorLetterbox: '#000000',
 };

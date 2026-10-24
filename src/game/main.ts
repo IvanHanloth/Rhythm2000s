@@ -2,6 +2,7 @@
 // Opens the street hub by default (title screen + level select, ADR 0005); sitting at a computer switches to the rhythm scene's canvas.
 
 import './style.css';
+import { Rectangle } from 'pixi.js';
 import { AudioClock } from '@/audio/audio-clock.ts';
 import { Hub, type LevelInfo } from '@/hub/hub.ts';
 import { mac2000Scene } from '@/scenes/mac-2000/scene.ts';
@@ -10,11 +11,13 @@ import { browserChartStore, ChartLibrary } from './chart-library.ts';
 import { fetchChartFromSite, loadCharts } from './chart-loader.ts';
 import { browserChartFiles } from './chart-transfer.ts';
 import { GameCanvas } from './game-canvas.ts';
+import { DESIGN_HEIGHT, DESIGN_WIDTH } from './layout.ts';
 import { listenForTaps } from './input.ts';
 import { LevelIntro } from './level-intro.ts';
 import { buildLevels, formatBestScore, parseRoute } from './levels.ts';
 import { loadBestAssisted, loadBestScore } from './records.ts';
 import { SceneDirector } from './scene-director.ts';
+import type { CutawayStage } from './scene.ts';
 import { PlayerSettings } from './settings.ts';
 
 const host = document.querySelector<HTMLElement>('#game');
@@ -40,12 +43,50 @@ await Promise.all(scenes.map(async (scene) => scene.preload?.(clock.context)));
 /** URL id of the street hub; also opened when the URL names no scene */
 const HUB_ROUTE = 'street';
 
+/** The street hub, created below; chair-swivel's cutaway draws its café (doc/cross-dimension.md) */
+let cafe: Hub | null = null;
+/** The cutaway is showing: the game canvas sits over the café with its background cleared */
+let inCutaway = false;
+const cutaway: CutawayStage = {
+  prepare: (sceneId) => requireHub().prepareCutaway(sceneId),
+  show: (sceneId, progress, desktop) => {
+    let snapshot: HTMLCanvasElement | null = null;
+    if (!inCutaway) {
+      inCutaway = true;
+      host.classList.add('is-cutaway');
+      // The desktop fills the 1280×720 stage at its own scale; captured once, as the café's monitor image
+      const frame = new Rectangle(
+        0,
+        0,
+        DESIGN_WIDTH / desktop.scale.x,
+        DESIGN_HEIGHT / desktop.scale.y,
+      );
+      const captured = canvas.app.renderer.extract.canvas({ target: desktop, frame });
+      if (!(captured instanceof HTMLCanvasElement))
+        throw new Error('Desktop capture is not a canvas');
+      snapshot = captured;
+    }
+    requireHub().renderCutaway(sceneId, progress, snapshot);
+  },
+  hide: () => {
+    if (!inCutaway) return;
+    inCutaway = false;
+    host.classList.remove('is-cutaway');
+    requireHub().endCutaway();
+  },
+};
+function requireHub(): Hub {
+  if (!cafe) throw new Error('The street hub is not created yet');
+  return cafe;
+}
+
 const director = new SceneDirector(canvas.stage, scenes, {
   clock,
   calibration: () => settings.values.calibrationMs / 1000,
   settings,
   library,
   chartFiles: browserChartFiles,
+  cutaway,
   leave: () => {
     location.hash = HUB_ROUTE;
   },
@@ -94,6 +135,7 @@ const hub = new Hub({
     location.hash = sceneId;
   },
 });
+cafe = hub;
 document.body.append(hub.element);
 document.querySelector('#boot')?.remove();
 

@@ -1,0 +1,41 @@
+{
+  "format": 1,
+  "id": "xp-chair-spin",
+  "title": "Spin Cycle",
+  "scene": "windows-xp",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    { "call": [{ "beat": 0, "action": "chair-swivel" }] },
+    { "call": [{ "beat": 1, "action": "chair-swivel" }] },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "chair-swivel" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "chair-swivel" },
+        { "beat": 2.5, "action": "dialog-info" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 0.5, "action": "dialog-info" },
+        { "beat": 1, "action": "chair-swivel" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "chair-swivel" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    }
+  ]
+}
