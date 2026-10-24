@@ -5,6 +5,7 @@
 | [game-design.md](game-design.md) | 游戏设计总览：核心玩法、判定、场景列表、待定问题 | 草稿 |
 | [scenes/windows-xp.md](scenes/windows-xp.md) | 场景：Windows XP 桌面 | 草稿 |
 | [scenes/mac-2000.md](scenes/mac-2000.md) | 场景：2000 年前后的 Mac 桌面 | 草稿 |
+| [tech-research.md](tech-research.md) | 技术调研：浏览器能力、候选技术栈对比、待验证风险 | 草稿 |
 | [decisions/](decisions/README.md) | 决策记录（ADR） | — |
 
 ## 写作约定

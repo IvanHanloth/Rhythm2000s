@@ -16,10 +16,10 @@
 
 ## 当前阶段
 
-**立项 / 设计阶段。** 技术栈（引擎、语言、目标平台）**尚未确定**。
+**设计阶段，技术栈已确定**（见 [ADR 0001](doc/decisions/0001-技术栈选型.md)），工程脚手架尚未搭建。
 
-- 在技术栈确定前，不要自行引入框架、脚手架或依赖；如果任务需要先选型，请向用户提出方案并说明取舍。
-- 技术栈确定后，更新本文件的「技术栈」与「常用命令」两节，并补充 `.gitignore`。
+- 只使用已确定的技术栈；要引入新的运行时依赖（尤其是音频、渲染、状态管理类库）前，先向用户说明理由和取舍。
+- 下一步计划是做最小延迟测试原型，验证 [doc/tech-research.md](doc/tech-research.md) 第 5 节列出的风险。
 
 ## 目录结构
 
@@ -31,6 +31,7 @@
 ├── doc/               # 设计与技术文档（人和 AI 都要读）
 │   ├── README.md      # 文档索引与写作约定
 │   ├── game-design.md # 游戏设计总览
+│   ├── tech-research.md # 技术调研：浏览器能力、方案对比、待验证风险
 │   ├── scenes/        # 各关卡/场景的设计
 │   └── decisions/     # 决策记录（ADR）
 └── memory/            # LLM 共享记忆：跨会话保存的项目背景、偏好与约定
@@ -40,11 +41,40 @@
 
 ## 技术栈
 
-待定。
+Web 优先，以浏览器为主要运行平台；需要上架 Steam 时再用 Electron 套壳。详见 [ADR 0001](doc/decisions/0001-技术栈选型.md)。
+
+| 部分 | 选择 | 说明 |
+| --- | --- | --- |
+| 语言 | TypeScript | |
+| 工具链 | [Vite+](https://viteplus.dev/guide)（npm 包名 `vite-plus`） | 统一提供开发服务器（Vite）、构建（Rolldown）、测试（Vitest）、代码检查（Oxlint）、格式化（Oxfmt）；所有配置写在根目录 `vite.config.ts`，从 `vite-plus` 导入 `defineConfig`。不要再单独安装 ESLint、Prettier、Jest 等同类工具 |
+| 渲染 | PixiJS（npm 包名 `pixi.js`） | 负责游戏画面；菜单、设置等界面可用 DOM |
+| 音频 | 原生 Web Audio API | 自写「指挥」模块，负责拍点换算、预约播放和判定；不用 Howler.js 之类的播放封装 |
+| 包管理器 | pnpm | 由 Vite+ 根据 `package.json` 的 `packageManager` 字段和锁文件自动调用 |
+| 运行环境 | Node.js 24 | 2026-10-24 本机版本 |
+
+音频与输入时序的实现原则（详见 [doc/tech-research.md](doc/tech-research.md) 第 2 节）：
+
+- 所有声音用 `AudioBufferSourceNode.start(when)` 按音频时钟预约播放。
+- 判定使用输入事件的 `event.timeStamp`，通过 `AudioContext.getOutputTimestamp()` 换算到音频时间轴，再扣除 `outputLatency` 和玩家校准值。
+- 每帧画面根据当前音频时间计算，不累加帧间隔。
 
 ## 常用命令
 
-待定（技术栈确定后补充：安装、运行、测试、构建）。
+> 脚手架尚未搭建，以下命令在搭建后生效；如有变化请同步修改。
+
+```bash
+vp install     # 安装依赖（内部调用 pnpm）
+vp dev         # 启动开发服务器
+vp build       # 构建到 dist/
+vp preview     # 本地预览构建结果
+vp test        # 运行测试（Vitest）
+vp check       # 格式、代码检查、类型检查一起跑；加 --fix 自动修复
+vp add <包名>  # 添加依赖
+vp run <脚本>  # 运行 package.json 中的自定义脚本
+```
+
+- `dev`、`build`、`test` 等内置命令不读取 `package.json` 的 scripts；自定义脚本要用 `vp run`。
+- 需要全局安装 `vp` 命令（见 [Vite+ 文档](https://viteplus.dev/guide)）；没有全局安装时，可以在项目里用 `pnpm exec vp <命令>` 调用本地的 `vite-plus`。
 
 ## 术语
 
@@ -64,7 +94,7 @@
 2. **文档先行**：新增或修改玩法、场景、判定规则时，先更新 `doc/` 中的相关文档，再写代码。
 3. **记录决策**：选型、架构、关键玩法规则等重要决定，在 `doc/decisions/` 新建一条 ADR。
 4. **节奏时间**：判定和动画必须以音频时钟为准，不能依赖帧计数或 `setTimeout` 之类的计时器（具体实现方式随技术栈确定）。
-5. **小步提交**：每次提交只做一件事，提交说明写清楚「做了什么、为什么」。
+5. **小步提交**：每次提交只做一件事，提交说明写清楚「做了什么、为什么」。提交说明和 PR 描述中**不要**加 `Co-Authored-By` 或「Generated with ...」之类的 AI 署名。
 6. **不臆造**：对需求不确定时先问用户，不要自行补全设计细节并当作已定事项写进文档。
 
 ## 素材与版权

@@ -1,6 +1,6 @@
 # ==============================
 # rhythm2000s .gitignore
-# 技术栈尚未确定：以下为通用规则，选定引擎/框架后请补充对应段落。
+# 技术栈：TypeScript + PixiJS + Vite+，pnpm 管理依赖（见 doc/decisions/0001-技术栈选型.md）
 # ==============================
 
 # ---------- 操作系统 ----------
@@ -41,7 +41,10 @@ logs/
 tmp/
 temp/
 
-# ---------- Node / Web 前端（如采用 Web 技术栈） ----------
+# ---------- Node / Vite ----------
+# pnpm-lock.yaml 需要提交，不要忽略
+*.local
+vite.config.*.timestamp-*
 node_modules/
 .pnpm-store/
 npm-debug.log*
