@@ -12,6 +12,7 @@
 | [hub-assets.md](hub-assets.md) | Custom models for the street: spec (size, facing, origin, SCREEN mesh) and slot list | Draft |
 | [level-design.md](level-design.md) | Official level design guidelines: the system demonstrates every action first, easy to hard, at least 1 minute of chart | Draft |
 | [beat-guide.md](beat-guide.md) | Beat guide: the `((((O))))` beat cue, toggled with H and flagged on scores | Draft |
+| [combo.md](combo.md) | Combo: counting, the hit counter, XP / Mac tier and break effects, best combo and Full Combo on the results | Draft |
 | [settings.md](settings.md) | Settings window in the XP / Mac system menus: latency calibration, skip tutorial, Beat Guide, keyboard shortcuts | Draft |
 | [chart-format.md](chart-format.md) | Chart JSON format: location, fields, action IDs, validation | Draft |
 | [chart-editor.md](chart-editor.md) | Chart editor on its own café computers: period program window, phrase-by-phrase timeline, play and test | Draft |

@@ -20,6 +20,21 @@ describe('summarizeResult', () => {
     expect(summarizeResult([perfect(0), miss()]).rank).toBe('tryAgain');
   });
 
+  it('best combo is the longest run of hits; Full Combo needs a press and no Miss', () => {
+    const summary = summarizeResult([
+      perfect(0),
+      good(0.05),
+      miss(),
+      perfect(0),
+      perfect(0),
+      good(0),
+    ]);
+    expect(summary.bestCombo).toBe(3);
+    expect(summary.fullCombo).toBe(false);
+    expect(summarizeResult([perfect(0), good(0.05)]).fullCombo).toBe(true);
+    expect(summarizeResult([]).fullCombo).toBe(false);
+  });
+
   it('buckets offsets by 20 ms; beyond ±120 ms goes to the ends', () => {
     const { bins } = summarizeResult([perfect(0), perfect(0.009), good(-0.061), good(0.15)]);
     expect(bins).toEqual([0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 1]);

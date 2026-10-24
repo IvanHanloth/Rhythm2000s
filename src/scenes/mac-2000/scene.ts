@@ -8,6 +8,7 @@ import { Container, Graphics, Rectangle, Sprite, type FederatedPointerEvent } fr
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
 import type { SceneContext, SceneEntry } from '@/game/scene.ts';
 import type { Chart } from '@/rhythm/chart.ts';
+import type { ComboBreak, ComboTier } from '@/rhythm/combo.ts';
 import { AQUA } from '@/theme/aqua.ts';
 import { THEMES } from '@/theme/tokens.ts';
 import { SCENE_CATALOG } from '@/scenes/catalog.ts';
@@ -28,6 +29,7 @@ import { APPLE_MENU_LEFT, MENU_BAR_HEIGHT, MenuBar } from './components/menu-bar
 import { EDITOR_TITLE, MacEditorWindow } from './editor-window.ts';
 import { MacLatencyTestWindow } from './latency-test-window.ts';
 import { MacLevelSelect } from './level-select.ts';
+import { MacComboEffects } from './combo-effects.ts';
 import { MacMessageWindow } from './message-window.ts';
 import { MacResultsWindow } from './results-window.ts';
 import { MacSession } from './session.ts';
@@ -42,6 +44,13 @@ const SCREEN_HEIGHT = DESIGN_HEIGHT / SCREEN_SCALE;
 
 /** Turn banner centre (canvas coordinates): below the menu bar, above the top row of alerts */
 const BANNER_Y = 62;
+/** Top of the combo hit counter (canvas coordinates): just below the menu bar */
+const COUNTER_Y = MENU_BAR_HEIGHT * SCREEN_SCALE + 8;
+/** The spinning wait cursor's centre (virtual screen): left of the hit counter */
+const BEACH_BALL = {
+  x: (DESIGN_WIDTH - 16 - 138 - 22) / SCREEN_SCALE,
+  y: COUNTER_Y / SCREEN_SCALE + 19,
+};
 
 const MENUS = ['File', 'Edit', 'View', 'Go', 'Window', 'Help'];
 /** HackerEditor's menus in editor mode, a document application's usual set (decoration) */
@@ -87,10 +96,17 @@ class Mac2000Scene extends LevelScene<MacSession> {
   /** The virtual mouse, on top of the Mac interface */
   private readonly pointerLayer = new Container({ label: 'pointer' });
   private targetsView: MacTargetsView | null = null;
+  /** Dock wave, glow, visualizer bands and the beach ball (doc/combo.md) */
+  private readonly comboEffects: MacComboEffects;
   private virtualMouse: MacVirtualMouse | null = null;
 
   constructor(context: SceneContext) {
-    super(context, { id: mac2000Scene.id, theme: THEMES.aqua, bannerY: BANNER_Y });
+    super(context, {
+      id: mac2000Scene.id,
+      theme: THEMES.aqua,
+      bannerY: BANNER_Y,
+      counterY: COUNTER_Y,
+    });
     this.sounds = createMacSongSounds(context.clock.context, macAssets().sounds);
     this.dock.view.position.set(
       Math.round((SCREEN_WIDTH - this.dock.width) / 2),
@@ -110,6 +126,15 @@ class Mac2000Scene extends LevelScene<MacSession> {
       this.menuLayer,
       this.pointerLayer,
     );
+    // Combo glow and bands go right over the wallpaper; the beach ball sits beside the hit counter, above everything
+    this.comboEffects = new MacComboEffects({
+      dock: this.dock,
+      screenWidth: SCREEN_WIDTH,
+      screenHeight: SCREEN_HEIGHT,
+    });
+    this.screen.addChildAt(this.comboEffects.backLayer, 1);
+    this.comboEffects.beachBall.position.set(BEACH_BALL.x, BEACH_BALL.y);
+    this.pointerLayer.addChild(this.comboEffects.beachBall);
 
     // The Apple opens its menu on the level list; a click anywhere outside the open menu closes it, the Apple included
     const apple = new Container({ label: 'apple-hit' });
@@ -158,6 +183,23 @@ class Mac2000Scene extends LevelScene<MacSession> {
     const sound = { info: 'Glass', error: 'Basso', question: 'Funk' } as const;
     this.playNow(this.sounds.byName[sound[options.kind]]);
     return message;
+  }
+
+  protected renderComboEffects(
+    tier: ComboTier,
+    beat: number,
+    audioTime: number,
+    beatSeconds: number,
+  ): void {
+    this.comboEffects.update(tier, beat, audioTime, beatSeconds);
+  }
+
+  protected onComboBreak(lost: ComboBreak): void {
+    this.comboEffects.showBreak(lost.time);
+  }
+
+  protected clearComboEffects(): void {
+    this.comboEffects.clear();
   }
 
   protected override updateDesktop(audioTime: number): void {

@@ -354,4 +354,15 @@ export const LUNA = {
   speaker: {
     mute: '#e0301e',
   },
+
+  /** Combo effects on the desktop (doc/combo.md): Bliss sky light, clouds, and the 3D Pipes screen saver's pipes */
+  combo: {
+    skyLight: '#ffffff',
+    cloud: '#ffffff',
+    pipes: [
+      { base: '#c8281e', light: '#ff9a8a', dark: '#5e0d08' },
+      { base: '#1f9a35', light: '#9cf0a8', dark: '#0b4316' },
+      { base: '#2457c9', light: '#9ec0ff', dark: '#0d2460' },
+    ],
+  },
 } as const;

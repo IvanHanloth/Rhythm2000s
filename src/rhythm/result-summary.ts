@@ -1,5 +1,6 @@
 // Results: turns a round's judgements into score, rating, offset histogram and comments (doc/results.md; all rules provisional). No PixiJS.
 
+import { ComboTracker } from './combo.ts';
 import type { JudgementLevel } from './judge.ts';
 
 /** One press's judgement: grade, offset (s, positive is late, null for Miss), phrase index (from 0) */
@@ -43,6 +44,10 @@ export interface ResultSummary {
   bins: number[];
   /** Phrases with a Miss, counted from 1, ascending */
   missedPhrases: number[];
+  /** Longest run of hits, in judgement order (doc/combo.md); it doesn't change the score */
+  bestCombo: number;
+  /** At least one press and no Miss: the "Full Combo" stamp */
+  fullCombo: boolean;
   comments: string[];
 }
 
@@ -69,6 +74,9 @@ export function summarizeResult(hits: readonly HitResult[]): ResultSummary {
     ...new Set(hits.filter((h) => h.level === 'miss').map((h) => h.phrase + 1)),
   ].sort((a, b) => a - b);
 
+  const combo = new ComboTracker();
+  for (const hit of hits) combo.record(hit.level, 0);
+
   return {
     counts,
     score,
@@ -76,6 +84,8 @@ export function summarizeResult(hits: readonly HitResult[]): ResultSummary {
     meanOffsetMs,
     bins,
     missedPhrases,
+    bestCombo: combo.best,
+    fullCombo: hits.length > 0 && counts.miss === 0,
     comments: buildComments(rank, missedPhrases, meanOffsetMs, offsetsMs.length),
   };
 }

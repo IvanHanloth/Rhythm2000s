@@ -22,7 +22,9 @@ import type { ChartEditor } from '@/editor/chart-editor.ts';
 import type { ActionType } from '@/rhythm/actions.ts';
 import type { AudioClock } from '@/audio/audio-clock.ts';
 import type { PlayerSettings } from '@/game/settings.ts';
+import { secondsPerBeat } from '@/rhythm/beat.ts';
 import type { Chart } from '@/rhythm/chart.ts';
+import { COMBO_BREAK_MIN, ComboTracker, type ComboBreak, type ComboTier } from '@/rhythm/combo.ts';
 import { summarizeResult, type HitResult, type ResultSummary } from '@/rhythm/result-summary.ts';
 import { buildTurnCues, turnCueAt, type TurnCue } from '@/rhythm/turn-cue.ts';
 import {
@@ -37,6 +39,7 @@ import { BEATS, type ThemeColors } from '@/theme/tokens.ts';
 import { BEAT_GUIDE_POSITION, BeatGuideView } from '@/ui/beat-guide-view.ts';
 import { clamp01 } from '@/ui/easing.ts';
 import { HackerIntro } from '@/ui/hacker-intro.ts';
+import { HitCounterView } from '@/ui/hit-counter.ts';
 import type { EditorPanelHandlers, HackerEditorPanel } from '@/ui/hacker-editor-panel.ts';
 import { TextEntry } from '@/ui/text-entry.ts';
 import { TurnBanner } from '@/ui/turn-banner.ts';
@@ -49,6 +52,8 @@ import type { RoundSession } from './round-session.ts';
 const RESULT_INPUT_DELAY_MS = 600;
 /** Left edge of the demo caption: just right of the 240-wide turn banner (canvas coordinates) */
 const CAPTION_X = DESIGN_WIDTH / 2 + 136;
+/** Gap between the hit counter and the right edge of the canvas */
+const COUNTER_MARGIN = 16;
 
 const LIST_MOVES: Record<string, [number, number]> = {
   ArrowLeft: [-1, 0],
@@ -80,6 +85,8 @@ interface LevelRun {
   assisted: boolean;
   /** Played from HackerEditor: `watch` lets the computer do the responses. No results or records */
   editor: { watch: boolean } | null;
+  /** Hits in a row across the chart's pieces, demos skipped (doc/combo.md) */
+  combo: ComboTracker;
 }
 
 /** The scene's level list (Explorer / Finder window) */
@@ -175,6 +182,8 @@ export interface LevelSceneOptions {
   theme: ThemeColors;
   /** Vertical centre of the turn banner and demo caption (canvas coordinates) */
   bannerY: number;
+  /** Top of the combo hit counter in the top right corner (canvas coordinates), clear of the scene's menu bar */
+  counterY: number;
 }
 
 export abstract class LevelScene<S extends RoundSession> implements Scene {
@@ -211,6 +220,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   private resultDefault: () => void = () => {};
   private resultShownAt = 0;
   private destroyed = false;
+  /** The combo hit counter (doc/combo.md), shown while the chart plays */
+  private readonly hitCounter = new HitCounterView();
+  /** Judgements of the current round already counted into the combo */
+  private comboSeen = 0;
   /** HackerEditor, in editor mode once opened */
   private desk: { desk: EditorDesk; window: EditorWindow; entry: TextEntry } | null = null;
 
@@ -251,6 +264,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       this.caption.view,
       this.cursorCover,
     );
+    // The hit counter sits with the banners, under the cover that hides the player's cursor
+    this.hitCounter.view.position.set(DESIGN_WIDTH - COUNTER_MARGIN, options.counterY);
+    this.hitCounter.view.visible = false;
+    this.view.addChildAt(this.hitCounter.view, this.view.getChildIndex(this.cursorCover));
     window.addEventListener('keydown', this.onKeyDown);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
@@ -277,6 +294,17 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   protected abstract openMessageWindow(options: MessageWindowOptions): ModalWindow;
   /** Replaces the level list with one built from `this.charts`, in the same place */
   protected abstract rebuildLevelList(): void;
+  /** Draws the scene's combo tier effects behind its windows (doc/combo.md "Tiers"); tier 0 turns them off */
+  protected abstract renderComboEffects(
+    tier: ComboTier,
+    beat: number,
+    audioTime: number,
+    beatSeconds: number,
+  ): void;
+  /** A combo of COMBO_BREAK_MIN or more broke (doc/combo.md "Combo break") */
+  protected abstract onComboBreak(lost: ComboBreak): void;
+  /** Stops every combo effect at once (the round ended) */
+  protected abstract clearComboEffects(): void;
   /** Opens HackerEditor's window on the desktop (editor mode) */
   protected abstract openEditorWindow(options: EditorWindowOptions): EditorWindow;
 
@@ -452,6 +480,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.renderTurnBanner(beat);
     this.renderCaption();
     this.renderBeatGuide(beat);
+    this.renderCombo(session, beat, audioTime);
 
     if (audioTime < session.endTime) return;
     this.roundEnded(session);
@@ -615,6 +644,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       hits: [],
       assisted: false,
       editor: null,
+      combo: new ComboTracker(),
     };
     this.advance();
   }
@@ -638,6 +668,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       hits: [],
       assisted: false,
       editor: { watch },
+      combo: new ComboTracker(),
     };
     this.advance();
   }
@@ -826,6 +857,9 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.turnBanner.show(null);
     this.caption.show(null);
     this.beatGuide.view.visible = false;
+    this.comboSeen = 0;
+    this.hitCounter.view.visible = false;
+    this.clearComboEffects();
   }
 
   /** Demo caption: which practice this is (or "Try again") and how to handle the action */
@@ -862,5 +896,28 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       return;
     }
     this.turnBanner.show(cue.turn, 1 - clamp01((beat - cue.start) / BEATS.squash));
+  }
+
+  /**
+   * Counts the round's new judgements into the combo and draws the hit counter and the scene's tier effects.
+   * Only the chart counts: demos and HackerEditor runs show neither (doc/combo.md "Counting").
+   */
+  private renderCombo(session: S, beat: number, audioTime: number): void {
+    const run = this.run;
+    const fresh = session.judgements.slice(this.comboSeen);
+    this.comboSeen = session.judgements.length;
+    const counting = run !== null && run.demo === null && run.editor === null;
+    this.hitCounter.view.visible = counting;
+    const beatSeconds = secondsPerBeat(session.chart.bpm);
+    if (!run || !counting) {
+      this.renderComboEffects(0, beat, audioTime, beatSeconds);
+      return;
+    }
+    for (const judgement of fresh) {
+      const broke = run.combo.record(judgement.level, judgement.shownAt);
+      if (broke && broke.lost >= COMBO_BREAK_MIN) this.onComboBreak(broke);
+    }
+    this.hitCounter.update(run.combo, audioTime, beat, beatSeconds);
+    this.renderComboEffects(run.combo.tier, beat, audioTime, beatSeconds);
   }
 }

@@ -6,6 +6,7 @@
 import { Container, Rectangle } from 'pixi.js';
 import type { SceneContext, SceneEntry } from '@/game/scene.ts';
 import type { Chart } from '@/rhythm/chart.ts';
+import type { ComboTier } from '@/rhythm/combo.ts';
 import { BEATS, THEMES } from '@/theme/tokens.ts';
 import { clamp01, easeOutBack } from '@/ui/easing.ts';
 import { createJudgementView } from '@/ui/judgement-view.ts';
@@ -35,6 +36,7 @@ import { XpTaskbar } from './components/taskbar.ts';
 import { isDialogKind, type DialogKind } from './dialog-kinds.ts';
 import { XpLatencyTestWindow } from './latency-test-window.ts';
 import { EXPLORER_TITLE, XpLevelSelect } from './level-select.ts';
+import { XpComboEffects } from './combo-effects.ts';
 import { XpMessageWindow } from './message-window.ts';
 import { XpResultsWindow } from './results-window.ts';
 import { XpSession, type XpTarget } from './session.ts';
@@ -46,6 +48,8 @@ import { WaitHoldView } from './wait-hold-view.ts';
 
 /** Turn banner centre (canvas coordinates), above the top row of message boxes */
 const BANNER_Y = 38;
+/** Top of the combo hit counter (canvas coordinates) */
+const COUNTER_Y = 12;
 
 /** Message box centres in a phrase (virtual screen), used in order of the box's index in the phrase */
 const SLOTS = [
@@ -133,6 +137,8 @@ class WindowsXpScene extends LevelScene<XpSession> {
   /** Virtual mouse and context menu, on top of the XP interface */
   private readonly pointerLayer = new Container({ label: 'pointer' });
   private startMenu: XpStartMenu | null = null;
+  /** Icons hopping, the brighter sky and the 3D Pipes (doc/combo.md) */
+  private readonly comboEffects: XpComboEffects;
 
   /** One message box per chart event; null for events that are not message boxes */
   private popups: (XpMessageBox | null)[] = [];
@@ -145,7 +151,13 @@ class WindowsXpScene extends LevelScene<XpSession> {
   private shownJudgements = 0;
 
   constructor(context: SceneContext) {
-    super(context, { id: windowsXpScene.id, theme: THEMES.xp, bannerY: BANNER_Y });
+    super(context, {
+      id: windowsXpScene.id,
+      theme: THEMES.xp,
+      bannerY: BANNER_Y,
+      counterY: COUNTER_Y,
+    });
+    this.comboEffects = new XpComboEffects(this.desktop);
     this.sounds = createXpSongSounds(context.clock.context, xpAssets().sounds);
     this.levelList = this.createLevelList();
     this.taskbar.setTaskActive(0, true);
@@ -210,6 +222,19 @@ class WindowsXpScene extends LevelScene<XpSession> {
     } as const;
     this.playNow(this.sounds.dialogs[sound[options.kind]]);
     return message;
+  }
+
+  protected renderComboEffects(tier: ComboTier, beat: number, audioTime: number): void {
+    this.comboEffects.update(tier, beat, audioTime);
+  }
+
+  /** Hardware Remove: the unplug chime, a short "disconnected" */
+  protected onComboBreak(): void {
+    this.playNow(xpAssets().sounds.comboBreak);
+  }
+
+  protected clearComboEffects(): void {
+    this.comboEffects.clear();
   }
 
   protected override updateDesktop(): void {

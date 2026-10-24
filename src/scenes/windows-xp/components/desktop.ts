@@ -15,6 +15,8 @@ export const DESKTOP_CELL_HEIGHT = 72;
 const CELL_WIDTH = DESKTOP_CELL_WIDTH;
 const CELL_HEIGHT = DESKTOP_CELL_HEIGHT;
 const MARGIN_TOP = 8;
+/** Icon picture's top inside its cell */
+const ICON_TOP = 2;
 
 const LEFT_COLUMN = [
   { icon: 'my-documents', label: 'My Documents' },
@@ -66,6 +68,18 @@ export class XpDesktop {
     this.recycleBinIcon.texture = xpAssets().icon(full ? 'recycle-bin-full' : 'recycle-bin-empty');
   }
 
+  /** Puts `layer` over the wallpaper and under the icons (combo effects, doc/combo.md) */
+  addBackdrop(layer: Container): void {
+    this.view.addChildAt(layer, 1);
+  }
+
+  /** Lifts every icon picture by `lift` px (combo tier 1: the icons hop on the beat) */
+  setIconLift(lift: number): void {
+    for (const child of this.view.children) {
+      if (child.label.startsWith('desktop-icon-')) child.children[0]!.y = ICON_TOP - lift;
+    }
+  }
+
   /** Shows or hides the icons (not the wallpaper); Refresh makes them blink off */
   setIconsVisible(visible: boolean): void {
     for (const child of this.view.children) {
@@ -85,7 +99,7 @@ export function desktopIcon(icon: string, label: string, x: number, y: number): 
 
   const sprite = new Sprite(xpAssets().icon(icon));
   sprite.setSize(ICON_SIZE);
-  sprite.position.set((CELL_WIDTH - ICON_SIZE) / 2, 2);
+  sprite.position.set((CELL_WIDTH - ICON_SIZE) / 2, ICON_TOP);
 
   const text = xpText(label, {
     fill: LUNA.white,

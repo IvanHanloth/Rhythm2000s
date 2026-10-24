@@ -152,6 +152,14 @@ export const AQUA = {
     trackLight: '#dcdcdc',
     knob: { rim: '#163f94', dark: '#2f6fe0', light: '#bfe6ff' } satisfies BallColors,
   },
+
+  /** Combo effects (doc/combo.md): Aqua glow, iTunes-visualizer bands, the spinning wait cursor */
+  combo: {
+    glow: '#8fd0ff',
+    bands: ['#ff4fb0', '#8a63ff', '#33d6ff', '#62f59a'],
+    beachBall: ['#ff3b30', '#ff9500', '#ffd60a', '#34c759', '#0a84ff', '#bf5af2'],
+    beachBallEdge: '#4a4a4a',
+  },
 };
 
 /** UI font: Lucida Grande is the original; on Windows, the related Lucida Sans Unicode. */
