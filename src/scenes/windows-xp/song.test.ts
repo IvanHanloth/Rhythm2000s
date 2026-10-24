@@ -13,11 +13,11 @@ const sounds = Object.fromEntries(
 ) as unknown as PopupSounds;
 
 describe('MVP 谱面文件', () => {
-  it('8 个乐句，每句「示范 + 半拍空档 + 跟打」，全曲 76 拍', () => {
+  it('8 个乐句，每句「示范 + 1 拍空档 + 跟打」，全曲 80 拍', () => {
     const chart = loadMvpChart();
     expect(chart.phrases).toHaveLength(8);
-    expect(chart.phrases[0]).toEqual({ callStart: 4, callEnd: 8, responseStart: 8.5, end: 12.5 });
-    expect(chart.endBeat).toBe(4 + 8 * 8.5 + 4);
+    expect(chart.phrases[0]).toEqual({ callStart: 4, callEnd: 8, responseStart: 9, end: 13 });
+    expect(chart.endBeat).toBe(4 + 8 * 9 + 4);
   });
 });
 
