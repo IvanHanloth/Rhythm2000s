@@ -48,7 +48,7 @@
 
 | 部件 | 原版对应 | 内容 |
 | --- | --- | --- |
-| 资源管理器窗口 | `CabinetWClass` | 标题「My Levels」带文件夹小图标，标题栏右边最小化、最大化、关闭三个按钮；菜单栏「File Edit View Favorites Tools Help」；标准按钮工具栏（Back、前进、向上、Search、Folders、查看）；地址栏「Address」「C:\rhythm2000s\My Levels\XP Desktop」（右边「Go」）；底部状态栏（「N objects」和「Click to select, double-click to play    Esc: back to the café」） |
+| 资源管理器窗口 | `CabinetWClass` | 标题「My Levels」带文件夹小图标，标题栏右边最小化、最大化、关闭三个按钮；菜单栏「File Edit View Favorites Tools Help」；标准按钮工具栏（Back、前进、向上、Search、Folders、查看）；地址栏「Address」「C:\Rhythm 2000s\My Levels\XP Desktop」（右边「Go」）；底部状态栏（「N objects」和「Click to select, double-click to play    Esc: back to the café」） |
 | 任务窗格 | Web 视图左边的任务窗格 | 蓝紫渐变底，可折叠的分组：「Level Tasks」（Play this level、Back to the café）、「Details」（选中关卡的曲名和 Actions、Tempo、Phrases、Length 四行） |
 | 平铺视图 | 「View → Tiles」 | 白底，分组标题「All Levels」，48 像素图标，右边三行字（名称、动作、速度）；选中时名称蓝底白字、图标蒙一层蓝 |
 | 任务栏按钮 | 任务栏上的程序按钮 | 「My Levels」；窗口在前面时是按下的深蓝色，开始一局后变回普通的浅蓝色 |

@@ -20,7 +20,7 @@ import { xpText } from './components/xp-text.ts';
 import { DIALOG_KINDS, isDialogKind } from './dialog-kinds.ts';
 
 export const EXPLORER_TITLE = 'My Levels';
-const ADDRESS = 'C:\\rhythm2000s\\My Levels\\XP Desktop';
+const ADDRESS = 'C:\\Rhythm 2000s\\My Levels\\XP Desktop';
 
 const MENU_HEIGHT = 20;
 const TOOLBAR_HEIGHT = 38;

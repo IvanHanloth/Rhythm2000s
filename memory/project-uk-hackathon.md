@@ -1,6 +1,6 @@
 ---
 name: project-uk-hackathon
-description: rhythm2000s 是用户参加英国黑客松的作品（2026-10-24 得知），评委和玩家在英国，街区场景因此改成 2000 年的英国商业街
+description: Rhythm 2000s 是用户参加英国黑客松的作品（2026-10-24 得知），评委和玩家在英国，街区场景因此改成 2000 年的英国商业街
 metadata:
   type: project
 ---

@@ -102,7 +102,7 @@ export class HubOverlay {
 
     // 开始界面：标题字 + 菜单
     const logo = el('h1', 'hub-logo');
-    logo.append(el('span', 'hub-logo-word', 'rhythm'), el('span', 'hub-logo-badge', '2000s'));
+    logo.append(el('span', 'hub-logo-word', 'Rhythm'), el('span', 'hub-logo-badge', '2000s'));
     const menu = el('nav', 'hub-menu');
     menu.setAttribute('aria-label', 'Main menu');
     menu.append(
@@ -297,7 +297,7 @@ export class HubOverlay {
       el(
         'p',
         '',
-        'rhythm2000s — a Rhythm Heaven-style rhythm game about everyday computing in the early 2000s.',
+        'Rhythm 2000s — a Rhythm Heaven-style rhythm game about everyday computing in the early 2000s.',
       ),
       list,
       button('Close', 'hub-button', () => this.toggleCredits()),

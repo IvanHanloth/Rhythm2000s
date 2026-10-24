@@ -188,9 +188,10 @@ export class MacLevelSelect {
     let x = 12;
     const add = (icon: Container, iconWidth: number, label: string, onTap?: () => void) => {
       const item = new Container({ label: `toolbar-${label}` });
-      const width = Math.max(48, iconWidth + 8);
-      icon.position.set((width - iconWidth) / 2, 6);
       const text = aquaText(label, { size: 11 });
+      // 标签比图标宽时（如「Rhythm 2000s」）按标签留位置，免得和旁边的标签挤在一起
+      const width = Math.max(48, iconWidth + 8, Math.ceil(text.width) + 8);
+      icon.position.set((width - iconWidth) / 2, 6);
       text.anchor.set(0.5, 0);
       text.position.set(width / 2, 40);
       item.addChild(icon, text);
@@ -212,7 +213,7 @@ export class MacLevelSelect {
     add(drawViewButtons(), 90, 'View');
     add(drawComputerIcon(), 32, 'Computer');
     add(drawHomeIcon(), 32, 'Home');
-    add(drawFolderIcon(), 32, 'rhythm');
+    add(drawFolderIcon(), 32, 'Rhythm 2000s');
 
     // 右边的搜索框
     const search = new Container({ label: 'search' });
@@ -275,7 +276,7 @@ class InfoWindow {
     if (chart) content.addChild(levelIcon(chart, 48)).position.set(14, 12);
     const title = aquaText(name, { size: 14, bold: true });
     title.position.set(72, 16);
-    const kind = aquaText('rhythm2000s level', { size: 11, color: AQUA.inkSoft });
+    const kind = aquaText('Rhythm 2000s level', { size: 11, color: AQUA.inkSoft });
     kind.position.set(72, 36);
     content.addChild(title, kind);
 
