@@ -8,10 +8,15 @@ export interface JudgeWindows {
   perfect: number;
   /** Good 的半宽（秒），偏差绝对值不超过它算 Good，超出算 Miss */
   good: number;
+  /**
+   * 提前按算 Miss 的范围（秒）：比目标早超过 good、但不超过它的输入，把目标判为 Miss。
+   * 防止一直连按就能把每个目标都蒙中。
+   */
+  early: number;
 }
 
 /** MVP 暂定的判定窗口，见 doc/prototypes/mvp.md */
-export const MVP_WINDOWS: JudgeWindows = { perfect: 0.045, good: 0.1 };
+export const MVP_WINDOWS: JudgeWindows = { perfect: 0.045, good: 0.1, early: 0.2 };
 
 export interface Judgement {
   /** 目标下标 */
@@ -19,7 +24,7 @@ export interface Judgement {
   level: JudgementLevel;
   /** 偏差（秒），正数表示晚；Miss 时为 null */
   offset: number | null;
-  /** 判定发生的时间（秒）：命中时是输入时间，Miss 时是 Good 窗口关闭的时间 */
+  /** 判定发生的时间（秒）：命中和提前按的 Miss 是输入时间，漏按的 Miss 是 Good 窗口关闭的时间 */
   time: number;
 }
 
@@ -54,20 +59,35 @@ export class ResponseJudge {
 
   /**
    * 一次输入：对到最早的、还没判定的、偏差在 Good 窗口以内的目标。
-   * 附近没有目标时返回 null，这次输入不计分也不罚分。
+   * 没对上时，如果输入比最早一个还没判定的目标早、但在 early 范围以内，这个目标判为 Miss。
+   * 都不是时返回 null，这次输入不计分也不罚分。
    */
   tap(time: number): Judgement | null {
     for (let i = 0; i < this.targets.length; i++) {
       if (this.results[i]) continue;
       const offset = time - this.targets[i]!;
       const level = levelForOffset(offset, this.windows);
-      if (level) {
-        const judgement: Judgement = { target: i, level, offset, time };
-        this.results[i] = judgement;
-        return judgement;
-      }
+      if (level) return this.record({ target: i, level, offset, time });
+    }
+    return this.earlyMiss(time);
+  }
+
+  /** 提前按：只看最早一个 Good 窗口还没关闭的未判定目标 */
+  private earlyMiss(time: number): Judgement | null {
+    for (let i = 0; i < this.targets.length; i++) {
+      if (this.results[i]) continue;
+      const offset = time - this.targets[i]!;
+      // 窗口已经关闭、等 expire 记 Miss 的目标跳过
+      if (offset > this.windows.good) continue;
+      if (offset < -this.windows.early) return null;
+      return this.record({ target: i, level: 'miss', offset: null, time });
     }
     return null;
+  }
+
+  private record(judgement: Judgement): Judgement {
+    this.results[judgement.target] = judgement;
+    return judgement;
   }
 
   /** 把 Good 窗口已经过去、仍没有输入的目标记为 Miss，返回这次新增的 Miss。 */

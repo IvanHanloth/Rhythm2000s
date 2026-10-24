@@ -109,17 +109,21 @@ export class MacSession {
     this.sequencer.schedule();
     const calibration = this.context.calibration();
     for (const judgement of this.judge.expire(audioTime - calibration)) {
-      const shownAt = judgement.time + calibration;
-      this.targets[judgement.target]!.missedAt = shownAt;
-      this.judgements.push({ ...judgement, shownAt });
-      this.playNow(this.sounds.miss);
+      this.recordMiss(judgement, judgement.time + calibration);
     }
   }
 
-  /** 玩家输入（听到的时间）。命中时处理掉对应的目标，返回判定；没有对上目标时返回 null。 */
+  /**
+   * 玩家输入（听到的时间）。命中时处理掉对应的目标，返回判定；提前按（见 ResponseJudge.tap）时目标记为 Miss；
+   * 没有对上目标时返回 null。
+   */
   tap(audioTime: number): Judgement | null {
     const judgement = this.judge.tap(audioTime - this.context.calibration());
     if (!judgement) return null;
+    if (judgement.level === 'miss') {
+      this.recordMiss(judgement, audioTime);
+      return judgement;
+    }
     this.targets[judgement.target]!.handledAt = audioTime;
     this.judgements.push({ ...judgement, shownAt: audioTime });
     this.playNow(this.sounds.handled);
@@ -135,6 +139,12 @@ export class MacSession {
   stop(): void {
     this.sequencer.stop();
     this.output.disconnect();
+  }
+
+  private recordMiss(judgement: Judgement, shownAt: number): void {
+    this.targets[judgement.target]!.missedAt = shownAt;
+    this.judgements.push({ ...judgement, shownAt });
+    this.playNow(this.sounds.miss);
   }
 
   /** 玩家动作的反馈音跟随输入立即播放，不预约在拍点上。 */

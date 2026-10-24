@@ -119,20 +119,18 @@ export class PopupSession {
     this.sequencer.schedule();
     const calibration = this.context.calibration();
     for (const judgement of this.judge.expire(audioTime - calibration)) {
-      const shownAt = judgement.time + calibration;
-      const { event, step } = this.targets[judgement.target]!;
-      const state = this.windows[event]!;
-      state.clicks[step]!.missedAt = shownAt;
-      state.missedAt ??= shownAt;
-      this.judgements.push({ ...judgement, event, step, shownAt });
-      this.playNow(this.sounds.miss);
+      this.recordMiss(judgement, judgement.time + calibration);
     }
   }
 
-  /** 玩家输入（听到的时间）。命中时记下这一下，返回判定；没有对上目标时返回 null。 */
+  /**
+   * 玩家输入（听到的时间）。命中时记下这一下，返回判定；提前按（见 ResponseJudge.tap）时这一下记为 Miss；
+   * 没有对上目标时返回 null。
+   */
   tap(audioTime: number): JudgementRecord | null {
     const judgement = this.judge.tap(audioTime - this.context.calibration());
     if (!judgement) return null;
+    if (judgement.level === 'miss') return this.recordMiss(judgement, audioTime);
     const { event, step } = this.targets[judgement.target]!;
     const state = this.windows[event]!;
     state.clicks[step]!.hitAt = audioTime;
@@ -152,6 +150,17 @@ export class PopupSession {
   stop(): void {
     this.sequencer.stop();
     this.output.disconnect();
+  }
+
+  private recordMiss(judgement: Judgement, shownAt: number): JudgementRecord {
+    const { event, step } = this.targets[judgement.target]!;
+    const state = this.windows[event]!;
+    state.clicks[step]!.missedAt = shownAt;
+    state.missedAt ??= shownAt;
+    const record = { ...judgement, event, step, shownAt };
+    this.judgements.push(record);
+    this.playNow(this.sounds.miss);
+    return record;
   }
 
   /** 玩家动作的反馈音跟随输入立即播放，不预约在拍点上。 */

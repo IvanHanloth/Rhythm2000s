@@ -89,6 +89,32 @@ describe('PopupSession', () => {
     expect(played).toHaveLength(0);
   });
 
+  it('提前按：这一下记为 Miss，响提示音，消息框不关', () => {
+    const { context, played } = fakeContext();
+    const session = new PopupSession(context, loadMvpChart(), sounds);
+    const target = session.timeAt(session.chart.responses[0]!.beat);
+
+    expect(session.tap(target - 0.15)).toMatchObject({ event: 0, step: 0, level: 'miss' });
+    expect(session.windows[0]!.missedAt).toBeCloseTo(target - 0.15, 10);
+    expect(session.windows[0]!.closedAt).toBeNull();
+    expect(session.tap(target)).toBeNull();
+    expect(played).toEqual(['miss']);
+  });
+
+  it('一直连按通过不了：整局几乎全是 Miss', () => {
+    const { context } = fakeContext();
+    const session = new PopupSession(context, loadMvpChart(), sounds);
+    for (let time = session.startTime; time < session.endTime; time += 0.05) {
+      session.update(time);
+      session.tap(time);
+    }
+    session.update(session.endTime);
+
+    const counts = session.counts();
+    expect(counts.perfect + counts.good + counts.miss).toBe(33);
+    expect(counts.miss).toBeGreaterThan(30);
+  });
+
   it('右键刷新要按两下：各自判定，第一下右键声、第二下菜单命令声，第二下命中才算完成', () => {
     const { context, played } = fakeContext();
     const chart = buildChart(
