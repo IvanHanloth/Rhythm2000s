@@ -1,0 +1,4 @@
+# HyperFrames 本地状态与检查/截帧产物
+.hyperframes/
+# 渲染输出（成片体积大，按需另行发布）
+renders/

@@ -26,10 +26,11 @@
 ```
 .
 ├── AGENTS.md          # 本文件：给 AI 助手和协作者的项目说明
-├── CLAUDE.md          # Claude Code 入口，引用本文件
 ├── README.md
 ├── index.html         # 游戏入口页：游戏画布 + 开发面板（切换场景、打开原型）
 ├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/index.html
+├── assets/            # 共用素材：原版系统素材参考、字体等，大多不进 git，见 assets/README.md
+├── promo/             # 宣发视频（HyperFrames：HTML + GSAP 渲染成 MP4），独立于游戏工程，说明见 promo/AGENTS.md
 ├── src/
 │   ├── game/          # 游戏画布（1280×720 等比缩放）、场景接口、场景切换器、入口
 │   ├── scenes/        # 各场景，一个场景一个目录，例如 scenes/windows-xp/
@@ -57,6 +58,7 @@
 - 单元测试与被测文件放在一起，命名为 `*.test.ts`，从 `vite-plus/test` 导入测试 API。
 - 新增原型页面时，在 `vite.config.ts` 的 `build.rolldownOptions.input` 中登记入口，并加到 `src/game/dev-panel.ts` 的原型列表里。
 - 新增场景时，在 `src/scenes/<场景名>/` 实现 `Scene` 接口（`src/game/scene.ts`），再在 `src/game/main.ts` 里登记。场景按 1280×720 的逻辑坐标绘制，颜色只取 `src/theme/` 的 token。
+- `promo/` 不属于游戏构建：它用 `npx hyperframes`（版本钉在 `promo/package.json`）预览和渲染，不进游戏的 pnpm 依赖。做视频前先用 `/hyperframes` 技能。
 
 ## 技术栈
 
