@@ -1,65 +1,65 @@
-# 原型：延迟测试
+# Prototype: latency test
 
-> 状态：草稿（2026-10-24）
+> Status: Draft
 >
-> 目的：回答 [tech-research.md](../tech-research.md) 第 5 节列出的风险，为之后的判定和校准设计提供实测数据。**本原型不是游戏，也不决定判定窗口。**
+> Goal: answer the risks in [tech-research.md](../tech-research.md), section 5, with measurements for judging and calibration design. **This prototype is not the game and doesn't set judgement windows.**
 
-## 要回答的问题
+## Questions
 
-| 编号 | 问题 | 原型怎么回答 |
+| No. | Question | How the prototype answers it |
 | --- | --- | --- |
-| Q1 | 浏览器报告的 `outputLatency` 准不准 | 同时用两种方法换算输入时间（见下文），比较两者的差值与玩家实测偏差 |
-| Q2 | 键盘、鼠标、触摸的误差分布 | 按输入类型分别统计平均值、中位数、标准差 |
-| Q4 | 蓝牙耳机下校准能否救回来 | 换耳机重测，对比「建议校准值」与标准差 |
-| Q5 | Safari 上 `getOutputTimestamp()` 是否正常 | 页面显示它的原始返回值和是否可用；不可用时自动退回方法 B |
+| Q1 | Is the reported `outputLatency` accurate? | Convert input times two ways (below) and compare their difference with measured offsets |
+| Q2 | Offset distribution of keyboard, mouse and touch | Mean, median and standard deviation per input type |
+| Q4 | Does calibration rescue Bluetooth headphones? | Retest with them and compare the suggested calibration and spread |
+| Q5 | Does `getOutputTimestamp()` work on Safari? | The page shows its raw values and availability; method B is used when it isn't available |
 
-Q3（鼠标需要移动定位时对节奏的影响）属于输入方式设计，不在本原型范围内，之后单独做。
+Q3 (the effect of having to aim the mouse) is an input design question, tested separately.
 
-## 玩法流程
+## Flow
 
-1. 打开页面，显示设备信息（采样率、`baseLatency`、`outputLatency`、浏览器）。
-2. 点击「Start」：创建/恢复 `AudioContext`，节拍器按设定 BPM（默认 120）开始打拍，每小节第 1 拍是重音。
-3. 玩家跟着**听到的**拍子按空格键（或任意字母键），或在画面上点击/触摸。
-4. 每次输入找到最近的拍，记录偏差（正数 = 晚，负数 = 早）。
-5. 面板按「输入类型 × 换算方法」实时显示统计，并给出建议校准值。
-6. 「Export JSON」把设备信息和全部输入记录下载下来，方便在不同设备之间对比。
+1. The page shows device info (sample rate, `baseLatency`, `outputLatency`, browser).
+2. "Start" creates / resumes the `AudioContext` and a metronome plays at the set BPM (120 by default), accented on beat 1.
+3. The player presses Space (or any letter) or clicks / taps along with **what they hear**.
+4. Each input is matched to the nearest beat and its offset recorded (positive late, negative early).
+5. Live statistics per input type × conversion method, with a suggested calibration.
+6. "Export JSON" downloads the device info and every input, for comparing devices.
 
-切到后台标签页时自动停止，回来后需要重新开始。
+Switching to a background tab stops the test.
 
-## 时间换算方法
+## Time conversion
 
-拍点时间 = 节拍器开始时间 + 拍序号 × (60 / BPM)，使用 `AudioContext` 时间轴（秒）。所有提示音都用 `AudioBufferSourceNode.start(拍点时间)` 预约播放。
+Beat time = metronome start + beat index × (60 / BPM) on the `AudioContext` timeline (s); every click is booked with `AudioBufferSourceNode.start(beat time)`.
 
-输入时间都从 `event.timeStamp`（与 `performance.now()` 同一时间轴）出发，换算成「输入那一刻，扬声器正在播放的音频时间」：
+Input times start from `event.timeStamp` (on `performance.now()`'s timeline) and are converted to "the audio the speakers were playing at that moment":
 
-- **方法 A（getOutputTimestamp）**：取一对 `{contextTime, performanceTime}`，表示「`contextTime` 处的音频正在 `performanceTime` 这一刻从扬声器出来」。
-  `听到的音频时间 = contextTime + (event.timeStamp − performanceTime) / 1000`
-- **方法 B（currentTime − 延迟）**：在事件回调里读 `currentTime` 和 `performance.now()`。
-  `听到的音频时间 = currentTime − (performance.now() − event.timeStamp) / 1000 − baseLatency − outputLatency`
+- **Method A (getOutputTimestamp)**: a `{contextTime, performanceTime}` pair says audio at `contextTime` is leaving the speakers at `performanceTime`.
+  `heard time = contextTime + (event.timeStamp − performanceTime) / 1000`
+- **Method B (currentTime − latency)**: read `currentTime` and `performance.now()` in the callback.
+  `heard time = currentTime − (performance.now() − event.timeStamp) / 1000 − baseLatency − outputLatency`
 
-`偏差 = 听到的音频时间 − 最近拍点时间`。
+`offset = heard time − nearest beat time`.
 
-方法 A 理论上更准（不受 `currentTime` 按块更新的影响），方法 B 用来对照。两者都已经扣掉了浏览器知道的输出延迟。剩下的偏差来自浏览器不知道的延迟（例如部分蓝牙耳机）、显示/输入设备延迟和人的习惯，正是校准要消掉的部分。
+Method A should be more accurate (unaffected by `currentTime` updating in blocks); B is for comparison. Both already remove the output latency the browser knows about; what remains (unknown latency such as some Bluetooth headphones, display and input devices, the player's habit) is what calibration removes.
 
-## 统计与建议校准值
+## Statistics and suggested calibration
 
-- 每组统计：次数、平均值、中位数、标准差。
-- 建议校准值 = 去掉前 4 次输入（刚开始找节奏）后、再去掉最早和最晚各 10% 的偏差的中位数。
-- 画面上的偏差条只用于可视化，刻度范围固定为 ±150 毫秒，**不代表判定窗口**。
+- Per group: count, mean, median, standard deviation.
+- Suggested calibration: the median after dropping the first 4 inputs (finding the beat) and the earliest and latest 10%.
+- The offset bar is visual only, fixed at ±150 ms, and **is not a judgement window**.
 
-## 代码位置
+## Code
 
-| 路径 | 内容 |
+| Path | Contents |
 | --- | --- |
-| `prototypes/latency/index.html` | 原型页面入口（开发服务器下访问 `/prototypes/latency/`） |
-| `src/audio/` | 音频时钟、点击音合成、节拍器（之后游戏会复用） |
-| `src/rhythm/` | 拍 ↔ 时间换算（纯函数，有单元测试） |
-| `src/latency/` | 偏差统计（纯函数，有单元测试） |
-| `src/prototypes/latency/` | 原型页面的界面代码 |
+| `prototypes/latency/index.html` | Page entry (`/prototypes/latency/` on the dev server) |
+| `src/audio/` | Audio clock, click synthesis, metronome (reused by the game) |
+| `src/rhythm/` | Beat ↔ time conversion (pure, unit tested) |
+| `src/latency/` | Offset statistics (pure, unit tested) |
+| `src/prototypes/latency/` | The page's UI code |
 
-## 测试记录
+## Test log
 
-（实测后在这里登记：设备、浏览器、耳机、各方法的中位数和标准差、结论。）
+(Log measurements here: device, browser, headphones, each method's median and spread, conclusion.)
 
-| 日期 | 设备 / 系统 | 浏览器 | 输出设备 | 输入 | 方法 A 中位数 / 标准差 | 方法 B 中位数 / 标准差 | 备注 |
+| Date | Device / OS | Browser | Output | Input | Method A median / SD | Method B median / SD | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |

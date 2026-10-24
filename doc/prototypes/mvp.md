@@ -1,94 +1,83 @@
-# MVP：弹窗 → 关窗
+# MVP: pop up → close
 
-> 状态：草稿（2026-10-24）
+> Status: Draft
 >
-> 目的：在 Windows XP 场景里跑通一次完整的「示范 → 跟打 → 判定」，先试手感。下面的数值和谱面都是 **MVP 暂定**，试玩后再调，不代表正式设计。
+> Goal: one complete call → response → judgement loop in the Windows XP scene, to try the feel. Numbers and the chart are **MVP provisional**, to adjust after play-testing.
 
-## 已确认（2026-10-24 用户选择）
+## Confirmed
 
-| 项目 | MVP 的做法 |
+| Item | MVP |
 | --- | --- |
-| 场景与动作 | Windows XP 场景。示范段：电脑按节奏弹出一串窗口；跟打段：玩家按同样的节奏把它们一个个关掉 |
-| 输入 | 按空格键，或点击画面任意位置，都算一次「关窗」；不需要点中关闭按钮 |
-| 判定窗口 | Perfect：偏差在 ±45 毫秒以内；Good：±100 毫秒以内；超出或漏按为 Miss。目标前 100–200 毫秒提前按下也算 Miss（防连按，2026-10-24 加） |
-| 配乐 | Web Audio 现场合成的简单鼓点，不使用素材文件 |
+| Scene and action | Windows XP. Call: the computer pops up a series of windows on the beat; response: the player closes them one by one in the same rhythm |
+| Input | Space, or a click anywhere on the canvas, closes a window; no need to hit the close button |
+| Judgement windows | Perfect within ±45 ms; Good within ±100 ms; otherwise or unpressed, Miss. Pressing 100–200 ms before a target is also a Miss (against mashing) |
+| Music | A simple drum beat synthesised with Web Audio, no sample files |
 
-## 玩法流程
+## Flow
 
-1. 进入 XP 场景，屏幕中央是一个说明消息框。按空格或点击画面开始。
-2. 先是 1 小节预备拍（只有踩镲和节拍器点击声）。
-3. 之后每个乐句 3 小节：
-   - **示范小节**：消息框在节奏点上弹出，每弹一个响一声对应的 XP 提示音。
-   - **空档**（2026-10-24 用户要求加入，先试过 1 小节、0.5 拍、1 拍，同日最后改为 **0**，跟打小节紧接着示范小节；下面是有空档时的样子）：横幅已经换成 Your turn，只剩踩镲，窗口留在屏幕上，给玩家准备。
-   - **跟打小节**：玩家在相同的相对位置（比示范晚 1 小节加空档）按键关窗，鼓点从这一小节第 1 拍重新开始。轮到的那个窗口标题栏是活动色，其余是非活动色；空档里就已经标出第一个要关的窗口。
-4. 全部乐句结束后，再过 1 小节，弹出结果对话框（响 tada），显示 Perfect / Good / Miss 各多少次。按空格或点击再来一次。
+1. After the intro, one count-in bar (hi-hat and metronome clicks).
+2. Each phrase is a **call bar**, where boxes pop up on the beat with their XP alert sounds, then a **response bar**, where the player closes them at the same relative positions. The window to close next has an active title bar, the rest inactive. Charts may add a gap between the two (hi-hat only, "Your turn" already showing); the current charts use none.
+3. One bar after the last phrase, the results window opens with tada.
 
-2026-10-24 起，一局里有一个虚拟鼠标：示范段它自己示范，跟打段它提前停在下一个要关的消息框按钮上，玩家按键时它点下去。细节见 [scenes/windows-xp.md](../scenes/windows-xp.md#虚拟鼠标2026-10-24-用户要求)。
+A virtual mouse demonstrates in the call and, in the response, waits on the next box's button and clicks when the player presses, see [scenes/windows-xp.md](../scenes/windows-xp.md#virtual-mouse).
 
-## 轮次提示（2026-10-24 用户要求加入）
+## Turn cue
 
-屏幕上方有一条横幅，告诉玩家现在是谁的回合：
+A banner at the top says whose turn it is: **Follow me** in the call bar (watch and listen), **Your turn** in the response bar (in the accent colour, more prominent).
 
-- **Follow me**：示范小节，玩家只听和看。
-- **Your turn**：跟打小节，轮到玩家按。用强调色，比 Follow me 醒目。
+- Follow me appears half a beat before the call bar; Your turn half a beat **before the call bar ends**, giving the player a beat to get ready.
+- Your turn lasts to the end of the phrase, switching back to Follow me half a beat before the next call bar; the banner disappears after the last phrase and first appears in the last half beat of the count-in.
+- Each switch squashes and springs back once (`beat-squash`, 0.125 beat), timed by the audio clock.
+- Because of the early switch, the last action of a call or response bar must have its Good window closed half a beat before the bar ends. At 120 BPM Good is about 0.2 beat, so the last action is at beat 3.25 at the latest; validation checks this.
+- It shows on every phrase.
 
-规则（MVP 暂定）：
+## Judging rules
 
-- Follow me 在示范小节开头前半拍出现；Your turn 在**示范小节结束前半拍**出现，之后经过半拍空档才开始跟打，玩家有 1 拍的准备时间。
-- Your turn 显示到这个乐句结束；如果紧接着下一个乐句，就在下一个示范小节开头前半拍切回 Follow me。全部乐句结束后横幅消失；预备小节的最后半拍开始显示第一个 Follow me。
-- 切换时横幅做一次挤压回弹（`beat-squash`，0.125 拍），时间按音频时钟计算。
-- 因为提前半拍切换，示范小节和跟打小节里最后一个动作的 Good 窗口必须在「小节结束前半拍」之前关闭，否则玩家还在按，横幅就已经切走了。120 BPM 下 Good 窗口约 0.2 拍，所以最后一个动作最晚放在第 3.25 拍（从 0 数）。现在的谱面最晚在第 3 拍，有单元测试检查。
-- 每个乐句都显示，不会在玩家熟悉之后自动隐藏。
+- Each call event has one response target.
+- Each input takes **the earliest unjudged target within its Good window**, graded Perfect or Good by offset, and that window closes at once.
+- **Early presses are Misses**: an input before the earliest unjudged target, outside Good but within 200 ms (offset −200 to −100 ms), marks that target a Miss, like a missed one. Mashing always lands some presses there, so it misses a lot.
+- Inputs further away (over 200 ms early, or after a target is judged) neither score nor cost.
+- A target with no input by the end of its Good window is a Miss: XP's Default Beep plays and the box's title bar flashes like clicking outside a modal box; it stays put and fades at the end of the phrase.
+- The judged input time is the heard audio time (conversion in the [latency test](latency-test.md#time-conversion)) minus the player's calibration, set in the dev panel in ms (positive means the player presses late; the latency prototype's suggested value can be used directly).
 
-## 判定规则
+## Sounds
 
-- 每个示范窗口对应一个跟打目标，目标时间 = 弹出时间 + 1 小节。
-- 每次输入找到**最早的、还没判定的、偏差在 Good 窗口以内**的目标，按偏差定 Perfect 或 Good，该窗口立即关闭。
-- **提前按算 Miss**（2026-10-24 加，防止一直连按就能全部命中）：输入落在最早一个还没判定的目标之前、Good 窗口以外但不超过 200 毫秒（即偏差在 −200 到 −100 毫秒之间），这个目标立即判 Miss，效果和漏按一样（响提示音、窗口闪动）。连按时总会有一下先落进这段，所以连按会大量 Miss。
-- 其余离目标更远的输入（比目标早 200 毫秒以上、目标已经判定过之后多按），不算分，也不罚分。
-- 目标时间过了 Good 窗口仍没有输入，记为 Miss：响一声 XP 默认提示音，消息框的标题栏像原版「点到模态框外面」那样闪几下，留在原处，到这一小节结束时淡出。
-- 判定使用的输入时间 = 听到的音频时间（换算方法见[延迟测试](latency-test.md#时间换算方法)）− 玩家校准值。校准值在开发面板里填写，单位毫秒，正数表示玩家习惯按晚；可以直接填延迟测试原型给出的「建议校准」。
+Drums and metronome are synthesised; interface sounds are the original XP ones ([scenes/windows-xp.md](../scenes/windows-xp.md#sounds)):
 
-## 音效
+- Drums: call and response bars each start on beat 1 with kick on 1 and 3, snare on 2 and 4, hi-hat every half beat; a gap has hi-hat only.
+- Pop-up: booked on the call beat, by box kind (information, warning, error, question).
+- Close: a click played immediately when the input is Perfect or Good (following the player, not the beat).
+- Miss: XP's Default Beep, immediately.
+- End of round: tada as the results open.
 
-鼓点和节拍器现场合成；界面音效用 XP 原版声音（2026-10-24 改，文件对应关系见 [scenes/windows-xp.md](../scenes/windows-xp.md#音效)）：
+## Animation
 
-- 鼓点：示范小节和跟打小节各自从第 1 拍起，第 1、3 拍底鼓，第 2、4 拍军鼓，每半拍踩镲；示范与跟打之间的空档只有踩镲。
-- 弹出消息框：按示范时间预约播放，声音随消息框种类不同（信息、警告、错误、询问）。
-- 关掉消息框：玩家输入判定为 Perfect / Good 时立即播放点击声（跟随玩家，而不是预约在拍点上）。
-- Miss：立即播放 XP 默认提示音。
-- 一局结束：结果对话框弹出时播放 tada。
+Durations come from the design system's `beat-*` tokens and are computed from the audio clock each frame:
 
-## 动画
+- Windows pop up over 0.25 beat, reaching full size exactly on the call beat.
+- Windows close over 0.125 beat from the input.
+- Judgement labels squash and spring back over 0.125 beat, hold for 1 beat, then fade over 0.25 beat.
 
-时长取自设计系统提案的 `beat-*` token，按音频时钟逐帧计算：
+## Chart (MVP provisional)
 
-- 窗口弹出 0.25 拍，在示范拍点那一刻刚好弹到最大。
-- 窗口关闭 0.125 拍，从玩家输入那一刻开始。
-- 判定字样：0.125 拍挤压回弹，停留 1 拍，再用 0.25 拍淡出。
+120 BPM, 4 beats per bar, 8 phrases; beat positions within the call bar (from 0):
 
-## 谱面（MVP 暂定）
-
-120 BPM，每小节 4 拍。共 8 个乐句，括号里是示范小节内的拍位置（从 0 开始）：
-
-| 乐句 | 节奏 |
+| Phrase | Rhythm |
 | --- | --- |
-| 1 | 0、1、2 |
-| 2 | 0、1、2 |
-| 3 | 0、1、2、3 |
-| 4 | 0、0.5、1、2 |
-| 5 | 0、1、1.5、2 |
-| 6 | 0、1、2、2.5、3 |
-| 7 | 0、0.5、1、1.5、2 |
-| 8 | 0、0.5、1、2、3 |
+| 1 | 0, 1, 2 |
+| 2 | 0, 1, 2 |
+| 3 | 0, 1, 2, 3 |
+| 4 | 0, 0.5, 1, 2 |
+| 5 | 0, 1, 1.5, 2 |
+| 6 | 0, 1, 2, 2.5, 3 |
+| 7 | 0, 0.5, 1, 1.5, 2 |
+| 8 | 0, 0.5, 1, 2, 3 |
 
-每个乐句的示范与跟打之间没有空档（谱面里写的是 `"responseGapBeats": 0`，与默认值相同，2026-10-24 用户要求所有谱面都改成 0）。全曲 1 小节预备 + 8 个乐句（每句 2 小节）+ 1 小节结尾，共 72 拍，约 36 秒。所有动作都是 `dialog-info`（2026-10-24 由 `close-window` 改名，见 [ADR 0006](../decisions/0006-actions-named-after-ui-classes.md)），跟打与示范相同。
+No gap; one count-in bar, 8 phrases of 2 bars and one outro bar make 72 beats, about 36 seconds. Every action is `dialog-info` ([ADR 0006](../decisions/0006-actions-named-after-ui-classes.md)), with the response the same as the call. The chart is `public/charts/xp-popup-mvp.json` ([chart-format.md](../chart-format.md)).
 
-谱面数据存放在 `public/charts/xp-popup-mvp.json`，格式见 [chart-format.md](../chart-format.md)。
+## Things to watch in play-testing
 
-## 试玩时要注意的问题
-
-- 判定窗口宽窄是否合适；Good 多不多。
-- 关窗音效跟随输入播放，在延迟高的设备上会不会显得拖沓。
-- 「点击画面」和「空格」两种输入，手感是否有明显差别。
-- 半拍空档够不够玩家准备，会不会打乱节奏感；提示是否需要配合声音。
+- Whether the judgement windows feel right; how many Goods.
+- Whether close sounds that follow the input feel sluggish on high-latency devices.
+- Whether click and Space feel noticeably different.
+- Whether a gap helps players prepare or breaks the flow, and whether the cue needs a sound.
