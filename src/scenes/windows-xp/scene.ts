@@ -283,7 +283,7 @@ class WindowsXpScene implements Scene {
   }
 
   /**
-   * 活动窗口：示范小节里是最新弹出的那个；跟打小节里是下一个该关的那个。
+   * 活动窗口：示范小节里是最新弹出的那个；空档和跟打小节里是下一个该关的那个。
    * 其余窗口用非活动标题栏，让玩家看懂下一个目标。
    */
   private focusedWindow(session: PopupSession, beat: number): number {
@@ -294,7 +294,7 @@ class WindowsXpScene implements Scene {
       .map((state, i) => ({ state, i }))
       .filter(({ state }) => state.call.phrase === phraseIndex);
 
-    if (beat < phrase.responseStart) {
+    if (beat < phrase.callEnd) {
       return windows.filter(({ state }) => state.call.beat <= beat).at(-1)?.i ?? -1;
     }
     return windows.find(({ state }) => state.closedAt === null && state.missedAt === null)?.i ?? -1;

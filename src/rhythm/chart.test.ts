@@ -8,7 +8,30 @@ describe('buildChart', () => {
 
     expect(chart.calls.map((c) => c.beat)).toEqual([4, 5, 6]);
     expect(chart.responses.map((c) => c.beat)).toEqual([8, 9, 10]);
-    expect(chart.phrases).toEqual([{ callStart: 4, responseStart: 8, end: 12 }]);
+    expect(chart.phrases).toEqual([{ callStart: 4, callEnd: 8, responseStart: 8, end: 12 }]);
+  });
+
+  it('顶层 responseGapBeats 在示范和跟打之间插入空档，乐句可以单独覆盖', () => {
+    const source = sourceFromPatterns([[0], [0], [0]], { responseGapBeats: 4 });
+    source.phrases[1]!.responseGapBeats = 2;
+    source.phrases[2]!.responseGapBeats = 0;
+    const chart = buildChart(source);
+
+    expect(chart.phrases).toEqual([
+      { callStart: 4, callEnd: 8, responseStart: 12, end: 16 },
+      { callStart: 16, callEnd: 20, responseStart: 22, end: 26 },
+      { callStart: 26, callEnd: 30, responseStart: 30, end: 34 },
+    ]);
+    expect(chart.responses.map((c) => c.beat)).toEqual([12, 22, 30]);
+    expect(chart.endBeat).toBe(34 + 4);
+  });
+
+  it('不写 responseGapBeats 时，空档默认 0.5 拍', () => {
+    const source = sourceFromPatterns([[0]]);
+    delete source.responseGapBeats;
+    expect(buildChart(source).phrases).toEqual([
+      { callStart: 4, callEnd: 8, responseStart: 8.5, end: 12.5 },
+    ]);
   });
 
   it('写了 response 时按 response 排跟打目标', () => {

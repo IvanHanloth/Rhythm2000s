@@ -15,6 +15,8 @@ export interface ChartPhraseSource {
   call: ChartEventSource[];
   /** 不写时与 call 相同 */
   response?: ChartEventSource[];
+  /** 这个乐句示范与跟打之间空几拍；不写时用谱面顶层的值 */
+  responseGapBeats?: number;
 }
 
 export interface ChartSource {
@@ -26,6 +28,8 @@ export interface ChartSource {
   beatsPerBar: number;
   countInBars: number;
   outroBars: number;
+  /** 示范小节结束后、跟打小节开始前空几拍；不写时用 DEFAULT_RESPONSE_GAP_BEATS（0.5 拍） */
+  responseGapBeats?: number;
   phrases: ChartPhraseSource[];
 }
 
@@ -48,11 +52,17 @@ const CHART_KEYS = [
   'beatsPerBar',
   'countInBars',
   'outroBars',
+  'responseGapBeats',
   'phrases',
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** 可选的空档拍数：不写，或不小于 0 的有限数字 */
+function isOptionalGap(value: unknown): boolean {
+  return value === undefined || (typeof value === 'number' && Number.isFinite(value) && value >= 0);
 }
 
 function isInteger(value: unknown, min: number): value is number {
@@ -97,6 +107,9 @@ export function parseChartFile(data: unknown, options: ChartFileOptions): ParseR
   if (beatsPerBar === null) errors.push('beatsPerBar 必须是大于 0 的整数');
   if (!isInteger(data.countInBars, 0)) errors.push('countInBars 必须是不小于 0 的整数');
   if (!isInteger(data.outroBars, 0)) errors.push('outroBars 必须是不小于 0 的整数');
+  if (!isOptionalGap(data.responseGapBeats)) {
+    errors.push('responseGapBeats 必须是不小于 0 的数字');
+  }
 
   if (!Array.isArray(data.phrases) || data.phrases.length === 0) {
     errors.push('phrases 必须是至少有一个乐句的数组');
@@ -107,7 +120,10 @@ export function parseChartFile(data: unknown, options: ChartFileOptions): ParseR
         errors.push(`${path} 必须是对象`);
         return;
       }
-      errors.push(...unknownKeys(phrase, ['call', 'response'], path));
+      errors.push(...unknownKeys(phrase, ['call', 'response', 'responseGapBeats'], path));
+      if (!isOptionalGap(phrase.responseGapBeats)) {
+        errors.push(`${path}.responseGapBeats 必须是不小于 0 的数字`);
+      }
       errors.push(
         ...checkEvents(phrase.call, `${path}.call`, beatsPerBar, sceneActions, data.scene),
       );

@@ -28,6 +28,19 @@ describe('parseChartFile', () => {
     expect(errorsOf(data)).toEqual([]);
   });
 
+  it('responseGapBeats 可选；写了就必须是不小于 0 的数字', () => {
+    const data = json(sourceFromPatterns([[0], [0]], { responseGapBeats: 4 }));
+    data.phrases[0].responseGapBeats = 2;
+    expect(errorsOf(data)).toEqual([]);
+
+    data.responseGapBeats = -1;
+    data.phrases[1].responseGapBeats = '1';
+    expect(errorsOf(data)).toEqual([
+      'responseGapBeats 必须是不小于 0 的数字',
+      'phrases[1].responseGapBeats 必须是不小于 0 的数字',
+    ]);
+  });
+
   it('缺字段、类型不对时逐个报出', () => {
     const data = json(sourceFromPatterns([[0]]));
     delete data.title;

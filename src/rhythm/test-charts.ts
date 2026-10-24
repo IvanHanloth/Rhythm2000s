@@ -18,6 +18,8 @@ export function sourceFromPatterns(
     beatsPerBar: 4,
     countInBars: 1,
     outroBars: 1,
+    // 测试默认不留空档，示范与跟打正好相差 1 小节，拍位置好算
+    responseGapBeats: 0,
     phrases: patterns.map((pattern) => ({ call: pattern.map((beat) => ({ beat, action })) })),
     ...overrides,
   };

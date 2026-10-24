@@ -33,36 +33,51 @@ export function createPopupSounds(context: BaseAudioContext): PopupSounds {
   };
 }
 
-/** 伴奏：预备小节打节拍器，正文每小节「底鼓 1、3 拍，军鼓 2、4 拍，每半拍踩镲」，最后一小节只收一下；再加上示范段的弹窗声。 */
+/** 伴奏：预备小节打节拍器，示范 / 跟打小节「底鼓、军鼓交替，每半拍踩镲」，空档只有踩镲，结尾只收一下；再加上示范段的弹窗声。 */
 export function buildBackingTrack(chart: Chart, sounds: PopupSounds): SequencedSound[] {
   const { beatsPerBar } = chart;
   const track: SequencedSound[] = [];
   const firstBodyBeat = chart.phrases[0]?.callStart ?? beatsPerBar;
   const lastBodyBeat = chart.phrases.at(-1)?.end ?? firstBodyBeat;
 
-  for (let bar = 0; bar * beatsPerBar < chart.endBeat; bar++) {
-    const barStart = bar * beatsPerBar;
-    if (barStart < firstBodyBeat) {
-      for (let i = 0; i < beatsPerBar; i++) {
-        track.push({ beat: barStart + i, buffer: i === 0 ? sounds.countAccent : sounds.count });
-      }
-      for (let i = 0; i < beatsPerBar * 2; i++) {
-        track.push({ beat: barStart + i / 2, buffer: sounds.hat, gain: 0.6 });
-      }
-    } else if (barStart < lastBodyBeat) {
-      for (let i = 0; i < beatsPerBar; i++) {
-        track.push({ beat: barStart + i, buffer: i % 2 === 0 ? sounds.kick : sounds.snare });
-      }
-      for (let i = 0; i < beatsPerBar * 2; i++) {
-        track.push({ beat: barStart + i / 2, buffer: sounds.hat, gain: i % 2 === 0 ? 0.8 : 0.5 });
-      }
-    } else if (barStart === lastBodyBeat) {
-      track.push({ beat: barStart, buffer: sounds.kick }, { beat: barStart, buffer: sounds.snare });
-    }
+  // 预备小节：节拍器点击（每小节第 1 拍重音）+ 每半拍踩镲
+  for (let beat = 0; beat < firstBodyBeat; beat++) {
+    track.push({ beat, buffer: beat % beatsPerBar === 0 ? sounds.countAccent : sounds.count });
   }
+  for (let half = 0; half / 2 < firstBodyBeat; half++) {
+    track.push({ beat: half / 2, buffer: sounds.hat, gain: 0.6 });
+  }
+
+  // 示范小节和跟打小节：鼓点各自从小节第 1 拍开始（底鼓、军鼓交替，每半拍踩镲），
+  // 这样空档不是整拍时，跟打的拍子也和鼓点对齐。
+  // 空档：只留踩镲，底鼓和军鼓停下，让玩家听出「停了一下」。
+  for (const phrase of chart.phrases) {
+    pushBar(track, sounds, phrase.callStart, phrase.callEnd);
+    for (let beat = phrase.callEnd; beat < phrase.responseStart; beat += 0.5) {
+      track.push({ beat, buffer: sounds.hat, gain: 0.5 });
+    }
+    pushBar(track, sounds, phrase.responseStart, phrase.end);
+  }
+
+  // 结尾只收一下
+  track.push(
+    { beat: lastBodyBeat, buffer: sounds.kick },
+    { beat: lastBodyBeat, buffer: sounds.snare },
+  );
 
   for (const call of chart.calls) {
     track.push({ beat: call.beat, buffer: sounds.popup });
   }
   return track;
+}
+
+/** 从 start 到 end 打一段鼓点：整拍上底鼓、军鼓交替（从底鼓开始），每半拍踩镲。 */
+function pushBar(track: SequencedSound[], sounds: PopupSounds, start: number, end: number): void {
+  for (let half = 0; start + half / 2 < end; half++) {
+    const beat = start + half / 2;
+    track.push({ beat, buffer: sounds.hat, gain: half % 2 === 0 ? 0.8 : 0.5 });
+    if (half % 2 === 0) {
+      track.push({ beat, buffer: (half / 2) % 2 === 0 ? sounds.kick : sounds.snare });
+    }
+  }
 }

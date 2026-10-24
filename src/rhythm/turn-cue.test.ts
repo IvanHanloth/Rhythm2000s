@@ -23,6 +23,19 @@ describe('buildTurnCues', () => {
   });
 });
 
+describe('有空档时', () => {
+  it('Your turn 在示范小节结束前半拍出现，持续整个空档和跟打小节', () => {
+    const chart = chartFromPatterns([[0], [0]], { responseGapBeats: 4 });
+
+    expect(buildTurnCues(chart)).toEqual([
+      { turn: 'call', phrase: 0, start: 3.5, end: 7.5 },
+      { turn: 'response', phrase: 0, start: 7.5, end: 15.5 },
+      { turn: 'call', phrase: 1, start: 15.5, end: 19.5 },
+      { turn: 'response', phrase: 1, start: 19.5, end: 28 },
+    ]);
+  });
+});
+
 describe('turnCueAt', () => {
   const chart = chartFromPatterns([[0]]);
   const cues = buildTurnCues(chart);

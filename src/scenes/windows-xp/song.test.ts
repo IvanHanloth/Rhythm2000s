@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
+import { buildChart } from '../../rhythm/chart.ts';
+import { sourceFromPatterns } from '../../rhythm/test-charts.ts';
 import { buildBackingTrack, type PopupSounds } from './song.ts';
 import { loadMvpChart } from './test-mvp-chart.ts';
 
@@ -11,10 +13,11 @@ const sounds = Object.fromEntries(
 ) as unknown as PopupSounds;
 
 describe('MVP 谱面文件', () => {
-  it('8 个乐句，全曲 1 + 16 + 1 小节', () => {
+  it('8 个乐句，每句「示范 + 半拍空档 + 跟打」，全曲 76 拍', () => {
     const chart = loadMvpChart();
     expect(chart.phrases).toHaveLength(8);
-    expect(chart.endBeat).toBe(18 * 4);
+    expect(chart.phrases[0]).toEqual({ callStart: 4, callEnd: 8, responseStart: 8.5, end: 12.5 });
+    expect(chart.endBeat).toBe(4 + 8 * 8.5 + 4);
   });
 });
 
@@ -46,5 +49,38 @@ describe('buildBackingTrack', () => {
     const lastBar = chart.endBeat - 4;
     expect(at(lastBar)).toEqual(['kick', 'snare']);
     expect(track.every((s) => s.beat <= lastBar)).toBe(true);
+  });
+});
+
+describe('空档的伴奏', () => {
+  const chart = buildChart(sourceFromPatterns([[0]], { responseGapBeats: 0.5 }));
+  const track = buildBackingTrack(chart, sounds);
+  const names = (beat: number) =>
+    track
+      .filter((s) => s.beat === beat)
+      .map((s) => s.buffer as unknown as string)
+      .sort();
+
+  it('示范小节和跟打小节的鼓点各自从第 1 拍开始，和跟打目标对齐', () => {
+    const drums = track
+      .filter((s) => ['kick', 'snare'].includes(s.buffer as unknown as string))
+      .map((s) => `${s.beat}:${s.buffer as unknown as string}`);
+    // 示范 4～8 拍，空档 8～8.5 拍，跟打 8.5～12.5 拍
+    expect(drums).toEqual([
+      '4:kick',
+      '5:snare',
+      '6:kick',
+      '7:snare',
+      '8.5:kick',
+      '9.5:snare',
+      '10.5:kick',
+      '11.5:snare',
+      '12.5:kick',
+      '12.5:snare',
+    ]);
+  });
+
+  it('空档里只有踩镲', () => {
+    expect(names(8)).toEqual(['hat']);
   });
 });
