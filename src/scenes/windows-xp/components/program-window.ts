@@ -189,6 +189,9 @@ function drawMinesweeper(client: Container, w: number, h: number): void {
     .circle(w / 2 - 3, 16, 1.2)
     .circle(w / 2 + 3, 16, 1.2)
     .fill(m.smileyInk)
+    // 嘴巴另起一条路径：Pixi 在 fill 之后会从上一个图形的终点接着画，
+    // 圆没有终点，弧线会被连上一条从别处拉过来的直线
+    .beginPath()
     .arc(w / 2, 18, 4.5, 0.3, Math.PI - 0.3)
     .stroke({ width: 1, color: m.smileyInk });
   // 雷区：一格格凸起的灰块
