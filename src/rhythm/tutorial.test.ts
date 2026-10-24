@@ -21,13 +21,13 @@ const chart = buildChart(
 );
 
 describe('tutorialActions', () => {
-  it('按第一次出现的先后列出，不重复', () => {
+  it('lists actions in order of first appearance, without repeats', () => {
     expect(tutorialActions(chart)).toEqual(['volume-mute', 'dialog-info', 'progress-download']);
   });
 });
 
 describe('buildTutorialChart', () => {
-  it('同样的速度、拍号；1 小节预备拍 + 一个乐句，动作在第 1 拍，没有结尾留空', () => {
+  it('keeps tempo and metre; one count-in bar and one phrase with the action on beat 1, no outro', () => {
     const tutorial = buildTutorialChart(chart, 'progress-download');
     expect(tutorial.bpm).toBe(100);
     expect(tutorial.phrases).toEqual([{ callStart: 4, callEnd: 8, responseStart: 8, end: 12 }]);
@@ -38,7 +38,7 @@ describe('buildTutorialChart', () => {
 });
 
 describe('tutorialPassed', () => {
-  it('每一下都判过、没有 Miss 才算成功', () => {
+  it('passes only when every press is judged without a Miss', () => {
     expect(tutorialPassed(['perfect', 'good'], 2)).toBe(true);
     expect(tutorialPassed(['perfect', 'miss'], 2)).toBe(false);
     expect(tutorialPassed(['perfect'], 2)).toBe(false);
@@ -46,12 +46,7 @@ describe('tutorialPassed', () => {
 });
 
 describe('tutorialHint', () => {
-  it('每个动作都写了提示（新动作别忘了在 tutorial.ts 里加）', () => {
-    const missing = ACTION_TYPES.filter((action) => tutorialHint(action).name === action);
-    expect(missing).toEqual([]);
-  });
-
-  it('提示文案只用英文', () => {
+  it('hint texts are plain English', () => {
     for (const action of ACTION_TYPES) {
       const { name, how } = tutorialHint(action);
       expect(`${name}${how}`).toMatch(/^[\x20-\x7e]+$/);

@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vite-plus/test';
-import type { SceneContext } from '@/game/scene.ts';
 import { DIALOG_KINDS } from './dialog-kinds.ts';
 import { XpSession } from './session.ts';
 import type { XpSongSounds } from './song.ts';
 import { buildChart } from '@/rhythm/chart.ts';
 import { sourceFromPatterns } from '@/rhythm/test-charts.ts';
 import { loadMvpChart } from './test-mvp-chart.ts';
+import { fakeContext } from '@/scenes/shared/test-audio.ts';
 
-/** 用名字代替真正的 AudioBuffer */
+/** Sounds named by strings in place of real AudioBuffers */
 const sounds = {
   ...Object.fromEntries(
     [
@@ -26,32 +26,8 @@ const sounds = {
   dialogs: Object.fromEntries(Object.keys(DIALOG_KINDS).map((kind) => [kind, kind])),
 } as unknown as XpSongSounds;
 
-/** 假的 AudioContext：只记录「立即播放」的音效，时间由测试手动推进。 */
-function fakeContext(calibration = 0) {
-  const played: string[] = [];
-  const audio = {
-    currentTime: 10,
-    destination: {},
-    createGain: () => ({ gain: { value: 1 }, connect() {}, disconnect() {} }),
-    createBufferSource: () => {
-      const source = {
-        buffer: null as unknown,
-        onended: null,
-        connect() {},
-        stop() {},
-        start(when?: number) {
-          if (when === undefined) played.push(source.buffer as string);
-        },
-      };
-      return source;
-    },
-  };
-  const context = { clock: { context: audio }, calibration: () => calibration };
-  return { context: context as unknown as SceneContext, played };
-}
-
 describe('XpSession', () => {
-  it('跟打全部踩准、漏掉一个：其余都是 Perfect，漏掉的记为 Miss', () => {
+  it('hits every response but one: the rest are Perfect, the skipped one a Miss', () => {
     const { context, played } = fakeContext();
     const session = new XpSession(context, loadMvpChart(), sounds);
     const skipped = 4;
@@ -70,17 +46,17 @@ describe('XpSession', () => {
     expect(played.filter((s) => s === 'miss')).toHaveLength(1);
   });
 
-  it('判定前扣除校准值；画面上的关闭时间仍用听到的时间', () => {
+  it('subtracts the calibration before judging; the close time on screen stays the heard time', () => {
     const { context } = fakeContext(0.08);
     const session = new XpSession(context, loadMvpChart(), sounds);
     const target = session.timeAt(session.chart.responses[0]!.beat);
 
-    // 玩家习惯晚 80 毫秒：听感上晚 80 毫秒的输入应判为 Perfect
+    // A player who habitually presses 80 ms late: an input heard 80 ms late is Perfect
     expect(session.tap(target + 0.08)?.level).toBe('perfect');
     expect(session.targets[0]!.handledAt).toBeCloseTo(target + 0.08, 10);
   });
 
-  it('附近没有目标的输入不计分', () => {
+  it('ignores input with no target nearby', () => {
     const { context, played } = fakeContext();
     const session = new XpSession(context, loadMvpChart(), sounds);
 
@@ -89,7 +65,7 @@ describe('XpSession', () => {
     expect(played).toHaveLength(0);
   });
 
-  it('提前按：这一下记为 Miss，响提示音，消息框不关', () => {
+  it('an early press is a Miss with the miss sound, and the box stays open', () => {
     const { context, played } = fakeContext();
     const session = new XpSession(context, loadMvpChart(), sounds);
     const target = session.timeAt(session.chart.responses[0]!.beat);
@@ -101,7 +77,7 @@ describe('XpSession', () => {
     expect(played).toEqual(['miss']);
   });
 
-  it('一直连按通过不了：整局几乎全是 Miss', () => {
+  it('mashing does not pass: nearly every target is a Miss', () => {
     const { context } = fakeContext();
     const session = new XpSession(context, loadMvpChart(), sounds);
     for (let time = session.startTime; time < session.endTime; time += 0.05) {
@@ -115,7 +91,7 @@ describe('XpSession', () => {
     expect(counts.miss).toBeGreaterThan(30);
   });
 
-  it('右键刷新要按两下：各自判定，第一下右键声、第二下菜单命令声，第二下命中才算完成', () => {
+  it('desktop-refresh takes two presses, judged separately, with right-click then menu sounds; done when the second hits', () => {
     const { context, played } = fakeContext();
     const chart = buildChart(
       sourceFromPatterns([[0]], {
@@ -134,7 +110,7 @@ describe('XpSession', () => {
     expect(refresh!.clicks.map((c) => c.beat)).toEqual([8, 8.5]);
     expect(dialog!.clicks.map((c) => c.beat)).toEqual([9]);
 
-    // 第一下漏掉，第二下和消息框都踩准
+    // Miss the first press, hit the second and the message box
     session.update(session.timeAt(8.5) - 0.001);
     expect(session.tap(session.timeAt(8.5))).toMatchObject({ event: 0, step: 1, target: 1 });
     expect(session.tap(session.timeAt(9))).toMatchObject({ event: 1, step: 0, target: 2 });

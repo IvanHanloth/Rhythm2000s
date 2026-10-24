@@ -1,8 +1,8 @@
-// IE6 的文件下载进度窗（doc/scenes/windows-xp-levels.md「等待与长按」）。
-// 上面是「地球 → 文件夹」的飞纸动画，中间是文件名和绿色方块进度条，下面是剩余时间、保存位置、速度，
-// 底部「Open」「Open Folder」「Cancel」。下载完之前 Open 两个按钮是灰的；走满后标题变「Download complete」，
-// Open 变成默认按钮，「Cancel」换成「Close」。界面文字只用英文（2026-10-24 起新增的显示内容一律英文）。
-// 原点在窗口中心，方便做弹出、关闭的缩放动画。
+// IE6 file download window (doc/scenes/windows-xp-levels.md "Waits and holds"): the globe-to-folder animation,
+// file name and green block progress bar, time left, destination and speed, then "Open", "Open Folder" and
+// "Cancel". Both Open buttons stay disabled until done; then the title reads "Download complete",
+// Open becomes the default button and Cancel turns into Close.
+// Origin at the window centre for the open and close scaling.
 
 import { Container, Graphics, Sprite } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -20,16 +20,16 @@ const CHUNK_WIDTH = 6;
 const CHUNK_GAP = 2;
 const BUTTON_GAP = 6;
 const OPEN_FOLDER_WIDTH = 88;
-/** 左栏标签（「Estimated time left:」等）的宽度 */
+/** Width of the left-hand labels ("Estimated time left:" etc.) */
 const LABEL_WIDTH = 120;
 const ROW_HEIGHT = 17;
 
 export interface XpDownloadDialogOptions {
-  /** 被下载的文件名，如 setup.exe */
+  /** File being downloaded, e.g. setup.exe */
   fileName: string;
-  /** 文件大小（KB），用来写「xx KB of yy KB copied」 */
+  /** File size (KB), for "xx KB of yy KB copied" */
   sizeKb: number;
-  /** 来源网站 */
+  /** Site it comes from */
   host: string;
 }
 
@@ -49,7 +49,7 @@ export class XpDownloadDialog {
   private readonly openFolder = new XpButton({ label: 'Open Folder', width: OPEN_FOLDER_WIDTH });
   private readonly cancel = new XpButton({ label: 'Cancel' });
   private readonly close = new XpButton({ label: 'Close' });
-  /** 默认按钮的样子由 XpButton 构造时决定，完成后换一个带蓝色内框的 Open */
+  /** XpButton fixes its default look when built, so completion swaps in a default Open button */
   private readonly openDefault = new XpButton({ label: 'Open', isDefault: true });
   private progress = -1;
 
@@ -58,7 +58,7 @@ export class XpDownloadDialog {
     const client = new Container({ label: 'client' });
     client.position.set(FRAME_WIDTH, CAPTION_HEIGHT);
 
-    // 飞纸动画：左边地球，右边打开的文件夹，纸在两者之间来回飞
+    // Flying paper: globe on the left, open folder on the right, a page flying between them
     const globe = icon('internet', 32);
     globe.position.set(PADDING + 4, PADDING);
     const folder = icon('folder-open', 32);
@@ -88,7 +88,7 @@ export class XpDownloadDialog {
     }
     y += 10;
 
-    // 按钮靠右排：Open、Open Folder、Cancel / Close
+    // Buttons on the right: Open, Open Folder, Cancel / Close
     const buttons = [this.open, this.openFolder, this.cancel];
     const buttonsWidth = BUTTON_WIDTH * 2 + OPEN_FOLDER_WIDTH + BUTTON_GAP * 2;
     let x = CLIENT_WIDTH - PADDING - buttonsWidth;
@@ -124,7 +124,7 @@ export class XpDownloadDialog {
     this.setProgress(0);
   }
 
-  /** 进度 0～1；到 1 时变成「下载完成」的样子 */
+  /** Progress 0–1; at 1 it switches to the completed look */
   setProgress(progress: number): void {
     const p = Math.min(1, Math.max(0, progress));
     if (p === this.progress) return;
@@ -148,7 +148,7 @@ export class XpDownloadDialog {
     this.openFolder.setEnabled(done);
     this.cancel.view.visible = !done;
     this.close.view.visible = done;
-    // 完成后纸停在文件夹里，看不见
+    // Once complete the page rests inside the folder, out of sight
     this.paper.visible = !done;
     if (!done) {
       const fly = (p * 3) % 1;
@@ -162,7 +162,7 @@ export class XpDownloadDialog {
     this.drawBar(p);
   }
 
-  /** 玩家（或虚拟鼠标）点下了「Open」 */
+  /** The player (or the virtual mouse) clicked Open */
   setOpenPressed(pressed: boolean): void {
     this.openDefault.setPressed(pressed);
   }
@@ -171,7 +171,7 @@ export class XpDownloadDialog {
     this.frame.setActive(active);
   }
 
-  /** 「Open」按钮中心，相对窗口中心（view 的原点）；虚拟鼠标点它时用 */
+  /** Open button centre relative to the window centre, for the virtual mouse */
   openCenter(): { x: number; y: number } {
     const button = this.open;
     return {
@@ -184,7 +184,7 @@ export class XpDownloadDialog {
     this.view.destroy({ children: true });
   }
 
-  /** 灰色圆角细边、白底，绿色方块从左往右一格格填 */
+  /** Thin grey rounded border, white track, green blocks filling left to right */
   private drawBar(progress: number): void {
     const { progress: style } = LUNA;
     const w = this.barWidth;

@@ -1,5 +1,5 @@
-// 托盘气泡提示（气泡样式的 tooltips_class32）：浅黄底、黑色细边、圆角，尖角指向托盘图标；
-// 左上是 16 像素图标和粗体标题，右上角小关闭按钮，下面是正文。原点在尖角的尖端。
+// Tray balloon tip (tooltips_class32, balloon style): pale yellow, thin black rounded border, a tail pointing
+// at the tray icon; 16 px icon and bold title, a small close button, then the text. Origin at the tail's tip.
 
 import { Container, Graphics, Rectangle, Sprite } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -9,14 +9,14 @@ import { xpText } from './xp-text.ts';
 const RADIUS = 7;
 const PADDING = 10;
 const STEM_HEIGHT = 18;
-/** 尖角离气泡右边的距离 */
+/** Distance from the tail to the balloon's right edge */
 const STEM_RIGHT = 34;
 const CLOSE_SIZE = 14;
 
 export interface BalloonOptions {
   title: string;
   text: string;
-  /** assets/reference/windows-xp/icons/ 下的图标名 */
+  /** Icon name under assets/reference/windows-xp/icons/ */
   icon?: string;
   width?: number;
   onClose?: () => void;
@@ -24,11 +24,11 @@ export interface BalloonOptions {
 
 export class XpBalloon {
   readonly view = new Container({ label: 'balloon' });
-  /** 气泡连尖角的总高度：从尖端往上这么高 */
+  /** Total height including the tail, measured up from its tip */
   readonly height: number;
-  /** 关闭按钮中心（相对尖端），虚拟鼠标点这里 */
+  /** Close button centre relative to the tip; the virtual mouse clicks here */
   readonly closeCenter: { x: number; y: number };
-  /** 关闭按钮的悬停高亮，虚拟鼠标移上去时用 */
+  /** Close button hover highlight, shown while the virtual mouse is over it */
   readonly setCloseHot: (hot: boolean) => void;
 
   constructor({ title, text, icon = 'dialog-info', width = 270, onClose }: BalloonOptions) {
@@ -46,7 +46,7 @@ export class XpBalloon {
     body.position.set(PADDING, PADDING + 16 + 8);
     const height = Math.ceil(body.y + body.height + PADDING);
 
-    // 尖角：底边上一段斜着伸向右下
+    // Tail: a slanted spike off the bottom edge, pointing down and right
     const stemTipX = width - STEM_RIGHT;
     const stemBase = [stemTipX - 18, stemTipX - 2] as const;
     const shape = new Graphics()
@@ -59,7 +59,7 @@ export class XpBalloon {
       )
       .fill(LUNA.tooltip.fill)
       .stroke({ width: 1, color: LUNA.tooltip.border })
-      // 盖住尖角和气泡相接处的那段边线
+      // Hide the border where the tail meets the balloon
       .rect(stemBase[0] + 1, height - 2, stemBase[1] - stemBase[0] - 2, 2)
       .fill(LUNA.tooltip.fill);
 

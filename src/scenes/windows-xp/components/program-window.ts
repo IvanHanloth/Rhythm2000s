@@ -1,6 +1,6 @@
-// XP 自带程序的小窗口：Luna 外框（最小化、最大化、关闭三个按钮）+ 菜单栏 + 程序自己的内容。
-// window-minimize 动作用它（doc/scenes/windows-xp-levels.md）。内容只是示意，按原版的样子简化绘制。
-// 原点在窗口中心，方便和消息框共用屏幕上的位置、做缩放动画。
+// Small windows of XP's built-in programs: Luna frame with minimise, maximise and close, a menu bar and
+// simplified program content. Used by window-minimize (doc/scenes/windows-xp-levels.md).
+// Origin at the centre, so it shares screen slots with message boxes and scales the same way.
 
 import { Container, Graphics } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -11,7 +11,7 @@ import { xpText } from './xp-text.ts';
 export const PROGRAM_WINDOW_WIDTH = 250;
 export const PROGRAM_WINDOW_HEIGHT = 164;
 const MENU_HEIGHT = 19;
-/** 标题栏按钮的边长和间距，与 window-frame.ts 一致 */
+/** Caption button size and spacing, as in window-frame.ts */
 const CAPTION_BUTTON = 21;
 const CAPTION_BUTTON_GAP = 2;
 
@@ -19,9 +19,9 @@ export type ProgramKind = 'notepad' | 'paint' | 'ie' | 'minesweeper';
 
 interface ProgramSpec {
   title: string;
-  /** 标题栏和任务栏按钮上的图标 */
+  /** Icon on the title bar and taskbar button */
   icon: string;
-  /** 任务栏按钮上的字 */
+  /** Taskbar button label */
   taskLabel: string;
   menu: string;
   draw(client: Container, width: number, height: number): void;
@@ -65,7 +65,7 @@ export class XpProgramWindow {
   readonly width = PROGRAM_WINDOW_WIDTH;
   readonly height = PROGRAM_WINDOW_HEIGHT;
   readonly spec: ProgramSpec;
-  /** 最小化按钮中心（相对窗口中心），虚拟鼠标点这里 */
+  /** Minimise button centre relative to the window centre; the virtual mouse clicks here */
   readonly minimizeCenter: { x: number; y: number };
   private readonly frame: XpWindowFrame;
 
@@ -94,7 +94,7 @@ export class XpProgramWindow {
     body.position.set(-width / 2, -height / 2);
     this.view.addChild(body);
 
-    // 关闭按钮在最右，左边依次是最大化、最小化（window-frame.ts 的排法）
+    // Close is rightmost, then maximise and minimise to its left (as in window-frame.ts)
     const closeLeft = width - FRAME_WIDTH - 2 - CAPTION_BUTTON;
     const minimizeLeft = closeLeft - 2 * (CAPTION_BUTTON + CAPTION_BUTTON_GAP);
     this.minimizeCenter = {
@@ -112,7 +112,7 @@ export class XpProgramWindow {
   }
 }
 
-/** 凹陷的白色区域（编辑区、画布、网页） */
+/** A sunken white area (edit box, canvas, web page) */
 function sunkenPaper(x: number, y: number, w: number, h: number): Graphics {
   return new Graphics()
     .rect(x, y, w, h)
@@ -138,7 +138,7 @@ function drawPaint(client: Container, w: number, h: number): void {
   }
   const paletteTop = h - 18;
   const canvas = sunkenPaper(30, 2, w - 33, paletteTop - 4);
-  // 涂鸦：蓝天、太阳、草地
+  // Doodle: blue sky, sun, grass
   const doodle = new Graphics()
     .rect(31, 3, w - 35, 20)
     .fill(p.sky)
@@ -175,7 +175,7 @@ function drawInternetExplorer(client: Container, w: number, h: number): void {
 function drawMinesweeper(client: Container, w: number, h: number): void {
   const m = XP_PROGRAMS.minesweeper;
   const g = new Graphics().rect(0, 0, w, h).fill(m.face);
-  // 顶部：剩余地雷数、笑脸、计时
+  // Top: mines left, smiley, timer
   g.rect(8, 6, 39, 24)
     .fill(m.counter)
     .rect(w - 47, 6, 39, 24)
@@ -189,12 +189,12 @@ function drawMinesweeper(client: Container, w: number, h: number): void {
     .circle(w / 2 - 3, 16, 1.2)
     .circle(w / 2 + 3, 16, 1.2)
     .fill(m.smileyInk)
-    // 嘴巴另起一条路径：Pixi 在 fill 之后会从上一个图形的终点接着画，
-    // 圆没有终点，弧线会被连上一条从别处拉过来的直线
+    // The mouth needs its own path: after fill() Pixi continues from the previous shape's end point,
+    // and a circle has none, so the arc would be joined by a stray line
     .beginPath()
     .arc(w / 2, 18, 4.5, 0.3, Math.PI - 0.3)
     .stroke({ width: 1, color: m.smileyInk });
-  // 雷区：一格格凸起的灰块
+  // Minefield: raised grey squares
   const size = 13;
   const cols = Math.floor((w - 16) / size);
   const rows = Math.floor((h - 44) / size);

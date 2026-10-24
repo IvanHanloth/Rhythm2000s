@@ -39,7 +39,7 @@ export interface ResultsPanelOptions {
   summary: ResultSummary;
   /** The score beat the previous best */
   newRecord: boolean;
-  /** 这一局正文里开过律动组件：得分框左上角显示「Beat Guide」标签（doc/beat-guide.md） */
+  /** The beat guide was on: a "Beat Guide" tag at the top left of the score box (doc/beat-guide.md) */
   assisted?: boolean;
   width: number;
   height: number;
@@ -124,7 +124,7 @@ export function createResultsPanel({
     score.inner.addChild(badge);
   }
   if (assisted) {
-    // 用了辅助：放在得分框左上角，和右边的得分、New record 分开
+    // Top left of the score box, apart from the score and "New record" on the right
     const tag = pill(
       kit.text('Beat Guide', { size: 11, color: JUDGEMENT_COLORS.onPerfect }),
       BEAT_GUIDE_COLORS.press,

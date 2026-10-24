@@ -1,6 +1,6 @@
-// 系统演示的提示条（doc/level-design.md「规则 1」）：放在 Follow me / Your turn 横幅右边。
-// 第一行「Practice 2 of 4 · Volume」（重来时「Try again · Volume」），第二行写怎么处理。
-// 颜色和轮次横幅「Follow me」一面相同，由场景按自己的主题传入。原点在提示条左边的竖直中点。
+// The demo caption (doc/level-design.md "Rule 1"), right of the Follow me / Your turn banner:
+// "Practice 2 of 4 · Volume" (or "Try again · Volume") over how to handle the action.
+// Coloured like the banner's call side, as given by the scene. Origin at the left edge, vertically centred.
 
 import { Container, Graphics, Text } from 'pixi.js';
 import { FONT_FAMILIES } from '@/theme/tokens.ts';
@@ -11,9 +11,9 @@ const HEIGHT = 56;
 const PADDING_X = 18;
 
 export interface TutorialCaptionContent {
-  /** 第一行，例如「Practice 2 of 4 · Volume」 */
+  /** First line, e.g. "Practice 2 of 4 · Volume" */
   title: string;
-  /** 第二行，例如「Press on the beat, release one beat later」 */
+  /** Second line, e.g. "Grab the slider on the beat" */
   how: string;
 }
 
@@ -48,7 +48,7 @@ export class TutorialCaption {
     this.show(null);
   }
 
-  /** null 表示隐藏 */
+  /** null hides it */
   show(content: TutorialCaptionContent | null): void {
     this.view.visible = content !== null;
     if (!content) return;

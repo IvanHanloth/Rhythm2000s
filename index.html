@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rhythm 2000s</title>
-    <!-- 启动画面的样式直接写在这里：JS 和 style.css 加载之前就要显示 -->
+    <!-- Boot screen styles live here so they apply before the JS and style.css load -->
     <style>
-      /* 启动画面：像老电脑开机时的黑底白字 */
+      /* Boot screen: white on black, like an old computer starting up */
       .boot {
         position: fixed;
         inset: 0;
@@ -44,7 +44,7 @@
   </head>
   <body>
     <div id="game"></div>
-    <!-- 启动画面：场景素材、谱面加载完、街区建好后由 main.ts 移除 -->
+    <!-- Boot screen: main.ts removes it once scene assets and charts are loaded and the street is built -->
     <div id="boot" class="boot" role="status">
       <span class="boot-title">Rhythm 2000s</span>
       <span class="boot-text">Starting up…</span>

@@ -22,8 +22,8 @@ export interface SceneContext {
   /** Player calibration (s); positive means the player presses late. Subtracted from input times when judging */
   calibration(): number;
   /**
-   * 律动组件（doc/beat-guide.md）现在开着没有；玩家随时可以按 H 切换，场景每帧读。
-   * 没有时（单元测试、原型页面）当作关闭。
+   * Whether the beat guide is on (doc/beat-guide.md); the player toggles it with H and scenes read it every frame.
+   * Absent in unit tests and prototype pages, where it counts as off.
    */
   beatGuide?(): boolean;
   /** Every loaded, validated chart; scenes pick theirs by chart.scene */

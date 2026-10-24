@@ -1,9 +1,9 @@
-// 一局里下载进度窗（progress-download）和音量控制（volume-mute）的画面
-// （doc/scenes/windows-xp-levels.md「等待与长按」）。
-// 两个动作在示范段和跟打段都要做一遍：下载窗两段各弹出一次、各走 3 拍；
-// 音量小窗示范段由电脑把音量从原位拖到 0，跟打段由玩家从 0 拖回原位。
-// 所以每个事件建两份部件，示范一份、跟打一份。音量控制只是画面，不改游戏的实际音量。
-// 画面每帧只根据拍位置计算，不累加帧间隔。坐标都是虚拟 XP 屏幕坐标。
+// The download window (progress-download) and volume control (volume-mute) in a round
+// (doc/scenes/windows-xp-levels.md "Waits and holds"). Both play out in the call and again in the response:
+// the download window opens and fills over 3 beats each time; the computer drags the volume from its
+// setting to 0 in the call and the player drags it back in the response. So every event has two widgets.
+// The volume control is only visual and never changes the game's volume.
+// Everything is computed from the beat; coordinates are virtual XP screen coordinates.
 
 import { Container } from 'pixi.js';
 import { actionTapOffsets } from '@/rhythm/actions.ts';
@@ -18,9 +18,9 @@ import type { Turn } from '@/scenes/shared/cursor-path.ts';
 
 type Point = { x: number; y: number };
 
-/** 下载窗的中心：屏幕中间偏下，盖在消息框之上 */
+/** Download window centre: below the middle of the screen, over the message boxes */
 const DOWNLOAD_CENTER: Point = { x: XP_SCREEN_WIDTH / 2, y: 300 };
-/** 被下载的文件，按乐句轮换（英文，2026-10-24 起新增的显示内容一律英文） */
+/** Downloaded files, rotating by phrase */
 const DOWNLOADS = [
   { fileName: 'setup.exe', sizeKb: 1240 },
   { fileName: 'song.mp3', sizeKb: 3712 },
@@ -30,25 +30,25 @@ const DOWNLOADS = [
 ];
 const DOWNLOAD_HOST = 'www.example-files.com';
 
-/** 音量原来的位置（0～1）：示范段从这里拖到 0，玩家要把滑块拖回这里 */
+/** Original volume (0–1): dragged from here to 0 in the call, back here by the player */
 const ORIGINAL_VOLUME = 0.7;
-/** Miss 后左右抖动的时长（拍）和幅度（像素），之后收起 */
+/** Shake after a Miss before closing: duration (beats) and amplitude (px) */
 const SHAKE_BEATS = 0.25;
 const SHAKE_PIXELS = 4;
-/** Miss 后标题栏闪烁：每隔多少拍切换一次，闪多久（拍），与消息框相同 */
+/** Title bar flashing after a Miss, as for message boxes: step and duration (beats) */
 const FLASH_STEP_BEATS = 0.125;
 const FLASH_BEATS = 0.75;
 const FADE_BEATS = 0.25;
 
-/** 一次演出（示范段或跟打段）的时间点，都是全曲拍 */
+/** Timing of one run (call or response), in song beats */
 interface Run {
-  /** 事件拍位置：下载窗弹出到位 / 音量按下滑块的拍点 */
+  /** Event beat: the download window is in place / the volume slider is pressed */
   start: number;
-  /** 下载窗点「Open」或音量松开的时间；还没有时为 null */
+  /** When Open was clicked or the slider released; null until then */
   done: number | null;
-  /** Miss 的时间；没有时为 null */
+  /** When it missed; null without a Miss */
   missed: number | null;
-  /** 音量：此刻是否正按着滑块 */
+  /** Volume: whether the slider is held right now */
   held: boolean;
 }
 
@@ -63,7 +63,7 @@ interface VolumeTarget {
   event: number;
   call: XpVolumeControl;
   response: XpVolumeControl;
-  /** 小窗左上角 */
+  /** Top left of the pop-up */
   origin: Point;
 }
 type Target = DownloadTarget | VolumeTarget;
@@ -74,7 +74,7 @@ export interface WaitHoldViewOptions {
 }
 
 export class WaitHoldView {
-  /** 下载窗和音量小窗都在任务栏之上、虚拟鼠标之下 */
+  /** Both windows sit above the taskbar and below the virtual mouse */
   readonly layer = new Container({ label: 'wait-hold' });
   private readonly session: XpSession;
   private readonly taskbar: XpTaskbar;
@@ -101,9 +101,8 @@ export class WaitHoldView {
           const control = new XpVolumeControl({
             volume: ORIGINAL_VOLUME,
             muted: false,
-            labels: { title: 'Volume', mute: 'Mute' },
           });
-          // 从下沿往上展开：原点放在左下角
+          // Unfolds upwards from its bottom edge: origin at the bottom left
           control.view.pivot.set(0, control.height);
           control.view.position.set(origin.x, origin.y + control.height);
           control.view.eventMode = 'none';
@@ -122,7 +121,7 @@ export class WaitHoldView {
     });
   }
 
-  /** 虚拟鼠标每一下要点的位置；不是这里画的事件返回 null */
+  /** Where the virtual mouse presses for each step; null for events drawn elsewhere */
   clickPoints(event: number, turn: Turn): Point[] | null {
     const target = this.targets.get(event);
     if (!target) return null;
@@ -134,13 +133,13 @@ export class WaitHoldView {
       const p = target.response.thumbCenter(volume);
       return { x: target.origin.x + p.x, y: target.origin.y + p.y };
     };
-    // 示范段从原位按下、拖到底松开；跟打段从底部按下、拖回原位松开
+    // Call: press at the setting, release at 0; response: press at 0, release back at the setting
     return turn === 'call'
       ? [thumb(ORIGINAL_VOLUME), thumb(0)]
       : [thumb(0), thumb(ORIGINAL_VOLUME)];
   }
 
-  /** 判定字样的位置：部件上沿的中点 */
+  /** Where the judgement label goes: the middle of the widget's top edge */
   judgementAnchor(event: number): Point | null {
     const target = this.targets.get(event);
     if (!target) return null;
@@ -150,7 +149,7 @@ export class WaitHoldView {
     return { x: target.origin.x + target.response.width / 2, y: target.origin.y };
   }
 
-  /** pointer：虚拟鼠标此刻的位置；按着滑块时滑块跟着它走 */
+  /** pointer: the virtual mouse position; a held slider follows it */
   update(beat: number, pointer: Point): void {
     let muted = false;
     for (const target of this.targets.values()) {
@@ -174,28 +173,28 @@ export class WaitHoldView {
     this.layer.destroy({ children: true });
   }
 
-  // ---------- 两段的时间点 ----------
+  // ---------- Run timing ----------
 
-  /** 示范段：电脑自己做完，最后一下就是完成的时间 */
+  /** Call: the computer does it all, so the last press is the completion time */
   private callRun(state: XpTarget, beat: number): Run {
     const start = state.call.beat;
     const end = start + actionTapOffsets(state.call.action).at(-1)!;
     return { start, done: end, missed: null, held: beat >= start && beat < end };
   }
 
-  /** 跟打段：看玩家的判定 */
+  /** Response: follows the player's judgements */
   private responseRun(state: XpTarget): Run {
     const toBeat = (time: number | null) => (time === null ? null : this.session.beatAt(time));
     return {
       start: state.response.beat,
       done: toBeat(state.handledAt),
       missed: toBeat(state.missedAt),
-      // 只判定按下：按下命中后滑块跟着鼠标走，到自动松开为止
+      // Only the press is judged: once it hits, the slider follows the mouse until the automatic release
       held: state.clicks[0]?.hitAt != null,
     };
   }
 
-  // ---------- 下载窗 ----------
+  // ---------- Download window ----------
 
   private renderDownload(dialog: XpDownloadDialog, run: Run, beat: number): void {
     const view = dialog.view;
@@ -207,7 +206,7 @@ export class WaitHoldView {
     let pressed = false;
 
     if (visible && run.done !== null && beat >= run.done) {
-      // 点下「Open」：缩小淡出
+      // Open clicked: shrink and fade
       pressed = true;
       const p = (beat - run.done) / BEATS.windowClose;
       visible = p < 1;
@@ -224,7 +223,7 @@ export class WaitHoldView {
 
     view.visible = visible;
     if (!visible) return;
-    // 进度条走 3 拍（progress-download 的判定点在事件后 3 拍）
+    // The bar fills over 3 beats (progress-download is judged 3 beats after the event)
     const wait = actionTapOffsets('progress-download')[0]!;
     dialog.setProgress((beat - run.start) / wait);
     dialog.setOpenPressed(pressed);
@@ -233,11 +232,11 @@ export class WaitHoldView {
     view.alpha = alpha;
   }
 
-  // ---------- 音量控制 ----------
+  // ---------- Volume control ----------
 
   /**
-   * 画一份音量小窗。示范段电脑把滑块从原位拖到 0，跟打段玩家把它从 0 拖回原位；
-   * 按住期间滑块跟着鼠标走，不超出 0～原位。
+   * Draws one volume pop-up. The computer drags the slider from the setting to 0 in the call, the player drags it
+   * back in the response; while held it follows the mouse, kept between 0 and the setting.
    */
   private renderVolume(
     target: VolumeTarget,
@@ -262,11 +261,11 @@ export class WaitHoldView {
     let dragging = false;
 
     if (done) {
-      // 松开：滑块停在终点，小窗收起
+      // Released: the slider stays at its end point and the pop-up closes
       volume = to;
       open = 1 - clamp01((beat - run.done!) / BEATS.windowClose);
     } else if (run.missed !== null && beat >= run.missed) {
-      // Miss（只有跟打段会有）：滑块掉回底部，抖一下再收起
+      // Miss (response only): the slider drops back to the bottom, shakes, then closes
       const since = beat - run.missed;
       if (since < SHAKE_BEATS) {
         shake = Math.sin(since * Math.PI * 16) * SHAKE_PIXELS * (1 - since / SHAKE_BEATS);
@@ -282,11 +281,11 @@ export class WaitHoldView {
     view.position.set(target.origin.x + shake, target.origin.y + control.height);
     view.scale.set(1, Math.max(0.01, open));
     control.setVolume(volume, dragging);
-    // 「Mute」：示范段松开时勾上，跟打段松开时取消
+    // "Mute" is ticked on the call's release and cleared on the response's
     control.setMuted(turn === 'call' ? done : !done);
   }
 
-  /** 托盘小喇叭显示静音：从示范段松开起，到跟打段松开或 Miss 后小窗收起为止 */
+  /** The tray speaker shows muted from the call's release until the response's release, or the pop-up closing after a Miss */
   private volumeMuted(state: XpTarget, response: Run, beat: number): boolean {
     const mutedFrom = state.call.beat + actionTapOffsets(state.call.action).at(-1)!;
     const mutedUntil =
@@ -295,7 +294,7 @@ export class WaitHoldView {
     return beat >= mutedFrom && beat < mutedUntil;
   }
 
-  /** 音量小窗的左上角：托盘小喇叭正上方，不超出屏幕右边 */
+  /** Top left of the volume pop-up: right above the tray speaker, kept inside the screen */
   private volumeOrigin(): Point {
     const speaker = this.taskbar.volumeIcon;
     const trayX = speaker.parent?.x ?? 0;

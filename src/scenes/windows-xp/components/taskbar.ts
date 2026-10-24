@@ -1,5 +1,5 @@
-// 任务栏（Shell_TrayWnd）：30 像素高的蓝色渐变条，左边绿色「start」按钮，右边通知区域（托盘）。
-// 托盘里有网络连接、Messenger、音量小喇叭和时钟。原点在任务栏左上角。
+// Taskbar (Shell_TrayWnd): a 30 px blue gradient bar, the green "start" button on the left and the
+// notification area on the right with network, Messenger, volume and the clock. Origin at the top left.
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -21,7 +21,7 @@ export const TASK_WIDTH = 160;
 export const TASK_HEIGHT = 22;
 
 export interface TaskbarTask {
-  /** assets/reference/windows-xp/icons/ 的文件名 */
+  /** File name under assets/reference/windows-xp/icons/ */
   icon: string;
   label: string;
 }
@@ -29,7 +29,7 @@ export interface TaskbarTask {
 export class XpTaskbar {
   readonly view = new Container({ label: 'taskbar' });
   readonly startButton: StartButton;
-  /** 托盘的音量图标：可以挂鼠标事件，弹出音量控制 */
+  /** Tray volume icon; can take pointer events to open the volume control */
   readonly volumeIcon = new Container({ label: 'tray-volume' });
   private readonly muteBadge = new Graphics();
   private readonly clock: Text;
@@ -37,7 +37,7 @@ export class XpTaskbar {
   private muted = false;
   private readonly taskButtons: TaskButton[] = [];
 
-  /** tasks：任务栏上的程序按钮，从「开始」右边依次排开 */
+  /** tasks: program buttons, laid out right of Start */
   constructor({ tasks = [] }: { tasks?: TaskbarTask[] } = {}) {
     const bar = new Graphics()
       .rect(0, 0, XP_SCREEN_WIDTH, TASKBAR_HEIGHT)
@@ -45,7 +45,7 @@ export class XpTaskbar {
 
     this.startButton = new StartButton();
 
-    // 托盘：先排好内容，再按内容宽度画底
+    // Tray: lay out the contents first, then size the background to them
     const tray = new Container({ label: 'tray' });
     const icons = ['network-neighborhood', 'windows-messenger'].map((name) => {
       const sprite = new Sprite(xpAssets().icon(name));
@@ -71,7 +71,7 @@ export class XpTaskbar {
     this.volumeIcon.position.set(x, iconTop);
     x += TRAY_ICON + TRAY_GAP + 2;
     this.clock.position.set(x, TASKBAR_HEIGHT / 2);
-    // 时钟宽度按最宽的「00:00 PM」留，走动时托盘不变宽
+    // The clock reserves the width of "00:00 PM" so the tray never resizes
     const trayWidth = Math.ceil(x + this.clock.width + TRAY_PADDING);
 
     const trayFace = new Graphics()
@@ -95,7 +95,7 @@ export class XpTaskbar {
     this.setClock(new Date());
   }
 
-  /** 时钟显示本机时间（英文版的 12 小时制，如「5:49 PM」）；每帧调用也只在分钟变化时重画 */
+  /** Local time in the English 12-hour format, e.g. "5:49 PM"; redraws only when the minute changes */
   setClock(now: Date): void {
     const hours = now.getHours();
     const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -105,7 +105,7 @@ export class XpTaskbar {
     this.clock.text = text;
   }
 
-  /** 第 index 个程序按钮是否按下（它的窗口在最前面） */
+  /** Whether program button `index` is pressed (its window is in front) */
   setTaskActive(index: number, active: boolean): void {
     this.taskButtons[index]?.setActive(active);
   }
@@ -121,7 +121,7 @@ export class XpTaskbar {
   }
 }
 
-/** 「开始」按钮：绿色渐变，右侧圆弧，左边是 Windows 旗帜 */
+/** Start button: green gradient, rounded right end, Windows flag on the left */
 export class StartButton {
   readonly view = new Container({ label: 'start-button' });
   private readonly shade = new Graphics();
@@ -131,14 +131,14 @@ export class StartButton {
     const face = startShape(new Graphics())
       .fill(verticalGradient(s.fill))
       .stroke({ width: 1, color: s.edge, alignment: 1 });
-    // 左上角的高光
+    // Highlight at the top left
     const gloss = new Graphics()
       .rect(0, 1, START_WIDTH - START_RADIUS, 1)
       .fill({ color: '#ffffff', alpha: 0.25 });
     startShape(this.shade).fill({ color: '#000000', alpha: 0.22 });
     this.shade.visible = false;
 
-    // Windows 旗帜，带 1 像素的淡阴影
+    // Windows flag with a faint 1 px shadow
     const flag = new Container({ label: 'flag' });
     for (const shadow of [true, false]) {
       const sprite = new Sprite(xpAssets().icon('windows-logo'));
@@ -152,7 +152,7 @@ export class StartButton {
     }
     flag.position.set(8, (TASKBAR_HEIGHT - FLAG_SIZE) / 2);
 
-    // 英文版按钮上是小写斜体的「start」
+    // The English button reads "start" in lowercase italics
     const label = xpText('start', {
       fontFamily: XP_FONTS.caption,
       fontSize: 18,
@@ -168,7 +168,7 @@ export class StartButton {
     this.view.hitArea = new Rectangle(0, 0, START_WIDTH, TASKBAR_HEIGHT);
   }
 
-  /** 开始菜单打开时按钮保持按下的暗色 */
+  /** Stays pressed (darker) while the Start menu is open */
   setPressed(pressed: boolean): void {
     this.shade.visible = pressed;
   }
@@ -188,7 +188,7 @@ function startShape(g: Graphics): Graphics {
     .closePath();
 }
 
-/** 任务栏上的程序按钮：16 像素图标 + 白字；窗口在最前面时是按下的深蓝色 */
+/** Program button on the taskbar: 16 px icon and white text; dark blue and pressed when its window is in front */
 export class TaskButton {
   readonly view: Container;
   private readonly normal: Graphics;

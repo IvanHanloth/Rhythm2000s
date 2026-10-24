@@ -1,5 +1,5 @@
-// 消息框（MessageBox，窗口类 #32770）：Luna 外框，左边 32 像素图标，右边正文，底部居中一排按钮。
-// 大小随文字自动调整，和原版一样。原点在窗口中心，方便做弹出、关闭的缩放动画。
+// Message box (MessageBox, window class #32770): Luna frame, 32 px icon on the left, text on the right,
+// a centred row of buttons below. Sized to its text like the original. Origin at the centre for scaling.
 
 import { Container, Sprite } from 'pixi.js';
 import { xpAssets } from '@/scenes/windows-xp/assets.ts';
@@ -8,13 +8,13 @@ import { BUTTON_HEIGHT, BUTTON_WIDTH, XpButton } from './button.ts';
 import { CAPTION_HEIGHT, FRAME_WIDTH, measureCaption, XpWindowFrame } from './window-frame.ts';
 import { xpText } from './xp-text.ts';
 
-/** 客户区内边距 */
+/** Client area padding */
 const PADDING = 11;
 const ICON_SIZE = 32;
-/** 图标和正文之间的距离 */
+/** Gap between icon and text */
 const ICON_GAP = 12;
 const BUTTON_GAP = 6;
-/** 正文和按钮之间的距离 */
+/** Gap between text and buttons */
 const TEXT_BUTTON_GAP = 14;
 const MIN_CLIENT_WIDTH = 160;
 
@@ -22,9 +22,9 @@ export interface XpMessageBoxOptions {
   kind: DialogKind;
   title: string;
   text: string;
-  /** 不传时按消息框种类（「OK」或「Yes」「No」） */
+  /** Defaults to the kind's buttons ("OK", or "Yes" and "No") */
   buttons?: readonly string[];
-  /** 正文超过这个宽度就换行 */
+  /** Text wraps beyond this width */
   maxTextWidth?: number;
 }
 
@@ -76,7 +76,7 @@ export class XpMessageBox {
     icon.setSize(ICON_SIZE);
     icon.position.set(PADDING, PADDING);
 
-    // 一行字时和图标垂直居中，多行时从顶部排
+    // A single line is centred on the icon; more lines start at the top
     body.position.set(textLeft, PADDING + Math.max(0, Math.round((ICON_SIZE - body.height) / 2)));
 
     let x = Math.round((clientWidth - buttonsWidth) / 2);
@@ -93,10 +93,10 @@ export class XpMessageBox {
     this.frame.setActive(active);
   }
 
-  /** 第 index 个按钮（默认是默认按钮）的中心，相对消息框中心（view 的原点）；虚拟鼠标点它时用 */
+  /** Centre of button `index` (the default button by default) relative to the box centre, for the virtual mouse */
   buttonCenter(index = 0): { x: number; y: number } {
     const button = this.buttons[index];
-    if (!button) throw new Error(`消息框没有第 ${index + 1} 个按钮`);
+    if (!button) throw new Error(`The message box has no button ${index + 1}`);
     return {
       x: FRAME_WIDTH + button.view.x + button.width / 2 - this.view.pivot.x,
       y: CAPTION_HEIGHT + button.view.y + button.height / 2 - this.view.pivot.y,

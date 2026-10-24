@@ -108,7 +108,7 @@ export const LUNA = {
     check: '#21a121',
   },
 
-  /** 进度条（msctls_progress32）：灰色圆角细边、白底、一格格绿色方块 */
+  /** Progress bar (msctls_progress32): thin grey rounded border, white track, green blocks */
   progress: {
     border: '#686868',
     track: '#ffffff',

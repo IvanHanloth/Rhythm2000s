@@ -1,6 +1,6 @@
-// 一局里托盘气泡、程序窗口、开始菜单、回收站文件的画面（doc/scenes/windows-xp-levels.md）。
-// 消息框和 desktop-refresh 由场景自己画；这里只管这四个动作。
-// 画面每帧只根据拍位置计算，不累加帧间隔。坐标都是虚拟 XP 屏幕坐标。
+// Tray balloons, program windows, the Start menu and Recycle Bin files in a round (doc/scenes/windows-xp-levels.md).
+// Message boxes and desktop-refresh are drawn by the scene. Everything is computed from the beat;
+// coordinates are virtual XP screen coordinates.
 
 import { Container } from 'pixi.js';
 import { BEATS } from '@/theme/tokens.ts';
@@ -28,35 +28,35 @@ import { isShellAction, PHRASE_LIMITS } from './shell-actions.ts';
 
 type Point = { x: number; y: number };
 
-/** 程序窗口缩进任务栏、文件飞进回收站的时长（拍） */
+/** How long a program window takes to shrink into the taskbar, and a file to fly into the bin (beats) */
 const MINIMIZE_BEATS = 0.25;
 const THROW_BEATS = 0.25;
-/** Miss 后左右抖动的时长（拍）和幅度（像素） */
+/** Shake after a Miss: duration (beats) and amplitude (px) */
 const SHAKE_BEATS = 0.25;
 const SHAKE_PIXELS = 4;
-/** 淡出的时长（拍） */
+/** Fade-out (beats) */
 const FADE_BEATS = 0.25;
-/** Miss 后标题栏闪烁：每隔多少拍切换一次，闪多久（拍），与消息框相同 */
+/** Title bar flashing after a Miss, as for message boxes: step and duration (beats) */
 const FLASH_STEP_BEATS = 0.125;
 const FLASH_BEATS = 0.75;
-/** 开始菜单：第二下之前多久菜单项开始高亮（虚拟鼠标移上去了），点完后多久收起（拍） */
+/** Start menu: the item lights up this long before the second press, and the menu closes this long after (beats) */
 const MENU_HOVER_BEATS = 0.2;
 const MENU_CLOSE_BEATS = 1 / 16;
-/** 文件落下的高度（像素） */
+/** How far files drop (px) */
 const DROP_PIXELS = 24;
-/** 气泡之间的竖向间距 */
+/** Vertical gap between balloons */
 const BALLOON_GAP = 4;
 const BALLOON_WIDTH = 230;
-/** 托盘图标之间的距离，与 taskbar.ts 一致 */
+/** Spacing of the tray icons, as in taskbar.ts */
 const TRAY_STEP = 16 + 6;
-/** 程序按钮之间的距离 */
+/** Spacing of the program buttons */
 const TASK_GAP = 3;
-/** 程序窗口上沿最高到哪（虚拟屏幕坐标）：轮次横幅的下沿再往下一点 */
+/** Highest a program window's top may go (virtual screen): just below the turn banner */
 const PROGRAM_TOP_MIN = 52;
-/** 「开始」按钮的中心 */
+/** Centre of the Start button */
 const START_BUTTON_CENTER_X = 50;
 
-/** 气泡文案：模仿当年的系统通知，全部原创 */
+/** Balloon texts in the voice of period system notices, all original */
 const BALLOON_TEXTS = [
   { title: 'Found New Hardware', text: 'USB Mass Storage Device', icon: 'dialog-info' },
   { title: 'Windows Messenger', text: 'Jamie has just signed in.', icon: 'windows-messenger' },
@@ -65,7 +65,7 @@ const BALLOON_TEXTS = [
   { title: 'Security Center', text: 'Your computer might be at risk.', icon: 'dialog-warning' },
 ];
 
-/** 回收站要扔的文件 */
+/** Files to throw away */
 const FILES = [
   { icon: 'text-document', label: 'New Text Document.txt' },
   { icon: 'music-file', label: 'Hey Ya!.mp3' },
@@ -75,7 +75,7 @@ const FILES = [
   { icon: 'text-document', label: 'homework(1).doc' },
 ];
 
-/** 开始菜单里会被点到的程序，按顺序轮换 */
+/** Programs picked from the Start menu, in rotation */
 const MENU_ITEMS = [
   'Notepad',
   'Paint',
@@ -85,7 +85,7 @@ const MENU_ITEMS = [
   'Windows Messenger',
 ];
 
-/** 文件那一行：从左往右，回收站左边留一点空 */
+/** The file row, left to right, leaving a little room left of the Recycle Bin */
 const FILE_ROW_LEFT = 120;
 const FILE_ROW_STEP = 92;
 const FILE_ROW_TOP = WORK_AREA_HEIGHT - DESKTOP_CELL_HEIGHT;
@@ -102,14 +102,14 @@ interface ProgramTarget {
   view: XpProgramWindow;
   slot: Point;
   task: TaskButton;
-  /** 任务栏按钮中心，窗口从这里弹出、缩回这里 */
+  /** Taskbar button centre, where the window pops out and shrinks back */
   taskCenter: Point;
 }
 interface FileTarget {
   kind: 'file';
   event: number;
   view: Container;
-  /** 图标格子左上角 */
+  /** Top left of the icon cell */
   cell: Point;
 }
 interface MenuTarget {
@@ -123,16 +123,16 @@ export interface ShellTargetsViewOptions {
   session: XpSession;
   desktop: XpDesktop;
   taskbar: XpTaskbar;
-  /** 消息框也在这一层；程序窗口和消息框共用屏幕位置 */
+  /** Message boxes share this layer and the screen slots with program windows */
   windowLayer: Container;
-  /** 消息框、程序窗口共用的屏幕位置（窗口中心），按 windowSlotIndex 取 */
+  /** Screen slots (window centres) shared by message boxes and program windows, indexed by windowSlotIndex */
   slots: readonly Point[];
 }
 
 export class ShellTargetsView {
-  /** 桌面上的文件：放在桌面之上、窗口之下 */
+  /** Files on the desktop: above the wallpaper, below the windows */
   readonly desktopLayer = new Container({ label: 'shell-desktop' });
-  /** 气泡、开始菜单、任务栏上的程序按钮：放在任务栏之上 */
+  /** Balloons, the Start menu and program buttons: above the taskbar */
   readonly overlayLayer = new Container({ label: 'shell-overlay' });
   private readonly session: XpSession;
   private readonly desktop: XpDesktop;
@@ -176,7 +176,7 @@ export class ShellTargetsView {
       } else if (action === 'window-minimize') {
         const program = PROGRAM_KINDS[(phrase + order) % PROGRAM_KINDS.length]!;
         const view = new XpProgramWindow(program);
-        // 程序窗口比消息框高，标题栏不能钻到轮次横幅底下，否则看不见最小化按钮
+        // Program windows are taller than message boxes; keep the title bar clear of the turn banner so the minimise button shows
         const shared = slots[windowSlotIndex(session, event) % slots.length]!;
         const slot = { x: shared.x, y: Math.max(shared.y, PROGRAM_TOP_MIN + view.height / 2) };
         const task = new TaskButton({ icon: view.spec.icon, label: view.spec.taskLabel });
@@ -209,12 +209,12 @@ export class ShellTargetsView {
     this.overlayLayer.addChild(this.menu.view);
   }
 
-  /** 这个谱面事件是不是这里画的 */
+  /** Whether this view draws the chart event */
   handles(event: number): boolean {
     return this.targets.has(event);
   }
 
-  /** 虚拟鼠标每一下要点的位置；不是这里画的事件返回 null */
+  /** Where the virtual mouse presses for each step; null for events drawn elsewhere */
   clickPoints(event: number): Point[] | null {
     const target = this.targets.get(event);
     if (!target) return null;
@@ -235,7 +235,7 @@ export class ShellTargetsView {
     }
   }
 
-  /** 判定字样的位置：目标上沿的中点 */
+  /** Where the judgement label goes: the middle of the target's top edge */
   judgementAnchor(event: number): Point | null {
     const target = this.targets.get(event);
     if (!target) return null;
@@ -251,7 +251,7 @@ export class ShellTargetsView {
     }
   }
 
-  /** focus：场景算出的活动窗口（谱面事件下标），程序窗口按它决定标题栏颜色 */
+  /** focus: the active window (chart event index) from the scene; program windows colour their title bar by it */
   update(beat: number, focus: number): void {
     let menuOpen = false;
     let menuItem: string | null = null;
@@ -301,7 +301,7 @@ export class ShellTargetsView {
     this.overlayLayer.destroy({ children: true });
   }
 
-  // ---------- 各动作 ----------
+  // ---------- Actions ----------
 
   private renderBalloon(target: BalloonTarget, state: XpTarget, beat: number): void {
     const view = target.view.view;
@@ -322,7 +322,7 @@ export class ShellTargetsView {
       alpha = this.fadeAtPhraseEnd(state, beat);
       visible = alpha > 0;
     } else if (visible) {
-      // 从尖角处弹开，在示范拍点那一刻刚好弹到最大
+      // Pops out from the tail, reaching full size exactly on the call beat
       scale = easeOutBack((beat - appearBeat) / BEATS.windowOpen);
     }
     view.visible = visible;
@@ -350,7 +350,7 @@ export class ShellTargetsView {
     let progress = 1;
     let alpha = 1;
     if (visible && state.handledAt !== null) {
-      // 最小化：缩小飞向自己的任务栏按钮，按钮弹起
+      // Minimise: shrink towards its taskbar button, which pops up
       const p = (beat - this.session.beatAt(state.handledAt)) / MINIMIZE_BEATS;
       visible = p < 1;
       progress = 1 - easeOutCubic(p);
@@ -362,7 +362,7 @@ export class ShellTargetsView {
       alpha = this.fadeAtPhraseEnd(state, beat);
       visible = alpha > 0;
     } else if (visible) {
-      // 还原：从任务栏按钮放大弹出，在示范拍点那一刻到位
+      // Restore: grow out of the taskbar button, in place on the call beat
       progress = easeOutBack((beat - appearBeat) / BEATS.windowOpen);
     }
     target.task.setActive(visible && state.handledAt === null && active);
@@ -379,7 +379,7 @@ export class ShellTargetsView {
     target.view.setActive(active);
   }
 
-  /** 画一个文件；返回它是否已经扔进了回收站 */
+  /** Draws a file; returns whether it is already in the bin */
   private renderFile(target: FileTarget, state: XpTarget, beat: number): boolean {
     const view = target.view;
     const appearBeat = state.call.beat - BEATS.windowOpen;
@@ -391,7 +391,7 @@ export class ShellTargetsView {
     let alpha = 1;
     let thrown = false;
     if (visible && state.handledAt !== null) {
-      // 沿弧线飞进回收站，越飞越小
+      // Arcs into the bin, shrinking as it goes
       const p = clamp01((beat - this.session.beatAt(state.handledAt)) / THROW_BEATS);
       const bin = this.desktop.recycleBinCenter;
       x = center.x + (bin.x - center.x) * p;
@@ -404,7 +404,7 @@ export class ShellTargetsView {
       alpha = this.fadeAtPhraseEnd(state, beat);
       visible = alpha > 0;
     } else if (visible) {
-      // 从上方落下，在示范拍点那一刻落地并轻弹一下
+      // Drops from above, landing with a small bounce on the call beat
       const p = (beat - appearBeat) / BEATS.windowOpen;
       y -= DROP_PIXELS * (1 - easeOutBack(p));
       alpha = clamp01(p * 2);
@@ -419,8 +419,8 @@ export class ShellTargetsView {
   }
 
   /**
-   * 开始菜单的状态。示范段：第一下打开，第二下关上。
-   * 跟打段：命中第一下才打开；第二下命中就关上，Miss 就一直开到乐句结束。
+   * Start menu state. Call: the first press opens it, the second closes it.
+   * Response: it opens only when the first press hits; a hit second press closes it, a Miss leaves it open to the phrase end.
    */
   private menuState(state: XpTarget, beat: number): { open: boolean; hover: boolean } {
     const phrase = this.session.chart.phrases[state.call.phrase]!;
@@ -441,7 +441,7 @@ export class ShellTargetsView {
     return beat < phrase.end ? { open: true, hover } : closed;
   }
 
-  // ---------- 工具 ----------
+  // ---------- Helpers ----------
 
   private fileCenter(target: FileTarget): Point {
     return {
@@ -450,20 +450,20 @@ export class ShellTargetsView {
     };
   }
 
-  /** Miss 后的左右抖动（像素） */
+  /** Sideways shake after a Miss (px) */
   private shake(beat: number, missedAt: number): number {
     const since = beat - this.session.beatAt(missedAt);
     if (since >= SHAKE_BEATS) return 0;
     return Math.sin(since * Math.PI * 16) * SHAKE_PIXELS * (1 - since / SHAKE_BEATS);
   }
 
-  /** Miss 的目标留到乐句结束，再用 FADE_BEATS 淡出 */
+  /** Missed targets stay until the phrase ends, then fade over FADE_BEATS */
   private fadeAtPhraseEnd(state: XpTarget, beat: number): number {
     const phraseEnd = this.session.chart.phrases[state.call.phrase]!.end;
     return 1 - clamp01((beat - phraseEnd) / FADE_BEATS);
   }
 
-  /** 托盘里网络连接、Messenger、音量三个图标的上沿中点（气泡尖角指向这里） */
+  /** Middle of the top edge of the network, Messenger and volume tray icons (where balloon tails point) */
   private trayIcons(): Point[] {
     const speaker = this.taskbar.volumeIcon;
     const trayX = speaker.parent?.x ?? 0;
@@ -472,7 +472,7 @@ export class ShellTargetsView {
     return [x - 2 * TRAY_STEP, x - TRAY_STEP, x].map((ix) => ({ x: ix, y }));
   }
 
-  /** 任务栏放不下 1 +（程序窗口上限）个标准宽度的按钮时，像原版一样把按钮压窄 */
+  /** Narrows the buttons like the original when 1 + the program window limit won't fit at standard width */
   private taskButtonScale(): number {
     const trayLeft = this.taskbar.volumeIcon.parent?.x ?? Infinity;
     const count = 1 + PHRASE_LIMITS.programs;
@@ -482,8 +482,8 @@ export class ShellTargetsView {
 }
 
 /**
- * 程序窗口和消息框在屏幕上的位置序号：同一乐句里第几个「消息框或程序窗口」。
- * 场景给消息框排位置时也要用它，两种窗口才不会叠在一起。
+ * Screen slot index of a message box or program window: its order among both kinds in the phrase.
+ * The scene places message boxes by it too, so the two kinds never overlap.
  */
 export function windowSlotIndex(session: XpSession, event: number): number {
   return orderInPhrase(
@@ -493,7 +493,7 @@ export function windowSlotIndex(session: XpSession, event: number): number {
   );
 }
 
-/** 这个事件在本乐句里、满足条件的事件中排第几（从 0 开始） */
+/** The event's order (from 0) among the phrase's events that pass `test` */
 function orderInPhrase(
   session: XpSession,
   event: number,

@@ -1,6 +1,6 @@
-// 右键菜单（菜单窗口类 #32768，XP 平面菜单样式）：白底、1 像素灰边、右下有阴影；
-// 鼠标所在的条目蓝底白字，不可用的条目灰字，有子菜单的条目右边一个黑色小三角。原点在菜单左上角。
-// 桌面右键菜单的条目见 doc/scenes/windows-xp.md「桌面右键菜单与刷新」。
+// Context menu (window class #32768, XP flat menu): white, 1 px grey border, shadow at the bottom right;
+// the hovered item is white on blue, disabled items grey, submenus get a small black arrow. Origin at the top left.
+// Desktop menu items: doc/scenes/windows-xp.md "Desktop context menu and Refresh".
 
 import { Container, Graphics, type Text } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -8,7 +8,7 @@ import { xpText } from './xp-text.ts';
 
 export type MenuEntry = { label: string; submenu?: boolean; disabled?: boolean } | 'separator';
 
-/** 英文版 XP 桌面空白处的右键菜单 */
+/** The English XP context menu on empty desktop */
 export const DESKTOP_MENU: readonly MenuEntry[] = [
   { label: 'Arrange Icons By', submenu: true },
   { label: 'Refresh' },
@@ -23,11 +23,11 @@ export const DESKTOP_MENU: readonly MenuEntry[] = [
 
 const ITEM_HEIGHT = 19;
 const SEPARATOR_HEIGHT = 9;
-/** 边框 + 上下留白 */
+/** Border plus top and bottom padding */
 const PADDING = 3;
-/** 文字左边留给勾选标记的位置 */
+/** Room left of the text for check marks */
 const TEXT_LEFT = 20;
-/** 文字右边留给子菜单三角的位置 */
+/** Room right of the text for submenu arrows */
 const TEXT_RIGHT = 32;
 const MIN_WIDTH = 150;
 const SHADOW = 4;
@@ -46,7 +46,7 @@ export class XpContextMenu {
   readonly height: number;
   private readonly highlight = new Graphics();
   private readonly items: ItemView[] = [];
-  /** 当前高亮的条目；undefined 表示还没画过 */
+  /** The highlighted item; undefined before the first draw */
   private hot: string | null | undefined = undefined;
 
   constructor(entries: readonly MenuEntry[] = DESKTOP_MENU) {
@@ -74,7 +74,7 @@ export class XpContextMenu {
     this.width = Math.ceil(Math.max(MIN_WIDTH, TEXT_LEFT + textWidth + TEXT_RIGHT));
     this.height = y + PADDING;
 
-    // 平面菜单的阴影：右边和下边各一条渐淡的影子
+    // Flat menu shadow: a fading strip along the right and bottom
     const shadow = new Graphics();
     for (let i = 1; i <= SHADOW; i++) {
       const alpha = 0.12 * (1 - (i - 1) / SHADOW);
@@ -92,14 +92,14 @@ export class XpContextMenu {
     this.setHot(null);
   }
 
-  /** 某个条目的中心（菜单内坐标）；虚拟鼠标点它时用 */
+  /** Centre of an item in menu coordinates, for the virtual mouse */
   itemCenter(label: string): { x: number; y: number } {
     const item = this.items.find((i) => i.label === label);
-    if (!item) throw new Error(`菜单里没有「${label}」`);
+    if (!item) throw new Error(`No menu item "${label}"`);
     return { x: TEXT_LEFT + 16, y: item.top + ITEM_HEIGHT / 2 };
   }
 
-  /** 高亮鼠标所在的条目；null 表示没有。不可用的条目不高亮 */
+  /** Highlights the item under the mouse, or none with null; disabled items never highlight */
   setHot(label: string | null): void {
     const item = this.items.find((i) => i.label === label && !i.disabled) ?? null;
     if ((item?.label ?? null) === this.hot) return;

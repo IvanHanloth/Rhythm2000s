@@ -17,7 +17,7 @@ export interface DevPanelOptions {
   calibrationMs: number;
   /** Calibration changed; returns the value actually used (may be clamped) */
   onCalibrationChange(value: number): number;
-  /** 跳过操作演示 */
+  /** Skip the per-action demo */
   skipTutorial: boolean;
   onSkipTutorialChange(skip: boolean): void;
 }
@@ -64,7 +64,6 @@ export function createDevPanel(options: DevPanelOptions): DevPanel {
   });
   calibration.append('Calibration', input, 'ms');
 
-  // 新增的显示文字只用英文
   const skip = document.createElement('label');
   skip.title = 'Skip the demo of each action and start straight from the main chart';
   const checkbox = document.createElement('input');

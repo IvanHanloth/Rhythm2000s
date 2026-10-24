@@ -1,5 +1,5 @@
-// 桌面：Bliss 壁纸按比例铺满（上下略裁），左上角一列系统图标，右下角回收站。
-// 图标 32 像素，下方白字带黑色阴影，和原版一样。
+// Desktop: Bliss scaled to cover (cropped slightly top and bottom), system icons down the top left,
+// Recycle Bin at the bottom right. 32 px icons with white labels and a black shadow, like the original.
 
 import { Container, Sprite } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -9,7 +9,7 @@ import { hardShadow, xpText } from './xp-text.ts';
 
 export const DESKTOP_ICON_SIZE = 32;
 const ICON_SIZE = DESKTOP_ICON_SIZE;
-/** 一个图标格子的宽、高 */
+/** Size of an icon cell */
 export const DESKTOP_CELL_WIDTH = 76;
 export const DESKTOP_CELL_HEIGHT = 72;
 const CELL_WIDTH = DESKTOP_CELL_WIDTH;
@@ -26,7 +26,7 @@ const RECYCLE_BIN = { icon: 'recycle-bin-empty', label: 'Recycle Bin' };
 
 export class XpDesktop {
   readonly view = new Container({ label: 'desktop' });
-  /** 回收站图标中心（虚拟屏幕坐标），文件扔进回收站时飞向这里 */
+  /** Recycle Bin icon centre (virtual screen), where thrown files fly */
   readonly recycleBinCenter = {
     x: XP_SCREEN_WIDTH - CELL_WIDTH / 2,
     y: WORK_AREA_HEIGHT - CELL_HEIGHT + 2 + DESKTOP_ICON_SIZE / 2,
@@ -59,14 +59,14 @@ export class XpDesktop {
     this.view.addChild(recycleBin);
   }
 
-  /** 回收站里有没有东西：空的是空纸篓，有东西是满纸篓 */
+  /** Empty or full Recycle Bin icon */
   setRecycleBinFull(full: boolean): void {
     if (this.recycleBinFull === full) return;
     this.recycleBinFull = full;
     this.recycleBinIcon.texture = xpAssets().icon(full ? 'recycle-bin-full' : 'recycle-bin-empty');
   }
 
-  /** 显示 / 隐藏桌面图标（壁纸不变）。桌面「刷新」时图标会消失一下再出现 */
+  /** Shows or hides the icons (not the wallpaper); Refresh makes them blink off */
   setIconsVisible(visible: boolean): void {
     for (const child of this.view.children) {
       if (child.label.startsWith('desktop-icon-')) child.visible = visible;
@@ -78,7 +78,7 @@ export class XpDesktop {
   }
 }
 
-/** 一个桌面图标格子，(x, y) 是格子左上角；第一个子节点是图标 Sprite */
+/** A desktop icon cell with its top left at (x, y); the first child is the icon sprite */
 export function desktopIcon(icon: string, label: string, x: number, y: number): Container {
   const cell = new Container({ label: `desktop-icon-${icon}` });
   cell.position.set(x, y);

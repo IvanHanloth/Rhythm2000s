@@ -1,4 +1,4 @@
-// 只给单元测试用：读取真实的 MVP 谱面文件并通过加载时的全部校验。
+// Unit tests only: loads the real MVP chart file through every load-time check.
 
 import mvpText from '@public/charts/xp-popup-mvp.json?raw';
 import { checkChartData } from '@/game/chart-loader.ts';

@@ -1,6 +1,6 @@
-// Luna 窗口外框：上方两个圆角的蓝色标题栏、3 像素宽的蓝色边框、米色窗口底；
-// 活动 / 非活动两套颜色。标题栏右边是红色关闭按钮（消息框只有这一个按钮），
-// 普通程序窗口（如资源管理器）前面还有蓝色的最小化、最大化按钮，标题左边有 16 像素的程序图标。原点在左上角。
+// Luna window frame: blue title bar with two rounded corners, 3 px blue border, beige face; active and
+// inactive colours. The red close button sits on the right (message boxes have only this one); ordinary
+// windows like Explorer add blue minimise and maximise buttons and a 16 px program icon. Origin at the top left.
 
 import { CanvasTextMetrics, Container, Graphics, Sprite, TextStyle, type Text } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -14,12 +14,12 @@ const CORNER_RADIUS = 8;
 const CLOSE_SIZE = 21;
 const CAPTION_STYLE = { fontFamily: XP_FONTS.caption, fontSize: 13, fontWeight: '700' } as const;
 
-/** 标题文字的宽度，用来决定窗口至少多宽 */
+/** Width of the title text, which sets the window's minimum width */
 export function measureCaption(title: string): number {
   return CanvasTextMetrics.measureText(title, new TextStyle(CAPTION_STYLE)).width;
 }
 
-/** 标题放不下时和原版一样截断，末尾加「...」 */
+/** Titles that don't fit are cut off with "..." like the original */
 function fitCaption(title: string, maxWidth: number): string {
   if (measureCaption(title) <= maxWidth) return title;
   let end = title.length;
@@ -31,20 +31,20 @@ export interface XpWindowFrameOptions {
   title: string;
   width: number;
   height: number;
-  /** 标题栏左边的程序小图标（assets/reference/windows-xp/icons/ 的文件名）；不传则没有 */
+  /** Program icon left of the title (file name under assets/reference/windows-xp/icons/); none if omitted */
   icon?: string;
-  /** close：只有关闭按钮（消息框）；all：最小化、最大化、关闭（普通窗口）。默认 close */
+  /** close: only a close button (message boxes); all: minimise, maximise and close. Defaults to close */
   controls?: 'close' | 'all';
 }
 
 export class XpWindowFrame {
   readonly view: Container;
-  /** 标题栏关闭按钮，可以挂鼠标事件 */
+  /** Title bar close button; can take pointer events */
   readonly closeButton: CloseButton;
   private readonly active: Graphics;
   private readonly inactive: Graphics;
   private readonly titleText: Text;
-  /** 标题文字最多多宽：从标题起点到最左边的标题栏按钮 */
+  /** Room for the title: from its start to the leftmost caption button */
   private readonly titleMaxWidth: number;
   private readonly captionButtons: Container[] = [];
   private isActive = true;
@@ -88,12 +88,12 @@ export class XpWindowFrame {
     this.titleText.text = fitCaption(title, this.titleMaxWidth);
   }
 
-  /** 改标题（下载窗的标题随进度变化） */
+  /** Changes the title (the download window's follows its progress) */
   setTitle(title: string): void {
     this.titleText.text = fitCaption(title, this.titleMaxWidth);
   }
 
-  /** 活动窗口是深蓝标题栏；非活动窗口是浅蓝灰，关闭按钮变淡 */
+  /** Active windows have a dark blue title bar; inactive ones pale blue-grey with a faded close button */
   setActive(active: boolean): void {
     if (this.isActive === active) return;
     this.isActive = active;
@@ -105,7 +105,7 @@ export class XpWindowFrame {
   }
 }
 
-/** 蓝色的最小化（左下角一道粗横线）、最大化（上沿加粗的方框）按钮 */
+/** Blue minimise (a thick bar at the bottom left) and maximise (a box with a thick top) buttons */
 function drawCaptionButton(glyph: 'minimize' | 'maximize'): Graphics {
   const s = CLOSE_SIZE;
   const c = LUNA.captionButton;
@@ -128,7 +128,7 @@ function drawFrame(width: number, height: number, active: boolean): Graphics {
   const dark = active ? w.frameDark : w.frameDarkInactive;
   const g = new Graphics();
 
-  // 标题栏：外圈 1 像素亮边，里面是竖向渐变
+  // Title bar: a 1 px light rim around a vertical gradient
   topRoundedRect(g, 0, 0, width, CAPTION_HEIGHT, CORNER_RADIUS).fill(
     active ? w.captionEdgeLight : w.captionEdgeLightInactive,
   );
@@ -137,7 +137,7 @@ function drawFrame(width: number, height: number, active: boolean): Graphics {
   );
   g.rect(width - 1, CORNER_RADIUS, 1, CAPTION_HEIGHT - CORNER_RADIUS).fill(dark[1]);
 
-  // 左、右、下三条边框，每条 3 像素，从外到内三种颜色
+  // Left, right and bottom borders, 3 px each, three colours from outside in
   const bodyTop = CAPTION_HEIGHT;
   const bodyHeight = height - CAPTION_HEIGHT;
   for (let i = 0; i < FRAME_WIDTH; i++) {
@@ -150,7 +150,7 @@ function drawFrame(width: number, height: number, active: boolean): Graphics {
   return g;
 }
 
-/** 21×21 的红色关闭按钮：白色细边、红色渐变、白色粗叉。悬停时变亮，按下时变暗。 */
+/** 21×21 red close button: thin white rim, red gradient, bold white cross. Brighter on hover, darker when pressed. */
 export class CloseButton {
   readonly view = new Container({ label: 'close-button' });
   private readonly highlight = new Graphics();
@@ -173,7 +173,7 @@ export class CloseButton {
     this.view.addChild(base, this.highlight);
   }
 
-  /** hot：鼠标悬停；pressed：按下 */
+  /** hot: hovered; pressed: held down */
   setState(state: 'normal' | 'hot' | 'pressed'): void {
     this.highlight.visible = state !== 'normal';
     this.highlight.tint = state === 'hot' ? '#ffffff' : '#000000';

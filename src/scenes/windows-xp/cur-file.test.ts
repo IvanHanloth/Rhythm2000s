@@ -13,12 +13,12 @@ describe('decodeCur', () => {
   const rgbAt = (x: number, y: number) =>
     Array.from(arrow.rgba.slice((y * arrow.width + x) * 4, (y * arrow.width + x) * 4 + 3));
 
-  it('读出本地 XP 箭头的尺寸和热点', () => {
+  it('reads the size and hotspot of the local XP arrow', () => {
     expect([arrow.width, arrow.height]).toEqual([32, 32]);
     expect(arrow.hotspot).toEqual({ x: 10, y: 10 });
   });
 
-  it('热点就是箭头尖：黑色描边，外面透明，里面白色', () => {
+  it('the hotspot is the arrow tip: black outline, transparent outside, white inside', () => {
     expect(alphaAt(10, 10)).toBe(255);
     expect(rgbAt(10, 10)).toEqual([0, 0, 0]);
     expect(alphaAt(9, 10)).toBe(0);
@@ -26,7 +26,7 @@ describe('decodeCur', () => {
     expect(rgbAt(11, 12)).toEqual([255, 255, 255]);
   });
 
-  it('不是光标文件时报错', () => {
-    expect(() => decodeCur(new Uint8Array(30))).toThrow('不是 .cur 光标文件');
+  it('throws for something that is not a cursor file', () => {
+    expect(() => decodeCur(new Uint8Array(30))).toThrow('Not a .cur cursor file');
   });
 });

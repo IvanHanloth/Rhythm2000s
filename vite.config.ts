@@ -4,8 +4,8 @@ import { defineConfig } from 'vite-plus';
 const alias = { '@/': '/src/', '@assets/': '/assets/', '@public/': '/public/' };
 
 /**
- * 不参与格式化和代码检查的文件：AI 助手和工具生成的目录、技能包锁文件，
- * 以及独立维护的宣发视频工程 promo/（有自己的工具链，见 promo/AGENTS.md）
+ * Kept out of formatting and linting: AI assistant and tool directories, the skills lock file,
+ * and the promo video project, which has its own toolchain (promo/AGENTS.md)
  */
 const TOOLING_DIRS = [
   '.agents/**',
@@ -19,7 +19,7 @@ export default defineConfig({
   resolve: { alias },
   build: {
     rolldownOptions: {
-      // 多页面：游戏入口 + 各个原型页面（相对项目根目录）
+      // One page for the game and one per prototype (paths from the project root)
       input: {
         main: 'index.html',
         latency: 'prototypes/latency/index.html',
@@ -33,7 +33,7 @@ export default defineConfig({
   },
   fmt: {
     singleQuote: true,
-    // 文档保持手写格式；AI 助手的技能包和工具产物不归本项目管
+    // Docs keep their hand formatting; assistant skills and tool output are not ours to format
     ignorePatterns: ['**/*.md', ...TOOLING_DIRS],
   },
   lint: {

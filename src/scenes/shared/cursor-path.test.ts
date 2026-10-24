@@ -9,45 +9,45 @@ describe('cursorAt', () => {
     { beat: 2, x: 100, y: 50 },
   ];
 
-  it('离目标还远时停在原地，最多提前半拍出发，提前 lead 拍到位', () => {
+  it('waits while the target is far off, leaves at most half a beat early and arrives lead beats early', () => {
     expect(cursorAt(stops, 1.2, options)).toEqual({ x: 0, y: 0 });
-    // 出发：2 - 0.25 - 0.5 = 1.25；到位：1.75
+    // Leaves at 2 - 0.25 - 0.5 = 1.25, arrives at 1.75
     expect(cursorAt(stops, 1.25, options)).toEqual({ x: 0, y: 0 });
     expect(cursorAt(stops, 1.5, options)).toEqual({ x: 50, y: 25 });
     expect(cursorAt(stops, 1.75, options)).toEqual({ x: 100, y: 50 });
     expect(cursorAt(stops, 2.1, options)).toEqual({ x: 100, y: 50 });
   });
 
-  it('第一个停靠点之前停在第一个点上', () => {
+  it('rests on the first stop before it', () => {
     expect(cursorAt(stops, -3, options)).toEqual({ x: 0, y: 0 });
   });
 
-  it('跟打段等判定完（leave）才离开', () => {
+  it('leaves a response stop only after its leave time', () => {
     const waiting: CursorStop[] = [
       { beat: 0, x: 0, y: 0, leave: 0.2 },
       { beat: 1, x: 80, y: 0 },
     ];
-    // 出发：max(0.2, 1 - 0.25 - 0.5) = 0.25，到位 0.75
+    // Leaves at max(0.2, 1 - 0.25 - 0.5) = 0.25, arrives at 0.75
     expect(cursorAt(waiting, 0.22, options)).toEqual({ x: 0, y: 0 });
     expect(cursorAt(waiting, 0.5, options).x).toBeCloseTo(40, 10);
   });
 
-  it('时间不够时离开后用最短时长移过去，不瞬移', () => {
+  it('takes the minimum move time when short on time instead of jumping', () => {
     const tight: CursorStop[] = [
       { beat: 0, x: 0, y: 0, leave: 0.4 },
       { beat: 0.5, x: 10, y: 0 },
     ];
-    // 0.5 - 0.25 = 0.25 早于离开时间 0.4：改成 0.4 出发、用 1/16 拍移过去
+    // 0.5 - 0.25 = 0.25 is before the leave time 0.4, so it leaves at 0.4 and moves in 1/16 beat
     expect(cursorAt(tight, 0.4, options)).toEqual({ x: 0, y: 0 });
     expect(cursorAt(tight, 0.4 + 1 / 32, options).x).toBeCloseTo(5, 10);
     expect(cursorAt(tight, 0.5, options)).toEqual({ x: 10, y: 0 });
   });
 });
 
-describe('示范完回到屏幕中央', () => {
+describe('returning to the centre after the call', () => {
   const center = { x: 500, y: 300 };
 
-  it('按乐句汇总：示范段最后一下、跟打段第一下', () => {
+  it('groups by phrase: last call press and first response press', () => {
     expect(
       turnGaps([
         { phrase: 0, callBeats: [4], responseBeats: [8] },
@@ -60,7 +60,7 @@ describe('示范完回到屏幕中央', () => {
     ]);
   });
 
-  it('在两者正中间停在中央；相隔太近的乐句不回中央', () => {
+  it('stops at the centre halfway between them, except when they are too close', () => {
     expect(
       returnToCenterStops(
         [
@@ -72,7 +72,7 @@ describe('示范完回到屏幕中央', () => {
     ).toEqual([{ beat: 6, x: 500, y: 300 }]);
   });
 
-  it('鼠标示范完先回中央，跟打段再出发去目标', () => {
+  it('goes back to the centre after the call, then out to the target in the response', () => {
     const target = { x: 100, y: 100 };
     const stops = [
       { beat: 4, ...target },

@@ -35,7 +35,7 @@ const [canvas, { charts, errors: chartErrors }] = await Promise.all([
 ]);
 for (const error of chartErrors) console.error(error);
 let calibrationMs = loadCalibrationMs();
-/** 律动组件开着没有（doc/beat-guide.md），关卡里按 H 切换 */
+/** Beat guide on or off (doc/beat-guide.md), toggled with H in a level */
 let beatGuide = loadBeatGuide();
 
 const scenes = [windowsXpScene, mac2000Scene];
@@ -115,13 +115,13 @@ const backHint = document.createElement('div');
 backHint.className = 'back-hint';
 backHint.hidden = true;
 document.body.append(backHint);
-/** Esc 回到哪里；提示条后面再写律动组件的开关状态 */
+/** Where Esc goes; the hint also shows the beat guide toggle */
 let backLabel = 'Esc: back to the café';
 function renderBackHint(): void {
   backHint.textContent = `${backLabel} · H: Beat Guide ${beatGuide ? 'on' : 'off'}`;
 }
 
-// 关卡里按 H 开关律动组件（doc/beat-guide.md）；街区里不管，免得和那边的按键冲突
+// H toggles the beat guide in a level; ignored on the street, where it could clash with the controls
 window.addEventListener('keydown', (event) => {
   if (event.code !== 'KeyH' || event.repeat) return;
   if (event.ctrlKey || event.metaKey || event.altKey) return;

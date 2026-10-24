@@ -9,8 +9,8 @@ export interface JudgeWindows {
   /** Half-width of Good (s): up to this is Good, beyond it is a Miss */
   good: number;
   /**
-   * 提前按算 Miss 的范围（秒）：比目标早超过 good、但不超过它的输入，把目标判为 Miss。
-   * 防止一直连按就能把每个目标都蒙中。
+   * Early-press range (s): a press earlier than the Good window but within this marks the target a Miss,
+   * so mashing cannot guess every target.
    */
   early: number;
 }
@@ -75,12 +75,12 @@ export class ResponseJudge {
     return this.earlyMiss(time);
   }
 
-  /** 提前按：只看最早一个 Good 窗口还没关闭的未判定目标 */
+  /** Early press: only the earliest unjudged target whose Good window is still open counts */
   private earlyMiss(time: number): Judgement | null {
     for (let i = 0; i < this.targets.length; i++) {
       if (this.results[i]) continue;
       const offset = time - this.targets[i]!;
-      // 窗口已经关闭、等 expire 记 Miss 的目标跳过
+      // Skip targets whose window has closed; expire() marks them
       if (offset > this.windows.good) continue;
       if (offset < -this.windows.early) return null;
       return this.record({ target: i, level: 'miss', offset: null, time });

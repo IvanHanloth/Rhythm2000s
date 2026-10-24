@@ -1,6 +1,6 @@
-// 开始菜单（XP 样式）：顶部蓝色用户栏 + 橙色分隔线；左栏白底（固定项、常用程序、「All Programs」），
-// 右栏浅蓝底（系统文件夹和工具）；底部蓝条「Log Off」「Turn Off Computer」。鼠标移上去是蓝底白字。
-// 本地缺「Control Panel」「My Recent Documents」「Set Program Access and Defaults」的图标，这三项暂时不放。原点在左上角。
+// XP Start menu: blue user bar with an orange rule; white left column (pinned, frequent, "All Programs"),
+// light blue right column (system folders and tools); blue footer with "Log Off" and "Turn Off Computer".
+// Hovered items are white on blue. Items without a local icon are left out. Origin at the top left.
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -20,7 +20,7 @@ const ALL_PROGRAMS_HEIGHT = 30;
 interface ItemSpec {
   icon: string;
   label: string;
-  /** 固定项的第二行灰字，如「Internet Explorer」 */
+  /** Grey second line of a pinned item, e.g. "Internet Explorer" */
   subtitle?: string;
   bold?: boolean;
 }
@@ -54,7 +54,7 @@ const RIGHT: Entry[] = [
 ];
 
 export interface StartMenuOptions {
-  /** 点了某一项（菜单项、「All Programs」、「Log Off」「Turn Off Computer」） */
+  /** An item was clicked (a menu item, "All Programs", "Log Off" or "Turn Off Computer") */
   onSelect?: (label: string) => void;
 }
 
@@ -63,7 +63,7 @@ export class XpStartMenu {
   readonly width = START_MENU_WIDTH;
   readonly height: number;
   private readonly onSelect: (label: string) => void;
-  /** 每一项：容器、鼠标热区（容器自己的坐标）、高亮开关 */
+  /** Each item: container, hit area (in its own coordinates), highlight toggle */
   private readonly items = new Map<
     string,
     { item: Container; hitArea: Rectangle; setHot: (on: boolean) => void }
@@ -74,7 +74,7 @@ export class XpStartMenu {
     this.onSelect = onSelect;
     const m = LUNA.startMenu;
 
-    // ---- 左栏、右栏的内容，先排出高度 ----
+    // ---- Column contents, laid out first to get the height ----
     const left = new Container({ label: 'left' });
     let y = BODY_PADDING;
     for (const spec of PINNED) y = this.addItem(left, spec, y, 32, 42, 'left');
@@ -93,7 +93,7 @@ export class XpStartMenu {
     }
     const bodyHeight = Math.max(leftContentHeight, y + BODY_PADDING);
 
-    // 「所有程序」贴着左栏底部
+    // "All Programs" sits at the bottom of the left column
     const allTop = bodyHeight - BODY_PADDING - ALL_PROGRAMS_HEIGHT;
     addSeparator(left, allTop - SEPARATOR_HEIGHT, m.leftSeparator);
     left.addChild(this.allPrograms(allTop));
@@ -102,7 +102,7 @@ export class XpStartMenu {
     this.height = bodyTop + bodyHeight + FOOTER_HEIGHT;
     const w = START_MENU_WIDTH;
 
-    // ---- 底色 ----
+    // ---- Background ----
     const shadow = new Graphics()
       .rect(3, 6, w, this.height - 4)
       .fill({ color: '#000000', alpha: 0.18 })
@@ -124,7 +124,7 @@ export class XpStartMenu {
     this.view.addChild(shadow, face, this.header(), left, right, this.footer(bodyTop + bodyHeight));
   }
 
-  /** 节奏关卡里虚拟鼠标停在哪一项：那一项蓝底白字，其余恢复；null 表示都不高亮 */
+  /** Item the virtual mouse is on in a round: white on blue, the rest normal; null for none */
   highlight(label: string | null): void {
     if (label === this.highlighted) return;
     if (this.highlighted) this.items.get(this.highlighted)?.setHot(false);
@@ -132,11 +132,11 @@ export class XpStartMenu {
     if (label) this.items.get(label)?.setHot(true);
   }
 
-  /** 某一项的中心（菜单自己的坐标），虚拟鼠标点这里；没有这一项时返回 null */
+  /** Centre of an item in menu coordinates for the virtual mouse; null if there is no such item */
   itemCenter(label: string): { x: number; y: number } | null {
     const entry = this.items.get(label);
     if (!entry) return null;
-    // 菜单里没有缩放，把一路上各层容器的位置加起来即可（不依赖还没渲染过的世界变换）
+    // Nothing in the menu is scaled, so summing the container positions works before the first render
     const { x, y, width, height } = entry.hitArea;
     const center = { x: x + width / 2, y: y + height / 2 };
     for (let node: Container | null = entry.item; node && node !== this.view; node = node.parent) {
@@ -239,7 +239,7 @@ export class XpStartMenu {
     return item;
   }
 
-  /** 加一个菜单项，返回下一项的 y */
+  /** Adds an item; returns the y of the next one */
   private addItem(
     column: Container,
     spec: ItemSpec,

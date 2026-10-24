@@ -133,17 +133,5 @@ export const AQUA = {
   },
 };
 
-/**
- * UI font: Lucida Grande is the original; on Windows, the related Lucida Sans Unicode.
- * CJK fallbacks remain at the end for any non-Latin text.
- */
-export const AQUA_FONT = [
-  'Lucida Grande',
-  'Lucida Sans Unicode',
-  'Lucida Sans',
-  'STHeiti',
-  'Heiti SC',
-  'PingFang SC',
-  'Microsoft YaHei',
-  'sans-serif',
-];
+/** UI font: Lucida Grande is the original; on Windows, the related Lucida Sans Unicode. */
+export const AQUA_FONT = ['Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'sans-serif'];

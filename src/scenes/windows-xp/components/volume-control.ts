@@ -1,6 +1,6 @@
-// 音量控制：单击托盘小喇叭弹出的小窗。顶部「音量」，中间竖向滑块（两侧刻度），底部「静音」复选框。
-// 拖动滑块时实时改音量，松开时按新音量响一声默认提示音——和原版行为相同，由使用方在 onChange 里播放。
-// 原点在左上角。
+// Volume control, the pop-up from the tray speaker: "Volume" on top, a vertical slider with ticks on both
+// sides, a "Mute" check box below. Like the original, releasing the slider should play the default beep at the
+// new volume; the owner does that in onChange. Origin at the top left.
 
 import { Container, Graphics, Rectangle, type FederatedPointerEvent } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -17,14 +17,12 @@ const THUMB_HEIGHT = 11;
 const CHECK_SIZE = 13;
 
 export interface VolumeControlOptions {
-  /** 0～1 */
+  /** 0–1 */
   volume: number;
   muted: boolean;
-  /** 音量改变；released 为 true 表示松开了滑块 */
+  /** Volume changed; `released` is true when the slider was let go */
   onChange?(volume: number, released: boolean): void;
   onMuteChange?(muted: boolean): void;
-  /** 界面文字；不传时用中文版的「音量」「静音」。2026-10-24 起新增的用法传英文 */
-  labels?: { title: string; mute: string };
 }
 
 export class XpVolumeControl {
@@ -47,7 +45,7 @@ export class XpVolumeControl {
     const h = VOLUME_CONTROL_HEIGHT;
     const cx = Math.round(w / 2);
 
-    // 弹出窗：米色底，外圈深阴影，内圈亮边 / 阴影
+    // Pop-up: beige face, dark outer shadow, light and dark inner edges
     const face = new Graphics().rect(0, 0, w, h).fill(LUNA.face);
     edgeRing(face, 0, 0, w, h, {
       top: LUNA.edgeShadow,
@@ -62,12 +60,11 @@ export class XpVolumeControl {
       bottom: LUNA.edgeShadow,
     });
 
-    const labels = options.labels ?? { title: 'Volume', mute: 'Mute' };
-    const title = xpText(labels.title);
+    const title = xpText('Volume');
     title.anchor.set(0.5, 0);
     title.position.set(cx, 9);
 
-    // 滑槽：4 像素宽的凹槽
+    // Channel: a 4 px groove
     const track = new Graphics()
       .rect(cx - 2, TRACK_TOP, 4, TRACK_LENGTH)
       .fill(LUNA.trackbar.channelFill);
@@ -93,14 +90,14 @@ export class XpVolumeControl {
     slider.on('pointerover', () => this.setHot(true));
     slider.on('pointerout', () => this.setHot(false));
 
-    // 「静音」复选框
+    // "Mute" check box
     const checkbox = new Container({ label: 'mute' });
     const box = new Graphics()
       .rect(0, 0, CHECK_SIZE, CHECK_SIZE)
       .fill(LUNA.checkbox.border)
       .rect(1, 1, CHECK_SIZE - 2, CHECK_SIZE - 2)
       .fill(verticalGradient(LUNA.checkbox.fill));
-    const label = xpText(labels.mute);
+    const label = xpText('Mute');
     label.anchor.set(0, 0.5);
     label.position.set(CHECK_SIZE + 5, CHECK_SIZE / 2);
     checkbox.addChild(box, this.check, label);
@@ -115,7 +112,7 @@ export class XpVolumeControl {
     this.drawCheck();
   }
 
-  /** 由外部摆滑块（游戏里的 volume-mute 动作），不触发 onChange；dragging 时滑块边框变橙 */
+  /** Sets the slider from outside (the volume-mute action) without onChange; `dragging` turns its border orange */
   setVolume(volume: number, dragging = false): void {
     const next = clamp01(volume);
     if (next === this.volume && dragging === this.dragging) return;
@@ -124,7 +121,7 @@ export class XpVolumeControl {
     this.drawThumb();
   }
 
-  /** 音量为 volume 时滑块中心的位置（相对小窗左上角） */
+  /** Slider centre for a volume, relative to the top left */
   thumbCenter(volume: number): { x: number; y: number } {
     return {
       x: Math.round(VOLUME_CONTROL_WIDTH / 2),
@@ -132,7 +129,7 @@ export class XpVolumeControl {
     };
   }
 
-  /** thumbCenter 的反算：滑块中心在 y（相对小窗左上角）时的音量 */
+  /** Inverse of thumbCenter: the volume when the slider centre is at y */
   volumeAtY(y: number): number {
     return clamp01(1 - (y - TRACK_TOP) / TRACK_LENGTH);
   }
@@ -178,7 +175,7 @@ export class XpVolumeControl {
     this.drawThumb();
   }
 
-  /** 竖向滑块、两侧都有刻度时，滑块是横放的圆角长方块 */
+  /** A vertical slider with ticks on both sides has a flat rounded-rectangle thumb */
   private drawThumb(): void {
     const cx = Math.round(VOLUME_CONTROL_WIDTH / 2);
     const y = TRACK_TOP + Math.round((1 - this.volume) * TRACK_LENGTH);
@@ -194,7 +191,7 @@ export class XpVolumeControl {
       .fill(verticalGradient(LUNA.trackbar.thumbFill));
   }
 
-  /** XP 的勾是绿色的 */
+  /** XP's check mark is green */
   private drawCheck(): void {
     this.check.clear();
     if (!this.muted) return;

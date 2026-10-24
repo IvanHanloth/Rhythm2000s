@@ -6,7 +6,7 @@ import { checkMacChart } from './chart-rules.ts';
 import { buildTargets } from './session.ts';
 import { buildBackingTrack, type MacSongSounds } from './song.ts';
 
-/** 每个乐句一组 [拍, 动作] */
+/** One [beat, action] list per phrase */
 function macChart(phrases: [number, ActionType][][]) {
   return buildChart(
     sourceFromPatterns([], {
@@ -19,7 +19,7 @@ function macChart(phrases: [number, ActionType][][]) {
 }
 
 describe('buildTargets', () => {
-  it('提示框和窗口共用画面位置，Dock 弹跳、新邮件各自计数；每个乐句重新从 0 开始', () => {
+  it('alerts and windows share screen slots, dock-bounce and mail count separately; each phrase restarts at 0', () => {
     const chart = macChart([
       [
         [0, 'alert-note'],
@@ -44,7 +44,7 @@ describe('buildTargets', () => {
     expect(targets[0]!.response).toBe(chart.responses[0]);
   });
 
-  it('menu-apple 跟打段要按两下（相隔 0.5 拍），文件按乐句内顺序排格子', () => {
+  it('menu-apple takes two response presses half a beat apart; files take cells in phrase order', () => {
     const chart = macChart([
       [
         [0, 'menu-apple'],
@@ -65,11 +65,11 @@ describe('buildTargets', () => {
 });
 
 describe('checkMacChart', () => {
-  it('示范与跟打一一对应时没有错误', () => {
+  it('no errors when call and response match', () => {
     expect(checkMacChart(macChart([[[0, 'alert-note']]]))).toEqual([]);
   });
 
-  it('同一乐句的提示框和窗口超过 6 个时报错', () => {
+  it('reports more than 6 alerts and windows in one phrase', () => {
     const beats = [0, 0.5, 1, 1.5, 2, 2.5, 3];
     const errors = checkMacChart(
       macChart([beats.map((b, i) => [b, i % 2 ? 'alert-note' : 'window-miniaturize'])]),
@@ -78,14 +78,14 @@ describe('checkMacChart', () => {
     expect(errors[0]).toContain('at most 6');
   });
 
-  it('同一乐句的 dock-trash 超过 6 个时报错', () => {
+  it('reports more than 6 dock-trash in one phrase', () => {
     const beats = [0, 0.5, 1, 1.5, 2, 2.5, 3];
     const errors = checkMacChart(macChart([beats.map((b) => [b, 'dock-trash'])]));
     expect(errors).toHaveLength(1);
     expect(errors[0]).toContain('dock-trash');
   });
 
-  it('跟打的动作与示范不一致时报错', () => {
+  it('reports a response action that differs from the call', () => {
     const chart = buildChart(
       sourceFromPatterns([], {
         scene: 'mac-2000',
@@ -109,7 +109,7 @@ describe('buildBackingTrack', () => {
     byName: new Proxy({}, { get: (_, name) => `sound:${String(name)}` }),
   } as unknown as MacSongSounds;
 
-  it('每个示范动作都在拍点上响对应的提示音，跟打段不提示', () => {
+  it('every call action sounds its cue on the beat; the response has none', () => {
     const chart = macChart([
       [
         [0, 'alert-caution'],
@@ -124,7 +124,7 @@ describe('buildBackingTrack', () => {
     ]);
   });
 
-  it('menu-apple 示范段的第二下也在拍点上响', () => {
+  it('menu-apple also sounds its second demonstrated press on the beat', () => {
     const chart = macChart([[[1, 'menu-apple']]]);
     const track = buildBackingTrack(chart, sounds);
     const cues = track.filter((s) => !names.includes(s.buffer as unknown as string));

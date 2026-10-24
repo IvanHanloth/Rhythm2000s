@@ -86,9 +86,9 @@ export const THEMES: Record<ThemeId, ThemeColors> = {
 
 /** Font families. Font files aren't loaded yet, so they fall back to system fonts for now (ADR 0002). */
 export const FONT_FAMILIES = {
-  ui: ['PT Sans', 'Noto Sans SC', 'sans-serif'],
-  display: ['Baloo 2', 'Noto Sans SC', 'sans-serif'],
-  pixel: ['Pixelify Sans', 'Noto Sans SC', 'monospace'],
+  ui: ['PT Sans', 'sans-serif'],
+  display: ['Baloo 2', 'sans-serif'],
+  pixel: ['Pixelify Sans', 'monospace'],
 };
 
 /** Joins a font list into a CSS font-family value, quoting names (unquoted, "Baloo 2" invalidates the whole declaration) */
@@ -108,15 +108,14 @@ export const JUDGEMENT_COLORS = {
 };
 
 /**
- * 律动组件（doc/beat-guide.md）的颜色，各主题共用。press 和 Perfect 同一种黄色。
- * 设计系统提案里还没有这个组件，先定在这里，提案补上后两边一起改。
+ * Beat guide colours (doc/beat-guide.md), shared by every theme; `press` is the Perfect yellow.
  */
 export const BEAT_GUIDE_COLORS = {
-  /** 平常的弧 */
+  /** Arcs on ordinary beats */
   idle: '#a6a6a6',
-  /** 要按的拍的弧，和中间圆的闪光 */
+  /** Arcs on beats to press, and the flash of the centre dot */
   press: JUDGEMENT_COLORS.perfect,
-  /** 中间的圆 */
+  /** The centre dot */
   core: '#ffffff',
 };
 

@@ -1,28 +1,27 @@
-// 虚拟鼠标的移动轨迹（doc/scenes/windows-xp.md「虚拟鼠标」）。
-// 轨迹由一串「停靠点」决定：在某一拍要停在某个位置。位置只由拍算出来，跟着音频时钟走，不累加帧间隔。
-// 不依赖 PixiJS，便于测试。
+// The virtual mouse's path (doc/scenes/windows-xp.md "Virtual mouse"): a list of stops, each a place
+// to be at on a beat. Positions come from the beat alone, following the audio clock. No PixiJS, so it is testable.
 
 import { secondsPerBeat } from '@/rhythm/beat.ts';
 import { JUDGE_WINDOWS } from '@/rhythm/judge.ts';
 import type { RoundSession, RoundTarget } from './round-session.ts';
 
 export interface CursorStop {
-  /** 要在这一拍停在这里（全曲拍） */
+  /** Be here on this beat (song beats) */
   beat: number;
   x: number;
   y: number;
-  /** 最早什么时候离开（拍）；不写时拍点后 holdBeats 离开 */
+  /** Earliest beat to leave; defaults to holdBeats after the stop */
   leave?: number;
 }
 
 export interface CursorPathOptions {
-  /** 提前多少拍到位 */
+  /** How many beats early to arrive */
   leadBeats: number;
-  /** 示范段点完以后停多久再走（拍） */
+  /** Pause after a demonstrated press (beats) */
   holdBeats?: number;
-  /** 两个停靠点之间最多用多久移过去（拍） */
+  /** Longest move between stops (beats) */
   maxMoveBeats?: number;
-  /** 时间不够时，最少也要用这么久移过去（拍），免得瞬移 */
+  /** Shortest move when time is short (beats), so it never jumps */
   minMoveBeats?: number;
 }
 
@@ -31,14 +30,13 @@ export interface Point {
   y: number;
 }
 
-/** 慢进慢出 */
 function easeInOut(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 }
 
 /**
- * 虚拟鼠标在某一拍的位置。stops 按 beat 从小到大排列，至少一个。
- * 第一个停靠点之前停在第一个停靠点上；最后一个之后停在最后一个上。
+ * Pointer position at a beat. `stops` is sorted by beat and not empty;
+ * before the first stop it rests there, after the last it rests on the last.
  */
 export function cursorAt(
   stops: readonly CursorStop[],
@@ -47,7 +45,7 @@ export function cursorAt(
 ): Point {
   const { leadBeats, holdBeats = 1 / 16, maxMoveBeats = 0.5, minMoveBeats = 1 / 16 } = options;
   const first = stops[0];
-  if (!first) throw new Error('虚拟鼠标至少要有一个停靠点');
+  if (!first) throw new Error('The cursor path needs at least one stop');
 
   for (let i = 1; i < stops.length; i++) {
     const from = stops[i - 1]!;
@@ -69,19 +67,19 @@ export function cursorAt(
   return { x: last.x, y: last.y };
 }
 
-/** 一个乐句里示范段的最后一下、跟打段的第一下（全曲拍） */
+/** A phrase's last call press and first response press (song beats) */
 export interface TurnGap {
   lastCall: number;
   firstResponse: number;
 }
 
-/** 示范段最后一下和跟打段第一下至少相隔多少拍，才来得及回中央再出发 */
+/** Minimum beats between them for the pointer to return to the centre in time */
 export const RETURN_MIN_GAP_BEATS = 0.75;
 
 /**
- * 示范完回到屏幕中央（2026-10-24 用户要求）：每个乐句在示范段最后一下和跟打段第一下的正中间，
- * 加一个停在 center 的停靠点。鼠标示范完先回中央，到跟打段再出发去目标，玩家看它一动就知道轮到自己了。
- * 两者相隔不到 RETURN_MIN_GAP_BEATS 拍的乐句不加，免得鼠标来回乱窜。
+ * A stop at `center` halfway between each phrase's last call press and first response press: the pointer
+ * returns after the call and sets off again in the response, so its first move tells the player it is their turn.
+ * Phrases where the two are closer than RETURN_MIN_GAP_BEATS get none, to keep the pointer from darting about.
  */
 export function returnToCenterStops(gaps: readonly TurnGap[], center: Point): CursorStop[] {
   return gaps
@@ -89,7 +87,7 @@ export function returnToCenterStops(gaps: readonly TurnGap[], center: Point): Cu
     .map((gap) => ({ beat: (gap.lastCall + gap.firstResponse) / 2, x: center.x, y: center.y }));
 }
 
-/** 按乐句汇总每个事件示范段、跟打段每一下的拍位置，得到每个乐句的 TurnGap */
+/** Each phrase's TurnGap, from the call and response beats of every press of its events */
 export function turnGaps(
   events: readonly {
     phrase: number;

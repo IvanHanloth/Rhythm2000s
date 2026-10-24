@@ -1,4 +1,4 @@
-// 绘制 Luna 部件的小工具：渐变缓存、按边上色的 1 像素边框。
+// Helpers for drawing Luna widgets: cached gradients and 1 px borders coloured per edge.
 
 import { FillGradient, type Graphics } from 'pixi.js';
 import type { GradientStops } from '@/theme/xp-luna.ts';
@@ -7,8 +7,8 @@ const vertical = new Map<GradientStops, FillGradient>();
 const horizontal = new Map<GradientStops, FillGradient>();
 
 /**
- * 从上到下的渐变，相对于被填充图形的外框。
- * 同一组色标只建一次，所有部件共用，不随部件销毁。
+ * Top-to-bottom gradient relative to the filled shape's bounds.
+ * Each set of stops is built once and shared by every widget, never destroyed with them.
  */
 export function verticalGradient(stops: GradientStops): FillGradient {
   let gradient = vertical.get(stops);
@@ -19,7 +19,7 @@ export function verticalGradient(stops: GradientStops): FillGradient {
   return gradient;
 }
 
-/** 从左到右的渐变，用法同 verticalGradient */
+/** Left-to-right gradient, used like verticalGradient */
 export function horizontalGradient(stops: GradientStops): FillGradient {
   let gradient = horizontal.get(stops);
   if (!gradient) {
@@ -44,7 +44,7 @@ export interface EdgeColors {
   bottom: string;
 }
 
-/** 在 (x, y, w, h) 的内侧画一圈 1 像素的线，四条边各自上色（模仿 CSS 的 inset box-shadow）。 */
+/** A 1 px line just inside (x, y, w, h), each edge its own colour (like CSS inset box-shadow). */
 export function edgeRing(g: Graphics, x: number, y: number, w: number, h: number, c: EdgeColors) {
   g.rect(x, y, w, 1).fill(c.top);
   g.rect(x, y + h - 1, w, 1).fill(c.bottom);
@@ -52,7 +52,7 @@ export function edgeRing(g: Graphics, x: number, y: number, w: number, h: number
   g.rect(x + w - 1, y + 1, 1, h - 2).fill(c.right);
 }
 
-/** 只圆上方两个角的矩形路径（窗口标题栏、开始菜单顶部） */
+/** Rectangle path with only the top corners rounded (title bars, the Start menu header) */
 export function topRoundedRect(g: Graphics, x: number, y: number, w: number, h: number, r: number) {
   return g
     .moveTo(x, y + h)

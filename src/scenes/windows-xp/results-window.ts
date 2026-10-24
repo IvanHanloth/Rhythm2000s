@@ -1,5 +1,5 @@
-// 结算窗口（doc/results.md）：Luna 窗口，里面是共用的结算内容（src/ui/results-panel.ts），
-// 底部「Retry」「Levels」「Next Level」三个按钮可以用鼠标点。原点在窗口中心，方便做弹出动画。
+// Results window (doc/results.md): a Luna window around the shared results panel (src/ui/results-panel.ts),
+// with clickable "Retry", "Levels" and "Next Level" buttons. Origin at the centre for the pop-up animation.
 
 import { Container, Graphics } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -12,7 +12,7 @@ import { xpText } from './components/xp-text.ts';
 export const RESULTS_WIDTH = 688;
 export const RESULTS_HEIGHT = 448;
 const PADDING = 14;
-/** Luna 分组框（GroupBox）：浅灰细边圆角框，蓝色标题压在上边线上 */
+/** Luna group box: thin light grey rounded border, blue title set into the top edge */
 const GROUP_BORDER = '#d0d0bf';
 const GROUP_TITLE = '#0046d5';
 
@@ -36,7 +36,7 @@ const kit: ResultsKit = {
     const box = new Graphics()
       .roundRect(0.5, top + 0.5, width - 1, height - top - 1, 3)
       .stroke({ width: 1, color: GROUP_BORDER })
-      // 标题背后垫一块窗口底色，把边线断开
+      // Back the title with the window face to break the border line
       .rect(6, 0, Math.ceil(label.width) + 6, label.height)
       .fill(LUNA.face);
     label.position.set(9, 0);
@@ -112,7 +112,7 @@ export class XpResultsWindow {
   }
 }
 
-/** 悬停变橙、按下变暗，和原版一样 */
+/** Hover turns orange and pressing darkens, like the original */
 function wireButton(button: XpButton, onTap: () => void): void {
   button.view.eventMode = 'static';
   button.view.on('pointerover', () => button.setHot(true));

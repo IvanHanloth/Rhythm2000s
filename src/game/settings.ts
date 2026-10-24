@@ -28,7 +28,7 @@ export function saveCalibrationMs(value: number): void {
 
 const SKIP_TUTORIAL_KEY = 'rhythm2000s.skipTutorial';
 
-/** 跳过操作演示（doc/level-design.md「规则 1」），默认不跳过 */
+/** Skip the per-action demo (doc/level-design.md "Rule 1"); off by default */
 export function loadSkipTutorial(): boolean {
   try {
     return localStorage.getItem(SKIP_TUTORIAL_KEY) === '1';
@@ -41,13 +41,13 @@ export function saveSkipTutorial(skip: boolean): void {
   try {
     localStorage.setItem(SKIP_TUTORIAL_KEY, skip ? '1' : '0');
   } catch {
-    // 保存失败只影响下次打开，不影响本次游戏
+    // A failed save only affects the next visit
   }
 }
 
 const BEAT_GUIDE_KEY = 'rhythm2000s.beatGuide';
 
-/** 律动组件（doc/beat-guide.md），关卡里按 H 切换，默认关闭 */
+/** Beat guide (doc/beat-guide.md), toggled with H in a level; off by default */
 export function loadBeatGuide(): boolean {
   try {
     return localStorage.getItem(BEAT_GUIDE_KEY) === '1';
@@ -60,6 +60,6 @@ export function saveBeatGuide(on: boolean): void {
   try {
     localStorage.setItem(BEAT_GUIDE_KEY, on ? '1' : '0');
   } catch {
-    // 保存失败只影响下次打开，不影响本次游戏
+    // A failed save only affects the next visit
   }
 }

@@ -1,6 +1,6 @@
-// 选关：XP 资源管理器（CabinetWClass）里的「My Levels」文件夹（doc/level-select.md、doc/scenes/windows-xp.md「选关」）。
-// 菜单栏、标准按钮工具栏、地址栏、左边任务窗格、右边平铺视图、底部状态栏，按原版像素尺寸绘制。
-// 单击图标选中，双击或点任务窗格的「Play this level」开始；工具栏「Back」回到网吧。原点在窗口左上角。
+// Level select: the "My Levels" folder in an XP Explorer window (CabinetWClass) (doc/level-select.md).
+// Menu bar, standard toolbar, address bar, task pane on the left, tiles on the right and a status bar, at original size.
+// Click an icon to select it; double-click or "Play this level" starts; "Back" returns to the café. Origin at the top left.
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
 import { ACTION_LABELS } from '@/rhythm/actions.ts';
@@ -30,7 +30,7 @@ const TASK_PANE_WIDTH = 200;
 const GROUP_MARGIN = 12;
 const GROUP_HEADER_HEIGHT = 25;
 const LINK_HEIGHT = 20;
-/** 平铺视图 */
+/** Tiles view */
 const VIEW_PADDING_X = 18;
 const VIEW_PADDING_Y = 14;
 const TILE_COLUMNS = 3;
@@ -42,13 +42,13 @@ const TILE_ICON = 48;
 const MENUS = ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'];
 
 export interface XpLevelSelectOptions {
-  /** 这台电脑上的全部谱面，按清单顺序 */
+  /** Every chart on this computer, in index order */
   charts: readonly Chart[];
   width: number;
   height: number;
-  /** 开始第 index 关（双击图标、「Play this level」、回车） */
+  /** Start level `index` (double-click, "Play this level", Enter) */
   onStart(index: number): void;
-  /** 回到网吧（工具栏「Back」、任务窗格「Back to the café」） */
+  /** Back to the café (toolbar "Back", task pane "Back to the café") */
   onBack(): void;
 }
 
@@ -115,7 +115,7 @@ export class XpLevelSelect {
     return this.selected;
   }
 
-  /** 选中第 index 关，刷新图标高亮和「Details」 */
+  /** Selects level `index`, updating the highlight and "Details" */
   select(index: number): void {
     const count = this.options.charts.length;
     if (count === 0) {
@@ -132,7 +132,7 @@ export class XpLevelSelect {
     this.renderDetails(this.options.charts[this.selected]!);
   }
 
-  /** 方向键：左右挪一格，上下挪一行 */
+  /** Arrow keys: left and right by one tile, up and down by a row */
   move(dx: number, dy: number): void {
     this.select(this.selected + dx + dy * TILE_COLUMNS);
   }
@@ -145,7 +145,7 @@ export class XpLevelSelect {
     this.view.destroy({ children: true });
   }
 
-  // ---------- 平铺视图 ----------
+  // ---------- Tiles ----------
 
   private tileView(width: number, height: number): Container {
     const root = new Container({ label: 'tiles' });
@@ -205,7 +205,7 @@ export class XpLevelSelect {
     return { view, icon, labelBack, label };
   }
 
-  // ---------- 任务窗格 ----------
+  // ---------- Task pane ----------
 
   private taskPane(height: number): Container {
     const pane = new Container({ label: 'task-pane' });
@@ -262,7 +262,7 @@ export class XpLevelSelect {
     this.details.addChild(name, lines);
   }
 
-  // ---------- 工具栏 ----------
+  // ---------- Toolbar ----------
 
   private toolbar(width: number): Container {
     const bar = new Container({ label: 'toolbar' });
@@ -313,7 +313,7 @@ export class XpLevelSelect {
   }
 }
 
-/** 关卡图标：只用一种消息框就用那种消息框的图标，混用多种的用程序窗口图标 */
+/** Level icon: the message box icon when the chart uses one kind, a program window icon for a mix */
 function levelIcon(actions: readonly string[]): string {
   const only = actions.length === 1 ? actions[0]! : null;
   return only && isDialogKind(only) ? DIALOG_KINDS[only].icon : 'program-window';
@@ -329,7 +329,7 @@ function iconSprite(name: string, size: number): Sprite {
   return sprite;
 }
 
-// ---------- 菜单栏、地址栏、状态栏 ----------
+// ---------- Menu bar, address bar, status bar ----------
 
 function menuBar(width: number): Container {
   const bar = new Container({ label: 'menu-bar' });
@@ -371,7 +371,7 @@ function addressBar(width: number): Container {
     .fill(e.comboBorder)
     .rect(comboLeft + 1, comboTop + 1, comboWidth - 2, comboHeight - 2)
     .fill(LUNA.white);
-  // 右端的下拉按钮
+  // Drop-down button at the right end
   const buttonX = comboLeft + comboWidth - 18;
   combo
     .roundRect(buttonX, comboTop + 1, 17, comboHeight - 2, 2)
@@ -415,7 +415,7 @@ function statusBar(width: number, left: string, right: string): Container {
     .fill(LUNA.face)
     .rect(0, 0, width, 1)
     .fill(e.bandLight);
-  // 各栏之间凹下去的分隔
+  // Sunken dividers between the panes
   g.rect(split, 3, 1, STATUS_HEIGHT - 6).fill(LUNA.edgeShadow);
   g.rect(split + 1, 3, 1, STATUS_HEIGHT - 6).fill(LUNA.edgeHighlight);
   const leftText = xpText(left);
@@ -428,11 +428,11 @@ function statusBar(width: number, left: string, right: string): Container {
   return bar;
 }
 
-// ---------- 工具栏按钮与图标 ----------
+// ---------- Toolbar buttons and icons ----------
 
 /**
- * 工具栏按钮：图标 + 可选文字 + 可选的下拉小三角。平时是平的，鼠标移上去凸起；
- * onTap 为 null 的按钮只是摆设（原版里对应的功能在这里用不到）。
+ * Toolbar button: icon, optional label and optional drop-down arrow. Flat until hovered, then raised;
+ * buttons with a null onTap are decoration (their original functions have no use here).
  */
 function toolbarButton(
   icon: Container,
@@ -476,7 +476,7 @@ function toolbarButton(
   return { view, width };
 }
 
-/** 绿色圆形里一个向左的箭头（后退）；本地没有原版图标，矢量绘制 */
+/** Green circle with a left arrow (Back), drawn as vectors since the original icon isn't available */
 function drawBackIcon(size: number): Graphics {
   const e = LUNA.explorer;
   const r = size / 2;
@@ -491,7 +491,7 @@ function drawBackIcon(size: number): Graphics {
     .stroke({ width: 3 * k, color: LUNA.white, cap: 'round', join: 'round' });
 }
 
-/** 灰掉的前进按钮 */
+/** Disabled Forward button */
 function drawForwardIcon(): Graphics {
   const e = LUNA.explorer;
   return new Graphics()
@@ -504,7 +504,7 @@ function drawForwardIcon(): Graphics {
     .stroke({ width: 3, color: LUNA.white, cap: 'round', join: 'round' });
 }
 
-/** 向上：黄色文件夹加一个绿色向上箭头 */
+/** Up: a yellow folder with a green up arrow */
 function drawUpIcon(): Container {
   const root = new Container();
   const folder = iconSprite('folder', 26);
@@ -519,7 +519,7 @@ function drawUpIcon(): Container {
   return root;
 }
 
-/** 查看：四个蓝色小方块 */
+/** Views: four small blue squares */
 function drawViewsIcon(): Graphics {
   const g = new Graphics();
   for (const [x, y] of [
@@ -533,7 +533,7 @@ function drawViewsIcon(): Graphics {
   return g;
 }
 
-/** 任务窗格「Play this level」的绿色播放图标 */
+/** Green play icon for "Play this level" */
 function drawPlayIcon(): Graphics {
   return new Graphics()
     .circle(8, 8, 7)
@@ -542,7 +542,7 @@ function drawPlayIcon(): Graphics {
     .fill(LUNA.white);
 }
 
-// ---------- 任务窗格分组 ----------
+// ---------- Task pane groups ----------
 
 interface TaskLink {
   icon: Container;
@@ -550,7 +550,7 @@ interface TaskLink {
   onTap: () => void;
 }
 
-/** 分组的外框：圆角标题条 + 浅蓝内容区 */
+/** Group frame: rounded header bar over a pale blue body */
 function taskGroupFrame(title: string, bodyHeight: number): Container {
   const e = LUNA.explorer;
   const width = TASK_PANE_WIDTH - GROUP_MARGIN * 2;
@@ -566,7 +566,7 @@ function taskGroupFrame(title: string, bodyHeight: number): Container {
   text.anchor.set(0, 0.5);
   text.position.set(10, GROUP_HEADER_HEIGHT / 2);
 
-  // 右边的折叠按钮：白色圆，里面两道向上的折线
+  // Collapse button on the right: a white circle with two upward chevrons
   const cx = width - 14;
   const cy = GROUP_HEADER_HEIGHT / 2;
   const chevron = new Graphics()
@@ -585,7 +585,7 @@ function taskGroupFrame(title: string, bodyHeight: number): Container {
   return group;
 }
 
-/** 一组可点的任务链接；鼠标移上去变亮蓝并加下划线，和原版一样 */
+/** A group of task links; hovering turns them bright blue and underlined, like the original */
 function taskGroup(title: string, links: TaskLink[]): { view: Container; height: number } {
   const bodyHeight = 8 + links.length * LINK_HEIGHT + 6;
   const group = taskGroupFrame(title, bodyHeight);

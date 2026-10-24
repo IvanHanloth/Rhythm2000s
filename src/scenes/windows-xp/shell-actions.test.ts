@@ -7,7 +7,7 @@ import { DIALOG_KINDS } from './dialog-kinds.ts';
 import { SHELL_ACTIONS } from './shell-actions.ts';
 import { buildBackingTrack, hitSound, type XpSongSounds } from './song.ts';
 
-/** 用名字代替真正的 AudioBuffer，只检查排了哪些声音 */
+/** Sounds named by strings in place of real AudioBuffers; only checks what gets booked */
 const sounds = {
   ...Object.fromEntries(
     ['kick', 'snare', 'hat', 'countAccent', 'count', 'close', 'rightClick', 'menuCommand'].map(
@@ -25,7 +25,7 @@ const sounds = {
   ),
 } as unknown as XpSongSounds;
 
-/** 一个乐句，示范小节里按给定的拍位置放这些动作 */
+/** One phrase with these actions at these beats of the call bar */
 function chartWith(events: [number, ActionType][]) {
   return buildChart(
     sourceFromPatterns([[0]], {
@@ -34,15 +34,15 @@ function chartWith(events: [number, ActionType][]) {
   );
 }
 
-describe('新动作的示范音', () => {
+describe('shell action cues in the call', () => {
   const name = (s: { buffer: AudioBuffer }) => s.buffer as unknown as string;
   const cues = (events: [number, ActionType][]) =>
     buildBackingTrack(chartWith(events), sounds)
       .filter((s) => !['kick', 'snare', 'hat', 'count', 'countAccent'].includes(name(s)))
       .map((s) => `${s.beat}:${name(s)}`);
 
-  it('气泡、程序窗口、文件在拍点上响出现的声音', () => {
-    // 示范小节从第 4 拍开始
+  it('balloons, program windows and files sound their appearance on the beat', () => {
+    // The call bar starts on beat 4
     expect(
       cues([
         [0, 'balloon-info'],
@@ -52,13 +52,13 @@ describe('新动作的示范音', () => {
     ).toEqual(['4:balloon', '5:restore', '6:fileDrop']);
   });
 
-  it('开始菜单示范两下：拍点上按「开始」，0.5 拍后点菜单项', () => {
+  it('the Start menu demo clicks Start on the beat and an item half a beat later', () => {
     expect(cues([[1, 'start-menu']])).toEqual(['5:close', '5.5:menuCommand']);
   });
 });
 
-describe('新动作跟打命中的声音', () => {
-  it('每种动作各有自己的声音', () => {
+describe('shell action hit sounds', () => {
+  it('each action has its own sound', () => {
     expect(hitSound(sounds, 'balloon-info', 0)).toBe('navigate');
     expect(hitSound(sounds, 'window-minimize', 0)).toBe('minimize');
     expect(hitSound(sounds, 'recycle-bin', 0)).toBe('recycle');
@@ -67,17 +67,17 @@ describe('新动作跟打命中的声音', () => {
   });
 });
 
-describe('每个乐句的上限', () => {
+describe('per-phrase limits', () => {
   const repeat = (action: ActionType, n: number): [number, ActionType][] =>
     Array.from({ length: n }, (_, i) => [i * 0.5, action]);
 
-  it('上限以内没有错误', () => {
+  it('no errors within the limits', () => {
     expect(checkWindowsXpChart(chartWith(repeat('balloon-info', 3)))).toEqual([]);
     expect(checkWindowsXpChart(chartWith(repeat('window-minimize', 4)))).toEqual([]);
     expect(checkWindowsXpChart(chartWith(repeat('recycle-bin', 6)))).toEqual([]);
   });
 
-  it('超过上限时报错', () => {
+  it('reports going over a limit', () => {
     expect(checkWindowsXpChart(chartWith(repeat('balloon-info', 4)))).toEqual([
       'phrases[0]: 4 balloon-info, the XP scene allows at most 3 per phrase',
     ]);
@@ -89,7 +89,7 @@ describe('每个乐句的上限', () => {
     ]);
   });
 
-  it('消息框和程序窗口共用 6 个位置', () => {
+  it('message boxes and program windows share 6 slots', () => {
     const events: [number, ActionType][] = [
       ...repeat('dialog-info', 4),
       [2, 'window-minimize'],

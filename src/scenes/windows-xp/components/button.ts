@@ -1,5 +1,5 @@
-// Luna 按钮：深蓝细边框、白到米色的渐变面、3 像素圆角。
-// 默认按钮（按回车会触发的那个）带蓝色内框；鼠标悬停时内框变橙色；按下时面变暗。原点在左上角。
+// Luna push button: thin dark blue border, white-to-beige face, 3 px corners. The default button
+// has a blue inner border that turns orange on hover; pressing darkens the face. Origin at the top left.
 
 import { Container, Graphics } from 'pixi.js';
 import { LUNA, type GradientStops } from '@/theme/xp-luna.ts';
@@ -14,7 +14,7 @@ export interface XpButtonOptions {
   label: string;
   width?: number;
   height?: number;
-  /** 默认按钮：带蓝色内框 */
+  /** Default button, with the blue inner border */
   isDefault?: boolean;
 }
 
@@ -48,7 +48,7 @@ export class XpButton {
     this.redraw();
   }
 
-  /** 灰掉的按钮：文字变灰、没有默认按钮的蓝色内框 */
+  /** Disabled: grey text, no default-button border */
   setEnabled(enabled: boolean): void {
     if (this.enabled === enabled) return;
     this.enabled = enabled;
