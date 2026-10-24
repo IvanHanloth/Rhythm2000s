@@ -38,7 +38,7 @@ export function shortcutGroups(enter: string): ShortcutGroup[] {
       shortcuts: [
         { keys: 'Space / Click', does: 'Do the action' },
         { keys: 'H', does: 'Beat Guide on / off' },
-        { keys: 'Tab', does: 'Skip the remaining practice' },
+        { keys: 'Backspace', does: 'Skip the remaining practice' },
         { keys: 'Esc', does: 'Back to the level list' },
       ],
     },

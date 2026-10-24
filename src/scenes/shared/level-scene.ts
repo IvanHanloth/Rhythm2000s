@@ -1,7 +1,7 @@
 // The level flow every desktop scene shares: pick a level on the in-game desktop (doc/level-select.md),
 // show the shell's level intro, then play the chart in pieces: before the first phrase that uses an action the
 // chart stops for its demo, one small round per new action, each repeated until passed (doc/level-design.md
-// "Rule 1", ADR 0008); Tab skips every remaining demo. The results count all pieces together (doc/results.md).
+// "Rule 1", ADR 0008); Backspace skips every remaining demo. The results count all pieces together (doc/results.md).
 // Subclasses draw the desktop and its widgets; everything is computed from audio time, never from frame deltas.
 //
 // States: select (choosing in the level list); ready (the shell shows the intro and waits for the first press);
@@ -313,7 +313,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.ready(chart);
   }
 
-  /** List: arrow keys select, Enter starts. Demo: Tab skips the tutorial. Results: Enter / Space press the default button, R retries */
+  /** List: arrow keys select, Enter starts. Demo: Backspace skips the tutorial. Results: Enter / Space press the default button, R retries */
   private readonly onKeyDown = (event: KeyboardEvent) => {
     if (this.state === 'select' && this.modal?.onKeyDown) {
       if (event.code !== 'Escape') this.modal.onKeyDown(event);
@@ -330,7 +330,11 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
         this.openLevel(this.levelList.selectedIndex);
       }
     } else if (this.state === 'playing') {
-      if (event.code === 'Tab' && this.skipTutorial()) event.preventDefault();
+      // Not Tab: browsers take it for moving focus
+      if (event.code === 'Backspace') {
+        event.preventDefault();
+        this.skipTutorial();
+      }
     } else if (this.state === 'result') {
       if (event.code === 'Enter' || event.code === 'Space') this.resultDefault();
       else if (event.code === 'KeyR') this.retry();
@@ -461,7 +465,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.beginRound(chartSegment(chart, run.pieceStart, run.nextPhrase));
   }
 
-  /** Tab during a demo: drop every remaining demo and play the rest of the chart in one go. False outside a demo. */
+  /** Backspace during a demo: drop every remaining demo and play the rest of the chart in one go. False outside a demo. */
   private skipTutorial(): boolean {
     const run = this.run;
     if (!run || run.demo === null) return false;

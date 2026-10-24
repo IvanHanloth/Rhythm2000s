@@ -20,7 +20,7 @@ Player settings live in a settings window on the in-game computer, opened from e
 | Setting | Default | Effect |
 | --- | --- | --- |
 | Input latency calibration | 0 ms | Offset subtracted when judging, within ±300 ms; positive means the player presses late. A slider, with ← / → for 1 ms steps; the latency test's "suggested calibration" can be used directly |
-| Skip tutorial | Off | Levels play the chart in one go without any action demo; Tab during a demo skips the rest of that level's demos (demo rules in [level-design.md](level-design.md#rule-1-the-system-demonstrates-every-action-before-it-is-used)) |
+| Skip tutorial | Off | Levels play the chart in one go without any action demo; Backspace during a demo skips the rest of that level's demos (demo rules in [level-design.md](level-design.md#rule-1-the-system-demonstrates-every-action-before-it-is-used)) |
 | Beat Guide | Off | Whether levels show the `((((O))))` beat cue, see [beat-guide.md](beat-guide.md). The same saved value H toggles in a level, so the check box and H always agree. Scores set with it on are marked "Beat Guide" |
 
 ## Keyboard shortcuts
@@ -40,7 +40,7 @@ The window lists every shortcut in the game (texts in `src/game/shortcuts.ts`):
 | | Esc | Back to the café |
 | In a level | Space / click | Do the action |
 | | H | Beat Guide on / off |
-| | Tab | Skip the remaining practice |
+| | Backspace | Skip the remaining practice (not Tab, which browsers take for moving focus) |
 | | Esc | Back to the level list |
 | Results | Enter | Next Level (Retry on the last level) |
 | | R | Retry |

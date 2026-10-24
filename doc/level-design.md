@@ -26,7 +26,7 @@ The intro ([hub.md](hub.md)) is dismissed by the player's first press, and the s
 | On failure | Repeat that action until it passes |
 | The chart resumes | When every new action of that phrase has passed |
 | Scoring | Practice only: **not** counted in the score, results or best score. The chart's pieces count together, as if played in one go |
-| Skipping | Skips every demo. "Skip tutorial" in the settings ([settings.md](settings.md)) plays the chart in one go; **Tab** during a demo ends it and plays the rest of the chart in one go, with no later demo |
+| Skipping | Skips every demo. "Skip tutorial" in the settings ([settings.md](settings.md)) plays the chart in one go; **Backspace** during a demo ends it and plays the rest of the chart in one go, with no later demo |
 
 For chart authors: the first phrase is real content, so don't write a teaching phrase at the start; every phrase that brings in a new action type pauses the chart for its demo, so bring new actions in where a pause sits well.
 
@@ -37,7 +37,7 @@ For chart authors: the first phrase is real content, so don't write a teaching p
 - **Each round**: a one-phrase chart (one count-in bar, a call bar, a response bar, no outro) with the action on beat 1; two-press actions keep their half-beat spacing.
 - **Pass**: no Miss on any press of the round (Perfect or Good).
 - **Resuming**: the first piece keeps the chart's count-in; later pieces start with one count-in bar. Only the last piece has the outro.
-- **Caption**: right of the "Follow me / Your turn" banner, "Practice 2 of 4" (or "Try again") over the action name and how to handle it, counted over the whole level, with "Tab: skip" at its top right; texts in `src/rhythm/tutorial.ts`.
+- **Caption**: right of the "Follow me / Your turn" banner, "Practice 2 of 4" (or "Try again") over the action name and how to handle it, counted over the whole level, with "Backspace: skip" at its top right; texts in `src/rhythm/tutorial.ts`.
 - **When**: entering a level from the list or "Next Level"; "Retry" on the results skips the demos.
 - **Skip toggle**: "Skip tutorial" in the settings window ([settings.md](settings.md)), saved in the browser.
 

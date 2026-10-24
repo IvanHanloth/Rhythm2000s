@@ -10,7 +10,7 @@ const WIDTH = 460;
 const HEIGHT = 56;
 const PADDING_X = 18;
 /** The key that skips the tutorial (handled by the level scene) */
-const SKIP_HINT = 'Tab: skip';
+const SKIP_HINT = 'Backspace: skip';
 
 export interface TutorialCaptionContent {
   /** First line, e.g. "Practice 2 of 4 · Volume" */

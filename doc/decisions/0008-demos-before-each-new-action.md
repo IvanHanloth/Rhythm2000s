@@ -17,7 +17,7 @@ Skipping: the setting alone, or the setting plus a key during a demo that skips 
 ## Decision
 
 - Option 2, as asked by the user: before each phrase that uses actions not seen earlier in the chart, the chart stops and those actions are demonstrated (same rounds and pass rule as ADR 0007), then it resumes from that phrase with a count-in.
-- Skipping skips everything: with "Skip tutorial" on no demos run; pressing Tab during a demo ends it and plays the rest of the chart in one go, without any later demo.
+- Skipping skips everything: with "Skip tutorial" on no demos run; pressing Tab (later Backspace, since browsers take Tab for moving focus) during a demo ends it and plays the rest of the chart in one go, without any later demo.
 
 Details in [level-design.md](../level-design.md#rule-1-the-system-demonstrates-every-action-before-it-is-used).
 

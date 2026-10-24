@@ -129,7 +129,7 @@ export function createSettingsPanel({
   const skip = checkGroup(
     'Practice',
     'Skip tutorial',
-    'Play every level without the action demos. Tab skips the rest of a level’s demos.',
+    'Play every level without the action demos. Backspace skips the rest of a level’s demos.',
     skipTop,
     () => settings.setSkipTutorial(!settings.values.skipTutorial),
   );
