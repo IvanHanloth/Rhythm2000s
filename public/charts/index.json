@@ -2,6 +2,8 @@
   "format": 1,
   "charts": [
     "xp-popup-mvp.json",
+    "xp-error-storm.json",
+    "xp-yes-no.json",
     "mac-alert-basics.json",
     "mac-dock-hop.json",
     "mac-mail-rush.json",
