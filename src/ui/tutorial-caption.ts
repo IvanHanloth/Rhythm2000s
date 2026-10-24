@@ -3,7 +3,7 @@
 // 颜色和轮次横幅「Follow me」一面相同，由场景按自己的主题传入。原点在提示条左边的竖直中点。
 
 import { Container, Graphics, Text } from 'pixi.js';
-import { FONT_FAMILIES } from '../theme/tokens.ts';
+import { FONT_FAMILIES } from '@/theme/tokens.ts';
 import type { TurnBannerStyle } from './turn-banner.ts';
 
 const WIDTH = 460;

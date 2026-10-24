@@ -1,7 +1,7 @@
 // Chart rule shared by the desktop scenes (doc/chart-format.md "Scene rules"): the n-th target to appear
 // is dealt with by the n-th response, so every phrase's response must repeat its call action for action.
 
-import type { Chart, ChartCue } from '../../rhythm/chart.ts';
+import type { Chart, ChartCue } from '@/rhythm/chart.ts';
 
 /** Checks each phrase's pairing and hands its calls to `checkPhrase` for scene-specific limits. */
 export function checkPairedPhrases(

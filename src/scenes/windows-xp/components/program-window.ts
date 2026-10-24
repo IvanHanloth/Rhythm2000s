@@ -3,8 +3,8 @@
 // 原点在窗口中心，方便和消息框共用屏幕上的位置、做缩放动画。
 
 import { Container, Graphics } from 'pixi.js';
-import { LUNA } from '../../../theme/xp-luna.ts';
-import { XP_PROGRAMS } from '../../../theme/xp-programs.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
+import { XP_PROGRAMS } from '@/theme/xp-programs.ts';
 import { CAPTION_HEIGHT, FRAME_WIDTH, XpWindowFrame } from './window-frame.ts';
 import { xpText } from './xp-text.ts';
 

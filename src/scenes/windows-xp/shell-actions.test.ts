@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
-import type { ActionType } from '../../rhythm/actions.ts';
-import { buildChart } from '../../rhythm/chart.ts';
-import { sourceFromPatterns } from '../../rhythm/test-charts.ts';
+import type { ActionType } from '@/rhythm/actions.ts';
+import { buildChart } from '@/rhythm/chart.ts';
+import { sourceFromPatterns } from '@/rhythm/test-charts.ts';
 import { checkWindowsXpChart } from './chart-rules.ts';
 import { DIALOG_KINDS } from './dialog-kinds.ts';
 import { SHELL_ACTIONS } from './shell-actions.ts';

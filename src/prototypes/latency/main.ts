@@ -1,9 +1,9 @@
 // 延迟测试原型的入口：连接音频时钟、节拍器、输入和画面。
 
 import './style.css';
-import { AudioClock } from '../../audio/audio-clock.ts';
-import { Metronome } from '../../audio/metronome.ts';
-import { nearestBeat, timeToBeat } from '../../rhythm/beat.ts';
+import { AudioClock } from '@/audio/audio-clock.ts';
+import { Metronome } from '@/audio/metronome.ts';
+import { nearestBeat, timeToBeat } from '@/rhythm/beat.ts';
 import {
   buildStatsRows,
   INPUT_KIND_LABELS,

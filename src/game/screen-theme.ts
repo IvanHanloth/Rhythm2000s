@@ -1,9 +1,9 @@
 // Level intro colours follow the scene: Luna for XP levels, Aqua for Mac levels (ADR 0004).
 // Colours come only from src/theme, injected as CSS variables (--screen-*); screens.css only references the variables.
 
-import { AQUA, AQUA_FONT } from '../theme/aqua.ts';
-import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS } from '../theme/tokens.ts';
-import { LUNA } from '../theme/xp-luna.ts';
+import { AQUA, AQUA_FONT } from '@/theme/aqua.ts';
+import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS } from '@/theme/tokens.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
 
 export type ScreenTheme = 'xp' | 'aqua';
 

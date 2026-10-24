@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { buildChart } from '../rhythm/chart.ts';
+import { buildChart } from '@/rhythm/chart.ts';
 import { buildLevels, formatBestScore, parseRoute } from './levels.ts';
 
 function chart(id: string, scene: string, actions: string[]) {

@@ -6,29 +6,29 @@
 // - 右上角按钮弹出四种消息框（各带提示音）和托盘气泡；消息框可以拖标题栏、点按钮或关闭按钮关掉
 // - 「File download」弹出下载进度窗，进度条 2 秒走满后「Open」亮起，点「Open」或「Close」关掉
 
-import '../../game/style.css';
+import '@/game/style.css';
 import { Container, Rectangle, type FederatedPointerEvent } from 'pixi.js';
-import { AudioClock } from '../../audio/audio-clock.ts';
-import { GameCanvas } from '../../game/game-canvas.ts';
-import { ACTION_LABELS } from '../../rhythm/actions.ts';
-import { preloadXpAssets, XP_CURSOR, type XpSoundName } from '../../scenes/windows-xp/assets.ts';
-import { XpBalloon } from '../../scenes/windows-xp/components/balloon.ts';
-import { XpDesktop } from '../../scenes/windows-xp/components/desktop.ts';
-import { XpDownloadDialog } from '../../scenes/windows-xp/components/download-dialog.ts';
-import { XpMessageBox } from '../../scenes/windows-xp/components/message-box.ts';
+import { AudioClock } from '@/audio/audio-clock.ts';
+import { GameCanvas } from '@/game/game-canvas.ts';
+import { ACTION_LABELS } from '@/rhythm/actions.ts';
+import { preloadXpAssets, XP_CURSOR, type XpSoundName } from '@/scenes/windows-xp/assets.ts';
+import { XpBalloon } from '@/scenes/windows-xp/components/balloon.ts';
+import { XpDesktop } from '@/scenes/windows-xp/components/desktop.ts';
+import { XpDownloadDialog } from '@/scenes/windows-xp/components/download-dialog.ts';
+import { XpMessageBox } from '@/scenes/windows-xp/components/message-box.ts';
 import {
   WORK_AREA_HEIGHT,
   XP_SCALE,
   XP_SCREEN_HEIGHT,
   XP_SCREEN_WIDTH,
-} from '../../scenes/windows-xp/components/screen.ts';
-import { XpStartMenu } from '../../scenes/windows-xp/components/start-menu.ts';
-import { XpTaskbar } from '../../scenes/windows-xp/components/taskbar.ts';
-import { CAPTION_HEIGHT } from '../../scenes/windows-xp/components/window-frame.ts';
-import { XpVolumeControl } from '../../scenes/windows-xp/components/volume-control.ts';
-import { DIALOG_KINDS, type DialogKind } from '../../scenes/windows-xp/dialog-kinds.ts';
-import { XpResultsWindow } from '../../scenes/windows-xp/results-window.ts';
-import { summarizeResult, type HitResult } from '../../rhythm/result-summary.ts';
+} from '@/scenes/windows-xp/components/screen.ts';
+import { XpStartMenu } from '@/scenes/windows-xp/components/start-menu.ts';
+import { XpTaskbar } from '@/scenes/windows-xp/components/taskbar.ts';
+import { CAPTION_HEIGHT } from '@/scenes/windows-xp/components/window-frame.ts';
+import { XpVolumeControl } from '@/scenes/windows-xp/components/volume-control.ts';
+import { DIALOG_KINDS, type DialogKind } from '@/scenes/windows-xp/dialog-kinds.ts';
+import { XpResultsWindow } from '@/scenes/windows-xp/results-window.ts';
+import { summarizeResult, type HitResult } from '@/rhythm/result-summary.ts';
 
 const host = document.querySelector<HTMLElement>('#game');
 if (!host) throw new Error('找不到容器 #game');

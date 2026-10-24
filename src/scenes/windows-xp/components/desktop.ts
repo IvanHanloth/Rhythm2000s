@@ -2,8 +2,8 @@
 // 图标 32 像素，下方白字带黑色阴影，和原版一样。
 
 import { Container, Sprite } from 'pixi.js';
-import { LUNA } from '../../../theme/xp-luna.ts';
-import { xpAssets } from '../assets.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
+import { xpAssets } from '@/scenes/windows-xp/assets.ts';
 import { WORK_AREA_HEIGHT, XP_SCREEN_HEIGHT, XP_SCREEN_WIDTH } from './screen.ts';
 import { hardShadow, xpText } from './xp-text.ts';
 

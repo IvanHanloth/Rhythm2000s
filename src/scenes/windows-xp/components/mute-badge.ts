@@ -1,7 +1,7 @@
 // 托盘小喇叭静音时右下角的红色禁止符号，画在 speaker.png 上面（16×16 的图标坐标）。
 
 import type { Graphics } from 'pixi.js';
-import { LUNA } from '../../../theme/xp-luna.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
 
 export function drawMuteBadge(g: Graphics): Graphics {
   return g

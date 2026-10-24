@@ -3,8 +3,8 @@
 // 头像本地没有原版素材，暂用 iChat 图标。
 
 import { Container, Graphics } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
-import { appIcon } from '../assets.ts';
+import { AQUA } from '@/theme/aqua.ts';
+import { appIcon } from '@/scenes/mac-2000/assets.ts';
 import { aquaText, vGradient } from './paint.ts';
 import { AquaWindow, TITLE_BAR_HEIGHT } from './window.ts';
 

@@ -8,26 +8,26 @@
 // Outside `playing` and `ready`, clicks and Space are not rhythm input; only buttons, icons and keys respond.
 
 import { Container, Rectangle } from 'pixi.js';
-import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../../game/layout.ts';
-import { recordScore } from '../../game/records.ts';
-import type { FrameInfo, Scene, SceneContext, TapInfo } from '../../game/scene.ts';
-import { loadSkipTutorial } from '../../game/settings.ts';
-import type { ActionType } from '../../rhythm/actions.ts';
-import type { Chart } from '../../rhythm/chart.ts';
-import { summarizeResult, type ResultSummary } from '../../rhythm/result-summary.ts';
-import { buildTurnCues, turnCueAt, type TurnCue } from '../../rhythm/turn-cue.ts';
+import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
+import { recordScore } from '@/game/records.ts';
+import type { FrameInfo, Scene, SceneContext, TapInfo } from '@/game/scene.ts';
+import { loadSkipTutorial } from '@/game/settings.ts';
+import type { ActionType } from '@/rhythm/actions.ts';
+import type { Chart } from '@/rhythm/chart.ts';
+import { summarizeResult, type ResultSummary } from '@/rhythm/result-summary.ts';
+import { buildTurnCues, turnCueAt, type TurnCue } from '@/rhythm/turn-cue.ts';
 import {
   buildTutorialChart,
   tutorialActions,
   tutorialHint,
   tutorialPassed,
-} from '../../rhythm/tutorial.ts';
-import { BEATS, type ThemeColors } from '../../theme/tokens.ts';
-import { BEAT_GUIDE_POSITION, BeatGuideView } from '../../ui/beat-guide-view.ts';
-import { clamp01 } from '../../ui/easing.ts';
-import { TurnBanner } from '../../ui/turn-banner.ts';
-import { TutorialCaption } from '../../ui/tutorial-caption.ts';
-import type { SceneId } from '../catalog.ts';
+} from '@/rhythm/tutorial.ts';
+import { BEATS, type ThemeColors } from '@/theme/tokens.ts';
+import { BEAT_GUIDE_POSITION, BeatGuideView } from '@/ui/beat-guide-view.ts';
+import { clamp01 } from '@/ui/easing.ts';
+import { TurnBanner } from '@/ui/turn-banner.ts';
+import { TutorialCaption } from '@/ui/tutorial-caption.ts';
+import type { SceneId } from '@/scenes/catalog.ts';
 import type { RoundSession } from './round-session.ts';
 
 /** How long after the results appear before Retry / Next accept input (ms), against mashing through */

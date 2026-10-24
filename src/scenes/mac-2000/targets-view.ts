@@ -2,9 +2,9 @@
 // 每帧只根据当前拍位置计算，不累加帧间隔（doc/scenes/mac-2000.md「玩法」）。
 
 import { Container } from 'pixi.js';
-import { BEATS } from '../../theme/tokens.ts';
-import { clamp01, easeOutBack, easeOutCubic } from '../../ui/easing.ts';
-import { createJudgementView } from '../../ui/judgement-view.ts';
+import { BEATS } from '@/theme/tokens.ts';
+import { clamp01, easeOutBack, easeOutCubic } from '@/ui/easing.ts';
+import { createJudgementView } from '@/ui/judgement-view.ts';
 import type { MacAction } from './action-kinds.ts';
 import { appIcon, type AppIconName } from './assets.ts';
 import { AquaAlert } from './components/alert.ts';
@@ -16,7 +16,7 @@ import { APPLE_MENU_LEFT, MENU_BAR_HEIGHT, type MenuBar } from './components/men
 import { aquaText } from './components/paint.ts';
 import { AquaWindow } from './components/window.ts';
 import { MacExtrasView } from './extras-view.ts';
-import type { JudgementRecord } from '../shared/round-session.ts';
+import type { JudgementRecord } from '@/scenes/shared/round-session.ts';
 import type { MacSession, MacTarget } from './session.ts';
 
 /** 提示框和文稿窗口的中心位置（虚拟屏幕坐标），按乐句内序号依次使用 */

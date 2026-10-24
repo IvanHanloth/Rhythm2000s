@@ -1,11 +1,11 @@
 // Chart loading: downloads the index and chart files in public/charts/ at runtime and validates each (ADR 0003).
 // Broken charts are skipped without affecting the others; errors are collected for the caller to show.
 
-import { buildChart, type Chart } from '../rhythm/chart.ts';
-import { parseChartFile, parseChartIndex } from '../rhythm/chart-file.ts';
-import { JUDGE_WINDOWS } from '../rhythm/judge.ts';
-import { checkTurnCueSpacing } from '../rhythm/turn-cue.ts';
-import { sceneActions, SCENE_CATALOG, type SceneId } from '../scenes/catalog.ts';
+import { buildChart, type Chart } from '@/rhythm/chart.ts';
+import { parseChartFile, parseChartIndex } from '@/rhythm/chart-file.ts';
+import { JUDGE_WINDOWS } from '@/rhythm/judge.ts';
+import { checkTurnCueSpacing } from '@/rhythm/turn-cue.ts';
+import { sceneActions, SCENE_CATALOG, type SceneId } from '@/scenes/catalog.ts';
 
 export const CHART_INDEX_FILE = 'index.json';
 

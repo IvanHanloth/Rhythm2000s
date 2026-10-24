@@ -1,7 +1,7 @@
 // 四种消息框（MessageBox）：动作 ID → 原版常量、图标、按钮、弹出时的提示音。
 // 对应关系见 doc/scenes/windows-xp.md「界面部件」「音效」。
 
-import type { ActionType } from '../../rhythm/actions.ts';
+import type { ActionType } from '@/rhythm/actions.ts';
 import type { XpSoundName } from './assets.ts';
 
 export type DialogKind = Extract<ActionType, `dialog-${string}`>;

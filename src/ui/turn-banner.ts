@@ -2,8 +2,8 @@
 // Colours come from the scene's theme; Your turn uses the accent colour so it stands out more than Follow me.
 
 import { Container, Graphics, Text } from 'pixi.js';
-import type { Turn } from '../rhythm/turn-cue.ts';
-import { FONT_FAMILIES } from '../theme/tokens.ts';
+import type { Turn } from '@/rhythm/turn-cue.ts';
+import { FONT_FAMILIES } from '@/theme/tokens.ts';
 
 export interface TurnBannerStyle {
   fill: string;

@@ -8,7 +8,7 @@ import { xpAssets } from './assets.ts';
 import { DESKTOP_MENU, XpContextMenu } from './components/context-menu.ts';
 import type { XpDesktop } from './components/desktop.ts';
 import { WORK_AREA_HEIGHT, XP_SCREEN_WIDTH } from './components/screen.ts';
-import { demoBeat, PointerTrack, type Point, type Turn } from '../shared/cursor-path.ts';
+import { demoBeat, PointerTrack, type Point, type Turn } from '@/scenes/shared/cursor-path.ts';
 import type { XpSession, XpTarget } from './session.ts';
 
 /** Where the pointer rests before and after a round */

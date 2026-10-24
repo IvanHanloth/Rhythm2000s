@@ -25,7 +25,7 @@ import {
   type Material,
   type Texture,
 } from 'three';
-import { STREET_COLORS as C } from '../theme/street.ts';
+import { STREET_COLORS as C } from '@/theme/street.ts';
 import { blushTexture, eyeTexture, mouthTexture } from './textures.ts';
 
 export interface Outfit {

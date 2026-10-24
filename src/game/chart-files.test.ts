@@ -1,7 +1,7 @@
 // Checks the real chart files in public/charts/: the index lists them all and every chart passes the load-time checks.
 
 import { describe, expect, it } from 'vite-plus/test';
-import { parseChartIndex } from '../rhythm/chart-file.ts';
+import { parseChartIndex } from '@/rhythm/chart-file.ts';
 import { CHART_INDEX_FILE, checkChartData } from './chart-loader.ts';
 
 const files = import.meta.glob<string>('/public/charts/*.json', {

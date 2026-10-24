@@ -2,7 +2,7 @@
 // Call schedule() every frame; it books the beats within the next lookAhead seconds with start(when).
 // Frames only queue ahead; when a sound plays is decided entirely by the audio clock.
 
-import { beatToTime } from '../rhythm/beat.ts';
+import { beatToTime } from '@/rhythm/beat.ts';
 import type { AudioClock } from './audio-clock.ts';
 import { createClickBuffer } from './click-sound.ts';
 

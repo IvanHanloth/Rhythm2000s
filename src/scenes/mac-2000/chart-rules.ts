@@ -1,8 +1,8 @@
 // Mac chart rules (doc/chart-format.md "Scene rules"): paired call and response, and per-phrase limits
 // set by the screen slots and Dock icons available.
 
-import type { Chart, ChartCue } from '../../rhythm/chart.ts';
-import { checkPairedPhrases, overLimits } from '../shared/chart-rules.ts';
+import type { Chart, ChartCue } from '@/rhythm/chart.ts';
+import { checkPairedPhrases, overLimits } from '@/scenes/shared/chart-rules.ts';
 import {
   isMacAction,
   MAC_ACTIONS,

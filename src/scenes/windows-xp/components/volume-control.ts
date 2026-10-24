@@ -3,7 +3,7 @@
 // 原点在左上角。
 
 import { Container, Graphics, Rectangle, type FederatedPointerEvent } from 'pixi.js';
-import { LUNA } from '../../../theme/xp-luna.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
 import { edgeRing, verticalGradient } from './draw.ts';
 import { xpText } from './xp-text.ts';
 

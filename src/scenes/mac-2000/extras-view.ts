@@ -3,8 +3,8 @@
 // 画面每帧只根据拍位置计算，不累加帧间隔。坐标都是虚拟 Mac 屏幕坐标。
 
 import { Container } from 'pixi.js';
-import { BEATS } from '../../theme/tokens.ts';
-import { clamp01, easeOutBack, easeOutCubic } from '../../ui/easing.ts';
+import { BEATS } from '@/theme/tokens.ts';
+import { clamp01, easeOutBack, easeOutCubic } from '@/ui/easing.ts';
 import { appIcon } from './assets.ts';
 import { CHAT_HEIGHT, ChatWindow } from './components/chat-window.ts';
 import type { Dock } from './components/dock.ts';

@@ -2,7 +2,7 @@
 // 上下箭头按原版默认设置并排放在底部。
 
 import { Graphics } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
+import { AQUA } from '@/theme/aqua.ts';
 import { drawGelThumb, hGradient } from './paint.ts';
 
 export const SCROLLER_WIDTH = 15;

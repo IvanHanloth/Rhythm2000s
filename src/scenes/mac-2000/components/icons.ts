@@ -3,7 +3,7 @@
 // 每个函数返回左上角在 (0, 0) 的图形，内部按固定的单位坐标绘制，再整体缩放到需要的大小。
 
 import { Graphics } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
+import { AQUA } from '@/theme/aqua.ts';
 import { hGradient, vGradient } from './paint.ts';
 
 /**

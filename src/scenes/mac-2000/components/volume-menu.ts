@@ -3,7 +3,7 @@
 // 另有 drawSpeakerIcon()：菜单栏上的黑色小喇叭。
 
 import { Container, Graphics } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
+import { AQUA } from '@/theme/aqua.ts';
 import { drawGelBall, drawWindowShadow, hGradient, stripes } from './paint.ts';
 
 export const VOLUME_MENU_WIDTH = 30;

@@ -2,8 +2,8 @@
 // 托盘里有网络连接、Messenger、音量小喇叭和时钟。原点在任务栏左上角。
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
-import { LUNA } from '../../../theme/xp-luna.ts';
-import { xpAssets } from '../assets.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
+import { xpAssets } from '@/scenes/windows-xp/assets.ts';
 import { verticalGradient } from './draw.ts';
 import { TASKBAR_HEIGHT, XP_SCREEN_WIDTH } from './screen.ts';
 import { drawMuteBadge } from './mute-badge.ts';

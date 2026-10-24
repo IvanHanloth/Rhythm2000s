@@ -2,7 +2,7 @@
 // Like the metronome, call schedule() every frame to book sounds within the next lookAhead seconds with start(when);
 // frames only queue ahead, and when a sound plays is decided entirely by the audio clock.
 
-import { beatToTime } from '../rhythm/beat.ts';
+import { beatToTime } from '@/rhythm/beat.ts';
 
 export interface SequencedSound {
   /** Beat position in the song */

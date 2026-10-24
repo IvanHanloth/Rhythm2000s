@@ -2,8 +2,8 @@
 // 左上是 16 像素图标和粗体标题，右上角小关闭按钮，下面是正文。原点在尖角的尖端。
 
 import { Container, Graphics, Rectangle, Sprite } from 'pixi.js';
-import { LUNA } from '../../../theme/xp-luna.ts';
-import { xpAssets } from '../assets.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
+import { xpAssets } from '@/scenes/windows-xp/assets.ts';
 import { xpText } from './xp-text.ts';
 
 const RADIUS = 7;

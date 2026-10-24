@@ -3,8 +3,8 @@
 // 本地缺「Control Panel」「My Recent Documents」「Set Program Access and Defaults」的图标，这三项暂时不放。原点在左上角。
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
-import { LUNA } from '../../../theme/xp-luna.ts';
-import { xpAssets } from '../assets.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
+import { xpAssets } from '@/scenes/windows-xp/assets.ts';
 import { horizontalGradient, topRoundedRect, verticalGradient } from './draw.ts';
 import { hardShadow, xpText } from './xp-text.ts';
 

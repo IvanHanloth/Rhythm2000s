@@ -3,7 +3,7 @@
 // menu-volume slider. Coordinates are virtual Mac screen coordinates.
 
 import { Container } from 'pixi.js';
-import { demoBeat, PointerTrack, type Point } from '../shared/cursor-path.ts';
+import { demoBeat, PointerTrack, type Point } from '@/scenes/shared/cursor-path.ts';
 import { drawArrowCursor } from './components/icons.ts';
 import type { MacSession, MacTarget } from './session.ts';
 

@@ -2,9 +2,9 @@
 // 右下「Retry」「Levels」「Next Level」三个推按钮可以用鼠标点，默认按钮是蓝色并会呼吸。原点在窗口中心。
 
 import { Container, Graphics } from 'pixi.js';
-import { AQUA } from '../../theme/aqua.ts';
-import type { ResultsWindowOptions } from '../shared/level-scene.ts';
-import { createResultsPanel, type ResultsKit } from '../../ui/results-panel.ts';
+import { AQUA } from '@/theme/aqua.ts';
+import type { ResultsWindowOptions } from '@/scenes/shared/level-scene.ts';
+import { createResultsPanel, type ResultsKit } from '@/ui/results-panel.ts';
 import { aquaText } from './components/paint.ts';
 import { PUSH_BUTTON_HEIGHT, PushButton } from './components/push-button.ts';
 import { AquaWindow, TITLE_BAR_HEIGHT } from './components/window.ts';

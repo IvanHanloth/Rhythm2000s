@@ -28,7 +28,7 @@ import {
   type Object3D,
   type Texture,
 } from 'three';
-import { STREET_COLORS as C } from '../theme/street.ts';
+import { STREET_COLORS as C } from '@/theme/street.ts';
 import { attachCustom, attachModel, surface, type PropOptions } from './assets.ts';
 import { SEAT_HEIGHT } from './character.ts';
 import { arrangeMachines } from './cafe-layout.ts';

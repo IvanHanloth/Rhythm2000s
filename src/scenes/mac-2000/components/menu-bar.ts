@@ -3,7 +3,7 @@
 // 菜单名用美国英文版 Finder 的说法。
 
 import { Container, Graphics, type Text } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
+import { AQUA } from '@/theme/aqua.ts';
 import { drawAppleLogo } from './icons.ts';
 import { aquaText, stripes, vGradient } from './paint.ts';
 import { drawSpeakerIcon, VOLUME_MENU_WIDTH } from './volume-menu.ts';

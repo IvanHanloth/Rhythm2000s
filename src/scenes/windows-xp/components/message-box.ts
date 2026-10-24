@@ -2,8 +2,8 @@
 // 大小随文字自动调整，和原版一样。原点在窗口中心，方便做弹出、关闭的缩放动画。
 
 import { Container, Sprite } from 'pixi.js';
-import { xpAssets } from '../assets.ts';
-import { DIALOG_KINDS, type DialogKind } from '../dialog-kinds.ts';
+import { xpAssets } from '@/scenes/windows-xp/assets.ts';
+import { DIALOG_KINDS, type DialogKind } from '@/scenes/windows-xp/dialog-kinds.ts';
 import { BUTTON_HEIGHT, BUTTON_WIDTH, XpButton } from './button.ts';
 import { CAPTION_HEIGHT, FRAME_WIDTH, measureCaption, XpWindowFrame } from './window-frame.ts';
 import { xpText } from './xp-text.ts';

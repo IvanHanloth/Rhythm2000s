@@ -1,9 +1,9 @@
 // Scene interface: each themed minigame (Windows XP desktop, Mac desktop…) is a scene (ADR 0002).
 
 import type { Container } from 'pixi.js';
-import type { AudioClock } from '../audio/audio-clock.ts';
-import type { Chart } from '../rhythm/chart.ts';
-import type { SceneId } from '../scenes/catalog.ts';
+import type { AudioClock } from '@/audio/audio-clock.ts';
+import type { Chart } from '@/rhythm/chart.ts';
+import type { SceneId } from '@/scenes/catalog.ts';
 
 export interface FrameInfo {
   /** Audio time the speakers are playing right now (s, AudioContext timeline). Draw only from this; never accumulate frame deltas. */

@@ -6,15 +6,15 @@
 // 画面每帧只根据拍位置计算，不累加帧间隔。坐标都是虚拟 XP 屏幕坐标。
 
 import { Container } from 'pixi.js';
-import { actionTapOffsets } from '../../rhythm/actions.ts';
-import { BEATS } from '../../theme/tokens.ts';
-import { clamp01, easeOutBack, easeOutCubic } from '../../ui/easing.ts';
+import { actionTapOffsets } from '@/rhythm/actions.ts';
+import { BEATS } from '@/theme/tokens.ts';
+import { clamp01, easeOutBack, easeOutCubic } from '@/ui/easing.ts';
 import { XpDownloadDialog } from './components/download-dialog.ts';
 import { WORK_AREA_HEIGHT, XP_SCREEN_WIDTH } from './components/screen.ts';
 import type { XpTaskbar } from './components/taskbar.ts';
 import { XpVolumeControl } from './components/volume-control.ts';
 import type { XpSession, XpTarget } from './session.ts';
-import type { Turn } from '../shared/cursor-path.ts';
+import type { Turn } from '@/scenes/shared/cursor-path.ts';
 
 type Point = { x: number; y: number };
 

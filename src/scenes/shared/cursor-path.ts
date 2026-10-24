@@ -2,8 +2,8 @@
 // 轨迹由一串「停靠点」决定：在某一拍要停在某个位置。位置只由拍算出来，跟着音频时钟走，不累加帧间隔。
 // 不依赖 PixiJS，便于测试。
 
-import { secondsPerBeat } from '../../rhythm/beat.ts';
-import { JUDGE_WINDOWS } from '../../rhythm/judge.ts';
+import { secondsPerBeat } from '@/rhythm/beat.ts';
+import { JUDGE_WINDOWS } from '@/rhythm/judge.ts';
 import type { RoundSession, RoundTarget } from './round-session.ts';
 
 export interface CursorStop {

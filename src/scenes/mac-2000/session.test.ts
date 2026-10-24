@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
-import type { ActionType } from '../../rhythm/actions.ts';
-import { buildChart } from '../../rhythm/chart.ts';
-import { sourceFromPatterns } from '../../rhythm/test-charts.ts';
+import type { ActionType } from '@/rhythm/actions.ts';
+import { buildChart } from '@/rhythm/chart.ts';
+import { sourceFromPatterns } from '@/rhythm/test-charts.ts';
 import { checkMacChart } from './chart-rules.ts';
 import { buildTargets } from './session.ts';
 import { buildBackingTrack, type MacSongSounds } from './song.ts';

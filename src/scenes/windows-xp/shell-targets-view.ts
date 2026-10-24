@@ -3,8 +3,8 @@
 // 画面每帧只根据拍位置计算，不累加帧间隔。坐标都是虚拟 XP 屏幕坐标。
 
 import { Container } from 'pixi.js';
-import { BEATS } from '../../theme/tokens.ts';
-import { clamp01, easeOutBack, easeOutCubic } from '../../ui/easing.ts';
+import { BEATS } from '@/theme/tokens.ts';
+import { clamp01, easeOutBack, easeOutCubic } from '@/ui/easing.ts';
 import { XpBalloon } from './components/balloon.ts';
 import {
   DESKTOP_CELL_HEIGHT,

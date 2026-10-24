@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { sourceFromPatterns } from '../rhythm/test-charts.ts';
+import { sourceFromPatterns } from '@/rhythm/test-charts.ts';
 import { loadCharts, type FetchChartJson } from './chart-loader.ts';
 
 /** Fake fetch: files missing from `files` are a 404 */

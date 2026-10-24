@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import arrowDataUrl from '../../../assets/reference/windows-xp/icons/default_arrow.cur?inline';
+import arrowDataUrl from '@assets/reference/windows-xp/icons/default_arrow.cur?inline';
 import { decodeCur } from './cur-file.ts';
 
 function bytesFromDataUrl(url: string): Uint8Array {

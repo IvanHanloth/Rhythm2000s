@@ -2,7 +2,7 @@
 // 默认按钮（按回车会触发的那个）带蓝色内框；鼠标悬停时内框变橙色；按下时面变暗。原点在左上角。
 
 import { Container, Graphics } from 'pixi.js';
-import { LUNA, type GradientStops } from '../../../theme/xp-luna.ts';
+import { LUNA, type GradientStops } from '@/theme/xp-luna.ts';
 import { edgeRing, verticalGradient } from './draw.ts';
 import { xpText } from './xp-text.ts';
 

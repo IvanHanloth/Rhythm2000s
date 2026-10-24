@@ -3,7 +3,7 @@
 // 鼠标所在的条目是蓝色果冻底、白字。原点在菜单左上角。
 
 import { Container, Graphics, type Text } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
+import { AQUA } from '@/theme/aqua.ts';
 import { aquaText, drawWindowShadow, stripes, vGradient } from './paint.ts';
 
 export const MENU_ITEM_HEIGHT = 20;

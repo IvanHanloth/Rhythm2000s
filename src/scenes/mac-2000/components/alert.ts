@@ -3,7 +3,7 @@
 // 边距按原版人机界面指南：四周 20–24 像素，图标与文字之间 16 像素，按钮之间 12 像素。
 
 import { Container, Graphics } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
+import { AQUA } from '@/theme/aqua.ts';
 import { aquaText, drawWindowShadow, stripes, topRoundedRect } from './paint.ts';
 import { PUSH_BUTTON_HEIGHT, PushButton, type PushButtonOptions } from './push-button.ts';
 

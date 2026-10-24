@@ -1,7 +1,7 @@
 // 绘制 Luna 部件的小工具：渐变缓存、按边上色的 1 像素边框。
 
 import { FillGradient, type Graphics } from 'pixi.js';
-import type { GradientStops } from '../../../theme/xp-luna.ts';
+import type { GradientStops } from '@/theme/xp-luna.ts';
 
 const vertical = new Map<GradientStops, FillGradient>();
 const horizontal = new Map<GradientStops, FillGradient>();

@@ -1,7 +1,7 @@
 // Mac 场景的动作：动作 ID → 部件种类、示范时的提示音（doc/scenes/mac-2000.md「玩法」「音效」）。
 // 不依赖 PixiJS，谱面校验和单元测试都能直接用。
 
-import type { ActionType } from '../../rhythm/actions.ts';
+import type { ActionType } from '@/rhythm/actions.ts';
 
 export type MacAction = Extract<
   ActionType,

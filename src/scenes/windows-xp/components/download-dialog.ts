@@ -5,8 +5,8 @@
 // 原点在窗口中心，方便做弹出、关闭的缩放动画。
 
 import { Container, Graphics, Sprite } from 'pixi.js';
-import { LUNA } from '../../../theme/xp-luna.ts';
-import { xpAssets } from '../assets.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
+import { xpAssets } from '@/scenes/windows-xp/assets.ts';
 import { BUTTON_HEIGHT, BUTTON_WIDTH, XpButton } from './button.ts';
 import { verticalGradient } from './draw.ts';
 import { CAPTION_HEIGHT, FRAME_WIDTH, XpWindowFrame } from './window-frame.ts';

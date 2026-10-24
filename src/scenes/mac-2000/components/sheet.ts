@@ -3,7 +3,7 @@
 // 原点在面板上沿中点，放在窗口标题栏下沿；setReveal() 控制滑出了多少（上沿以上的部分被裁掉）。
 
 import { Container, Graphics } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
+import { AQUA } from '@/theme/aqua.ts';
 import { aquaText, drawWindowShadow, stripes } from './paint.ts';
 import { PUSH_BUTTON_HEIGHT, PushButton } from './push-button.ts';
 

@@ -6,29 +6,29 @@
 // - 页面上的按钮弹出提示框、文稿窗口、表单、iChat 消息窗，让 Dock 图标弹跳、Mail 角标加一、废纸篓变空 / 满、落下桌面文件
 // - 提示框、表单的按钮和窗口的红色关闭按钮可以点掉
 
-import '../../game/style.css';
+import '@/game/style.css';
 import { Container, Graphics, Rectangle, Sprite, type FederatedPointerEvent } from 'pixi.js';
-import { AudioClock } from '../../audio/audio-clock.ts';
-import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../../game/layout.ts';
-import { GameCanvas } from '../../game/game-canvas.ts';
-import { appIcon, preloadMacAssets, type AppIconName } from '../../scenes/mac-2000/assets.ts';
-import type { MacSoundName } from '../../scenes/mac-2000/action-kinds.ts';
-import { AquaAlert } from '../../scenes/mac-2000/components/alert.ts';
-import { ChatWindow } from '../../scenes/mac-2000/components/chat-window.ts';
-import { createDesktopFile } from '../../scenes/mac-2000/components/desktop-file.ts';
-import { Dock, DOCK_HEIGHT, type DockItem } from '../../scenes/mac-2000/components/dock.ts';
-import { drawCautionIcon, drawFinderIcon } from '../../scenes/mac-2000/components/icons.ts';
-import { APPLE_MENU, AquaMenu } from '../../scenes/mac-2000/components/menu.ts';
+import { AudioClock } from '@/audio/audio-clock.ts';
+import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
+import { GameCanvas } from '@/game/game-canvas.ts';
+import { appIcon, preloadMacAssets, type AppIconName } from '@/scenes/mac-2000/assets.ts';
+import type { MacSoundName } from '@/scenes/mac-2000/action-kinds.ts';
+import { AquaAlert } from '@/scenes/mac-2000/components/alert.ts';
+import { ChatWindow } from '@/scenes/mac-2000/components/chat-window.ts';
+import { createDesktopFile } from '@/scenes/mac-2000/components/desktop-file.ts';
+import { Dock, DOCK_HEIGHT, type DockItem } from '@/scenes/mac-2000/components/dock.ts';
+import { drawCautionIcon, drawFinderIcon } from '@/scenes/mac-2000/components/icons.ts';
+import { APPLE_MENU, AquaMenu } from '@/scenes/mac-2000/components/menu.ts';
 import {
   APPLE_MENU_LEFT,
   MENU_BAR_HEIGHT,
   MenuBar,
-} from '../../scenes/mac-2000/components/menu-bar.ts';
-import { aquaText } from '../../scenes/mac-2000/components/paint.ts';
-import { AquaSheet } from '../../scenes/mac-2000/components/sheet.ts';
-import { VolumeMenu } from '../../scenes/mac-2000/components/volume-menu.ts';
-import { AquaWindow, TITLE_BAR_HEIGHT } from '../../scenes/mac-2000/components/window.ts';
-import { AQUA } from '../../theme/aqua.ts';
+} from '@/scenes/mac-2000/components/menu-bar.ts';
+import { aquaText } from '@/scenes/mac-2000/components/paint.ts';
+import { AquaSheet } from '@/scenes/mac-2000/components/sheet.ts';
+import { VolumeMenu } from '@/scenes/mac-2000/components/volume-menu.ts';
+import { AquaWindow, TITLE_BAR_HEIGHT } from '@/scenes/mac-2000/components/window.ts';
+import { AQUA } from '@/theme/aqua.ts';
 
 const host = document.querySelector<HTMLElement>('#game');
 if (!host) throw new Error('找不到容器 #game');

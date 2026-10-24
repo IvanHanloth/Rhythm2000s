@@ -3,10 +3,10 @@
 // 单击图标选中，双击或点简介窗口里的「Start」开始；「Back」回到网吧。原点在虚拟屏幕左上角。
 
 import { Container, Graphics, Rectangle, type Text } from 'pixi.js';
-import type { Chart } from '../../rhythm/chart.ts';
-import { formatDuration, summarizeChart } from '../../rhythm/chart-summary.ts';
-import { AQUA } from '../../theme/aqua.ts';
-import { DoubleClick } from '../../ui/double-click.ts';
+import type { Chart } from '@/rhythm/chart.ts';
+import { formatDuration, summarizeChart } from '@/rhythm/chart-summary.ts';
+import { AQUA } from '@/theme/aqua.ts';
+import { DoubleClick } from '@/ui/double-click.ts';
 import { isMacAction, MAC_ACTIONS, type MacTargetKind } from './action-kinds.ts';
 import { appIcon, type AppIconName } from './assets.ts';
 import { drawCautionIcon, drawTrashIcon } from './components/icons.ts';

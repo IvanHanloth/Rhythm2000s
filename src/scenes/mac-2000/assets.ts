@@ -3,8 +3,8 @@
 // 提示音与事件的对应关系见 doc/scenes/mac-2000.md「音效」。
 
 import { Assets, Sprite, type Texture } from 'pixi.js';
-import { loadAiffSample } from '../../audio/aiff.ts';
-import wallpaperUrl from '../../../assets/reference/mac-os-x/wallpapers/aqua/10.4 Jaguar Aqua Blue.jpg?url';
+import { loadAiffSample } from '@/audio/aiff.ts';
+import wallpaperUrl from '@assets/reference/mac-os-x/wallpapers/aqua/10.4 Jaguar Aqua Blue.jpg?url';
 import type { MacSoundName } from './action-kinds.ts';
 
 /** 文件名（不含扩展名） → 地址 */
@@ -15,7 +15,7 @@ function urlsByName(files: Record<string, string>): Map<string, string> {
 }
 
 const ICON_URLS = urlsByName(
-  import.meta.glob<string>('../../../assets/reference/mac-os-x/icons/*.png', {
+  import.meta.glob<string>('/assets/reference/mac-os-x/icons/*.png', {
     eager: true,
     query: '?url',
     import: 'default',
@@ -23,7 +23,7 @@ const ICON_URLS = urlsByName(
 );
 
 const SOUND_URLS = urlsByName(
-  import.meta.glob<string>('../../../assets/reference/mac-os-x/sounds/*.aiff', {
+  import.meta.glob<string>('/assets/reference/mac-os-x/sounds/*.aiff', {
     eager: true,
     query: '?url',
     import: 'default',

@@ -2,8 +2,8 @@
 // 墙面、地面等写实贴图是照片素材，见 assets.ts。
 
 import { CanvasTexture, NearestFilter, RepeatWrapping, SRGBColorSpace, type Texture } from 'three';
-import { cssFontFamily, FONT_FAMILIES } from '../theme/tokens.ts';
-import { STREET_COLORS as C } from '../theme/street.ts';
+import { cssFontFamily, FONT_FAMILIES } from '@/theme/tokens.ts';
+import { STREET_COLORS as C } from '@/theme/street.ts';
 
 /** 招牌、海报上的字（场景里只用英文）：粗黑的无衬线体 */
 const SIGN_FONT = cssFontFamily(['Arial Black', 'Impact', ...FONT_FAMILIES.ui]);

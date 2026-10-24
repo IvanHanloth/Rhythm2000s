@@ -13,6 +13,11 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@assets/*": ["./assets/*"],
+      "@public/*": ["./public/*"]
+    },
 
     /* Linting */
     "strict": true,

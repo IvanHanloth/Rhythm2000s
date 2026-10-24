@@ -17,7 +17,7 @@ import {
   type Vector3,
 } from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { STREET_COLORS as C } from '../theme/street.ts';
+import { STREET_COLORS as C } from '@/theme/street.ts';
 
 /** 调色参数（暂定，按截图调出来的） */
 const GRADE = {

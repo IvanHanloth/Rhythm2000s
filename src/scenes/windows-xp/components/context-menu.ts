@@ -3,7 +3,7 @@
 // 桌面右键菜单的条目见 doc/scenes/windows-xp.md「桌面右键菜单与刷新」。
 
 import { Container, Graphics, type Text } from 'pixi.js';
-import { LUNA } from '../../../theme/xp-luna.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
 import { xpText } from './xp-text.ts';
 
 export type MenuEntry = { label: string; submenu?: boolean; disabled?: boolean } | 'separator';

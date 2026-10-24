@@ -3,9 +3,9 @@
 // the gap between them keeps only the hi-hat so the player hears the band stop; the song ends on a single hit.
 // Scenes add their own cues on top (doc/scenes/windows-xp.md, doc/scenes/mac-2000.md "Sounds").
 
-import type { SequencedSound } from '../../audio/sequencer.ts';
-import { createBlip, createHat, createKick, createSnare } from '../../audio/synth.ts';
-import type { Chart } from '../../rhythm/chart.ts';
+import type { SequencedSound } from '@/audio/sequencer.ts';
+import { createBlip, createHat, createKick, createSnare } from '@/audio/synth.ts';
+import type { Chart } from '@/rhythm/chart.ts';
 
 export interface DrumKit {
   kick: AudioBuffer;

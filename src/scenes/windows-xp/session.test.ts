@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vite-plus/test';
-import type { SceneContext } from '../../game/scene.ts';
+import type { SceneContext } from '@/game/scene.ts';
 import { DIALOG_KINDS } from './dialog-kinds.ts';
 import { XpSession } from './session.ts';
 import type { XpSongSounds } from './song.ts';
-import { buildChart } from '../../rhythm/chart.ts';
-import { sourceFromPatterns } from '../../rhythm/test-charts.ts';
+import { buildChart } from '@/rhythm/chart.ts';
+import { sourceFromPatterns } from '@/rhythm/test-charts.ts';
 import { loadMvpChart } from './test-mvp-chart.ts';
 
 /** 用名字代替真正的 AudioBuffer */

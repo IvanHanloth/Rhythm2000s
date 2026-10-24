@@ -3,13 +3,13 @@
 // screen scaled 1.25× to the canvas; the turn banner and judgement labels use canvas coordinates.
 
 import { Container, Graphics, Sprite } from 'pixi.js';
-import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../../game/layout.ts';
-import type { SceneContext, SceneEntry } from '../../game/scene.ts';
-import type { Chart } from '../../rhythm/chart.ts';
-import { AQUA } from '../../theme/aqua.ts';
-import { THEMES } from '../../theme/tokens.ts';
-import { SCENE_CATALOG } from '../catalog.ts';
-import { LevelScene, type ResultsWindowOptions } from '../shared/level-scene.ts';
+import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
+import type { SceneContext, SceneEntry } from '@/game/scene.ts';
+import type { Chart } from '@/rhythm/chart.ts';
+import { AQUA } from '@/theme/aqua.ts';
+import { THEMES } from '@/theme/tokens.ts';
+import { SCENE_CATALOG } from '@/scenes/catalog.ts';
+import { LevelScene, type ResultsWindowOptions } from '@/scenes/shared/level-scene.ts';
 import { macAssets, preloadMacAssets } from './assets.ts';
 import { AquaAlert } from './components/alert.ts';
 import { Dock, DOCK_HEIGHT, type DockItem } from './components/dock.ts';

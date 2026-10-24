@@ -3,8 +3,8 @@
 // 图标可以弹跳（requestUserAttention），可以带红色未读角标（Mail 的新邮件数）。
 
 import { Container, Graphics, type Text } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
-import { appIcon, type AppIconName } from '../assets.ts';
+import { AQUA } from '@/theme/aqua.ts';
+import { appIcon, type AppIconName } from '@/scenes/mac-2000/assets.ts';
 import { drawFinderIcon, drawTrashIcon } from './icons.ts';
 import { aquaText, stripes, vGradient } from './paint.ts';
 

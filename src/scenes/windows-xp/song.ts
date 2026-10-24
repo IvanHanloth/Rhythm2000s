@@ -1,10 +1,10 @@
 // XP backing track and sound effects. Interface sounds are the original XP sounds,
 // mapped in doc/scenes/windows-xp.md "Sounds".
 
-import type { SequencedSound } from '../../audio/sequencer.ts';
-import { actionTapOffsets, type ActionType } from '../../rhythm/actions.ts';
-import type { Chart } from '../../rhythm/chart.ts';
-import { buildDrumTrack, createDrumKit, type DrumKit } from '../shared/backing-track.ts';
+import type { SequencedSound } from '@/audio/sequencer.ts';
+import { actionTapOffsets, type ActionType } from '@/rhythm/actions.ts';
+import type { Chart } from '@/rhythm/chart.ts';
+import { buildDrumTrack, createDrumKit, type DrumKit } from '@/scenes/shared/backing-track.ts';
 import type { XpSounds } from './assets.ts';
 import { DIALOG_KINDS, isDialogKind, type DialogKind } from './dialog-kinds.ts';
 import { isShellAction, SHELL_ACTIONS, type ShellAction } from './shell-actions.ts';

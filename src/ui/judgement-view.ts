@@ -2,8 +2,8 @@
 // The grade must be readable from the word itself; colour only reinforces it.
 
 import { Container, Graphics, Text } from 'pixi.js';
-import type { JudgementLevel } from '../rhythm/judge.ts';
-import { FONT_FAMILIES, JUDGEMENT_COLORS } from '../theme/tokens.ts';
+import type { JudgementLevel } from '@/rhythm/judge.ts';
+import { FONT_FAMILIES, JUDGEMENT_COLORS } from '@/theme/tokens.ts';
 
 const LABELS: Record<JudgementLevel, string> = {
   perfect: 'Perfect!',

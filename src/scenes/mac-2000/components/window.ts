@@ -3,7 +3,7 @@
 // 原点在窗口中心，方便做缩放动画（与 XP 的弹出窗口一致）。
 
 import { Container, Graphics, type Text } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
+import { AQUA } from '@/theme/aqua.ts';
 import {
   aquaText,
   drawGelBall,

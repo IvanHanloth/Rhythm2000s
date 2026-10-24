@@ -13,10 +13,10 @@ import {
   holdSpans,
   pressBeats,
   type HoldSpan,
-} from '../rhythm/beat-guide.ts';
-import type { Chart } from '../rhythm/chart.ts';
-import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../game/layout.ts';
-import { BEAT_GUIDE_COLORS } from '../theme/tokens.ts';
+} from '@/rhythm/beat-guide.ts';
+import type { Chart } from '@/rhythm/chart.ts';
+import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
+import { BEAT_GUIDE_COLORS } from '@/theme/tokens.ts';
 
 /** 组件中心在画布上的位置：水平正中，垂直在中线偏下（doc/beat-guide.md） */
 export const BEAT_GUIDE_POSITION = { x: DESIGN_WIDTH / 2, y: DESIGN_HEIGHT - 200 };

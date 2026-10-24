@@ -1,9 +1,9 @@
 // One round of a Mac level (doc/scenes/mac-2000.md "Gameplay"). On top of the shared round,
 // each target knows its widget kind and its place among same-kind targets in the phrase.
 
-import type { SceneContext } from '../../game/scene.ts';
-import type { Chart } from '../../rhythm/chart.ts';
-import { createClicks, RoundSession, type RoundTarget } from '../shared/round-session.ts';
+import type { SceneContext } from '@/game/scene.ts';
+import type { Chart } from '@/rhythm/chart.ts';
+import { createClicks, RoundSession, type RoundTarget } from '@/scenes/shared/round-session.ts';
 import {
   isMacAction,
   MAC_ACTIONS,

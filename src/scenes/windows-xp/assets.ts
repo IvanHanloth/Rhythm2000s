@@ -3,34 +3,34 @@
 // 音效与事件的对应关系见 doc/scenes/windows-xp.md「音效」。
 
 import { Assets, Texture } from 'pixi.js';
-import { loadSample, type SampleOptions } from '../../audio/samples.ts';
+import { loadSample, type SampleOptions } from '@/audio/samples.ts';
 import { decodeCur } from './cur-file.ts';
-import tahomaUrl from '../../../assets/reference/windows-xp/fonts/TAHOMA.TTF?url';
-import tahomaBoldUrl from '../../../assets/reference/windows-xp/fonts/TAHOMABD.TTF?url';
-import blissUrl from '../../../assets/reference/windows-xp/wallpapers/Bliss.jpg?url';
-import asteriskUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Error.wav?url';
-import exclamationUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Exclamation.wav?url';
-import criticalStopUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Critical Stop.wav?url';
-import chimesUrl from '../../../assets/reference/windows-xp/sounds/chimes.wav?url';
-import dingUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Ding.wav?url';
-import navigateUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Start.wav?url';
-import menuCommandUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Menu Command.wav?url';
-import balloonUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Balloon.wav?url';
-import tadaUrl from '../../../assets/reference/windows-xp/sounds/tada.wav?url';
-import restoreUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Restore.wav?url';
-import minimizeUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Minimize.wav?url';
-import recycleUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Recycle.wav?url';
-import defaultSoundUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Default.wav?url';
-import hardwareInsertUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Hardware Insert.wav?url';
-import notifyUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Notify.wav?url';
-import chordUrl from '../../../assets/reference/windows-xp/sounds/chord.wav?url';
-import arrowCursorUrl from '../../../assets/reference/windows-xp/icons/default_arrow.cur?url';
+import tahomaUrl from '@assets/reference/windows-xp/fonts/TAHOMA.TTF?url';
+import tahomaBoldUrl from '@assets/reference/windows-xp/fonts/TAHOMABD.TTF?url';
+import blissUrl from '@assets/reference/windows-xp/wallpapers/Bliss.jpg?url';
+import asteriskUrl from '@assets/reference/windows-xp/sounds/Windows XP Error.wav?url';
+import exclamationUrl from '@assets/reference/windows-xp/sounds/Windows XP Exclamation.wav?url';
+import criticalStopUrl from '@assets/reference/windows-xp/sounds/Windows XP Critical Stop.wav?url';
+import chimesUrl from '@assets/reference/windows-xp/sounds/chimes.wav?url';
+import dingUrl from '@assets/reference/windows-xp/sounds/Windows XP Ding.wav?url';
+import navigateUrl from '@assets/reference/windows-xp/sounds/Windows XP Start.wav?url';
+import menuCommandUrl from '@assets/reference/windows-xp/sounds/Windows XP Menu Command.wav?url';
+import balloonUrl from '@assets/reference/windows-xp/sounds/Windows XP Balloon.wav?url';
+import tadaUrl from '@assets/reference/windows-xp/sounds/tada.wav?url';
+import restoreUrl from '@assets/reference/windows-xp/sounds/Windows XP Restore.wav?url';
+import minimizeUrl from '@assets/reference/windows-xp/sounds/Windows XP Minimize.wav?url';
+import recycleUrl from '@assets/reference/windows-xp/sounds/Windows XP Recycle.wav?url';
+import defaultSoundUrl from '@assets/reference/windows-xp/sounds/Windows XP Default.wav?url';
+import hardwareInsertUrl from '@assets/reference/windows-xp/sounds/Windows XP Hardware Insert.wav?url';
+import notifyUrl from '@assets/reference/windows-xp/sounds/Windows XP Notify.wav?url';
+import chordUrl from '@assets/reference/windows-xp/sounds/chord.wav?url';
+import arrowCursorUrl from '@assets/reference/windows-xp/icons/default_arrow.cur?url';
 import { XP_FONT_FAMILY } from './components/xp-text.ts';
 
 /** 图标文件名（不含 .png） → 地址 */
 const ICON_URLS: Record<string, string> = Object.fromEntries(
   Object.entries(
-    import.meta.glob<string>('../../../assets/reference/windows-xp/icons/*.png', {
+    import.meta.glob<string>('/assets/reference/windows-xp/icons/*.png', {
       eager: true,
       query: '?url',
       import: 'default',

@@ -1,5 +1,8 @@
 import { defineConfig } from 'vite-plus';
 
+/** Import aliases, mirrored in tsconfig.json `paths` */
+const alias = { '@/': '/src/', '@assets/': '/assets/', '@public/': '/public/' };
+
 /**
  * 不参与格式化和代码检查的文件：AI 助手和工具生成的目录、技能包锁文件，
  * 以及独立维护的宣发视频工程 promo/（有自己的工具链，见 promo/AGENTS.md）
@@ -13,6 +16,7 @@ const TOOLING_DIRS = [
 ];
 
 export default defineConfig({
+  resolve: { alias },
   build: {
     rolldownOptions: {
       // 多页面：游戏入口 + 各个原型页面（相对项目根目录）

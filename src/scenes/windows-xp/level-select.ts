@@ -3,11 +3,11 @@
 // 单击图标选中，双击或点任务窗格的「Play this level」开始；工具栏「Back」回到网吧。原点在窗口左上角。
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
-import { ACTION_LABELS } from '../../rhythm/actions.ts';
-import type { Chart } from '../../rhythm/chart.ts';
-import { formatDuration, summarizeChart } from '../../rhythm/chart-summary.ts';
-import { LUNA } from '../../theme/xp-luna.ts';
-import { DoubleClick } from '../../ui/double-click.ts';
+import { ACTION_LABELS } from '@/rhythm/actions.ts';
+import type { Chart } from '@/rhythm/chart.ts';
+import { formatDuration, summarizeChart } from '@/rhythm/chart-summary.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
+import { DoubleClick } from '@/ui/double-click.ts';
 import { xpAssets } from './assets.ts';
 import {
   edgeRing,

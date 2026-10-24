@@ -1,7 +1,7 @@
 // XP 场景里点在任务栏、桌面、程序窗口上的四个动作（doc/scenes/windows-xp-levels.md）：
 // 托盘气泡、程序窗口最小化、开始菜单、回收站。不依赖 PixiJS，谱面校验和单元测试都能直接用。
 
-import type { ActionType } from '../../rhythm/actions.ts';
+import type { ActionType } from '@/rhythm/actions.ts';
 import type { XpSoundName } from './assets.ts';
 
 export type ShellAction = Extract<

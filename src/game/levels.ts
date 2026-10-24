@@ -2,8 +2,8 @@
 // The net café has one computer per scene; inside, levels are picked in Explorer / Finder (doc/level-select.md). #scene/chart opens a level directly.
 // No DOM, so unit tests can use it directly.
 
-import { ACTION_LABELS } from '../rhythm/actions.ts';
-import type { Chart } from '../rhythm/chart.ts';
+import { ACTION_LABELS } from '@/rhythm/actions.ts';
+import type { Chart } from '@/rhythm/chart.ts';
 
 export interface Level {
   /** Chart id */

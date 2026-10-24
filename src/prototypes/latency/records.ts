@@ -1,6 +1,6 @@
 // 延迟测试的输入记录与分组统计。
 
-import { suggestCalibration, summarize, type Summary } from '../../latency/stats.ts';
+import { suggestCalibration, summarize, type Summary } from '@/latency/stats.ts';
 
 export type InputKind = 'keyboard' | 'mouse' | 'touch' | 'pen';
 export type Method = 'A' | 'B';

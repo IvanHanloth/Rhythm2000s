@@ -2,7 +2,7 @@
 // 默认按钮是蓝色，并且会缓慢「呼吸」（原版的默认按钮一直在明暗之间脉动）；其他按钮是白色。
 
 import { Container, Graphics } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
+import { AQUA } from '@/theme/aqua.ts';
 import { aquaText, drawGelPill } from './paint.ts';
 
 export const PUSH_BUTTON_HEIGHT = 20;

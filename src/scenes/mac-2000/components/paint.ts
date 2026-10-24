@@ -2,7 +2,7 @@
 // 原版的这些图形都是位图，这里用渐变矢量近似（doc/scenes/mac-2000.md「本地素材缺口」）。
 
 import { BlurFilter, FillGradient, FillPattern, Graphics, Text, Texture } from 'pixi.js';
-import { AQUA, AQUA_FONT, type BallColors, type GelColors } from '../../../theme/aqua.ts';
+import { AQUA, AQUA_FONT, type BallColors, type GelColors } from '@/theme/aqua.ts';
 
 type Stops = readonly (readonly [offset: number, color: string])[];
 

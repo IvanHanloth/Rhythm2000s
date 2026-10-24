@@ -3,15 +3,15 @@
 // the turn banner and judgement labels use canvas coordinates.
 
 import { Container } from 'pixi.js';
-import type { SceneContext, SceneEntry } from '../../game/scene.ts';
-import type { Chart } from '../../rhythm/chart.ts';
-import { BEATS, THEMES } from '../../theme/tokens.ts';
-import { clamp01, easeOutBack } from '../../ui/easing.ts';
-import { createJudgementView } from '../../ui/judgement-view.ts';
-import { SCENE_CATALOG } from '../catalog.ts';
-import type { Turn } from '../shared/cursor-path.ts';
-import { LevelScene, type ResultsWindowOptions } from '../shared/level-scene.ts';
-import type { JudgementRecord } from '../shared/round-session.ts';
+import type { SceneContext, SceneEntry } from '@/game/scene.ts';
+import type { Chart } from '@/rhythm/chart.ts';
+import { BEATS, THEMES } from '@/theme/tokens.ts';
+import { clamp01, easeOutBack } from '@/ui/easing.ts';
+import { createJudgementView } from '@/ui/judgement-view.ts';
+import { SCENE_CATALOG } from '@/scenes/catalog.ts';
+import type { Turn } from '@/scenes/shared/cursor-path.ts';
+import { LevelScene, type ResultsWindowOptions } from '@/scenes/shared/level-scene.ts';
+import type { JudgementRecord } from '@/scenes/shared/round-session.ts';
 import { preloadXpAssets, XP_CURSOR, xpAssets } from './assets.ts';
 import { XpDesktop } from './components/desktop.ts';
 import { XpMessageBox } from './components/message-box.ts';

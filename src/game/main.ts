@@ -2,10 +2,10 @@
 // Opens the street hub by default (title screen + level select, ADR 0005); sitting at a computer switches to the rhythm scene's canvas.
 
 import './style.css';
-import { AudioClock } from '../audio/audio-clock.ts';
-import { Hub } from '../hub/hub.ts';
-import { mac2000Scene } from '../scenes/mac-2000/scene.ts';
-import { windowsXpScene } from '../scenes/windows-xp/scene.ts';
+import { AudioClock } from '@/audio/audio-clock.ts';
+import { Hub } from '@/hub/hub.ts';
+import { mac2000Scene } from '@/scenes/mac-2000/scene.ts';
+import { windowsXpScene } from '@/scenes/windows-xp/scene.ts';
 import { fetchChartFromSite, loadCharts } from './chart-loader.ts';
 import { createDevPanel } from './dev-panel.ts';
 import { GameCanvas } from './game-canvas.ts';

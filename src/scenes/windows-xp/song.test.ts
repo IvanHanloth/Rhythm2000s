@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { buildChart } from '../../rhythm/chart.ts';
-import { sourceFromPatterns } from '../../rhythm/test-charts.ts';
+import { buildChart } from '@/rhythm/chart.ts';
+import { sourceFromPatterns } from '@/rhythm/test-charts.ts';
 import { DIALOG_KINDS } from './dialog-kinds.ts';
 import { buildBackingTrack, type XpSongSounds } from './song.ts';
 import { loadMvpChart } from './test-mvp-chart.ts';

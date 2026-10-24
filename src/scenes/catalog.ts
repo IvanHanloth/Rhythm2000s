@@ -1,8 +1,8 @@
 // Scene catalog: each scene's name, supported actions and extra chart rules.
 // No PixiJS, so the chart loader and unit tests can use it directly.
 
-import type { ActionType } from '../rhythm/actions.ts';
-import type { Chart } from '../rhythm/chart.ts';
+import type { ActionType } from '@/rhythm/actions.ts';
+import type { Chart } from '@/rhythm/chart.ts';
 import { MAC_ACTION_TYPES } from './mac-2000/action-kinds.ts';
 import { checkMacChart } from './mac-2000/chart-rules.ts';
 import { checkWindowsXpChart } from './windows-xp/chart-rules.ts';

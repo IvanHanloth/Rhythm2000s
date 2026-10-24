@@ -1,8 +1,8 @@
 // 大厅的声音：坐到电脑前时，XP 机器响 XP 的登录声，iMac 响经典 Mac 的开机和弦（原版素材，ADR 0004）。
 // 用到时才下载、解码，之后缓存。音频上下文和节奏关卡共用同一个。
 
-import xpLogonUrl from '../../assets/reference/windows-xp/sounds/Windows XP Logon Sound.wav?url';
-import macChimeUrl from '../../assets/reference/mac-os-classic/sounds/Startup Chime.mp3?url';
+import xpLogonUrl from '@assets/reference/windows-xp/sounds/Windows XP Logon Sound.wav?url';
+import macChimeUrl from '@assets/reference/mac-os-classic/sounds/Startup Chime.mp3?url';
 
 const STARTUP_URLS: Record<string, string> = {
   'windows-xp': xpLogonUrl,

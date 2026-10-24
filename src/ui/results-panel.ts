@@ -3,7 +3,7 @@
 // Top-left at (0, 0).
 
 import { Container, Graphics, Text } from 'pixi.js';
-import type { JudgementLevel } from '../rhythm/judge.ts';
+import type { JudgementLevel } from '@/rhythm/judge.ts';
 import {
   formatScore,
   OFFSET_BIN_MS,
@@ -11,8 +11,8 @@ import {
   RANK_LABELS,
   type Rank,
   type ResultSummary,
-} from '../rhythm/result-summary.ts';
-import { BEAT_GUIDE_COLORS, FONT_FAMILIES, JUDGEMENT_COLORS } from '../theme/tokens.ts';
+} from '@/rhythm/result-summary.ts';
+import { BEAT_GUIDE_COLORS, FONT_FAMILIES, JUDGEMENT_COLORS } from '@/theme/tokens.ts';
 
 export interface PanelTextStyle {
   size: number;

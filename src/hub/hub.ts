@@ -18,7 +18,7 @@ import {
   Vector3,
   WebGLRenderer,
 } from 'three';
-import { STREET_COLORS as C } from '../theme/street.ts';
+import { STREET_COLORS as C } from '@/theme/street.ts';
 import { pushOut, type Point } from './collision.ts';
 import {
   clampPitch,

@@ -3,8 +3,8 @@
 // 普通程序窗口（如资源管理器）前面还有蓝色的最小化、最大化按钮，标题左边有 16 像素的程序图标。原点在左上角。
 
 import { CanvasTextMetrics, Container, Graphics, Sprite, TextStyle, type Text } from 'pixi.js';
-import { LUNA } from '../../../theme/xp-luna.ts';
-import { xpAssets } from '../assets.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
+import { xpAssets } from '@/scenes/windows-xp/assets.ts';
 import { topRoundedRect, verticalGradient } from './draw.ts';
 import { hardShadow, xpText, XP_FONTS } from './xp-text.ts';
 

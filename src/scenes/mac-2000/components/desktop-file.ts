@@ -2,8 +2,8 @@
 // 下面是白色带阴影的文件名。dock-trash 动作和 Mac 部件展示页共用。
 
 import { Container } from 'pixi.js';
-import { AQUA } from '../../../theme/aqua.ts';
-import { appIcon, type AppIconName } from '../assets.ts';
+import { AQUA } from '@/theme/aqua.ts';
+import { appIcon, type AppIconName } from '@/scenes/mac-2000/assets.ts';
 import { drawDocumentIcon, drawFolderIcon } from './icons.ts';
 import { aquaText } from './paint.ts';
 

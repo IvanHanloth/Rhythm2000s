@@ -2,7 +2,7 @@
 // 这些是菜单类界面，可以用 CSS 过渡（设计系统「动效」一节）；颜色从 src/theme 注入成 CSS 变量。
 
 import './hub.css';
-import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS, THEMES } from '../theme/tokens.ts';
+import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS, THEMES } from '@/theme/tokens.ts';
 
 /** 坐下后卡片上显示的关卡信息（一关就是一首谱面） */
 export interface LevelInfo {

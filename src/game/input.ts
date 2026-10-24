@@ -3,7 +3,7 @@
 // (doc/scenes/windows-xp-levels.md, "Input: release").
 // The input time is the event's timeStamp, converted to "the audio the speakers were playing at that moment".
 
-import type { AudioClock } from '../audio/audio-clock.ts';
+import type { AudioClock } from '@/audio/audio-clock.ts';
 import type { TapInfo } from './scene.ts';
 
 /**

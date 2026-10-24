@@ -5,12 +5,12 @@
 // Presses whose kind is `auto` (the release of volume-mute / menu-volume) are completed by the game
 // after the previous press hits: they play their sound but are neither judged nor scored.
 
-import { Sequencer, type SequencedSound } from '../../audio/sequencer.ts';
-import type { SceneContext } from '../../game/scene.ts';
-import { actionTapKind, actionTapOffsets } from '../../rhythm/actions.ts';
-import { beatToTime, timeToBeat } from '../../rhythm/beat.ts';
-import type { Chart, ChartCue } from '../../rhythm/chart.ts';
-import { ResponseJudge, type Judgement, type JudgementLevel } from '../../rhythm/judge.ts';
+import { Sequencer, type SequencedSound } from '@/audio/sequencer.ts';
+import type { SceneContext } from '@/game/scene.ts';
+import { actionTapKind, actionTapOffsets } from '@/rhythm/actions.ts';
+import { beatToTime, timeToBeat } from '@/rhythm/beat.ts';
+import type { Chart, ChartCue } from '@/rhythm/chart.ts';
+import { ResponseJudge, type Judgement, type JudgementLevel } from '@/rhythm/judge.ts';
 
 /** Delay (s) between starting a round and beat 0 */
 const LEAD_IN = 0.2;

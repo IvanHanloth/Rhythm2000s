@@ -2,9 +2,9 @@
 // 底部「Retry」「Levels」「Next Level」三个按钮可以用鼠标点。原点在窗口中心，方便做弹出动画。
 
 import { Container, Graphics } from 'pixi.js';
-import { LUNA } from '../../theme/xp-luna.ts';
-import type { ResultsWindowOptions } from '../shared/level-scene.ts';
-import { createResultsPanel, type ResultsKit } from '../../ui/results-panel.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
+import type { ResultsWindowOptions } from '@/scenes/shared/level-scene.ts';
+import { createResultsPanel, type ResultsKit } from '@/ui/results-panel.ts';
 import { BUTTON_HEIGHT, XpButton } from './components/button.ts';
 import { CAPTION_HEIGHT, FRAME_WIDTH, XpWindowFrame } from './components/window-frame.ts';
 import { xpText } from './components/xp-text.ts';

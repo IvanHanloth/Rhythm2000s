@@ -2,7 +2,7 @@
 // Tahoma 由 assets.ts 从本地素材加载，Trebuchet MS 用系统里装的；后面的中文字体只是兜底。
 
 import { Text, type TextStyleOptions } from 'pixi.js';
-import { LUNA } from '../../../theme/xp-luna.ts';
+import { LUNA } from '@/theme/xp-luna.ts';
 
 /** 从 assets/reference/windows-xp/fonts/ 加载的 Tahoma，起个独立的名字，避免和系统里的 Tahoma 混淆 */
 export const XP_FONT_FAMILY = 'XP Tahoma';

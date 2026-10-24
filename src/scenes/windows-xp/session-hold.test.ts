@@ -1,9 +1,9 @@
 // 等待与长按两个动作的判定（doc/scenes/windows-xp-levels.md「判定（暂定）」）。
 
 import { describe, expect, it } from 'vite-plus/test';
-import type { SceneContext } from '../../game/scene.ts';
-import { buildChart } from '../../rhythm/chart.ts';
-import { sourceFromPatterns } from '../../rhythm/test-charts.ts';
+import type { SceneContext } from '@/game/scene.ts';
+import { buildChart } from '@/rhythm/chart.ts';
+import { sourceFromPatterns } from '@/rhythm/test-charts.ts';
 import { DIALOG_KINDS } from './dialog-kinds.ts';
 import { XpSession } from './session.ts';
 import { buildBackingTrack, type XpSongSounds } from './song.ts';
