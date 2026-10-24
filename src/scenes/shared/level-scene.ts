@@ -13,10 +13,13 @@
 // In editor mode (doc/chart-editor.md) HackerEditor takes the level list's place after the "Welcome Back Hacker"
 // opening: Play and Test run the edited chart from the selected phrase, without demos, results or records, and
 // return to the editor.
+// The Rickroll easter egg (doc/easter-eggs.md): finished charts unlock a message in the mail program, whose link
+// opens the browser; both are modal windows over the level list, drawn by each scene.
 
 import { Container, Rectangle } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
 import { listErrors } from '@/game/chart-library.ts';
+import { Mailbox, type MailState } from '@/game/mailbox.ts';
 import { recordScore } from '@/game/records.ts';
 import type { FrameInfo, Scene, SceneContext, SceneMode, TapInfo } from '@/game/scene.ts';
 import type { ChartEditor } from '@/editor/chart-editor.ts';
@@ -157,6 +160,26 @@ export interface EditorWindowOptions {
   onClose: () => void;
 }
 
+/** What a scene's mail window (Outlook Express, Mail) is given (doc/easter-eggs.md) */
+export interface MailWindowOptions {
+  /** The 4chan message and whether it has been read; null while the inbox is empty */
+  message: { read: boolean } | null;
+  /** The message was clicked: it is now read */
+  onRead: () => void;
+  /** The link in the message: the browser replaces the mail window */
+  onOpenLink: () => void;
+  /** The close button or Esc */
+  onClose: () => void;
+}
+
+/** What a scene's browser window (Internet Explorer, Safari) is given (doc/easter-eggs.md) */
+export interface BrowserWindowOptions {
+  /** Where the mirror page puts the YouTube player (SceneContext.overlay, ADR 0014) */
+  overlay: HTMLElement;
+  /** The close button or Esc */
+  onClose: () => void;
+}
+
 /** HackerEditor's window on the desktop, in place of the level list */
 export interface EditorWindow {
   readonly view: Container;
@@ -230,6 +253,12 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   private comboSeen = 0;
   /** HackerEditor, in editor mode once opened */
   private desk: { desk: EditorDesk; window: EditorWindow; entry: TextEntry } | null = null;
+  /** Finished charts and the easter egg's message (doc/easter-eggs.md) */
+  private readonly mailbox = new Mailbox();
+  /** The mailbox's state, read again only when it can change */
+  private mailState: MailState = this.mailbox.state;
+  /** The new-mail notice has shown during this visit */
+  private mailNoticed = false;
 
   constructor(context: SceneContext, options: LevelSceneOptions) {
     this.context = context;
@@ -311,6 +340,12 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   protected abstract clearComboEffects(): void;
   /** Opens HackerEditor's window on the desktop (editor mode) */
   protected abstract openEditorWindow(options: EditorWindowOptions): EditorWindow;
+  /** The mail program with the easter egg's inbox (doc/easter-eggs.md) */
+  protected abstract openMailWindow(options: MailWindowOptions): ModalWindow;
+  /** The browser on the 4chan thread */
+  protected abstract openBrowserWindow(options: BrowserWindowOptions): ModalWindow;
+  /** The message is unread and the level list has come up idle: the new-mail notice, once per visit */
+  protected abstract showMailNotice(): void;
 
   /** HackerEditor's window in editor mode; the scene shows it where the level list would be */
   protected get editorWindow(): EditorWindow | null {
@@ -343,6 +378,36 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
         onClose: () => this.closeModal(),
         onTestLatency: () => this.openLatencyTest(),
       }),
+    );
+  }
+
+  /** The message waits unread on a level-list computer and no round is on: the desktop shows its unread mark */
+  protected get mailWaiting(): boolean {
+    return this.mode === 'levels' && this.mailState === 'unread' && this.session === null;
+  }
+
+  /** The desktop's mail program (XP's "E-mail", the Mac's Mail): its inbox over the level list */
+  protected openMail(): void {
+    this.closeMenus();
+    if (this.mode !== 'levels' || !this.desktopIdle) return;
+    this.showModal(
+      this.openMailWindow({
+        message: this.mailState === 'empty' ? null : { read: this.mailState === 'read' },
+        onRead: () => {
+          this.mailbox.markRead();
+          this.mailState = this.mailbox.state;
+        },
+        onOpenLink: () => this.openBrowser(),
+        onClose: () => this.closeModal(),
+      }),
+    );
+  }
+
+  /** The message's link: the browser replaces the mail window */
+  private openBrowser(): void {
+    if (this.state !== 'select') return;
+    this.showModal(
+      this.openBrowserWindow({ overlay: this.context.overlay, onClose: () => this.closeModal() }),
     );
   }
 
@@ -482,6 +547,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   update({ audioTime }: FrameInfo): void {
     this.updateDesktop(audioTime);
     this.modal?.update?.(audioTime);
+    if (!this.mailNoticed && this.mailWaiting && this.desktopIdle) {
+      this.mailNoticed = true;
+      this.showMailNotice();
+    }
 
     const session = this.session;
     if (this.state !== 'playing' || !session) return;
@@ -842,6 +911,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     const summary = summarizeResult(run.hits);
     const assisted = run.assisted;
     const newRecord = recordScore(chart.id, summary.score, assisted);
+    this.mailbox.recordFinished(chart.id);
+    this.mailState = this.mailbox.state;
     const hasNext = this.charts.indexOf(chart) < this.charts.length - 1;
     this.endRound();
     this.closeModal();

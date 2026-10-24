@@ -1,7 +1,8 @@
 // XP Start menu: blue user bar with an orange rule; white left column (pinned, frequent, "All Programs"),
 // light blue right column (system folders and tools); blue footer with "Log Off" and "Turn Off Computer".
 // Hovered items are white on blue. Items without a local icon are left out, except "Control Panel" (it opens the
-// settings, doc/settings.md), whose icon is drawn as vectors. The footer items leave the computer. Origin at the top left.
+// settings, doc/settings.md), whose icon is drawn as vectors. "E-mail" opens Outlook Express (doc/easter-eggs.md).
+// The footer items leave the computer. Origin at the top left.
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -18,6 +19,8 @@ const BODY_PADDING = 6;
 const SEPARATOR_HEIGHT = 9;
 const ALL_PROGRAMS_HEIGHT = 30;
 
+/** Label of the item that opens Outlook Express (doc/easter-eggs.md) */
+export const E_MAIL = 'E-mail';
 /** Label of the item that opens the settings window */
 export const CONTROL_PANEL = 'Control Panel';
 /** Footer items that leave the computer for the café */
@@ -39,7 +42,7 @@ type Entry = ItemSpec | 'separator';
 
 const PINNED: ItemSpec[] = [
   { icon: 'internet-explorer', label: 'Internet', subtitle: 'Internet Explorer', bold: true },
-  { icon: 'outlook-express', label: 'E-mail', subtitle: 'Outlook Express', bold: true },
+  { icon: 'outlook-express', label: E_MAIL, subtitle: 'Outlook Express', bold: true },
 ];
 const FREQUENT: ItemSpec[] = [
   { icon: 'windows-media-player', label: 'Windows Media Player' },

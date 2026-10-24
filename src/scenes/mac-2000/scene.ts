@@ -1,6 +1,7 @@
 // Scene: a Mac desktop from around 2000 (doc/scenes/mac-2000.md), the early Aqua of US English Mac OS X 10.0–10.2.
 // Levels are picked in a Finder window; on the list the Apple menu's "System Preferences…" opens the settings
-// window (doc/settings.md) and "Shut Down…" / "Log Out…" leave the computer. In editor mode HackerEditor's window takes the Finder's place (doc/chart-editor.md) and
+// window (doc/settings.md) and "Shut Down…" / "Log Out…" leave the computer. Mail in the Dock opens the Rickroll
+// easter egg's inbox (doc/easter-eggs.md); its new-mail notice is Mail bouncing with its badge at 1. In editor mode HackerEditor's window takes the Finder's place (doc/chart-editor.md) and
 // the menu bar names it as the front application. The interface is drawn at original pixel size on a 1024×576 virtual
 // screen scaled 1.25× to the canvas; the turn banner and judgement labels use canvas coordinates.
 
@@ -13,29 +14,33 @@ import { AQUA } from '@/theme/aqua.ts';
 import { THEMES } from '@/theme/tokens.ts';
 import { SCENE_CATALOG } from '@/scenes/catalog.ts';
 import {
+  type BrowserWindowOptions,
   type EditorWindowOptions,
   type LatencyTestWindowOptions,
   LevelScene,
+  type MailWindowOptions,
   type MessageWindowOptions,
   type ResultsWindowOptions,
   type SettingsWindowOptions,
 } from '@/scenes/shared/level-scene.ts';
 import { macAssets, preloadMacAssets } from './assets.ts';
 import { AquaAlert } from './components/alert.ts';
-import { Dock, DOCK_HEIGHT, type DockItem } from './components/dock.ts';
+import { Dock, DOCK_HEIGHT, DOCK_ICON_SIZE, type DockItem } from './components/dock.ts';
 import { drawCautionIcon } from './components/icons.ts';
 import { APPLE_MENU, AquaMenu, LOG_OUT, SHUT_DOWN, SYSTEM_PREFERENCES } from './components/menu.ts';
 import { APPLE_MENU_LEFT, MENU_BAR_HEIGHT, MenuBar } from './components/menu-bar.ts';
 import { EDITOR_TITLE, MacEditorWindow } from './editor-window.ts';
 import { MacLatencyTestWindow } from './latency-test-window.ts';
 import { MacLevelSelect } from './level-select.ts';
+import { MacMailWindow } from './mail-window.ts';
 import { MacComboEffects } from './combo-effects.ts';
 import { MacMessageWindow } from './message-window.ts';
 import { MacResultsWindow } from './results-window.ts';
+import { MacSafariWindow } from './safari-window.ts';
 import { MacSession } from './session.ts';
 import { MacSettingsWindow } from './settings-window.ts';
 import { createMacSongSounds, type MacSongSounds } from './song.ts';
-import { MacTargetsView } from './targets-view.ts';
+import { MAIL_DOCK_INDEX, MacTargetsView } from './targets-view.ts';
 import { MacVirtualMouse } from './virtual-mouse.ts';
 
 const SCREEN_SCALE = 1.25;
@@ -70,6 +75,11 @@ const DOCK_ITEMS: DockItem[] = [
   { icon: 'System Preferences' },
 ];
 
+/** Mail's new-mail bounce (doc/easter-eggs.md): hops, length of each (s) and height (virtual screen px) */
+const MAIL_BOUNCES = 3;
+const MAIL_BOUNCE_SECONDS = 0.6;
+const MAIL_BOUNCE_HEIGHT = 26;
+
 /** Vertical centres on the virtual screen: alerts, and the results window between menu bar and Dock */
 const DIALOG_Y = 250;
 const RESULTS_Y = 266;
@@ -99,6 +109,8 @@ class Mac2000Scene extends LevelScene<MacSession> {
   /** Dock wave, glow, visualizer bands and the beach ball (doc/combo.md) */
   private readonly comboEffects: MacComboEffects;
   private virtualMouse: MacVirtualMouse | null = null;
+  /** Audio time Mail started bouncing for new mail, or null */
+  private mailBounceStart: number | null = null;
 
   constructor(context: SceneContext) {
     super(context, {
@@ -147,6 +159,18 @@ class Mac2000Scene extends LevelScene<MacSession> {
     );
     apple.on('pointerdown', () => this.openAppleMenu());
     this.menuBar.view.addChild(apple);
+    // Mail in the Dock opens the inbox on the level list
+    const mail = new Container({ label: 'mail-hit' });
+    mail.eventMode = 'static';
+    const mailCenter = this.dock.iconCenter(MAIL_DOCK_INDEX);
+    mail.hitArea = new Rectangle(
+      mailCenter.x - DOCK_ICON_SIZE / 2,
+      mailCenter.y - DOCK_ICON_SIZE / 2,
+      DOCK_ICON_SIZE,
+      DOCK_ICON_SIZE,
+    );
+    mail.on('pointertap', () => this.openMail());
+    this.dock.view.addChild(mail);
     this.menuLayer.eventMode = 'static';
     this.menuLayer.on('pointerdown', (event) => {
       if (event.target === this.menuLayer) this.closeMenus();
@@ -206,6 +230,44 @@ class Mac2000Scene extends LevelScene<MacSession> {
     // The menu bar clock is decoration showing local time, unrelated to the rhythm
     this.menuBar.update(new Date());
     if (this.levelList.view.visible) this.levelList.update(audioTime);
+    // Outside a round Mail's badge and hops belong to the easter egg; in a round, to the round's targets
+    if (!this.session) {
+      this.dock.setBadge(MAIL_DOCK_INDEX, this.mailWaiting ? 1 : 0);
+      this.dock.setLift(MAIL_DOCK_INDEX, this.mailBounceLift(audioTime));
+    }
+  }
+
+  /** Mail's height in its new-mail hops at `audioTime`, 0 once they are over */
+  private mailBounceLift(audioTime: number): number {
+    if (this.mailBounceStart === null) return 0;
+    const t = audioTime - this.mailBounceStart;
+    if (t < 0) return 0;
+    if (t >= MAIL_BOUNCES * MAIL_BOUNCE_SECONDS) {
+      this.mailBounceStart = null;
+      return 0;
+    }
+    const p = (t % MAIL_BOUNCE_SECONDS) / MAIL_BOUNCE_SECONDS;
+    return MAIL_BOUNCE_HEIGHT * 4 * p * (1 - p);
+  }
+
+  /** Mail bounces with its badge at 1 and the Ping sound */
+  protected showMailNotice(): void {
+    this.mailBounceStart = this.context.clock.heardNow();
+    this.playNow(this.sounds.byName.Ping);
+  }
+
+  protected openMailWindow(options: MailWindowOptions): MacMailWindow {
+    const mail = new MacMailWindow(options);
+    mail.view.position.set(SCREEN_WIDTH / 2, RESULTS_Y);
+    this.dialogLayer.addChild(mail.view);
+    return mail;
+  }
+
+  protected openBrowserWindow(options: BrowserWindowOptions): MacSafariWindow {
+    const browser = new MacSafariWindow(options);
+    browser.view.position.set(SCREEN_WIDTH / 2, RESULTS_Y);
+    this.dialogLayer.addChild(browser.view);
+    return browser;
   }
 
   protected createSession(chart: Chart): MacSession {

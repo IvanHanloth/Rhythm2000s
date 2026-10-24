@@ -132,6 +132,18 @@ export const AQUA = {
   /** White file name under desktop icons and its shadow */
   desktopLabel: { text: '#ffffff', shadow: '#000000' },
 
+  /**
+   * Mail 1.x and Safari 1.0 in the Rickroll easter egg (doc/easter-eggs.md): links, Mail's unread dot, list column
+   * headers and Safari's address field edge
+   */
+  web: {
+    link: '#0000ee',
+    unread: '#3875d7',
+    listHeaderTop: '#ffffff',
+    listHeaderBottom: '#dadada',
+    fieldEdge: '#8c8c8c',
+  },
+
   /** iChat 1.0 speech bubble: light blue gradient, slightly darker edge */
   chatBubble: { top: '#e3f0ff', bottom: '#b9d6fb', edge: '#7da5d8' },
 

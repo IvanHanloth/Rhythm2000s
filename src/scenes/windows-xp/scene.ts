@@ -1,6 +1,7 @@
 // Scene: the Windows XP desktop (doc/scenes/windows-xp.md). Levels are picked in an Explorer window; on the list,
 // "start" opens the Start menu, whose "Control Panel" opens the settings window (doc/settings.md)
-// and whose "Log Off" / "Turn Off Computer" leave the computer.
+// and whose "Log Off" / "Turn Off Computer" leave the computer. "E-mail" opens Outlook Express for the Rickroll easter
+// egg (doc/easter-eggs.md), whose new-mail notice is the tray envelope and a balloon.
 // The XP interface is drawn at original pixel size on a 1024×576 virtual screen scaled up to the canvas;
 // the turn banner and judgement labels use canvas coordinates.
 
@@ -14,15 +15,18 @@ import { createJudgementView } from '@/ui/judgement-view.ts';
 import { SCENE_CATALOG } from '@/scenes/catalog.ts';
 import type { Turn } from '@/scenes/shared/cursor-path.ts';
 import {
+  type BrowserWindowOptions,
   type EditorWindowOptions,
   type LatencyTestWindowOptions,
   LevelScene,
+  type MailWindowOptions,
   type MessageWindowOptions,
   type ResultsWindowOptions,
   type SettingsWindowOptions,
 } from '@/scenes/shared/level-scene.ts';
 import type { JudgementRecord } from '@/scenes/shared/round-session.ts';
 import { preloadXpAssets, XP_CURSOR, xpAssets } from './assets.ts';
+import { XpBalloon } from './components/balloon.ts';
 import { XpDesktop } from './components/desktop.ts';
 import { EDITOR_ICON, EDITOR_TITLE, XpEditorWindow } from './editor-window.ts';
 import { XpMessageBox } from './components/message-box.ts';
@@ -32,13 +36,21 @@ import {
   XP_SCREEN_HEIGHT,
   XP_SCREEN_WIDTH,
 } from './components/screen.ts';
-import { CONTROL_PANEL, LOG_OFF, TURN_OFF_COMPUTER, XpStartMenu } from './components/start-menu.ts';
+import {
+  CONTROL_PANEL,
+  E_MAIL,
+  LOG_OFF,
+  TURN_OFF_COMPUTER,
+  XpStartMenu,
+} from './components/start-menu.ts';
 import { XpTaskbar } from './components/taskbar.ts';
 import { isDialogKind, type DialogKind } from './dialog-kinds.ts';
+import { XpInternetExplorerWindow } from './internet-explorer-window.ts';
 import { XpLatencyTestWindow } from './latency-test-window.ts';
 import { EXPLORER_TITLE, XpLevelSelect } from './level-select.ts';
 import { XpComboEffects } from './combo-effects.ts';
 import { XpMessageWindow } from './message-window.ts';
+import { XpOutlookExpressWindow } from './outlook-express-window.ts';
 import { XpResultsWindow } from './results-window.ts';
 import { XpSession, type XpTarget } from './session.ts';
 import { XpSettingsWindow } from './settings-window.ts';
@@ -112,6 +124,9 @@ const FLASH_BEATS = 0.75;
 /** Fade-out of message boxes and judgement labels (beats) */
 const FADE_BEATS = 0.25;
 
+/** Width of the new-mail balloon */
+const MAIL_BALLOON_WIDTH = 240;
+
 /** Explorer window on the virtual screen (the 1120×630 mock-up scaled to 1024×576) */
 const EXPLORER = { x: 80, y: 19, width: 864, height: 504 };
 /** HackerEditor's window: nearly the whole work area (doc/chart-editor.md) */
@@ -140,6 +155,8 @@ class WindowsXpScene extends LevelScene<XpSession> {
   /** Virtual mouse and context menu, on top of the XP interface */
   private readonly pointerLayer = new Container({ label: 'pointer' });
   private startMenu: XpStartMenu | null = null;
+  /** The new-mail balloon over the tray envelope (doc/easter-eggs.md), above the taskbar */
+  private mailBalloon: XpBalloon | null = null;
   /** Icons hopping, the brighter sky and the 3D Pipes (doc/combo.md) */
   private readonly comboEffects: XpComboEffects;
 
@@ -185,6 +202,8 @@ class WindowsXpScene extends LevelScene<XpSession> {
     const start = this.taskbar.startButton.view;
     start.eventMode = 'static';
     start.on('pointerdown', () => this.openStartMenu());
+    this.taskbar.mailIcon.eventMode = 'static';
+    this.taskbar.mailIcon.on('pointertap', () => this.openMail());
 
     if (this.charts.length === 0 && this.mode === 'levels') this.showNoCharts();
     this.openRequestedLevel();
@@ -243,10 +262,60 @@ class WindowsXpScene extends LevelScene<XpSession> {
   protected override updateDesktop(): void {
     // The taskbar clock is decoration showing local time, unrelated to the rhythm
     this.taskbar.setClock(new Date());
+    this.taskbar.setMailShown(this.mailWaiting);
   }
 
   protected override onLevelOpened(): void {
+    this.closeMailBalloon();
     this.playNow(this.sounds.close);
+  }
+
+  /** "E-mail", the envelope or the balloon: the balloon goes, Outlook Express opens */
+  protected override openMail(): void {
+    this.closeMailBalloon();
+    super.openMail();
+  }
+
+  protected openMailWindow(options: MailWindowOptions): XpOutlookExpressWindow {
+    const mail = new XpOutlookExpressWindow(options);
+    mail.view.position.set(XP_SCREEN_WIDTH / 2, WORK_AREA_HEIGHT / 2);
+    this.dialogLayer.addChild(mail.view);
+    return mail;
+  }
+
+  protected openBrowserWindow(options: BrowserWindowOptions): XpInternetExplorerWindow {
+    const browser = new XpInternetExplorerWindow(options);
+    browser.view.position.set(XP_SCREEN_WIDTH / 2, WORK_AREA_HEIGHT / 2);
+    this.dialogLayer.addChild(browser.view);
+    return browser;
+  }
+
+  /** The New Mail Notification sound and a balloon over the tray envelope; clicking it opens Outlook Express */
+  protected showMailNotice(): void {
+    this.closeMailBalloon();
+    this.taskbar.setMailShown(true);
+    const balloon = new XpBalloon({
+      title: 'Outlook Express',
+      text: 'You have 1 new message. Click here to read it.',
+      icon: 'outlook-express',
+      width: MAIL_BALLOON_WIDTH,
+      onClose: () => this.closeMailBalloon(),
+    });
+    const tip = this.taskbar.mailIconTop;
+    balloon.view.position.set(tip.x, this.taskbar.view.y + tip.y);
+    // The whole balloon is clickable, not only its close button
+    const bounds = balloon.view.getLocalBounds();
+    balloon.view.hitArea = new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
+    balloon.view.eventMode = 'static';
+    balloon.view.on('pointertap', () => this.openMail());
+    this.menuLayer.addChildAt(balloon.view, 0);
+    this.mailBalloon = balloon;
+    this.playNow(xpAssets().sounds.newMail);
+  }
+
+  private closeMailBalloon(): void {
+    this.mailBalloon?.destroy();
+    this.mailBalloon = null;
   }
 
   protected createSession(chart: Chart): XpSession {
@@ -366,6 +435,7 @@ class WindowsXpScene extends LevelScene<XpSession> {
         this.playNow(this.sounds.menuCommand);
         this.closeMenus();
         if (label === CONTROL_PANEL) this.openSettings();
+        else if (label === E_MAIL) this.openMail();
         else if (label === LOG_OFF || label === TURN_OFF_COMPUTER) this.leaveComputer();
       },
     });

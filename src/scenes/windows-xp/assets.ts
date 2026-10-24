@@ -26,6 +26,7 @@ import hardwareRemoveUrl from '@assets/reference/windows-xp/sounds/Windows XP Ha
 import notifyUrl from '@assets/reference/windows-xp/sounds/Windows XP Notify.wav?url';
 import chordUrl from '@assets/reference/windows-xp/sounds/chord.wav?url';
 import arrowCursorUrl from '@assets/reference/windows-xp/icons/default_arrow.cur?url';
+import linkCursorUrl from '@assets/reference/windows-xp/icons/default_link.cur?url';
 import { XP_FONT_FAMILY } from './components/xp-text.ts';
 
 /** Icon file name (without .png) → URL */
@@ -43,6 +44,9 @@ const ICON_URLS: Record<string, string> = Object.fromEntries(
  * XP's standard arrow pointer (the .cur file carries its hotspot, at the arrow's tip).
  */
 export const XP_CURSOR = `url("${arrowCursorUrl}"), default`;
+
+/** XP's hand over links (Link Select), for the easter egg's web pages and message links */
+export const XP_LINK_CURSOR = `url("${linkCursorUrl}"), pointer`;
 
 /** Sounds named after the original system events */
 const SOUND_FILES = {
@@ -75,6 +79,8 @@ const SOUND_FILES = {
   downloadOpen: { url: notifyUrl, peak: 0.55 },
   /** volume-mute slider released: chord, since Ding (the original) is the Miss sound here (provisional) */
   volumeRelease: { url: chordUrl, peak: 0.55 },
+  /** New Mail Notification: the Rickroll message arrives (doc/easter-eggs.md) */
+  newMail: { url: notifyUrl, peak: 0.55 },
   /** Hardware Remove: a combo of 10 or more breaks (doc/combo.md "Combo break") */
   comboBreak: { url: hardwareRemoveUrl, peak: 0.55 },
 } satisfies Record<string, { url: string } & SampleOptions>;

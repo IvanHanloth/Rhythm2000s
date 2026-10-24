@@ -87,6 +87,7 @@ const director = new SceneDirector(canvas.stage, scenes, {
   library,
   chartFiles: browserChartFiles,
   cutaway,
+  overlay: host,
   leave: () => {
     location.hash = HUB_ROUTE;
   },

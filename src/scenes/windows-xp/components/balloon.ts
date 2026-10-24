@@ -84,7 +84,11 @@ export class XpBalloon {
     close.hitArea = new Rectangle(0, 0, CLOSE_SIZE, CLOSE_SIZE);
     close.on('pointerover', () => drawClose(true));
     close.on('pointerout', () => drawClose(false));
-    close.on('pointertap', () => onClose?.());
+    close.on('pointertap', (event) => {
+      // A balloon that opens something on click shouldn't open it when closed
+      event.stopPropagation();
+      onClose?.();
+    });
 
     const content = new Container();
     content.addChild(shape, iconSprite, titleText, body, close);

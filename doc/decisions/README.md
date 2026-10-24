@@ -44,3 +44,4 @@ What follows from it, its costs, and the work it creates.
 | [0011](0011-chart-import-export.md) | Chart import and export in the level list | Accepted |
 | [0012](0012-in-game-chart-editor.md) | An in-game chart editor on its own café computers | Accepted |
 | [0013](0013-combo-feedback-in-the-scene.md) | Combo feedback inside the scene, with no effect on the score | Accepted |
+| [0014](0014-rickroll-embeds-youtube.md) | The Rickroll easter egg embeds the official YouTube video | Accepted |

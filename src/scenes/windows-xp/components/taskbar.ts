@@ -1,5 +1,6 @@
 // Taskbar (Shell_TrayWnd): a 30 px blue gradient bar, the green "start" button on the left and the
-// notification area on the right with network, Messenger, volume and the clock. Origin at the top left.
+// notification area on the right with network, Messenger, volume and the clock. Outlook Express's unread-mail envelope
+// can join them on the left, widening the area (doc/easter-eggs.md). Origin at the top left.
 
 import { Container, Graphics, Rectangle, Sprite, type Text } from 'pixi.js';
 import { LUNA } from '@/theme/xp-luna.ts';
@@ -15,6 +16,8 @@ const FLAG_SIZE = 20;
 const TRAY_ICON = 16;
 const TRAY_GAP = 6;
 const TRAY_PADDING = 10;
+/** Room the mail envelope adds to the tray */
+const MAIL_SLOT = TRAY_ICON + TRAY_GAP;
 
 export const TASK_LEFT = START_WIDTH + 10;
 export const TASK_WIDTH = 160;
@@ -31,8 +34,13 @@ export class XpTaskbar {
   readonly startButton: StartButton;
   /** Tray volume icon; can take pointer events to open the volume control */
   readonly volumeIcon = new Container({ label: 'tray-volume' });
-  /** Left edge of the notification area (taskbar coordinates) */
+  /** Left edge of the notification area without the mail envelope (taskbar coordinates) */
   readonly trayLeft: number;
+  /** Outlook Express's unread-mail envelope; can take pointer events to open the mail */
+  readonly mailIcon = new Container({ label: 'tray-mail' });
+  private readonly trayFace = new Graphics();
+  private readonly trayWidth: number;
+  private mailShown = false;
   private readonly muteBadge = new Graphics();
   private readonly clock: Text;
   private clockText = '';
@@ -76,14 +84,16 @@ export class XpTaskbar {
     // The clock reserves the width of "00:00 PM" so the tray never resizes
     const trayWidth = Math.ceil(x + this.clock.width + TRAY_PADDING);
 
-    const trayFace = new Graphics()
-      .rect(0, 0, trayWidth, TASKBAR_HEIGHT)
-      .fill(verticalGradient(LUNA.taskbar.trayFill))
-      .rect(0, 0, 1, TASKBAR_HEIGHT)
-      .fill(LUNA.taskbar.trayBorder)
-      .rect(1, 1, 1, TASKBAR_HEIGHT - 2)
-      .fill(LUNA.taskbar.trayHighlight);
-    tray.addChild(trayFace, ...icons, this.volumeIcon, this.clock);
+    this.trayWidth = trayWidth;
+    this.drawTrayFace(0);
+    // The envelope goes left of the first icon, on a strip of tray shown with it
+    const envelope = new Sprite(xpAssets().icon('email'));
+    envelope.setSize(TRAY_ICON);
+    this.mailIcon.addChild(envelope);
+    this.mailIcon.position.set(TRAY_PADDING - MAIL_SLOT, iconTop);
+    this.mailIcon.hitArea = new Rectangle(-2, -4, TRAY_ICON + 4, TRAY_ICON + 8);
+    this.mailIcon.visible = false;
+    tray.addChild(this.trayFace, ...icons, this.mailIcon, this.volumeIcon, this.clock);
     this.trayLeft = XP_SCREEN_WIDTH - trayWidth;
     tray.position.set(this.trayLeft, 0);
 
@@ -96,6 +106,31 @@ export class XpTaskbar {
       this.view.addChild(button.view);
     });
     this.setClock(new Date());
+  }
+
+  /** Top centre of the mail envelope, shown or not (taskbar coordinates) */
+  get mailIconTop(): { x: number; y: number } {
+    return { x: this.trayLeft + this.mailIcon.x + TRAY_ICON / 2, y: this.mailIcon.y };
+  }
+
+  /** Shows or hides the unread-mail envelope */
+  setMailShown(shown: boolean): void {
+    if (this.mailShown === shown) return;
+    this.mailShown = shown;
+    this.mailIcon.visible = shown;
+    this.drawTrayFace(shown ? MAIL_SLOT : 0);
+  }
+
+  /** Tray background reaching `extra` px left of the usual edge */
+  private drawTrayFace(extra: number): void {
+    this.trayFace
+      .clear()
+      .rect(-extra, 0, this.trayWidth + extra, TASKBAR_HEIGHT)
+      .fill(verticalGradient(LUNA.taskbar.trayFill))
+      .rect(-extra, 0, 1, TASKBAR_HEIGHT)
+      .fill(LUNA.taskbar.trayBorder)
+      .rect(-extra + 1, 1, 1, TASKBAR_HEIGHT - 2)
+      .fill(LUNA.taskbar.trayHighlight);
   }
 
   /** Top centre of the tray speaker icon (taskbar coordinates) */

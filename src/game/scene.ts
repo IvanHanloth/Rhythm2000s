@@ -58,6 +58,11 @@ export interface SceneContext {
   leave(): void;
   /** The 3D café for chair-swivel's cutaway */
   cutaway: CutawayStage;
+  /**
+   * An element covering the game canvas (the same box), for DOM content lined up with the canvas: the Rickroll's
+   * YouTube player (doc/easter-eggs.md, ADR 0014)
+   */
+  overlay: HTMLElement;
   /** The chart to play (when #scene/chart opens a level directly); without it the scene shows its level list first */
   chartId?: string;
   /** The level list and levels, or the chart editor (doc/chart-editor.md) */
