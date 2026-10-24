@@ -2,12 +2,14 @@
 // 这些是菜单类界面，可以用 CSS 过渡（设计系统「动效」一节）；颜色从 src/theme 注入成 CSS 变量。
 
 import './hub.css';
-import { FONT_FAMILIES, JUDGEMENT_COLORS, THEMES } from '../theme/tokens.ts';
+import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS, THEMES } from '../theme/tokens.ts';
 
-/** 坐下后卡片上显示的关卡信息 */
+/** 坐下后卡片上显示的关卡信息（一关就是一首谱面） */
 export interface LevelInfo {
+  /** 关卡 id（谱面 id） */
+  id: string;
   sceneId: string;
-  /** 场景名，例如「Windows XP 桌面」 */
+  /** 关卡名（曲名），卡片的标题 */
   label: string;
   /** 曲名、速度等，一行一条 */
   details: string[];
@@ -48,9 +50,9 @@ function button(label: string, className: string, onClick: () => void): HTMLButt
 function setThemeVariables(root: HTMLElement): void {
   const xp = THEMES.xp;
   const vars: Record<string, string> = {
-    '--hub-font-ui': FONT_FAMILIES.ui.join(', '),
-    '--hub-font-display': FONT_FAMILIES.display.join(', '),
-    '--hub-font-pixel': FONT_FAMILIES.pixel.join(', '),
+    '--hub-font-ui': cssFontFamily(FONT_FAMILIES.ui),
+    '--hub-font-display': cssFontFamily(FONT_FAMILIES.display),
+    '--hub-font-pixel': cssFontFamily(FONT_FAMILIES.pixel),
     '--hub-titlebar': xp.titlebar,
     '--hub-titlebar-hi': xp.titlebarHi,
     '--hub-on-titlebar': xp.onTitlebar,
@@ -88,6 +90,10 @@ export class HubOverlay {
   private readonly cardBody = el('div', 'hub-card-body');
   private readonly cardPlay: HTMLButtonElement;
   private readonly pause = el('section', 'hub-pause');
+  private readonly credits = el('section', 'hub-credits');
+  private readonly loading = el('div', 'hub-loading');
+  private readonly loadingBar = el('span', 'hub-loading-fill');
+  private readonly loadingText = el('span', 'hub-loading-text');
   private readonly fade = el('div', 'hub-fade');
   private placeTimer = 0;
 
@@ -102,6 +108,7 @@ export class HubOverlay {
     menu.append(
       button('开始游戏', 'hub-button hub-button-primary', handlers.onStart),
       button('操作说明', 'hub-button', () => this.toggleHelp()),
+      button('制作人员', 'hub-button', () => this.toggleCredits()),
     );
     const latency = el('a', 'hub-button', '延迟测试');
     latency.href = `${import.meta.env.BASE_URL}prototypes/latency/`;
@@ -112,6 +119,12 @@ export class HubOverlay {
       menu,
       el('p', 'hub-press', '按 Enter 开始'),
     );
+
+    this.buildCredits();
+    const track = el('span', 'hub-loading-track');
+    track.append(this.loadingBar);
+    this.loading.append(this.loadingText, track);
+    this.loading.hidden = true;
 
     this.help.append(el('div', 'hub-help-title', '操作说明'));
     const keys: [string, string][] = [
@@ -126,7 +139,7 @@ export class HubOverlay {
     this.help.append(list);
     this.help.hidden = true;
 
-    this.objective.textContent = '去「TURBO NET CAFE」网吧找一台空着的电脑坐下';
+    this.objective.textContent = '去 CYBERSPACE CAFÉ 网吧，找一台头顶有黄色标记的电脑坐下';
     this.hud.append(this.objective, this.place, this.prompt, this.lockHint);
 
     this.dialog.append(this.dialogName, this.dialogText, el('div', 'hub-dialog-next', 'E 继续'));
@@ -147,6 +160,8 @@ export class HubOverlay {
     this.element.append(
       this.title,
       this.help,
+      this.credits,
+      this.loading,
       this.hud,
       this.dialog,
       this.card,
@@ -162,11 +177,15 @@ export class HubOverlay {
 
   showTitle(visible: boolean): void {
     this.title.hidden = !visible;
-    if (!visible) this.help.hidden = true;
+    if (!visible) {
+      this.help.hidden = true;
+      this.credits.hidden = true;
+    }
   }
 
   toggleHelp(): void {
     this.help.hidden = !this.help.hidden;
+    if (!this.help.hidden) this.credits.hidden = true;
   }
 
   showHud(visible: boolean): void {
@@ -200,11 +219,15 @@ export class HubOverlay {
     }
   }
 
-  showCard(level: LevelInfo | null): void {
+  /** 坐下后的关卡卡片；record 是最佳成绩的一行文字，还没打过时为 null */
+  showCard(level: LevelInfo | null, record: string | null = null): void {
     this.card.hidden = level === null;
     if (!level) return;
     this.cardTitle.textContent = level.label;
     const lines = level.details.map((line) => el('p', '', line));
+    const best = el('p', 'hub-card-record');
+    best.append(el('b', '', '最佳　'), record ?? '还没有记录');
+    lines.push(best);
     const keys = el('p', 'hub-card-keys');
     keys.append(
       ...(level.playable ? [el('kbd', '', 'E'), ' 开始　'] : []),
@@ -213,6 +236,58 @@ export class HubOverlay {
     );
     this.cardBody.replaceChildren(...lines, keys);
     this.cardPlay.disabled = !level.playable;
+  }
+
+  /** 加载进度（0～1）；null 时收起 */
+  setLoading(progress: number | null): void {
+    this.loading.hidden = progress === null;
+    if (progress === null) return;
+    const percent = Math.round(progress * 100);
+    this.loadingBar.style.width = `${percent}%`;
+    this.loadingText.textContent = `正在载入街区…… ${percent}%`;
+  }
+
+  toggleCredits(): void {
+    this.credits.hidden = !this.credits.hidden;
+    if (!this.credits.hidden) this.help.hidden = true;
+  }
+
+  /**
+   * 制作人员与素材署名。鲸鱼娘模型是 CC BY 4.0，必须在游戏里署名并注明修改（assets/README.md）。
+   */
+  private buildCredits(): void {
+    const link = (text: string, href: string) => {
+      const a = el('a', '', text);
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      return a;
+    };
+    const items: (string | HTMLElement)[][] = [
+      [
+        '鲸鱼娘 3D 模型：Manny / ningfangtianwai-pixel，',
+        link('AI Girls 3D', 'https://github.com/ningfangtianwai-pixel/ai-girls-3d'),
+        '，',
+        link('CC BY 4.0', 'https://creativecommons.org/licenses/by/4.0/'),
+        '。修改：压缩了网格和贴图。DeepSeek 鲸鱼娘是同人形象，与官方无关。',
+      ],
+      ['街区的贴图和道具模型：', link('Poly Haven', 'https://polyhaven.com/'), '（CC0）。'],
+      ['Windows XP、Mac OS 的界面素材和音效版权归 Microsoft、Apple 所有，本项目仅作学术用途。'],
+      ['其余素材的来源见仓库里的 assets/README.md。'],
+    ];
+    const list = el('ul', 'hub-credits-list');
+    for (const parts of items) {
+      const li = el('li', '');
+      li.append(...parts);
+      list.append(li);
+    }
+    this.credits.append(
+      el('div', 'hub-help-title', '制作人员'),
+      el('p', '', 'rhythm2000s —— 一款《节奏天国》式的节奏游戏，题材是 21 世纪初的电脑日常。'),
+      list,
+      button('关闭', 'hub-button', () => this.toggleCredits()),
+    );
+    this.credits.hidden = true;
   }
 
   showPause(visible: boolean): void {

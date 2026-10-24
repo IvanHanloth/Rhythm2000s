@@ -26,6 +26,14 @@ export interface SceneContext {
   charts: readonly Chart[];
   /** 离开场景、回到街区大厅（选关界面的「后退」「返回」） */
   leave(): void;
+  /** 要打的那一首谱面（网址 #场景/谱面 直接打开某一关时有）；不写时场景先显示关卡列表 */
+  chartId?: string;
+  /**
+   * 开始一关之前调用：游戏外壳显示这一关的开场页（关卡名、速度、部件、最佳成绩、玩法）。
+   * 开场页由玩家的第一下空格或点击收起，这一下照常传给场景，场景收到后再开始。
+   * 不提供时（单元测试、原型页面）场景直接开始。
+   */
+  introduce?(chartId: string): void;
 }
 
 export interface Scene {

@@ -2,8 +2,8 @@
   "format": 1,
   "charts": [
     "xp-popup-mvp.json",
-    "xp-error-chain.json",
-    "xp-yes-or-no.json",
+    "xp-error-storm.json",
+    "xp-yes-no.json",
     "xp-crash.json",
     "xp-desktop-refresh.json",
     "xp-tray.json",

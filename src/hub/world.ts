@@ -1,4 +1,5 @@
-// 街区的全部布景：一条黄昏的街，北侧三家能进的店（音像店、网吧、电玩城），南侧是不能进的楼和街边设施。
+// 街区的全部布景：2000 年英国商业街（High Street）的黄昏，北侧三家能进的店（唱片行、网吧、街机厅），
+// 南侧是不能进的楼和街边设施。英国元素是 2026-10-24 用户的要求（项目参加英国的黑客松）。
 // 布局、店名、文案都是第一版占位（doc/hub.md「暂定内容」）。场景里的招牌、海报一律用英文（2026-10-24 用户要求）。
 // 写实风格：墙面、地面用 PBR 照片贴图，道具用现成模型（assets.ts）；需要定制的道具先用简单形体占位，
 // 等用户用 Tripo / Blender 做好后放进 public/models/custom/（规格见 doc/hub-assets.md）。
@@ -10,6 +11,7 @@ import {
   Line,
   LineBasicMaterial,
   Color,
+  CylinderGeometry,
   Group,
   InstancedMesh,
   Matrix4,
@@ -18,6 +20,7 @@ import {
   OctahedronGeometry,
   PlaneGeometry,
   PointLight,
+  SphereGeometry,
   SRGBColorSpace,
   TextureLoader,
   Vector3,
@@ -28,6 +31,7 @@ import {
 import { STREET_COLORS as C } from '../theme/street.ts';
 import { attachCustom, attachModel, surface, type PropOptions } from './assets.ts';
 import { SEAT_HEIGHT } from './character.ts';
+import { arrangeMachines } from './cafe-layout.ts';
 import { boxAt, type Box } from './collision.ts';
 import type { Spot } from './motion.ts';
 import { ledTexture, posterTexture, signTexture } from './textures.ts';
@@ -49,7 +53,8 @@ const DOOR_HEIGHT = 2.5;
 /** 坐到电脑前开始关卡 */
 export interface LevelSpot extends Spot {
   kind: 'level';
-  sceneId: string;
+  /** 关卡 id（谱面 id） */
+  levelId: string;
   /** 坐下后角色的位置和朝向 */
   seat: { x: number; z: number; heading: number };
   /** 屏幕中心（世界坐标），镜头最后推进到这里；自制电脑模型加载后会更新 */
@@ -91,8 +96,9 @@ export interface World {
 /** 显示器画面：用原版系统壁纸（assets/reference/，ADR 0004）缩小后的图 */
 export type ScreenImage = 'xp-bliss' | 'xp-azul' | 'xp-autumn' | 'xp-desert' | 'mac-aqua-blue';
 
-/** 关卡电脑：哪台机器对应哪个场景（场景 id 见 src/scenes/catalog.ts） */
+/** 入口电脑：每个场景一台，坐下后进这个场景的关卡列表（场景 id 见 src/scenes/catalog.ts） */
 export interface LevelMachine {
+  levelId: string;
   sceneId: string;
   /** 屏幕上显示的壁纸（public/textures/screens/） */
   screen: ScreenImage;
@@ -390,7 +396,59 @@ function buildStreet(b: Builder): void {
     if (Math.abs(x) < 3) continue;
     b.floor(2, 0.14, x + 1, -CURB_HEIGHT + 0.004, 0, paint);
   }
-  for (let z = -3.3; z <= 3.3; z += 0.75) b.floor(3, 0.4, 0, -CURB_HEIGHT + 0.004, z, paint);
+  for (let z = -2.6; z <= 2.65; z += 0.75) b.floor(3, 0.4, 0, -CURB_HEIGHT + 0.004, z, paint);
+
+  // 英国街道：路边的双黄线（禁止停车），斑马线前写着 LOOK RIGHT（靠左行驶，两边路沿最近的车道都是从右边来车）
+  const yellow = b.plain(C.roadYellow, 0.6);
+  for (const side of [-1, 1]) {
+    for (const offset of [0.25, 0.4]) {
+      b.floor(length, 0.08, 0, -CURB_HEIGHT + 0.004, side * (ROAD_HALF_WIDTH - offset), yellow);
+    }
+    // 路面上的字只有白漆，没有底色
+    const look = signTexture({
+      text: 'LOOK RIGHT',
+      background: 'transparent',
+      color: C.roadLine,
+      width: 512,
+      height: 96,
+    });
+    const text = b.floor(
+      2.4,
+      0.45,
+      0,
+      -CURB_HEIGHT + 0.006,
+      side * (ROAD_HALF_WIDTH - 0.6),
+      new MeshStandardMaterial({ map: look, transparent: true, roughness: 0.8 }),
+    );
+    // 让站在这一侧路沿、面朝马路的人读起来是正的
+    if (side < 0) text.rotation.z = Math.PI;
+  }
+
+  // 斑马线两头的黄色闪灯（自制槽位 belisha-beacon）：黑白条纹杆子顶着一个黄色灯球，一秒亮一次
+  const beaconLights: MeshStandardMaterial[] = [];
+  for (const [bx, bz] of [
+    [-1.9, -4.3],
+    [1.9, -4.3],
+    [-1.9, 4.3],
+    [1.9, 4.3],
+  ] as const) {
+    const globe = b.glow(null, C.beaconAmber, 5);
+    beaconLights.push(globe);
+    b.custom('belisha-beacon', bx, bz, 0, (p) => {
+      for (let k = 0; k < 6; k++) {
+        const stripe = k % 2 === 0 ? b.plain(C.signTextDark, 0.5) : b.plain(C.signText, 0.5);
+        p.add(placeholderBox(0.1, 0.4, 0.1, 0, k * 0.4, 0, stripe));
+      }
+      const ball = new Mesh(new SphereGeometry(0.17, 16, 12), globe);
+      ball.position.y = 2.55;
+      p.add(ball);
+    });
+    b.colliders.push(boxAt(bx, bz, 0.25, 0.25));
+  }
+  b.animations.push((t) => {
+    const on = t % 1 < 0.5;
+    for (const light of beaconLights) light.emissiveIntensity = on ? 5 : 0.15;
+  });
 
   // 人行道和路沿
   const sidewalkWidth = SIDEWALK_EDGE - ROAD_HALF_WIDTH;
@@ -407,19 +465,18 @@ function buildStreet(b: Builder): void {
   // 井盖
   for (const x of [-18, 6, 22]) b.prop('water_manhole_cover', x, -CURB_HEIGHT, 1.8, { width: 0.7 });
 
-  // 路灯：北侧四盏、南侧三盏，只有几盏真的打光（点光源多了会卡）
-  const lamps: [number, number, boolean][] = [
-    [-24, -4.6, false],
-    [-8, -4.6, true],
-    [8, -4.6, false],
-    [24, -4.6, true],
-    [-16, 4.6, true],
-    [0, 4.6, false],
-    [16, 4.6, false],
+  // 路灯：北侧四盏、南侧三盏。白天不亮
+  const lamps: [number, number][] = [
+    [-24, -4.6],
+    [-8, -4.6],
+    [8, -4.6],
+    [24, -4.6],
+    [-16, 4.6],
+    [0, 4.6],
+    [16, 4.6],
   ];
-  for (const [x, z, lit] of lamps) {
+  for (const [x, z] of lamps) {
     b.prop('street_lamp_01', x, 0, z, { height: 4.2, collider: [0.35, 0.35] });
-    if (lit) b.light(C.lampWarm, 30, x, 3.9, z, 18);
   }
 
   // 街边：垃圾桶、配电箱
@@ -437,7 +494,7 @@ function buildStreet(b: Builder): void {
     width: 256,
     height: 96,
   });
-  const farWall = surface('rectangular_facade_tiles', { tile: 2, tint: '#9a9aa4' });
+  const farWall = surface('red_brick_03', { tile: 2, tint: '#e8d8d0' });
   for (const side of [-1, 1]) {
     const x = side * STREET_END;
     b.box(0.3, 1.1, SIDEWALK_EDGE * 2, x, -CURB_HEIGHT, 0, barrier, { solid: true });
@@ -457,32 +514,34 @@ function buildStreet(b: Builder): void {
 // ---------- 南侧：不能进的楼面和街边设施 ----------
 
 function buildSouthSide(b: Builder): void {
+  // 英国商业街：维多利亚式红砖楼为主，夹着刷了涂料的楼和一栋 60 年代的贴砖楼
   const facades = [
-    surface('rectangular_facade_tiles', { tile: 2 }),
     surface('red_brick_03', { tile: 2 }),
-    surface('rectangular_facade_tiles', { tile: 2, tint: '#d8e0ea' }),
     surface('painted_plaster_wall', { tile: 2.5, tint: '#e2d3b0' }),
-    surface('rectangular_facade_tiles', { tile: 2, tint: '#e8dccd' }),
+    surface('red_brick_03', { tile: 2, tint: '#c9a89a' }),
+    surface('rectangular_facade_tiles', { tile: 2, tint: '#d8d4cc' }),
+    surface('painted_plaster_wall', { tile: 2.5, tint: '#c8d4dc' }),
   ];
   const shutter = surface('painted_metal_shutter', { tile: 2 });
-  // 2000 年前后街边常见的店：录像带 / VCD 出租、寻呼机、一小时冲印、电脑城、彩票站……
+  // 2000 年前后英国商业街上常见的店：录像出租、手机话费、一小时冲印、报刊店、炸鱼薯条、投注站……
   const shopSigns = [
-    'VCD · DVD RENTAL',
-    'PAGER · MOBILE',
+    'VIDEO & DVD RENTAL',
+    'MOBILE PHONES',
     '1-HOUR PHOTO',
-    'MINI MART',
-    'COMPUTER CITY',
-    'LOTTERY',
-    'HARDWARE',
+    'NEWSAGENT',
+    'FISH & CHIPS',
+    'COMPUTER SUPERSTORE',
+    'BOOKMAKERS',
+    'OFF LICENCE',
   ];
   // 卷帘门上贴的小广告
   const flyers: [string[], string, string][] = [
-    [['PC 2000', 'PIII 600', '128MB RAM', '¥6999'], C.signText, C.signBlue],
-    [['COLOR', 'SCREEN', 'PHONE'], C.signYellow, C.signRed],
-    [['RINGTONES', 'POLYPHONIC', 'SEND SMS'], C.neonPink, C.signText],
+    [['PC 2000', 'PIII 600', '128MB RAM', '£899'], C.signText, C.signBlue],
+    [['PAY AS', 'YOU GO', 'TOP UP HERE'], C.signYellow, C.signRed],
+    [['RINGTONES', 'POLYPHONIC', 'TEXT NOW'], C.neonPink, C.signText],
     [['FLASH', 'GAMES', 'FREE CD-R'], C.signGreen, C.signText],
     [['DIGITAL', 'CAMERA', '1.3 MP'], C.signText, C.signRed],
-    [['ENGLISH', 'CLASS', 'NEW 2000'], C.signBlue, C.signYellow],
+    [['VIDEO', 'RENTAL', '£2.50 NIGHT'], C.signBlue, C.signYellow],
   ];
   let x = -STREET_END - 3;
   let i = 0;
@@ -534,7 +593,7 @@ function buildSouthSide(b: Builder): void {
   // 屋顶广告牌
   const billboard = signTexture({
     text: 'BROADBAND 512K',
-    sub: '¥120 / MONTH · GOODBYE DIAL-UP',
+    sub: '£29.99 / MONTH · GOODBYE DIAL-UP',
     background: C.signBlue,
     border: C.signYellow,
   });
@@ -542,7 +601,7 @@ function buildSouthSide(b: Builder): void {
   for (const dx of [-3.5, 3.5])
     b.box(0.2, 3, 0.2, 4 + dx, 10.5, SIDEWALK_EDGE + 1.2, b.plain(C.metalDark, 0.5, 0.7));
 
-  // 报刊亭（自制槽位 newsstand）
+  // 报摊（自制槽位 newsstand）
   const kx = -9;
   const kz = 5.6;
   b.custom('newsstand', kx, kz, Math.PI, (p) => {
@@ -551,21 +610,44 @@ function buildSouthSide(b: Builder): void {
     p.add(placeholderBox(2.6, 0.12, 1.9, 0, 2.3, 0.15, green));
   });
   b.colliders.push(boxAt(kx, kz, 2.2, 1.4));
-  b.read('报刊亭', '查看', kx, kz - 1.3, [
-    '报刊亭：最新一期的电脑报，头版是「装机必看：DIY 配置推荐」。',
-    '旁边还挂着几张游戏光盘，封面已经被晒褪色了。',
+  b.read('报摊', '查看', kx, kz - 1.3, [
+    '报摊：晚报的头版标题写着「千年虫没有来」。',
+    '旁边夹着几张电脑杂志送的光盘，封面已经被晒褪色了。',
   ]);
 
-  // IC 卡电话亭（自制槽位 phone-booth）
+  // 红色电话亭（自制槽位 phone-box）和红色邮筒（自制槽位 pillar-box）
   const px = 4.5;
-  const pz = 5.6;
-  b.custom('phone-booth', px, pz, Math.PI, (p) => {
-    p.add(placeholderBox(0.12, 2.4, 0.12, 0, 0, -0.3, b.plain(C.metalDark, 0.4, 0.7)));
-    p.add(placeholderBox(1.1, 0.5, 0.7, 0, 2.3, 0, b.plain(C.signYellow, 0.4)));
-    p.add(placeholderBox(0.5, 0.7, 0.25, 0, 1.2, -0.18, b.plain(C.signBlue, 0.4)));
+  const pz = 5.7;
+  b.custom('phone-box', px, pz, Math.PI, (p) => {
+    const red = b.plain(C.postRed, 0.45);
+    p.add(placeholderBox(1.0, 2.4, 1.0, 0, 0, 0, red));
+    p.add(placeholderBox(1.06, 0.12, 1.06, 0, 2.4, 0, red));
+    p.add(placeholderBox(0.7, 1.5, 0.02, 0, 0.6, 0.51, b.plain(C.windowDark, 0.1, 0.2)));
+    const label = signTexture({
+      text: 'TELEPHONE',
+      background: C.signTextDark,
+      width: 256,
+      height: 48,
+    });
+    const sign = new Mesh(new PlaneGeometry(0.8, 0.15), b.glow(label, '#ffffff', 1.2));
+    sign.position.set(0, 2.25, 0.511);
+    p.add(sign);
   });
-  b.colliders.push(boxAt(px, pz + 0.3, 0.4, 0.4));
-  b.read('电话亭', '查看', px, pz - 0.6, ['电话亭：投币口坏了，只能插 IC 卡。你没有卡。']);
+  b.colliders.push(boxAt(px, pz, 1.0, 1.0));
+  b.read('电话亭', '查看', px, pz - 0.8, [
+    '红色电话亭：投币口只收 10p 和 20p 的硬币。你口袋里只有一张 5 英镑的纸币。',
+  ]);
+  const mx = -17;
+  const mz = 5.9;
+  b.custom('pillar-box', mx, mz, Math.PI, (p) => {
+    const body = new Mesh(new CylinderGeometry(0.26, 0.28, 1.35, 20), b.plain(C.postRed, 0.4));
+    body.position.y = 0.675;
+    const cap = new Mesh(new CylinderGeometry(0.3, 0.3, 0.1, 20), b.plain(C.postRed, 0.4));
+    cap.position.y = 1.4;
+    p.add(body, cap, placeholderBox(0.3, 0.04, 0.02, 0, 1.05, 0.27, b.plain(C.signTextDark, 0.5)));
+  });
+  b.colliders.push(boxAt(mx, mz, 0.6, 0.6));
+  b.read('邮筒', '查看', mx, mz - 0.7, ['红色邮筒：今天最后一次收信是下午 5:30。已经过了。']);
 
   // 公交站（自制槽位 bus-stop）
   const bx = 19;
@@ -594,20 +676,16 @@ function buildSouthSide(b: Builder): void {
   });
   b.colliders.push(boxAt(bx, bz + 0.6, 3.8, 0.1), boxAt(bx, bz + 0.25, 2.4, 0.4));
   const busSign = signTexture({
-    text: 'BUS 12',
-    sub: 'STATION — UNIVERSITY',
+    text: 'BUS STOP',
+    sub: '24 · CITY CENTRE — UNIVERSITY',
     background: C.signRed,
     width: 256,
     height: 96,
   });
   b.panel(1.4, 0.5, bx - 1.2, 2.9, bz - 0.2, Math.PI, b.glow(busSign, '#ffffff', 1.3));
   b.read('公交站', '查看', bx, bz - 0.7, [
-    '站牌：12 路，首班 6:00，末班 21:30。今天的末班车好像已经开走了。',
+    '站牌：24 路，开往市中心和大学。时刻表上的下一班车被人用笔改成了「迟早会来」。',
   ]);
-
-  // 路边小卖部门口的塑料椅
-  b.prop('plastic_monobloc_chair_01', -2.5, 0, 5.3, { height: 0.85, rotation: 2.6 });
-  b.prop('plastic_monobloc_chair_01', -1.6, 0, 5.6, { height: 0.85, rotation: -2.8 });
 }
 
 // ---------- 北侧：店铺外壳 ----------
@@ -684,7 +762,7 @@ function shop(b: Builder, o: ShopOptions): { back: number; left: number; right: 
   });
   b.windowGrid(left + 0.4, right - 0.4, STOREY + 0.55, 2, front, 1, Math.round(o.x * 7 + 50));
 
-  // 灯箱招牌 + 门头壁灯
+  // 灯箱招牌 + 门头壁灯（白天不点亮）
   const signWidth = o.width * 0.86;
   b.box(
     signWidth + 0.2,
@@ -700,7 +778,6 @@ function shop(b: Builder, o: ShopOptions): { back: number; left: number; right: 
     height: 0.9,
     groundAlign: false,
   });
-  b.light(o.light, 4, o.x, 2.4, front + 0.8, 6);
 
   // 屋里：主灯 + 天花板上的日光灯
   b.light(o.light, o.lightIntensity, o.x, STOREY - 1.4, mid, 0);
@@ -740,8 +817,8 @@ function buildFillers(b: Builder): void {
 
 // ---------- 网吧 ----------
 
-/** 网吧里两排电脑的桌子中心 z，以及每排 4 台的 x 偏移 */
-const CAFE_ROWS = [-13, -16.6];
+/** 网吧里三排电脑的桌子中心 z，以及每排 4 台的 x 偏移：前排 XP 区，后两排 Mac 区（按 cafe-layout.ts 分配） */
+const CAFE_ROWS = [-11.2, -14.2, -17.2];
 const CAFE_COLUMNS = [-5.3, -3.1, -0.9, 1.3];
 
 type Machine =
@@ -750,17 +827,20 @@ type Machine =
   | { kind: 'repair' }
   | { kind: 'off' };
 
+/** 有人在用的机器屏幕上轮流放的画面 */
+const BUSY_SCREENS: readonly ScreenImage[] = ['xp-azul', 'xp-autumn', 'xp-desert', 'mac-aqua-blue'];
+
 function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[]): void {
   const { back, right } = shop(b, {
-    name: 'TURBO NET CAFE',
+    name: 'CYBERSPACE CAFÉ',
     x,
     width: 14,
     depth: 12,
     facade: surface('rectangular_facade_tiles', { tile: 2 }),
     inner: surface('painted_plaster_wall', { tile: 2.5, tint: '#c4c8d4' }),
     sign: signTexture({
-      text: 'TURBO NET CAFE',
-      sub: 'ADSL BROADBAND · OPEN 24H',
+      text: 'CYBERSPACE CAFÉ',
+      sub: 'INTERNET · GAMES · TEA & COFFEE',
       background: C.signBlue,
       border: C.neonCyan,
     }),
@@ -770,20 +850,20 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
     lightRows: 3,
   });
 
-  // 前排中间两台空着的机器放关卡，其余有人或坏了
-  const machines: Machine[][] = [
-    [
-      { kind: 'busy', screen: 'xp-azul' },
-      ...[0, 1].map((i) => levelOr(levels[i])),
-      { kind: 'busy', screen: 'xp-autumn' },
-    ],
-    [
-      { kind: 'busy', screen: 'xp-desert' },
-      { kind: 'repair' },
-      { kind: 'busy', screen: 'xp-azul' },
-      { kind: 'off' },
-    ],
-  ];
+  // 每个场景一台入口电脑；空位放有人占着、维修中、没开机的机器
+  const layout = arrangeMachines(levels, CAFE_ROWS.length, CAFE_COLUMNS.length);
+  if (layout.overflow.length > 0) {
+    console.warn(`网吧里坐不下这些关卡：${layout.overflow.map((l) => l.levelId).join('、')}`);
+  }
+  let busy = 0;
+  const machines: Machine[][] = layout.seats.map((row) =>
+    row.map((seat): Machine => {
+      if (seat.kind === 'level') return { kind: 'level', level: seat.level };
+      if (seat.kind === 'busy')
+        return { kind: 'busy', screen: BUSY_SCREENS[busy++ % BUSY_SCREENS.length]! };
+      return { kind: seat.kind };
+    }),
+  );
   const partition = b.plain(C.plastic, 0.6);
   CAFE_ROWS.forEach((rowZ, row) => {
     CAFE_COLUMNS.forEach((dx, col) => computerDesk(b, x + dx, rowZ, machines[row]![col]!));
@@ -793,8 +873,8 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
   });
 
   // 吊扇、监控、门口的盆栽
-  b.prop('ceiling_fan', x - 2, STOREY, -11, { width: 1.3, groundAlign: false });
-  b.prop('ceiling_fan', x - 2, STOREY, -16, { width: 1.3, groundAlign: false });
+  b.prop('ceiling_fan', x - 2, STOREY, -12.7, { width: 1.3, groundAlign: false });
+  b.prop('ceiling_fan', x - 2, STOREY, -15.7, { width: 1.3, groundAlign: false });
   b.prop('security_camera_01', right - 0.4, STOREY - 0.35, -7.6, {
     height: 0.25,
     rotation: -2.4,
@@ -817,23 +897,23 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
   b.colliders.push(boxAt(cx, cz, 2.6, 0.8));
   b.prop('classic_laptop', cx + 0.6, 1.1, cz, { width: 0.45, rotation: Math.PI });
   b.read('前台', '查看', cx - 0.4, cz + 0.85, [
-    '前台没人。玻璃板下面压着价目表：上机两块钱一小时，押金十块。',
-    '旁边贴着一张便签：「头顶有黄色标记的两台空着，随便坐。」',
+    '前台没人。价目表上写着：上网 30 分钟 1 英镑，打印一页 10 便士。',
+    '旁边贴着一张便签：「头顶有黄色标记的那几台空着，随便坐。」',
   ]);
 
   // 墙上的告示
   const prices = posterTexture(
-    ['PRICES', '¥2 / HOUR', 'NIGHT ¥10', 'DEPOSIT ¥10'],
+    ['PRICES', '£1 / 30 MINS', 'PRINTING 10p', 'TEA 80p'],
     C.wallCream,
     C.signBlue,
   );
   const lanParty = posterTexture(
-    ['LAN PARTY', 'SAT NIGHT', 'WINNER PLAYS', 'FREE 1 MONTH'],
+    ['LAN PARTY', 'SAT NIGHT', '£5 ENTRY', 'PRIZES!'],
     C.signRed,
     C.signText,
   );
   const noMinors = signTexture({
-    text: 'NO MINORS',
+    text: 'PAY AT COUNTER',
     background: C.signText,
     color: C.signRed,
     width: 384,
@@ -843,10 +923,6 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
   b.panel(1.2, 1.6, right - WALL - 0.01, 1.7, -12.5, -Math.PI / 2, b.glow(prices, '#ffffff', 0.35));
   b.panel(1.2, 1.6, x - 3, 1.8, backInner, 0, b.glow(lanParty, '#ffffff', 0.35));
   b.panel(1.6, 0.6, x + 1.5, 2.4, backInner, 0, b.glow(noMinors, '#ffffff', 0.4));
-}
-
-function levelOr(level: LevelMachine | undefined): Machine {
-  return level ? { kind: 'level', level } : { kind: 'off' };
 }
 
 /**
@@ -921,7 +997,7 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
 
   switch (machine.kind) {
     case 'level': {
-      const marker = new Mesh(new OctahedronGeometry(0.12, 0), b.glow(null, C.marker, 2.5));
+      const marker = new Mesh(new OctahedronGeometry(0.12, 0), b.glow(null, C.marker, 6));
       marker.position.set(x, 1.75, z - 0.1);
       b.root.add(marker);
       b.animations.push((t) => {
@@ -930,7 +1006,7 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
       });
       b.spots.push({
         kind: 'level',
-        sceneId: machine.level.sceneId,
+        levelId: machine.level.levelId,
         x,
         z: seatZ,
         reach: 1.0,
@@ -940,7 +1016,14 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
       break;
     }
     case 'busy':
-      b.read('电脑', '查看', x, seatZ, ['这台有人占着：外套搭在椅背上，桌上放着半瓶冰红茶。'], 0.9);
+      b.read(
+        '电脑',
+        '查看',
+        x,
+        seatZ,
+        ['这台有人占着：外套搭在椅背上，桌上放着一杯凉掉的茶和半包薯片。'],
+        0.9,
+      );
       b.colliders.push(boxAt(x, seatZ, 0.6, 0.6));
       break;
     case 'repair':
@@ -956,15 +1039,15 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
 
 function buildMusicShop(b: Builder, x: number): void {
   const { back, left, right } = shop(b, {
-    name: 'MILLENNIUM MUSIC',
+    name: 'MILLENNIUM RECORDS',
     x,
     width: 10,
     depth: 9,
     facade: surface('red_brick_03', { tile: 2 }),
     inner: surface('painted_plaster_wall', { tile: 2.5, tint: '#efe4cf' }),
     sign: signTexture({
-      text: 'MILLENNIUM MUSIC',
-      sub: 'CD · VCD · CASSETTE',
+      text: 'MILLENNIUM RECORDS',
+      sub: 'CDs · VINYL · TAPES · VIDEOS',
       background: C.signRed,
       border: C.signYellow,
     }),
@@ -999,17 +1082,13 @@ function buildMusicShop(b: Builder, x: number): void {
   b.prop('cassette_player', x + 0.2, 1.0, cz + 0.1, { height: 0.16, rotation: -0.4 });
   b.prop('portable_cassette_player', x + 0.5, 1.0, cz + 0.15, { width: 0.14, rotation: 0.5 });
   b.read('柜台', '查看', x, cz + 0.9, [
-    '柜台后面没人，收音机里放着一首老歌。',
-    '纸条上写着：「新到一批打口碟，随便挑。试听机坏了。」',
+    '柜台后面没人，收音机里放着本周排行榜的第一名。',
+    '纸条上写着：「任选两张 CD 只要 20 英镑。试听机坏了。」',
   ]);
   b.prop('ceiling_fan', x, STOREY, back + 4.5, { width: 1.2, groundAlign: false });
 
-  const topHits = posterTexture(
-    ['TOP HITS', 'NEW ARRIVALS', 'BUY 2 GET 1'],
-    C.signYellow,
-    C.signRed,
-  );
-  const original = posterTexture(['ORIGINAL', 'VCD / DVD', 'WELCOME'], C.signBlue, C.signText);
+  const topHits = posterTexture(['TOP 40', 'NEW IN', '2 FOR £20'], C.signYellow, C.signRed);
+  const original = posterTexture(['VHS', 'DVD', 'NOW £9.99'], C.signBlue, C.signText);
   const backInner = back + WALL + 0.01;
   b.panel(1.2, 1.6, x + 2.6, 1.8, backInner, 0, b.glow(topHits, '#ffffff', 0.35));
   b.panel(1.2, 1.6, x - 2.2, 1.8, backInner, 0, b.glow(original, '#ffffff', 0.35));
@@ -1019,15 +1098,15 @@ function buildMusicShop(b: Builder, x: number): void {
 
 function buildArcade(b: Builder, x: number): void {
   const { back, left } = shop(b, {
-    name: 'SUPER ARCADE',
+    name: 'FUNLAND AMUSEMENTS',
     x,
     width: 10,
     depth: 9,
     facade: surface('painted_plaster_wall', { tile: 2.5, tint: '#b9c4e0' }),
     inner: surface('painted_plaster_wall', { tile: 2.5, tint: '#3a3458' }),
     sign: signTexture({
-      text: 'SUPER ARCADE',
-      sub: 'ARCADE · DANCE · CLAW',
+      text: 'FUNLAND AMUSEMENTS',
+      sub: '2p PUSHERS · ARCADE · DANCE',
       background: C.plasticDark,
       color: C.neonPink,
       border: C.neonPurple,
@@ -1042,7 +1121,7 @@ function buildArcade(b: Builder, x: number): void {
   // 靠后墙的四台街机（自制槽位 arcade-cabinet）
   const notes = [
     ['投币口贴着纸条：「维修中」。'],
-    ['屏幕上一直放着演示画面。你口袋里没有游戏币。'],
+    ['屏幕上一直放着演示画面。你口袋里没有 10 便士的硬币。'],
     ['两个人正在这台机器上对战……不对，屏幕上是演示画面。'],
     ['摇杆歪了，拨一下就卡住。'],
   ];
@@ -1099,14 +1178,53 @@ function buildArcade(b: Builder, x: number): void {
   b.read('跳舞机', '查看', dx, dz, ['跳舞机：踏板上贴着「暂停使用」。'], 1.0);
 }
 
-// ---------- 千禧年的街头布置 ----------
+// ---------- 千禧年的英国商业街 ----------
 
-/** 横幅、LED 滚动屏、橱窗海报：2000 年前后街上随处可见的东西（文字只用英文） */
+/** 横幅、LED 滚动屏、橱窗海报、路牌、酒吧挂牌：2000 年前后英国商业街上随处可见的东西（文字只用英文） */
 function buildMillennium(b: Builder): void {
+  // HIGH STREET 路牌：英国标准的白底黑字、红色边框，钉在楼的一层上方
+  const plate = signTexture({
+    text: 'HIGH STREET',
+    sub: 'CITY CENTRE',
+    background: C.signText,
+    color: C.signTextDark,
+    border: C.postRed,
+    width: 384,
+    height: 96,
+  });
+  const plateMaterial = b.glow(plate, '#ffffff', 0.4);
+  b.panel(1.6, 0.4, -9, 3.15, -SIDEWALK_EDGE + 0.02, 0, plateMaterial);
+  b.panel(1.6, 0.4, -27.5, 3.9, SIDEWALK_EDGE - 0.02, Math.PI, plateMaterial);
+
+  // 酒吧的挂牌：从墙上伸出一根铁杆，下面吊一块两面都有字的牌子
+  const pub = signTexture({
+    text: 'THE MILLENNIUM ARMS',
+    sub: 'FREE HOUSE · EST. 1999',
+    background: '#1f3b2a',
+    color: C.signYellow,
+    border: C.signYellow,
+    width: 384,
+    height: 256,
+  });
+  const pubX = 23;
+  b.box(0.06, 0.06, 1.0, pubX, 3.75, -SIDEWALK_EDGE + 0.5, b.plain(C.metalDark, 0.4, 0.8));
+  for (const facing of [Math.PI / 2, -Math.PI / 2]) {
+    b.panel(
+      0.9,
+      0.62,
+      pubX + Math.sign(facing) * 0.02,
+      3.35,
+      -SIDEWALK_EDGE + 0.6,
+      facing,
+      b.glow(pub, '#ffffff', 0.5),
+    );
+  }
+  b.box(0.03, 0.66, 0.94, pubX, 3.02, -SIDEWALK_EDGE + 0.6, b.plain(C.wood, 0.6));
+
   // 横跨马路的布横幅，两头用绳子拴在楼上
   const banners: [number, string, string][] = [
     [-12, 'WELCOME TO THE NEW MILLENNIUM · 2000', C.signRed],
-    [10, 'Y2K READY · INTERNET FOR EVERYONE', C.signBlue],
+    [10, 'HIGH STREET MILLENNIUM FESTIVAL', C.signBlue],
   ];
   const rope = new LineBasicMaterial({ color: C.plasticDark });
   for (const [bx, text, background] of banners) {
@@ -1139,7 +1257,7 @@ function buildMillennium(b: Builder): void {
   const ledX = -4;
   const ledZ = SIDEWALK_EDGE - 0.1;
   b.box(7.6, 1.2, 0.3, ledX, 9.1, ledZ + 0.2, b.plain(C.metalDark, 0.5, 0.6));
-  b.panel(7.2, 0.9, ledX, 9.7, ledZ, Math.PI, b.glow(led, '#ffffff', 2.2));
+  b.panel(7.2, 0.9, ledX, 9.7, ledZ, Math.PI, b.glow(led, '#ffffff', 4.5));
   b.animations.push((t) => {
     led.offset.x = (t * 0.06) % 1;
   });
@@ -1170,14 +1288,14 @@ function buildMillennium(b: Builder): void {
     '查看',
     tvX,
     tvZ - 1.0,
-    ['六台电视放着同一个频道的天气预报。店主说今年的新款都是纯平的。'],
+    ['六台电视放着同一个频道的天气预报：明天还是有雨。店主说今年流行纯平电视。'],
     1.3,
   );
 
   // 楼顶第二块广告牌：整机广告
   const pcAd = signTexture({
     text: 'PC 2000 · PENTIUM III',
-    sub: '128MB RAM · 20GB HDD · 17" CRT · ¥6999',
+    sub: '128MB RAM · 20GB HDD · 17" CRT · £899 INC VAT',
     background: '#1b2b5a',
     color: C.signYellow,
     border: C.neonCyan,
@@ -1187,25 +1305,25 @@ function buildMillennium(b: Builder): void {
     b.box(0.2, 2.4, 0.2, -26 + dx, 10.4, -SIDEWALK_EDGE - 0.7, b.plain(C.metalDark, 0.5, 0.7));
 
   // 电玩城门头里面的 LED 滚动屏
-  const coin = ledTexture('INSERT COIN ★ 2 PLAYERS ★ HIGH SCORE ★ INSERT COIN ★', C.neonPink);
+  const coin = ledTexture('10p A GO ★ INSERT COIN ★ HIGH SCORE ★ 2 PLAYERS ★', C.neonPink);
   coin.repeat.set(((3.2 / 0.4) * 48) / (coin.image as HTMLCanvasElement).width, 1);
-  b.panel(3.2, 0.4, 16, 2.25, -SIDEWALK_EDGE - WALL - 0.03, 0, b.glow(coin, '#ffffff', 2.0));
+  b.panel(3.2, 0.4, 16, 2.25, -SIDEWALK_EDGE - WALL - 0.03, 0, b.glow(coin, '#ffffff', 4.5));
   b.animations.push((t) => {
     coin.offset.x = (t * 0.09) % 1;
   });
 
   // 网吧橱窗里的霓虹灯牌
   const open = signTexture({
-    text: 'OPEN 24H',
+    text: 'OPEN 7 DAYS',
     background: '#000000',
     color: C.neonCyan,
     border: C.neonPink,
     width: 256,
     height: 96,
   });
-  b.panel(1.1, 0.42, 4.2, 2.0, -SIDEWALK_EDGE - WALL - 0.03, 0, b.glow(open, '#ffffff', 2.4));
+  b.panel(1.1, 0.42, 4.2, 2.0, -SIDEWALK_EDGE - WALL - 0.03, 0, b.glow(open, '#ffffff', 5));
 
-  // 报刊亭门口：两只塑料筐叠起来当柜台，上面摆着卖的随身听
+  // 报摊门口：两只塑料筐叠起来当柜台，上面摆着卖的随身听
   b.prop('plastic_crate_01', -9.1, 0, 4.7, {
     height: 0.3,
     rotation: Math.PI / 2,
@@ -1217,9 +1335,9 @@ function buildMillennium(b: Builder): void {
 
   // 橱窗里贴的海报（贴在玻璃内侧，朝外）
   const windowPosters: [number, string[], string, string][] = [
-    [-19.5, ['NEW!', 'MP3 PLAYER', '64 MB', '¥899'], C.signYellow, C.signRed],
+    [-19.5, ['NEW!', 'MP3 PLAYER', '64 MB', '£149'], C.signYellow, C.signRed],
     [-4.8, ['Y2K READY', 'ALL PCs', 'TESTED'], C.signText, C.signBlue],
-    [4.8, ['56K → 512K', 'ADSL', 'NOW HERE'], C.signBlue, C.signText],
+    [4.8, ['56K → 512K', 'BROADBAND', 'NOW HERE'], C.signBlue, C.signText],
     [19.6, ['DANCE', 'MACHINE', 'NEW SONGS'], C.neonPink, C.signText],
   ];
   for (const [px, lines, background, color] of windowPosters) {

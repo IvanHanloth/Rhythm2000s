@@ -1,0 +1,200 @@
+/* 关卡开场页（结算用场景里的结算窗口，见 doc/results.md）。颜色都是 screen-theme.ts 注入的 --screen-* 变量，XP 关卡用 Luna、Mac 关卡用 Aqua */
+
+.level-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 16px;
+  box-sizing: border-box;
+  font: 14px/1.45 var(--screen-font);
+  color: var(--screen-ink);
+}
+
+.level-intro[hidden] {
+  display: none;
+}
+
+/* ---------- 窗口外框：两套主题共用结构 ---------- */
+
+.screen-window {
+  width: min(860px, 100%);
+  border: 1px solid var(--screen-frame);
+  border-radius: var(--screen-radius);
+  background: var(--screen-face);
+  box-shadow: 0 12px 36px rgb(0 0 0 / 0.45);
+  overflow: hidden;
+}
+
+.screen-caption {
+  padding: 6px 12px;
+  background: var(--screen-caption);
+  color: var(--screen-caption-ink);
+  font-weight: 700;
+  text-align: center;
+  border-bottom: 1px solid var(--screen-line);
+}
+
+.level-intro[data-theme='xp'] .screen-caption {
+  text-align: left;
+  text-shadow: 1px 1px 0 rgb(0 0 0 / 0.45);
+}
+
+.screen-body {
+  padding: 16px 20px;
+}
+
+.screen-group {
+  padding: 10px 14px 12px;
+  border: 1px solid var(--screen-line);
+  border-radius: 6px;
+  background: var(--screen-panel);
+}
+
+.screen-group h2 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--screen-ink-soft);
+}
+
+.screen-button {
+  min-width: 88px;
+  padding: 4px 16px;
+  border: 1px solid var(--screen-button-edge);
+  border-radius: var(--screen-button-radius);
+  background: var(--screen-button);
+  color: var(--screen-button-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.screen-button.is-primary {
+  background: var(--screen-primary);
+  color: var(--screen-primary-ink);
+  font-weight: 700;
+}
+
+.screen-button:focus-visible {
+  outline: 2px solid var(--screen-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- 关卡开场 ---------- */
+
+.level-intro {
+  background: rgb(0 0 0 / 0.55);
+  pointer-events: none;
+}
+
+.level-intro-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  animation: screen-drop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.level-intro-kicker {
+  padding: 3px 14px;
+  border-radius: 999px;
+  background: var(--screen-accent);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.level-intro-title {
+  margin: 0;
+  font: 800 clamp(40px, 7vw, 84px) / 1 var(--screen-font-display);
+  text-align: center;
+  text-shadow: 5px 5px 0 rgb(0 0 0 / 0.45);
+}
+
+.level-intro-card {
+  width: min(420px, 100%);
+  animation: screen-drop 0.45s 0.08s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.level-intro-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+
+.level-intro-facts dt {
+  color: var(--screen-ink-soft);
+}
+
+.level-intro-facts dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.level-intro-tip {
+  width: min(420px, 100%);
+  padding: 10px 14px;
+  border: 1px solid var(--screen-tip-edge);
+  border-radius: 8px;
+  background: var(--screen-tip);
+  color: var(--screen-ink);
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
+  animation: screen-drop 0.45s 0.16s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.level-intro-tip p {
+  margin: 6px 0 0;
+}
+
+.level-intro-turns {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.turn-chip {
+  padding: 0 8px;
+  border-radius: 999px;
+  color: #fff;
+  font: 800 13px / 20px var(--screen-font-display);
+}
+
+.turn-call {
+  background: var(--screen-good);
+  opacity: 0.75;
+}
+
+.turn-response {
+  background: var(--screen-accent);
+}
+
+.level-intro-keys {
+  color: var(--screen-ink-soft);
+  font-size: 12px;
+  animation: screen-blink 1.2s steps(2, jump-none) infinite;
+}
+
+@keyframes screen-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.96);
+  }
+}
+
+@keyframes screen-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-intro * {
+    animation: none !important;
+  }
+}

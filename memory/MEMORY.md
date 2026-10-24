@@ -7,3 +7,4 @@
 - [字体 PP NeueBit](project-font-pp-neuebit.md) — 用户指定的像素字体，已提交但仅个人授权，商用前需购买
 - [大厅美术要求](feedback-hub-art-direction.md) — 不要方块人和代码拼的造型，场景写实，场景内只用英文，主角是 DeepSeek 鲸鱼娘 GLB
 - [Vitest 谱面目录缓存](project-vitest-glob-cache.md) — 新增谱面后 chart-files 测试报清单不一致，先删 node_modules/.vitest-cache
+- [英国黑客松](project-uk-hackathon.md) — 项目是英国黑客松作品，街区用 2000 年英国商业街元素，界面语言改不改先问用户

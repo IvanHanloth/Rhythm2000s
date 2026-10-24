@@ -1,0 +1,161 @@
+{
+  "format": 1,
+  "id": "xp-yes-no",
+  "title": "是还是否",
+  "scene": "windows-xp",
+  "bpm": 104,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [
+        {
+          "beat": 0,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 2,
+          "action": "dialog-question"
+        }
+      ]
+    },
+    {
+      "call": [
+        {
+          "beat": 0,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 1,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 2,
+          "action": "dialog-question"
+        }
+      ]
+    },
+    {
+      "call": [
+        {
+          "beat": 0,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 1.5,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 3,
+          "action": "dialog-question"
+        }
+      ]
+    },
+    {
+      "call": [
+        {
+          "beat": 0.5,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 1.5,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 2.5,
+          "action": "dialog-question"
+        }
+      ]
+    },
+    {
+      "call": [
+        {
+          "beat": 0,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 1,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 1.5,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 2,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 3,
+          "action": "dialog-question"
+        }
+      ]
+    },
+    {
+      "call": [
+        {
+          "beat": 0,
+          "action": "dialog-info"
+        },
+        {
+          "beat": 0.5,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 1.5,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 2,
+          "action": "dialog-info"
+        },
+        {
+          "beat": 3,
+          "action": "dialog-question"
+        }
+      ]
+    },
+    {
+      "call": [
+        {
+          "beat": 0.5,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 1,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 2.5,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 3,
+          "action": "dialog-question"
+        }
+      ]
+    },
+    {
+      "call": [
+        {
+          "beat": 0,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 1,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 2,
+          "action": "dialog-question"
+        },
+        {
+          "beat": 3,
+          "action": "dialog-question"
+        }
+      ]
+    }
+  ]
+}

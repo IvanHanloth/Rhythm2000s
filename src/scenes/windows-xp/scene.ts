@@ -84,10 +84,11 @@ const FADE_BEATS = 0.25;
 const RESULT_INPUT_DELAY_MS = 600;
 
 /**
- * select：资源管理器里选关；starting：等音频恢复；playing：一局进行中；result：显示结果。
+ * select：资源管理器里选关；ready：选好了一关，游戏外壳正显示开场页，等第一下空格或点击；
+ * starting：等音频恢复；playing：一局进行中；result：显示结果。
  * 选关和结果时点画面不算节奏输入（onTap 不处理），只认鼠标点到的按钮、图标和键盘。
  */
-type State = 'select' | 'starting' | 'playing' | 'result';
+type State = 'select' | 'ready' | 'starting' | 'playing' | 'result';
 
 /** 资源管理器窗口在虚拟屏幕上的位置和大小（设计稿 1120×630 换算到 1024×576） */
 const EXPLORER = { x: 64, y: 19, width: 896, height: 504 };
@@ -195,6 +196,12 @@ class WindowsXpScene implements Scene {
         buttons: [{ label: '确定', onTap: () => this.hideDialog() }],
       });
     }
+    // 网址 #windows-xp/谱面 直接打开某一关：资源管理器里选中它，跳过列表
+    const direct = this.charts.findIndex((chart) => chart.id === context.chartId);
+    if (direct >= 0) {
+      this.explorer.select(direct);
+      this.ready(this.charts[direct]!);
+    }
     window.addEventListener('keydown', this.onKeyDown);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
@@ -217,9 +224,10 @@ class WindowsXpScene implements Scene {
     if (audioTime >= session.endTime) this.finish(session);
   }
 
-  /** 只有一局进行中时，空格和点画面才是节奏输入 */
+  /** 只有一局进行中时，空格和点画面才是节奏输入；开场页上的第一下开始这一关 */
   onTap({ audioTime }: TapInfo): void {
     if (this.state === 'playing') this.session?.tap(audioTime);
+    else if (this.state === 'ready' && this.chart) void this.start(this.chart);
   }
 
   /** 关卡里、结果框上按 Esc 回到关卡列表；关卡列表上交给游戏入口回网吧 */
@@ -264,12 +272,29 @@ class WindowsXpScene implements Scene {
     }
   };
 
-  /** 双击图标或点「开始这一关」：响一声资源管理器的点击声，开始这一关 */
+  /** 双击图标或点「开始这一关」：响一声资源管理器的点击声，进这一关的开场页 */
   private openLevel(index: number): void {
     const chart = this.charts[index];
     if (!chart || this.state !== 'select') return;
     this.playNow(this.sounds.close);
-    void this.start(chart);
+    this.ready(chart);
+  }
+
+  /**
+   * 选好了一关：收起资源管理器，请游戏外壳显示开场页，等玩家第一下空格或点击再开始。
+   * 没有开场页时（原型页面等）直接开始。
+   */
+  private ready(chart: Chart): void {
+    if (!this.context.introduce) {
+      void this.start(chart);
+      return;
+    }
+    this.clearRound();
+    this.hideDialog();
+    this.chart = chart;
+    this.state = 'ready';
+    this.setExplorerVisible(false);
+    this.context.introduce(chart.id);
   }
 
   private retry(): void {
@@ -284,7 +309,7 @@ class WindowsXpScene implements Scene {
     const chart = this.charts[index];
     if (!chart) return;
     this.explorer.select(index);
-    void this.start(chart);
+    this.ready(chart);
   }
 
   private async start(chart: Chart): Promise<void> {

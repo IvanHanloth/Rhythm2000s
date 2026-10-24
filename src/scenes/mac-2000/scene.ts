@@ -60,10 +60,11 @@ const RESULTS_Y = 266;
 const RESULT_INPUT_DELAY_MS = 600;
 
 /**
- * select：Finder 里选关；starting：等音频恢复；playing：一局进行中；result：显示结果。
+ * select：Finder 里选关；ready：选好了一关，游戏外壳正显示开场页，等第一下空格或点击；
+ * starting：等音频恢复；playing：一局进行中；result：显示结果。
  * 选关和结果时点画面不算节奏输入（onTap 不处理），只认鼠标点到的按钮、图标和键盘。
  */
-type State = 'select' | 'starting' | 'playing' | 'result';
+type State = 'select' | 'ready' | 'starting' | 'playing' | 'result';
 
 class Mac2000Scene implements Scene {
   readonly view = new Container({ label: 'mac-2000' });
@@ -138,6 +139,12 @@ class Mac2000Scene implements Scene {
         buttons: [{ label: '好', isDefault: true, onTap: () => this.hideDialog() }],
       });
     }
+    // 网址 #mac-2000/谱面 直接打开某一关：Finder 里选中它，跳过列表
+    const direct = this.charts.findIndex((chart) => chart.id === context.chartId);
+    if (direct >= 0) {
+      this.levelSelect.select(direct);
+      this.ready(this.charts[direct]!);
+    }
 
     window.addEventListener('keydown', this.onKeyDown);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
@@ -158,9 +165,10 @@ class Mac2000Scene implements Scene {
     if (audioTime >= session.endTime) this.finish(session);
   }
 
-  /** 只有一局进行中时，空格和点画面才是节奏输入 */
+  /** 只有一局进行中时，空格和点画面才是节奏输入；开场页上的第一下开始这一关 */
   onTap({ audioTime }: TapInfo): void {
     if (this.state === 'playing') this.session?.tap(audioTime);
+    else if (this.state === 'ready' && this.chart) void this.start(this.chart);
   }
 
   /** 关卡里、结果框上按 Esc 回到关卡列表；关卡列表上交给游戏入口回网吧 */
@@ -208,7 +216,24 @@ class Mac2000Scene implements Scene {
   private openLevel(index: number): void {
     const chart = this.charts[index];
     if (!chart || this.state !== 'select') return;
-    void this.start(chart);
+    this.ready(chart);
+  }
+
+  /**
+   * 选好了一关：收起 Finder，请游戏外壳显示开场页，等玩家第一下空格或点击再开始。
+   * 没有开场页时（原型页面等）直接开始。
+   */
+  private ready(chart: Chart): void {
+    if (!this.context.introduce) {
+      void this.start(chart);
+      return;
+    }
+    this.clearRound();
+    this.hideDialog();
+    this.chart = chart;
+    this.state = 'ready';
+    this.levelSelect.view.visible = false;
+    this.context.introduce(chart.id);
   }
 
   private retry(): void {
@@ -252,7 +277,7 @@ class Mac2000Scene implements Scene {
     const chart = this.charts[index];
     if (!chart) return;
     this.levelSelect.select(index);
-    void this.start(chart);
+    this.ready(chart);
   }
 
   /** 一局结束：弹出结算窗口（doc/results.md），记下最好得分 */

@@ -4,9 +4,51 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>rhythm2000s</title>
+    <!-- 启动画面的样式直接写在这里：JS 和 style.css 加载之前就要显示 -->
+    <style>
+      /* 启动画面：像老电脑开机时的黑底白字 */
+      .boot {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: #000;
+        color: #c8c8c8;
+        font:
+          15px/1.4 ui-monospace,
+          'Courier New',
+          monospace;
+      }
+
+      .boot-title {
+        color: #fff;
+        font-size: 22px;
+        letter-spacing: 0.08em;
+      }
+
+      .boot-text::after {
+        content: '_';
+        animation: boot-cursor 1s steps(2, jump-none) infinite;
+      }
+
+      @keyframes boot-cursor {
+        50% {
+          opacity: 0;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="game"></div>
+    <!-- 启动画面：场景素材、谱面加载完、街区建好后由 main.ts 移除 -->
+    <div id="boot" class="boot" role="status">
+      <span class="boot-title">rhythm2000s</span>
+      <span class="boot-text">正在启动……</span>
+    </div>
     <script type="module" src="/src/game/main.ts"></script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-// 大厅的素材加载：GLB 模型、PBR 贴图、HDRI。素材来源与授权登记在 assets/README.md。
+// 大厅的素材加载：GLB 模型、PBR 贴图。素材来源与授权登记在 assets/README.md。
 // 模型都是异步加载的：布景先放一个空的锚点，模型下载完再挂上去，所以画面不用等全部素材。
 
 import {
@@ -38,6 +38,13 @@ export function loadModel(path: string): Promise<Group | null> {
           if (!mesh.isMesh) return;
           mesh.castShadow = true;
           mesh.receiveShadow = true;
+          // 现成模型自带的自发光（灯管、指示灯）不进辉光：辉光只留给游戏自己的灯箱和闪灯（hub.ts）
+          for (const material of [mesh.material].flat()) {
+            const standard = material as MeshStandardMaterial;
+            if (standard.isMeshStandardMaterial && standard.emissiveIntensity > 1) {
+              standard.emissiveIntensity = 1;
+            }
+          }
         });
         return gltf.scene;
       },

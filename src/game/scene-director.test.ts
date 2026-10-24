@@ -8,8 +8,8 @@ function fakeEntry(id: string, log: string[]): SceneEntry {
   return {
     id: id as SceneEntry['id'],
     label: id,
-    create(): Scene {
-      log.push(`create ${id}`);
+    create(context): Scene {
+      log.push(context.chartId ? `create ${id} ${context.chartId}` : `create ${id}`);
       return {
         view: { label: id } as unknown as Container,
         update: (frame: FrameInfo) => log.push(`update ${id} ${frame.audioTime}`),
@@ -54,6 +54,17 @@ describe('SceneDirector', () => {
     director.show('a');
 
     expect(log).toEqual(['create a', 'add a']);
+  });
+
+  it('同一场景换一首谱面时重建，并把谱面 id 交给场景', () => {
+    const log: string[] = [];
+    const director = new SceneDirector(fakeHost(log), [fakeEntry('a', log)], context);
+
+    director.show('a', 'x');
+    director.show('a', 'x');
+    director.show('a', 'y');
+
+    expect(log).toEqual(['create a x', 'add a', 'remove a', 'destroy a', 'create a y', 'add a']);
   });
 
   it('每帧只更新当前场景', () => {

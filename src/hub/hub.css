@@ -184,6 +184,73 @@
   color: var(--hub-ink-muted);
 }
 
+/* ---------- 制作人员 ---------- */
+
+.hub-credits {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100% - 32px));
+  box-sizing: border-box;
+  padding: 16px 20px;
+  border: 1px solid var(--hub-line);
+  border-radius: 6px;
+  background: var(--hub-surface);
+  color: var(--hub-ink);
+  pointer-events: auto;
+}
+
+.hub-credits p {
+  margin: 0 0 8px;
+}
+
+.hub-credits-list {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  line-height: 1.5;
+}
+
+.hub-credits a {
+  color: var(--hub-accent);
+  pointer-events: auto;
+}
+
+/* ---------- 加载进度：XP 开机画面那种蓝色小方块进度条 ---------- */
+
+.hub-loading {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  text-shadow: 1px 1px 0 var(--hub-focus);
+}
+
+.hub-loading-track {
+  width: 180px;
+  height: 12px;
+  padding: 2px;
+  border: 1px solid var(--hub-line-soft);
+  border-radius: 4px;
+  background: var(--hub-ink);
+}
+
+.hub-loading-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: repeating-linear-gradient(90deg, var(--hub-accent) 0 8px, transparent 8px 10px);
+  transition: width 0.2s;
+}
+
 /* ---------- 走动时的提示 ---------- */
 
 .hub-hud {
@@ -303,6 +370,11 @@
 
 .hub-card-body p {
   margin: 0 0 6px;
+}
+
+.hub-card-record {
+  padding-top: 6px;
+  border-top: 1px solid var(--hub-line-soft);
 }
 
 .hub-card-keys {

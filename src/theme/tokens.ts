@@ -91,6 +91,12 @@ export const FONT_FAMILIES = {
   pixel: ['Pixelify Sans', 'Noto Sans SC', 'monospace'],
 };
 
+/** 字体列表拼成 CSS 的 font-family 值：名字里有空格或数字的要加引号（不加时「Baloo 2」会让整条声明失效） */
+export function cssFontFamily(families: readonly string[]): string {
+  const generic = new Set(['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui']);
+  return families.map((f) => (generic.has(f) ? f : `"${f}"`)).join(', ');
+}
+
 /** 判定颜色：三套主题共用，保证判定反馈跨场景一致。on-* 是落在对应底色上的文字颜色 */
 export const JUDGEMENT_COLORS = {
   perfect: '#f2b705',
