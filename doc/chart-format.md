@@ -110,14 +110,21 @@ public/charts/
 | `dialog-warning` | 警告消息框（黄色感叹号图标） | `windows-xp` | 在拍点上弹出，响 XP「感叹号」提示音 | 在拍点上关掉 |
 | `dialog-error` | 错误消息框（红色叉号图标） | `windows-xp` | 在拍点上弹出，响 XP「严重停止」提示音 | 在拍点上关掉 |
 | `dialog-question` | 询问消息框（问号图标，按钮是「是」「否」） | `windows-xp` | 在拍点上弹出，暂用 `chimes.wav`（原版的「问题」事件没有声音，见 [scenes/windows-xp.md](scenes/windows-xp.md#音效)） | 在拍点上关掉 |
+| `alert-note` | Mac 提示框（`kAlertNoteAlert`，程序图标） | `mac-2000` | 在拍点上弹出，响 `Glass` | 在拍点上按「好」关掉 |
+| `alert-caution` | Mac 警告提示框（`kAlertCautionAlert`，黄色三角） | `mac-2000` | 在拍点上弹出，响 `Funk` | 同上 |
+| `alert-stop` | Mac 停止提示框（`kAlertStopAlert`） | `mac-2000` | 在拍点上弹出，响 `Basso` | 同上 |
+| `dock-bounce` | Dock 图标弹跳（`requestUserAttention:`） | `mac-2000` | 图标跳起，在拍点上落下，响 `Pop`，之后一直小幅弹跳 | 在拍点上点一下，让它停下 |
+| `mail-new` | Mail 新邮件（Dock 图标的未读角标） | `mac-2000` | Mail 图标轻跳一下，角标加 1，响 `Ping` | 在拍点上读一封，角标减 1 |
+| `window-miniaturize` | Mac 文稿窗口（`NSWindow miniaturize:`） | `mac-2000` | 在拍点上弹出窗口，响 `Bottle` | 在拍点上把它最小化到 Dock |
 
-四种消息框玩法相同，只是图标、按钮和提示音不同，同一乐句里可以混用。设计文档里的其他动作（收邮件、点击刷新等）实现后再按同样规则加入此表。谱面用了所在场景不支持的动作，视为错误。
+四种消息框玩法相同，只是图标、按钮和提示音不同，同一乐句里可以混用。Mac 场景的六个动作也一样，玩法相同，同一乐句里可以混用（Mac 提示音的选择见 [scenes/mac-2000.md](scenes/mac-2000.md#音效)）。设计文档里的其他动作（点击刷新等）实现后再按同样规则加入此表。谱面用了所在场景不支持的动作，视为错误。
 
 ## 场景附加规则
 
 | 场景 | 规则 |
 | --- | --- |
 | `windows-xp` | 每个乐句的 `response` 与 `call` 事件个数相同、动作依次相同：第几个弹出的消息框，就由第几下关掉 |
+| `mac-2000` | 同上：第几个出现的提示框 / 弹跳图标 / 新邮件 / 窗口，就由第几下处理。另外同一乐句里提示框和文稿窗口合计不超过 6 个，`dock-bounce` 不超过 8 个（画面上的位置和 Dock 图标就这么多） |
 
 ## 时间上的限制
 

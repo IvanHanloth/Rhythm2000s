@@ -3,6 +3,8 @@
 
 import type { ActionType } from '../rhythm/actions.ts';
 import type { Chart } from '../rhythm/chart.ts';
+import { MAC_ACTION_TYPES } from './mac-2000/action-kinds.ts';
+import { checkMacChart } from './mac-2000/chart-rules.ts';
 import { checkWindowsXpChart } from './windows-xp/chart-rules.ts';
 
 export type SceneId = 'windows-xp' | 'mac-2000';
@@ -24,8 +26,8 @@ export const SCENE_CATALOG: Record<SceneId, SceneInfo> = {
   },
   'mac-2000': {
     label: 'Mac 桌面（水晶）',
-    // 还是占位场景，没有可玩的动作
-    actions: [],
+    actions: MAC_ACTION_TYPES,
+    checkChart: checkMacChart,
   },
 };
 

@@ -1,0 +1,148 @@
+// Mac 场景的一局：谱面、伴奏、判定串在一起，不负责画面。
+// 时间都是音频时间（秒）。画面用「听到的」时间；判定用扣除校准值之后的时间。
+
+import { Sequencer } from '../../audio/sequencer.ts';
+import type { SceneContext } from '../../game/scene.ts';
+import { beatToTime, timeToBeat } from '../../rhythm/beat.ts';
+import type { Chart, ChartCue } from '../../rhythm/chart.ts';
+import { ResponseJudge, type Judgement, type JudgementLevel } from '../../rhythm/judge.ts';
+import { isMacAction, MAC_ACTIONS, type MacAction, type MacTargetKind } from './action-kinds.ts';
+import { buildBackingTrack, type MacSongSounds } from './song.ts';
+
+/** 按下开始后，第 0 拍延后多久（秒） */
+const LEAD_IN = 0.2;
+
+/** 一个要玩家处理的目标：示范段出现的一个提示框 / 弹跳图标 / 新邮件 / 窗口 */
+export interface MacTarget {
+  call: ChartCue;
+  response: ChartCue;
+  action: MacAction;
+  kind: MacTargetKind;
+  /**
+   * 在本乐句同类目标里排第几（从 0 开始），决定画在哪：
+   * 提示框和窗口共用画面上的位置；Dock 弹跳决定用哪个图标；新邮件只用来区分先后。
+   */
+  order: number;
+  /** 玩家处理掉它的听到时间；还没处理时为 null */
+  handledAt: number | null;
+  /** 判定为 Miss 的听到时间 */
+  missedAt: number | null;
+}
+
+/** 画面位置的分组：提示框和窗口共用一组位置 */
+function slotGroup(kind: MacTargetKind): string {
+  return kind === 'alert' || kind === 'window' ? 'screen' : kind;
+}
+
+/** 把谱面里的示范 / 跟打事件配成一个个目标。谱面应已通过 checkMacChart（个数、动作一一对应）。 */
+export function buildTargets(chart: Chart): MacTarget[] {
+  const counters = new Map<string, number>();
+  return chart.calls.map((call, i) => {
+    const action: MacAction = isMacAction(call.action) ? call.action : 'alert-note';
+    const kind = MAC_ACTIONS[action].kind;
+    const key = `${call.phrase}:${slotGroup(kind)}`;
+    const order = counters.get(key) ?? 0;
+    counters.set(key, order + 1);
+    return {
+      call,
+      response: chart.responses[i]!,
+      action,
+      kind,
+      order,
+      handledAt: null,
+      missedAt: null,
+    };
+  });
+}
+
+export interface JudgementRecord extends Judgement {
+  /** 判定在画面上出现的时间（听到的时间，没有扣除校准值） */
+  shownAt: number;
+}
+
+export class MacSession {
+  readonly chart: Chart;
+  readonly startTime: number;
+  readonly targets: MacTarget[];
+  /** 按发生顺序追加，画面据此弹出判定字样 */
+  readonly judgements: JudgementRecord[] = [];
+
+  private readonly context: SceneContext;
+  private readonly sounds: MacSongSounds;
+  private readonly output: GainNode;
+  private readonly sequencer: Sequencer;
+  private readonly judge: ResponseJudge;
+
+  constructor(context: SceneContext, chart: Chart, sounds: MacSongSounds) {
+    const audio = context.clock.context;
+    this.context = context;
+    this.chart = chart;
+    this.sounds = sounds;
+    this.startTime = audio.currentTime + LEAD_IN;
+
+    this.output = audio.createGain();
+    this.output.gain.value = 0.8;
+    this.output.connect(audio.destination);
+
+    this.sequencer = new Sequencer(audio, this.output, buildBackingTrack(chart, sounds), {
+      startTime: this.startTime,
+      bpm: chart.bpm,
+    });
+    this.judge = new ResponseJudge(chart.responses.map((cue) => this.timeAt(cue.beat)));
+    this.targets = buildTargets(chart);
+  }
+
+  beatAt(time: number): number {
+    return timeToBeat(this.startTime, this.chart.bpm, time);
+  }
+
+  timeAt(beat: number): number {
+    return beatToTime(this.startTime, this.chart.bpm, beat);
+  }
+
+  get endTime(): number {
+    return this.timeAt(this.chart.endBeat);
+  }
+
+  /** 每帧调用：预约伴奏，并把过了判定窗口的目标记为 Miss。 */
+  update(audioTime: number): void {
+    this.sequencer.schedule();
+    const calibration = this.context.calibration();
+    for (const judgement of this.judge.expire(audioTime - calibration)) {
+      const shownAt = judgement.time + calibration;
+      this.targets[judgement.target]!.missedAt = shownAt;
+      this.judgements.push({ ...judgement, shownAt });
+      this.playNow(this.sounds.miss);
+    }
+  }
+
+  /** 玩家输入（听到的时间）。命中时处理掉对应的目标，返回判定；没有对上目标时返回 null。 */
+  tap(audioTime: number): Judgement | null {
+    const judgement = this.judge.tap(audioTime - this.context.calibration());
+    if (!judgement) return null;
+    this.targets[judgement.target]!.handledAt = audioTime;
+    this.judgements.push({ ...judgement, shownAt: audioTime });
+    this.playNow(this.sounds.handled);
+    return judgement;
+  }
+
+  counts(): Record<JudgementLevel, number> {
+    const counts = { perfect: 0, good: 0, miss: 0 };
+    for (const judgement of this.judgements) counts[judgement.level]++;
+    return counts;
+  }
+
+  stop(): void {
+    this.sequencer.stop();
+    this.output.disconnect();
+  }
+
+  /** 玩家动作的反馈音跟随输入立即播放，不预约在拍点上。 */
+  private playNow(buffer: AudioBuffer): void {
+    const audio = this.context.clock.context;
+    const source = audio.createBufferSource();
+    source.buffer = buffer;
+    source.connect(this.output);
+    source.start();
+  }
+}
