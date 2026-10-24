@@ -28,14 +28,14 @@
 ├── AGENTS.md          # 本文件：给 AI 助手和协作者的项目说明
 ├── README.md
 ├── index.html         # 游戏入口页：游戏画布 + 开发面板（切换场景、打开原型）
-├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/index.html
+├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/、prototypes/xp-components/（XP 界面部件展示）
 ├── public/charts/     # 谱面 JSON：index.json 清单 + 每首一个文件，运行时下载
 ├── assets/            # 共用素材：原版系统素材参考、字体等，来源与授权见 assets/README.md
 ├── promo/             # 宣发视频（HyperFrames：HTML + GSAP 渲染成 MP4），独立于游戏工程，说明见 promo/AGENTS.md
 ├── src/
 │   ├── game/          # 游戏画布（1280×720 等比缩放）、场景接口、场景切换器、输入、设置、入口
-│   ├── scenes/        # 各场景，一个场景一个目录；catalog.ts 登记各场景支持的动作
-│   ├── theme/         # 场景主题颜色、字体、判定颜色、动画拍数，取自设计系统提案
+│   ├── scenes/        # 各场景，一个场景一个目录；catalog.ts 登记各场景支持的动作；windows-xp/components/ 是贴近原版的 XP 界面部件
+│   ├── theme/         # 场景主题颜色、字体、判定颜色、动画拍数（取自设计系统提案）；xp-luna.ts 是 XP Luna 原版配色
 │   ├── ui/            # 跨场景共用的画面部件（判定字样、缓动函数）
 │   ├── audio/         # 音频时钟、节拍器、音序器、合成鼓点与音效
 │   ├── rhythm/        # 拍 ↔ 音频时间换算、动作 ID、谱面校验与展开、判定、轮次提示

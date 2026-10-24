@@ -1,9 +1,12 @@
-// XP 场景的伴奏和音效，全部 MVP 暂定（doc/prototypes/mvp.md）。
+// XP 场景的伴奏和音效（doc/prototypes/mvp.md）。鼓点、节拍器现场合成，MVP 暂定；
+// 界面音效用 XP 原版声音，对应关系见 doc/scenes/windows-xp.md「音效」。
 // 谱面不在这里，存放在 public/charts/（ADR 0003）。
 
 import type { SequencedSound } from '../../audio/sequencer.ts';
 import { createBlip, createHat, createKick, createSnare } from '../../audio/synth.ts';
 import type { Chart } from '../../rhythm/chart.ts';
+import type { XpSounds } from './assets.ts';
+import { DIALOG_KINDS, isDialogKind, type DialogKind } from './dialog-kinds.ts';
 
 export interface PopupSounds {
   kick: AudioBuffer;
@@ -12,28 +15,34 @@ export interface PopupSounds {
   /** 预备拍的节拍器点击，重音和普通各一个 */
   countAccent: AudioBuffer;
   count: AudioBuffer;
-  /** 示范段弹窗的「叮」 */
-  popup: AudioBuffer;
-  /** 玩家关窗的「啪」 */
+  /** 示范段弹出各种消息框时的 XP 提示音 */
+  dialogs: Record<DialogKind, AudioBuffer>;
+  /** 玩家关掉消息框的点击声 */
   close: AudioBuffer;
-  /** Miss 的错误提示音 */
+  /** Miss：XP 默认提示音 */
   miss: AudioBuffer;
+  /** 一局结束：tada */
+  result: AudioBuffer;
 }
 
-export function createPopupSounds(context: BaseAudioContext): PopupSounds {
+export function createPopupSounds(context: BaseAudioContext, xp: XpSounds): PopupSounds {
+  const dialogs = Object.fromEntries(
+    Object.entries(DIALOG_KINDS).map(([kind, info]) => [kind, xp[info.sound]]),
+  ) as Record<DialogKind, AudioBuffer>;
   return {
     kick: createKick(context),
     snare: createSnare(context),
     hat: createHat(context),
     countAccent: createBlip(context, { from: 1760, duration: 0.05, gain: 0.5 }),
     count: createBlip(context, { from: 880, duration: 0.05, gain: 0.5 }),
-    popup: createBlip(context, { from: 988, to: 1319, duration: 0.09, gain: 0.35, wave: 'square' }),
-    close: createBlip(context, { from: 1200, to: 500, duration: 0.07, gain: 0.45, wave: 'square' }),
-    miss: createBlip(context, { from: 160, duration: 0.22, gain: 0.35, wave: 'square' }),
+    dialogs,
+    close: xp.navigate,
+    miss: xp.defaultBeep,
+    result: xp.tada,
   };
 }
 
-/** 伴奏：预备小节打节拍器，示范 / 跟打小节「底鼓、军鼓交替，每半拍踩镲」，空档只有踩镲，结尾只收一下；再加上示范段的弹窗声。 */
+/** 伴奏：预备小节打节拍器，示范 / 跟打小节「底鼓、军鼓交替，每半拍踩镲」，空档只有踩镲，结尾只收一下；再加上示范段的消息框提示音。 */
 export function buildBackingTrack(chart: Chart, sounds: PopupSounds): SequencedSound[] {
   const { beatsPerBar } = chart;
   const track: SequencedSound[] = [];
@@ -66,7 +75,9 @@ export function buildBackingTrack(chart: Chart, sounds: PopupSounds): SequencedS
   );
 
   for (const call of chart.calls) {
-    track.push({ beat: call.beat, buffer: sounds.popup });
+    if (isDialogKind(call.action)) {
+      track.push({ beat: call.beat, buffer: sounds.dialogs[call.action] });
+    }
   }
   return track;
 }

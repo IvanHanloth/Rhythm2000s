@@ -1,13 +1,17 @@
 import { describe, expect, it } from 'vite-plus/test';
 import type { SceneContext } from '../../game/scene.ts';
+import { DIALOG_KINDS } from './dialog-kinds.ts';
 import { PopupSession } from './popup-session.ts';
 import type { PopupSounds } from './song.ts';
 import { loadMvpChart } from './test-mvp-chart.ts';
 
 /** 用名字代替真正的 AudioBuffer */
-const sounds = Object.fromEntries(
-  ['kick', 'snare', 'hat', 'countAccent', 'count', 'popup', 'close', 'miss'].map((n) => [n, n]),
-) as unknown as PopupSounds;
+const sounds = {
+  ...Object.fromEntries(
+    ['kick', 'snare', 'hat', 'countAccent', 'count', 'close', 'miss', 'result'].map((n) => [n, n]),
+  ),
+  dialogs: Object.fromEntries(Object.keys(DIALOG_KINDS).map((kind) => [kind, kind])),
+} as unknown as PopupSounds;
 
 /** 假的 AudioContext：只记录「立即播放」的音效，时间由测试手动推进。 */
 function fakeContext(calibration = 0) {

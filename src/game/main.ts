@@ -23,7 +23,11 @@ const [canvas, { charts, errors: chartErrors }] = await Promise.all([
 for (const error of chartErrors) console.error(error);
 let calibrationMs = loadCalibrationMs();
 
-const director = new SceneDirector(canvas.stage, [windowsXpScene, mac2000Scene], {
+const scenes = [windowsXpScene, mac2000Scene];
+// 场景素材在画布建好之后加载（PixiJS 的纹理加载放在渲染器初始化之后更稳妥）
+await Promise.all(scenes.map(async (scene) => scene.preload?.(clock.context)));
+
+const director = new SceneDirector(canvas.stage, scenes, {
   clock,
   calibration: () => calibrationMs / 1000,
   charts,

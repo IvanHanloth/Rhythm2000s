@@ -1,16 +1,17 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { buildChart } from '../../rhythm/chart.ts';
 import { sourceFromPatterns } from '../../rhythm/test-charts.ts';
+import { DIALOG_KINDS } from './dialog-kinds.ts';
 import { buildBackingTrack, type PopupSounds } from './song.ts';
 import { loadMvpChart } from './test-mvp-chart.ts';
 
 /** 用名字代替真正的 AudioBuffer，只检查排了哪些声音 */
-const sounds = Object.fromEntries(
-  ['kick', 'snare', 'hat', 'countAccent', 'count', 'popup', 'close', 'miss'].map((name) => [
-    name,
-    name,
-  ]),
-) as unknown as PopupSounds;
+const sounds = {
+  ...Object.fromEntries(
+    ['kick', 'snare', 'hat', 'countAccent', 'count', 'close', 'miss', 'result'].map((n) => [n, n]),
+  ),
+  dialogs: Object.fromEntries(Object.keys(DIALOG_KINDS).map((kind) => [kind, kind])),
+} as unknown as PopupSounds;
 
 describe('MVP 谱面文件', () => {
   it('8 个乐句，每句「示范 + 1 拍空档 + 跟打」，全曲 80 拍', () => {
@@ -35,9 +36,10 @@ describe('buildBackingTrack', () => {
     expect(at(1)).toEqual(['count', 'hat']);
   });
 
-  it('每个示范动作都有一声弹窗音', () => {
-    const popups = track.filter((s) => (s.buffer as unknown as string) === 'popup');
+  it('每个示范动作都有一声对应种类的消息框提示音', () => {
+    const popups = track.filter((s) => (s.buffer as unknown as string).startsWith('dialog-'));
     expect(popups.map((s) => s.beat)).toEqual(chart.calls.map((c) => c.beat));
+    expect(popups.map((s) => s.buffer)).toEqual(chart.calls.map((c) => c.action));
   });
 
   it('跟打段不提示动作，只有鼓点', () => {

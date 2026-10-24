@@ -3,7 +3,10 @@
 import type { SceneEntry } from './scene.ts';
 import { CALIBRATION_LIMIT_MS } from './settings.ts';
 
-const PROTOTYPES = [{ label: '延迟测试', href: '/prototypes/latency/' }];
+const PROTOTYPES = [
+  { label: '延迟测试', href: '/prototypes/latency/' },
+  { label: 'XP 部件', href: '/prototypes/xp-components/' },
+];
 
 export interface DevPanelOptions {
   scenes: readonly SceneEntry[];

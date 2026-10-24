@@ -42,5 +42,7 @@ export interface SceneEntry {
   id: SceneId;
   /** 给人看的名称，例如「Windows XP 桌面」 */
   label: string;
+  /** 场景素材（图片、字体、音效）的加载；游戏启动时等它完成，之后 create() 可以同步取用 */
+  preload?(audio: BaseAudioContext): Promise<void>;
   create(context: SceneContext): Scene;
 }
