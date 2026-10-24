@@ -1,6 +1,7 @@
 // 场景：2000 年前后的 Mac 桌面（doc/scenes/mac-2000.md），按简体中文版 Mac OS X 10.0–10.2 的早期 Aqua 还原。
 // 玩法与 XP 的 MVP 相同：示范小节里电脑按节奏「出事」，跟打小节里玩家按同样的节奏逐个处理。
 // 进场景先在 Finder 里用鼠标选关（doc/level-select.md）。
+// 进关后先跑系统演示：谱面用到的每种动作各一轮小谱面，成功才进下一种，全部成功后才开始正文（doc/level-design.md「规则 1」）。
 // Aqua 界面按原版像素尺寸画在 1024×576 的虚拟屏幕上，整体放大 1.25 倍铺满画布；轮次横幅和判定字样按画布坐标画。
 // 画面每帧只根据音频时间计算，不累加帧间隔。
 
@@ -8,13 +9,22 @@ import { Container, Graphics, Rectangle, Sprite } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../../game/layout.ts';
 import type { FrameInfo, Scene, SceneContext, SceneEntry, TapInfo } from '../../game/scene.ts';
 import { recordScore } from '../../game/records.ts';
+import { loadSkipTutorial } from '../../game/settings.ts';
+import type { ActionType } from '../../rhythm/actions.ts';
 import type { Chart } from '../../rhythm/chart.ts';
 import { summarizeResult } from '../../rhythm/result-summary.ts';
 import { buildTurnCues, turnCueAt, type TurnCue } from '../../rhythm/turn-cue.ts';
+import {
+  buildTutorialChart,
+  tutorialActions,
+  tutorialHint,
+  tutorialPassed,
+} from '../../rhythm/tutorial.ts';
 import { AQUA } from '../../theme/aqua.ts';
 import { BEATS, THEMES } from '../../theme/tokens.ts';
 import { clamp01 } from '../../ui/easing.ts';
 import { TurnBanner } from '../../ui/turn-banner.ts';
+import { TutorialCaption } from '../../ui/tutorial-caption.ts';
 import { SCENE_CATALOG } from '../catalog.ts';
 import { macAssets, preloadMacAssets } from './assets.ts';
 import { AquaAlert, type AquaAlertOptions } from './components/alert.ts';
@@ -36,6 +46,8 @@ const SCREEN_HEIGHT = DESIGN_HEIGHT / SCREEN_SCALE;
 
 /** 轮次横幅中心的纵坐标（画布坐标），在菜单栏下方、最上排提示框之上 */
 const BANNER_Y = 62;
+/** 演示提示条的左边（画布坐标）：轮次横幅（宽 240）右边再留一点空 */
+const CAPTION_X = DESIGN_WIDTH / 2 + 136;
 
 const MENUS = ['文件', '编辑', '显示', '前往', '窗口', '帮助'];
 
@@ -77,6 +89,14 @@ class Mac2000Scene implements Scene {
     call: { fill: theme.surfaceRaised, text: theme.ink, line: theme.line },
     response: { fill: theme.accent, text: theme.onAccent, line: theme.highlight },
   });
+  /** 系统演示的提示条，颜色同横幅的 Follow me 一面 */
+  private readonly caption = new TutorialCaption({
+    fill: theme.surfaceRaised,
+    text: theme.ink,
+    line: theme.line,
+  });
+  /** 系统演示进行到哪：要演示的动作、第几个、这一轮是不是重来；不在演示时为 null */
+  private tutorial: { actions: ActionType[]; index: number; retry: boolean } | null = null;
   private readonly screen = new Container({ label: 'mac-screen' });
   private readonly menuBar = new MenuBar({ width: SCREEN_WIDTH, appName: 'Finder', menus: MENUS });
   private readonly dock = new Dock(DOCK_ITEMS);
@@ -148,7 +168,14 @@ class Mac2000Scene implements Scene {
     this.cursorCover.hitArea = new Rectangle(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
     this.cursorCover.cursor = 'none';
     this.cursorCover.eventMode = 'none';
-    this.view.addChild(this.screen, this.judgementLayer, this.turnBanner.view, this.cursorCover);
+    this.caption.view.position.set(CAPTION_X, BANNER_Y);
+    this.view.addChild(
+      this.screen,
+      this.judgementLayer,
+      this.turnBanner.view,
+      this.caption.view,
+      this.cursorCover,
+    );
 
     if (this.charts.length === 0) {
       this.showDialog({
@@ -182,7 +209,10 @@ class Mac2000Scene implements Scene {
     this.targetsView?.update(audioTime);
     this.virtualMouse?.update(session.beatAt(audioTime));
     this.renderTurnBanner(session.beatAt(audioTime));
-    if (audioTime >= session.endTime) this.finish(session);
+    this.renderCaption();
+    if (audioTime < session.endTime) return;
+    if (this.tutorial) this.nextTutorialRound(session);
+    else this.finish(session);
   }
 
   /** 只有一局进行中时，空格和点画面才是节奏输入；开场页上的第一下开始这一关 */
@@ -256,26 +286,62 @@ class Mac2000Scene implements Scene {
     this.context.introduce(chart.id);
   }
 
+  /** 结算后重试：刚演示过，不再演示，直接从正文开始 */
   private retry(): void {
     if (performance.now() - this.resultShownAt < RESULT_INPUT_DELAY_MS) return;
-    if (this.chart) void this.start(this.chart);
+    if (this.chart) void this.start(this.chart, false);
   }
 
   private backToList(): void {
     this.clearRound();
+    this.tutorial = null;
     this.state = 'select';
     this.hideDialog();
     this.levelSelect.view.visible = true;
     this.levelSelect.setActive(true);
   }
 
-  private async start(chart: Chart): Promise<void> {
+  /**
+   * 开始一关。withTutorial 时先跑系统演示（设置里打开了「跳过演示」就不跑），演示完再开始正文。
+   */
+  private async start(chart: Chart, withTutorial = true): Promise<void> {
     this.state = 'starting';
     this.chart = chart;
     await this.context.clock.resume();
     // 等待音频恢复期间可能已经离开场景，或按了 Esc
     if (this.destroyed || this.state !== 'starting') return;
 
+    const actions = withTutorial && !loadSkipTutorial() ? tutorialActions(chart) : [];
+    this.tutorial = actions.length > 0 ? { actions, index: 0, retry: false } : null;
+    this.beginRound(this.tutorial ? buildTutorialChart(chart, actions[0]!) : chart);
+  }
+
+  /**
+   * 演示的一轮结束：成功就演示下一种动作，失败就重来这一种；全部成功后开始正文。
+   * 演示不计分，不进结算和最好成绩。
+   */
+  private nextTutorialRound(session: MacSession): void {
+    const tutorial = this.tutorial;
+    const chart = this.chart;
+    if (!tutorial || !chart) return;
+    const targets = session.targets.reduce((n, target) => n + target.clicks.length, 0);
+    const passed = tutorialPassed(
+      session.judgements.map((j) => j.level),
+      targets,
+    );
+    if (passed) tutorial.index++;
+    tutorial.retry = !passed;
+    const action = tutorial.actions[tutorial.index];
+    if (action === undefined) {
+      this.tutorial = null;
+      this.beginRound(chart);
+    } else {
+      this.beginRound(buildTutorialChart(chart, action));
+    }
+  }
+
+  /** 开一轮：正文谱面，或演示用的小谱面 */
+  private beginRound(chart: Chart): void {
     this.clearRound();
     this.hideDialog();
     this.levelSelect.view.visible = false;
@@ -356,6 +422,7 @@ class Mac2000Scene implements Scene {
     this.cursorCover.eventMode = 'none';
     this.turnCues = [];
     this.turnBanner.show(null);
+    this.caption.show(null);
   }
 
   /** 屏幕中央的提示框；按钮可以用鼠标点 */
@@ -395,6 +462,21 @@ class Mac2000Scene implements Scene {
     source.buffer = buffer;
     source.connect(this.output);
     source.start();
+  }
+
+  /** 演示提示条：第几种动作（或「Try again」）和怎么处理 */
+  private renderCaption(): void {
+    const tutorial = this.tutorial;
+    const action = tutorial?.actions[tutorial.index];
+    if (!tutorial || action === undefined) {
+      this.caption.show(null);
+      return;
+    }
+    const hint = tutorialHint(action);
+    const step = tutorial.retry
+      ? 'Try again'
+      : `Practice ${tutorial.index + 1} of ${tutorial.actions.length}`;
+    this.caption.show({ title: `${step} · ${hint.name}`, how: hint.how });
   }
 
   /** 轮次横幅：切换时挤压回弹一次 */

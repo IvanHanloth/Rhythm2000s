@@ -1,4 +1,4 @@
-// 玩家设置。目前只有输入校准值，保存在浏览器本地；读写失败（隐私模式等）时退回默认值。
+// 玩家设置：输入校准值、跳过操作演示（doc/settings.md），保存在浏览器本地；读写失败（隐私模式等）时退回默认值。
 
 const CALIBRATION_KEY = 'rhythm2000s.calibrationMs';
 /** 校准值允许的范围（毫秒） */
@@ -20,6 +20,25 @@ export function loadCalibrationMs(): number {
 export function saveCalibrationMs(value: number): void {
   try {
     localStorage.setItem(CALIBRATION_KEY, String(value));
+  } catch {
+    // 保存失败只影响下次打开，不影响本次游戏
+  }
+}
+
+const SKIP_TUTORIAL_KEY = 'rhythm2000s.skipTutorial';
+
+/** 跳过操作演示（doc/level-design.md「规则 1」），默认不跳过 */
+export function loadSkipTutorial(): boolean {
+  try {
+    return localStorage.getItem(SKIP_TUTORIAL_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function saveSkipTutorial(skip: boolean): void {
+  try {
+    localStorage.setItem(SKIP_TUTORIAL_KEY, skip ? '1' : '0');
   } catch {
     // 保存失败只影响下次打开，不影响本次游戏
   }

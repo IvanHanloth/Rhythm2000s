@@ -14,7 +14,13 @@ import { LevelIntro } from './level-intro.ts';
 import { buildLevels, formatBestScore, parseRoute } from './levels.ts';
 import { loadBestScore } from './records.ts';
 import { SceneDirector } from './scene-director.ts';
-import { clampCalibrationMs, loadCalibrationMs, saveCalibrationMs } from './settings.ts';
+import {
+  clampCalibrationMs,
+  loadCalibrationMs,
+  loadSkipTutorial,
+  saveCalibrationMs,
+  saveSkipTutorial,
+} from './settings.ts';
 
 const host = document.querySelector<HTMLElement>('#game');
 if (!host) throw new Error('找不到游戏容器 #game');
@@ -129,6 +135,8 @@ const panel = createDevPanel({
     saveCalibrationMs(calibrationMs);
     return calibrationMs;
   },
+  skipTutorial: loadSkipTutorial(),
+  onSkipTutorialChange: saveSkipTutorial,
 });
 document.body.append(panel.element);
 

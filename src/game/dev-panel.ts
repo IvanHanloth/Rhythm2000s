@@ -1,4 +1,5 @@
 // 开发面板：用来直接切换到街区或某个场景、填写输入校准值、打开原型页面（ADR 0002）。
+// 设置页面做好之前，「跳过演示」也先放在这里（doc/settings.md）。
 
 import { CALIBRATION_LIMIT_MS } from './settings.ts';
 
@@ -15,6 +16,9 @@ export interface DevPanelOptions {
   calibrationMs: number;
   /** 校准值改变；返回实际采用的值（可能被限制在范围内） */
   onCalibrationChange(value: number): number;
+  /** 跳过操作演示 */
+  skipTutorial: boolean;
+  onSkipTutorialChange(skip: boolean): void;
 }
 
 export interface DevPanel {
@@ -60,6 +64,15 @@ export function createDevPanel(options: DevPanelOptions): DevPanel {
   });
   calibration.append('校准', input, 'ms');
 
+  // 新增的显示文字只用英文
+  const skip = document.createElement('label');
+  skip.title = '进关后不再演示动作，直接从谱面正文开始';
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.checked = options.skipTutorial;
+  checkbox.addEventListener('change', () => options.onSkipTutorialChange(checkbox.checked));
+  skip.append(checkbox, 'Skip tutorial');
+
   const links = PROTOTYPES.map(({ label, href }) => {
     const link = document.createElement('a');
     link.href = href;
@@ -67,7 +80,7 @@ export function createDevPanel(options: DevPanelOptions): DevPanel {
     return link;
   });
 
-  element.append(...buttons, calibration, ...links);
+  element.append(...buttons, calibration, skip, ...links);
 
   return {
     element,

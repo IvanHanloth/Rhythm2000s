@@ -1,15 +1,25 @@
 // 场景：Windows XP 桌面（doc/scenes/windows-xp.md）。
 // MVP 玩法（doc/prototypes/mvp.md）：电脑按节奏弹出消息框，玩家按同样的节奏把它们关掉。
 // 进场景先在资源管理器里用鼠标选关（doc/level-select.md）。
+// 进关后先跑系统演示：谱面用到的每种动作各一轮小谱面，成功才进下一种，全部成功后才开始正文（doc/level-design.md「规则 1」）。
 // XP 界面按原版像素尺寸画在 1024×576 的虚拟屏幕上，整体放大铺满画布；轮次横幅和判定字样按画布坐标画。
 // 画面每帧只根据音频时间计算，不累加帧间隔。
 
 import { Container, Rectangle } from 'pixi.js';
 import type { FrameInfo, Scene, SceneContext, SceneEntry, TapInfo } from '../../game/scene.ts';
 import { recordScore } from '../../game/records.ts';
+import type { ActionType } from '../../rhythm/actions.ts';
 import type { Chart } from '../../rhythm/chart.ts';
 import { summarizeResult } from '../../rhythm/result-summary.ts';
 import { buildTurnCues, turnCueAt, type TurnCue } from '../../rhythm/turn-cue.ts';
+import {
+  buildTutorialChart,
+  tutorialActions,
+  tutorialHint,
+  tutorialPassed,
+} from '../../rhythm/tutorial.ts';
+import { loadSkipTutorial } from '../../game/settings.ts';
+import { TutorialCaption } from '../../ui/tutorial-caption.ts';
 import { BEATS, THEMES } from '../../theme/tokens.ts';
 import { clamp01, easeOutBack } from '../../ui/easing.ts';
 import { createJudgementView } from '../../ui/judgement-view.ts';
@@ -38,6 +48,8 @@ const theme = THEMES.xp;
 
 /** 轮次横幅中心的纵坐标（画布坐标），在最上排消息框之上 */
 const BANNER_Y = 38;
+/** 演示提示条的左边（画布坐标）：轮次横幅（宽 240）右边再留一点空 */
+const CAPTION_X = (XP_SCREEN_WIDTH * XP_SCALE) / 2 + 136;
 
 /** 一个乐句里各消息框的中心位置（虚拟屏幕坐标），按乐句内序号依次使用 */
 const SLOTS = [
@@ -109,6 +121,12 @@ class WindowsXpScene implements Scene {
     call: { fill: theme.surfaceRaised, text: theme.ink, line: theme.line },
     response: { fill: theme.accent, text: theme.onAccent, line: theme.highlight },
   });
+  /** 系统演示的提示条，颜色同横幅的 Follow me 一面 */
+  private readonly caption = new TutorialCaption({
+    fill: theme.surfaceRaised,
+    text: theme.ink,
+    line: theme.line,
+  });
   private readonly sounds: PopupSounds;
   /** 虚拟 XP 屏幕：放大 XP_SCALE 倍铺满画布 */
   private readonly screen = new Container({ label: 'xp-screen' });
@@ -131,7 +149,10 @@ class WindowsXpScene implements Scene {
   private readonly output: GainNode;
 
   private state: State = 'select';
+  /** 选中的这一关的谱面（演示时 session.chart 是演示用的小谱面，这里仍是正文谱面） */
   private chart: Chart | null = null;
+  /** 系统演示进行到哪：要演示的动作、第几个、这一轮是不是重来；不在演示时为 null */
+  private tutorial: { actions: ActionType[]; index: number; retry: boolean } | null = null;
   private turnCues: TurnCue[] = [];
   private session: PopupSession | null = null;
   /** 每个谱面事件的消息框；不是消息框的动作（desktop-refresh）为 null */
@@ -189,7 +210,14 @@ class WindowsXpScene implements Scene {
     );
     this.cursorCover.cursor = 'none';
     this.cursorCover.eventMode = 'none';
-    this.view.addChild(this.screen, this.judgementLayer, this.turnBanner.view, this.cursorCover);
+    this.caption.view.position.set(CAPTION_X, BANNER_Y);
+    this.view.addChild(
+      this.screen,
+      this.judgementLayer,
+      this.turnBanner.view,
+      this.caption.view,
+      this.cursorCover,
+    );
 
     if (this.charts.length === 0) {
       this.showDialog({
@@ -224,8 +252,11 @@ class WindowsXpScene implements Scene {
     if (this.virtualMouse) this.waitHoldView?.update(beat, this.virtualMouse.position);
     this.renderJudgements(session, beat);
     this.renderTurnBanner(beat);
+    this.renderCaption();
 
-    if (audioTime >= session.endTime) this.finish(session);
+    if (audioTime < session.endTime) return;
+    if (this.tutorial) this.nextTutorialRound(session);
+    else this.finish(session);
   }
 
   /** 只有一局进行中时，空格和点画面才是节奏输入；开场页上的第一下开始这一关 */
@@ -306,9 +337,10 @@ class WindowsXpScene implements Scene {
     this.context.introduce(chart.id);
   }
 
+  /** 结算后重试：刚演示过，不再演示，直接从正文开始 */
   private retry(): void {
     if (performance.now() - this.resultShownAt < RESULT_INPUT_DELAY_MS) return;
-    if (this.chart) void this.start(this.chart);
+    if (this.chart) void this.start(this.chart, false);
   }
 
   /** 结算后直接玩列表里的下一关，资源管理器里的选中也跟过去 */
@@ -321,13 +353,47 @@ class WindowsXpScene implements Scene {
     this.ready(chart);
   }
 
-  private async start(chart: Chart): Promise<void> {
+  /**
+   * 开始一关。withTutorial 时先跑系统演示（设置里打开了「跳过演示」就不跑），演示完再开始正文。
+   */
+  private async start(chart: Chart, withTutorial = true): Promise<void> {
     this.state = 'starting';
     this.chart = chart;
     await this.context.clock.resume();
     // 等待音频恢复期间可能已经离开场景，或按了 Esc
     if (this.destroyed || this.state !== 'starting') return;
 
+    const actions = withTutorial && !loadSkipTutorial() ? tutorialActions(chart) : [];
+    this.tutorial = actions.length > 0 ? { actions, index: 0, retry: false } : null;
+    this.beginRound(this.tutorial ? buildTutorialChart(chart, actions[0]!) : chart);
+  }
+
+  /**
+   * 演示的一轮结束：成功就演示下一种动作，失败就重来这一种；全部成功后开始正文。
+   * 演示不计分，不进结算和最好成绩。
+   */
+  private nextTutorialRound(session: PopupSession): void {
+    const tutorial = this.tutorial;
+    const chart = this.chart;
+    if (!tutorial || !chart) return;
+    const targets = session.windows.reduce((n, state) => n + state.clicks.length, 0);
+    const passed = tutorialPassed(
+      session.judgements.map((j) => j.level),
+      targets,
+    );
+    if (passed) tutorial.index++;
+    tutorial.retry = !passed;
+    const action = tutorial.actions[tutorial.index];
+    if (action === undefined) {
+      this.tutorial = null;
+      this.beginRound(chart);
+    } else {
+      this.beginRound(buildTutorialChart(chart, action));
+    }
+  }
+
+  /** 开一轮：正文谱面，或演示用的小谱面 */
+  private beginRound(chart: Chart): void {
     this.clearRound();
     this.hideDialog();
     this.setExplorerVisible(false);
@@ -394,6 +460,7 @@ class WindowsXpScene implements Scene {
 
   private backToList(): void {
     this.clearRound();
+    this.tutorial = null;
     this.state = 'select';
     this.hideDialog();
     this.setExplorerVisible(true);
@@ -426,6 +493,7 @@ class WindowsXpScene implements Scene {
     this.cursorCover.eventMode = 'none';
     for (const { view } of this.judgementViews) view.destroy({ children: true });
     this.turnBanner.show(null);
+    this.caption.show(null);
     this.judgementViews = [];
     this.shownJudgements = 0;
   }
@@ -576,6 +644,21 @@ class WindowsXpScene implements Scene {
       return windows.filter(({ state }) => state.call.beat <= beat).at(-1)?.i ?? -1;
     }
     return windows.find(({ state }) => state.closedAt === null && state.missedAt === null)?.i ?? -1;
+  }
+
+  /** 演示提示条：第几种动作（或「Try again」）和怎么处理 */
+  private renderCaption(): void {
+    const tutorial = this.tutorial;
+    const action = tutorial?.actions[tutorial.index];
+    if (!tutorial || action === undefined) {
+      this.caption.show(null);
+      return;
+    }
+    const hint = tutorialHint(action);
+    const step = tutorial.retry
+      ? 'Try again'
+      : `Practice ${tutorial.index + 1} of ${tutorial.actions.length}`;
+    this.caption.show({ title: `${step} · ${hint.name}`, how: hint.how });
   }
 
   /** 轮次横幅：切换时挤压回弹一次 */
