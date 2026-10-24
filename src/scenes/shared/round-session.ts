@@ -12,8 +12,8 @@ import { beatToTime, timeToBeat } from '@/rhythm/beat.ts';
 import type { Chart, ChartCue } from '@/rhythm/chart.ts';
 import { ResponseJudge, type Judgement, type JudgementLevel } from '@/rhythm/judge.ts';
 
-/** Delay (s) between starting a round and beat 0 */
-const LEAD_IN = 0.2;
+/** Delay (s) between starting a round and beat 0, when it doesn't follow on from another round */
+export const ROUND_LEAD_IN = 0.2;
 
 /** One press of a response target */
 export interface ClickState {
@@ -69,6 +69,8 @@ export interface RoundSessionOptions<T extends RoundTarget> {
   /** Sound for the step-th press of a target, played when it hits (or is completed automatically) */
   hitSound(target: T, step: number): AudioBuffer;
   missSound: AudioBuffer;
+  /** Audio time of beat 0; by default ROUND_LEAD_IN from now. A round that follows on from another starts on its end */
+  startTime?: number;
 }
 
 interface TapTarget {
@@ -97,7 +99,7 @@ export class RoundSession<T extends RoundTarget = RoundTarget> {
     this.chart = chart;
     this.options = options;
     this.targets = options.targets;
-    this.startTime = audio.currentTime + LEAD_IN;
+    this.startTime = options.startTime ?? audio.currentTime + ROUND_LEAD_IN;
 
     this.output = audio.createGain();
     this.output.gain.value = 0.8;
@@ -140,9 +142,9 @@ export class RoundSession<T extends RoundTarget = RoundTarget> {
    * on (doc/cheat-code.md) the game hits a target nobody pressed on its beat instead.
    */
   update(audioTime: number): void {
+    if (this.context.cheat.active) this.autoplay(audioTime);
     this.sequencer.schedule();
     const calibration = this.context.calibration();
-    if (this.context.cheat.active) this.autoplay(audioTime);
     for (const judgement of this.judge.expire(audioTime - calibration)) {
       this.recordMiss(judgement, judgement.time + calibration);
     }
@@ -190,6 +192,15 @@ export class RoundSession<T extends RoundTarget = RoundTarget> {
     const counts = { perfect: 0, good: 0, miss: 0 };
     for (const judgement of this.judgements) counts[judgement.level]++;
     return counts;
+  }
+
+  /**
+   * The next round starts on this one's end beat: the rest of the backing track before it is booked at once, so it
+   * plays out after the screen has moved on to the next round, and nothing from the end beat on (the closing hit
+   * gives way to the next round's first beat). Stop the session only once its end has passed.
+   */
+  handOff(): void {
+    this.sequencer.finishAt(this.endTime);
   }
 
   stop(): void {

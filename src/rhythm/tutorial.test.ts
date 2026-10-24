@@ -5,6 +5,8 @@ import { sourceFromPatterns } from './test-charts.ts';
 import {
   buildTutorialChart,
   chartSegment,
+  nextRound,
+  type TutorialProgress,
   tutorialHint,
   tutorialPassed,
   tutorialStops,
@@ -62,18 +64,18 @@ describe('chartSegment', () => {
   );
 
   it('returns the same timeline when it covers the whole chart', () => {
-    expect(chartSegment(long, 0, 3)).toEqual(long);
+    expect(chartSegment(long, 0, 3, false)).toEqual(long);
   });
 
   it('keeps the count-in for the first piece and drops the outro when phrases follow', () => {
-    const piece = chartSegment(long, 0, 1);
+    const piece = chartSegment(long, 0, 1, false);
     expect(piece.phrases).toEqual([{ callStart: 4, callEnd: 8, responseStart: 9, end: 13 }]);
     expect(piece.calls.map((c) => [c.beat, c.phrase])).toEqual([[4, 0]]);
     expect(piece.endBeat).toBe(13);
   });
 
   it('gives later pieces one count-in bar, renumbers phrases from 0 and keeps the outro at the end', () => {
-    const piece = chartSegment(long, 1, 3);
+    const piece = chartSegment(long, 1, 3, false);
     expect(piece.id).toBe('test--phrases-1-3');
     expect(piece.phrases.map((p) => p.callStart)).toEqual([4, 13]);
     expect(piece.calls.map((c) => [c.beat, c.phrase])).toEqual([
@@ -87,20 +89,82 @@ describe('chartSegment', () => {
     expect(piece.endBeat).toBe(26);
   });
 
+  it('has no count-in when it follows on from another round, so its call bar starts on beat 0', () => {
+    const piece = chartSegment(long, 1, 2, true);
+    expect(piece.phrases).toEqual([{ callStart: 0, callEnd: 4, responseStart: 5, end: 9 }]);
+    expect(piece.calls.map((c) => c.beat)).toEqual([1]);
+    expect(piece.endBeat).toBe(9);
+    expect(chartSegment(long, 0, 1, true).phrases[0]!.callStart).toBe(0);
+  });
+
   it('rejects an empty or out-of-range piece', () => {
-    expect(() => chartSegment(long, 2, 2)).toThrow();
-    expect(() => chartSegment(long, 2, 4)).toThrow();
+    expect(() => chartSegment(long, 2, 2, false)).toThrow();
+    expect(() => chartSegment(long, 2, 4, false)).toThrow();
   });
 });
 
 describe('buildTutorialChart', () => {
   it('keeps tempo and metre; one count-in bar and one phrase with the action on beat 1, no outro', () => {
-    const tutorial = buildTutorialChart(chart, 'progress-download');
+    const tutorial = buildTutorialChart(chart, 'progress-download', false);
     expect(tutorial.bpm).toBe(100);
     expect(tutorial.phrases).toEqual([{ callStart: 4, callEnd: 8, responseStart: 8, end: 12 }]);
     expect(tutorial.calls.map((c) => [c.beat, c.action])).toEqual([[4, 'progress-download']]);
     expect(tutorial.responses.map((c) => [c.beat, c.action])).toEqual([[8, 'progress-download']]);
     expect(tutorial.endBeat).toBe(12);
+  });
+
+  it('has no count-in when it follows on from another round', () => {
+    const tutorial = buildTutorialChart(chart, 'dialog-info', true);
+    expect(tutorial.phrases).toEqual([{ callStart: 0, callEnd: 4, responseStart: 4, end: 8 }]);
+    expect(tutorial.calls.map((c) => c.beat)).toEqual([0]);
+    expect(tutorial.endBeat).toBe(8);
+  });
+});
+
+describe('nextRound', () => {
+  const start: TutorialProgress = {
+    stops: tutorialStops(chart),
+    demo: null,
+    retry: false,
+    passed: 0,
+    pieceStart: 0,
+    nextPhrase: 0,
+  };
+
+  it('runs the demo of each stop, repeats a failed one, then plays the chart up to the next stop', () => {
+    const first = nextRound(chart, start, false, false);
+    expect(first.chart?.id).toBe('test--tutorial--volume-mute');
+    expect(first.progress).toMatchObject({ demo: 0, retry: false, passed: 0 });
+    expect(first.chart?.phrases[0]!.callStart).toBe(4);
+
+    const failed = nextRound(chart, first.progress, false, true);
+    expect(failed.chart?.id).toBe('test--tutorial--volume-mute');
+    expect(failed.progress).toMatchObject({ demo: 0, retry: true, passed: 0 });
+    expect(failed.chart?.phrases[0]!.callStart).toBe(0);
+
+    const piece = nextRound(chart, failed.progress, true, true);
+    expect(piece.chart?.id).toBe('test--phrases-0-1');
+    expect(piece.progress).toMatchObject({ demo: null, retry: false, passed: 1 });
+    expect(piece.progress.stops.map((stop) => stop.phrase)).toEqual([1, 2]);
+    expect(piece.progress).toMatchObject({ pieceStart: 0, nextPhrase: 1 });
+    expect(piece.chart?.phrases[0]!.callStart).toBe(0);
+
+    const second = nextRound(chart, piece.progress, false, true);
+    expect(second.chart?.id).toBe('test--tutorial--dialog-info');
+  });
+
+  it('leaves the progress it is given untouched', () => {
+    const copy = structuredClone(start);
+    nextRound(chart, start, true, true);
+    expect(start).toEqual(copy);
+  });
+
+  it('plays the rest in one go once the stops are dropped, then ends', () => {
+    const rest = nextRound(chart, { ...start, stops: [], demo: 0 }, false, false);
+    expect(rest.chart?.id).toBe('test');
+    expect(rest.chart?.phrases[0]!.callStart).toBe(chart.phrases[0]!.callStart);
+    expect(rest.progress).toMatchObject({ demo: null, retry: false, nextPhrase: 3 });
+    expect(nextRound(chart, rest.progress, false, false).chart).toBeNull();
   });
 });
 

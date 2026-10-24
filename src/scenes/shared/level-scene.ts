@@ -30,14 +30,13 @@ import { secondsPerBeat } from '@/rhythm/beat.ts';
 import type { Chart } from '@/rhythm/chart.ts';
 import { COMBO_BREAK_MIN, ComboTracker, type ComboBreak, type ComboTier } from '@/rhythm/combo.ts';
 import { summarizeResult, type HitResult, type ResultSummary } from '@/rhythm/result-summary.ts';
-import { buildTurnCues, turnCueAt, type TurnCue } from '@/rhythm/turn-cue.ts';
+import { buildTurnCues, TURN_CUE_LEAD_BEATS, turnCueAt, type TurnCue } from '@/rhythm/turn-cue.ts';
 import {
-  buildTutorialChart,
-  chartSegment,
+  nextRound,
   tutorialHint,
   tutorialPassed,
   tutorialStops,
-  type TutorialStop,
+  type TutorialProgress,
 } from '@/rhythm/tutorial.ts';
 import { BEATS, type ThemeColors } from '@/theme/tokens.ts';
 import { BEAT_GUIDE_POSITION, BeatGuideView } from '@/ui/beat-guide-view.ts';
@@ -51,7 +50,7 @@ import { TutorialCaption } from '@/ui/tutorial-caption.ts';
 import { SCENE_CATALOG, type SceneId } from '@/scenes/catalog.ts';
 import { cutawayDesktopAlpha, cutawayProgress, hasCutaway } from './cutaway.ts';
 import { EditorDesk } from './editor-desk.ts';
-import type { RoundSession } from './round-session.ts';
+import { ROUND_LEAD_IN, type RoundSession } from './round-session.ts';
 
 /** How long after the results appear before Retry / Next accept input (ms), against mashing through */
 const RESULT_INPUT_DELAY_MS = 600;
@@ -67,32 +66,36 @@ const LIST_MOVES: Record<string, [number, number]> = {
   ArrowDown: [0, 1],
 };
 
+/**
+ * How long (s, on the audio scheduling clock) before the hand-over the next round is booked, so its first beat lands
+ * exactly on the end beat: more than the sequencer's look-ahead (0.2 s) plus a frame stall
+ */
+const BOOK_AHEAD = 0.3;
+/**
+ * The next round takes over the screen this many beats before the round on ends: its "Follow me" banner and the
+ * windows of its first call show ahead of the beat. Safe, as turn cue spacing has every press of a phrase that
+ * another follows judged by then (doc/prototypes/mvp.md)
+ */
+const HANDOVER_BEATS = TURN_CUE_LEAD_BEATS;
+
 type State = 'select' | 'ready' | 'starting' | 'playing' | 'result';
 
-/** A level in progress: the demo stops still ahead, the round that is on, and the chart's judgements so far */
-interface LevelRun {
-  /** Stops not finished yet; the first is the one being demonstrated. Emptied when the tutorial is skipped */
-  stops: TutorialStop[];
-  /** Index into stops[0].actions of the demo round on, or null while a piece of the chart plays */
-  demo: number | null;
-  /** The demo round on repeats a failed one */
-  retry: boolean;
-  /** Demos passed, and how many the level has (for the caption) */
-  passed: number;
+/**
+ * A level in progress: the demo stops still ahead and the round that is on (stops are emptied when the tutorial
+ * is skipped), and the chart's judgements so far
+ */
+interface LevelRun extends TutorialProgress {
+  /** How many demos the level has (for the caption) */
   total: number;
-  /** First chart phrase of the piece playing */
-  pieceStart: number;
-  /** First chart phrase not played yet */
-  nextPhrase: number;
   /** Judgements of the pieces played, with the chart's phrase numbers */
   hits: HitResult[];
   /** The beat guide was on at some point during the chart */
   assisted: boolean;
+  /** The cheat code was on at some point during the level: no records (doc/cheat-code.md) */
+  cheat: boolean;
   /** Played from HackerEditor: `watch` lets the computer do the responses. No results or records */
   editor: { watch: boolean } | null;
   /** Hits in a row across the chart's pieces, demos skipped (doc/combo.md) */
-  /** The cheat code was on at some point during the level: no records (doc/cheat-code.md) */
-  cheat: boolean;
   combo: ComboTracker;
 }
 
@@ -112,11 +115,11 @@ export interface ResultsWindowOptions {
   newRecord: boolean;
   /** The beat guide was on during the chart (doc/beat-guide.md) */
   assisted: boolean;
+  /** The cheat code was on during the level: a "Cheat" tag, never a new record (doc/cheat-code.md) */
+  cheat: boolean;
   /** Another level follows in the list; without one "Next Level" is disabled and Retry is the default */
   hasNext: boolean;
   onRetry: () => void;
-  /** The cheat code was on during the level: a "Cheat" tag, never a new record (doc/cheat-code.md) */
-  cheat: boolean;
   onList: () => void;
   onNext: () => void;
 }
@@ -225,6 +228,13 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   /** Judgement labels, in canvas coordinates */
   protected readonly judgementLayer = new Container({ label: 'judgements' });
   protected session: S | null = null;
+  /**
+   * The round after the one on, booked to start on its end beat (doc/level-design.md "Resuming"); the run takes
+   * `progress` when it begins. Only while a demo or a piece of the chart has another round after it
+   */
+  private upcoming: { session: S; progress: TutorialProgress } | null = null;
+  /** The round just handed over, whose last sounds still play out; stopped when the next round ends */
+  private outgoing: S | null = null;
   /** Replaced by rebuildLevelList after an import or delete; never shown in editor mode */
   protected abstract levelList: LevelList;
   /** The level list and levels, or HackerEditor */
@@ -309,8 +319,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
 
-  /** Session for one round: the chart itself or a demo chart */
-  protected abstract createSession(chart: Chart): S;
+  /** Session for one round (the chart itself, a piece of it or a demo chart) with beat 0 at audio time `startTime` */
+  protected abstract createSession(chart: Chart, startTime: number): S;
   /** Builds the round's widgets and the virtual mouse */
   protected abstract buildRound(session: S): void;
   /** Tears down what buildRound made */
@@ -559,7 +569,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     const session = this.session;
     if (this.state !== 'playing' || !session) return;
     if (this.run?.editor?.watch) session.autoplay(audioTime);
+    if (this.run && this.context.cheat.active) this.run.cheat = true;
     session.update(audioTime);
+    this.bookNextRound(session);
+    this.upcoming?.session.update(audioTime);
     const beat = session.beatAt(audioTime);
     this.renderRound(session, beat, audioTime);
     this.renderCutaway(session, beat);
@@ -568,8 +581,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.renderBeatGuide(beat);
     this.renderCombo(session, beat, audioTime);
 
-    if (audioTime < session.endTime) return;
-    if (this.run && this.context.cheat.active) this.run.cheat = true;
+    const handOver = this.upcoming ? HANDOVER_BEATS * secondsPerBeat(session.chart.bpm) : 0;
+    if (audioTime < session.endTime - handOver) return;
     this.roundEnded(session);
   }
 
@@ -734,7 +747,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       editor: null,
       combo: new ComboTracker(),
     };
-    this.advance();
+    this.firstRound(chart);
   }
 
   /** HackerEditor's Play and Test: the chart from phrase `phrase` to the end, with no demos */
@@ -759,7 +772,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       editor: { watch },
       combo: new ComboTracker(),
     };
-    this.advance();
+    this.firstRound(chart);
   }
 
   /** Editor mode: the opening plays over the desktop, then HackerEditor is ready */
@@ -825,17 +838,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   private roundEnded(session: S): void {
     const run = this.run;
     if (!run) return;
-    if (run.demo !== null) {
-      const passed = tutorialPassed(
-        session.judgements.map((j) => j.level),
-        session.targetCount,
-      );
-      if (passed) {
-        run.demo++;
-        run.passed++;
-      }
-      run.retry = !passed;
-    } else {
+    if (run.demo === null) {
       run.hits.push(
         ...session.judgements.map((j) => ({
           level: j.level,
@@ -844,57 +847,111 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
         })),
       );
     }
-    this.advance();
+    const upcoming = this.upcoming;
+    if (upcoming) {
+      this.upcoming = null;
+      Object.assign(run, upcoming.progress);
+      this.beginRound(upcoming.session, true);
+      return;
+    }
+    // Not booked ahead (a demo's last press was judged too late): start on a later bar of the same beat grid
+    this.advance(this.demoPassed(session), this.nextBarTime(session.endTime, session.chart));
   }
 
   /**
-   * Starts the next round: the next demo if the chart has reached a stop, otherwise the chart from the next
-   * unplayed phrase up to the following stop (or the end); after the last phrase, the results.
+   * Shortly before a round with another after it ends, works out that round and books it to start on the end
+   * beat with no count-in, so demos and the chart's pieces follow on in one beat (doc/level-design.md "One beat
+   * throughout"). A demo waits until every press is judged, since passing decides what comes next.
    */
-  private advance(): void {
+  private bookNextRound(session: S): void {
+    const run = this.run;
+    const chart = this.chart;
+    if (this.upcoming || !run || !chart) return;
+    const handOver = HANDOVER_BEATS * secondsPerBeat(session.chart.bpm);
+    const bookAt = session.endTime - handOver - BOOK_AHEAD;
+    if (this.context.clock.context.currentTime < bookAt) return;
+    if (run.demo !== null && session.judgements.length < session.targetCount) return;
+    const next = nextRound(chart, run, this.demoPassed(session), true);
+    if (!next.chart) return;
+    session.handOff();
+    this.beatGuide.appendRound(next.chart, session.chart.endBeat);
+    this.upcoming = {
+      session: this.createSession(next.chart, session.endTime),
+      progress: next.progress,
+    };
+  }
+
+  /** Whether the round on, if a demo, passed */
+  private demoPassed(session: S): boolean {
+    return tutorialPassed(
+      session.judgements.map((j) => j.level),
+      session.targetCount,
+    );
+  }
+
+  /**
+   * Moves the run on to the next round, with its count-in, and beat 0 at `startTime`; after the last phrase, the
+   * results. Rounds booked ahead to follow on go through bookNextRound instead.
+   */
+  private advance(demoPassed: boolean, startTime: number): void {
     const run = this.run;
     const chart = this.chart;
     if (!run || !chart) return;
-    const stop = run.stops[0];
-    if (stop?.phrase === run.nextPhrase) {
-      const demo = run.demo ?? 0;
-      const action = stop.actions[demo];
-      if (action !== undefined) {
-        run.demo = demo;
-        this.beginRound(buildTutorialChart(chart, action));
-        return;
-      }
-      run.stops.shift();
-    }
-    run.demo = null;
-    run.retry = false;
-    if (run.nextPhrase >= chart.phrases.length) {
+    const next = nextRound(chart, run, demoPassed, false);
+    Object.assign(run, next.progress);
+    if (!next.chart) {
       this.finish(run, chart);
       return;
     }
-    run.pieceStart = run.nextPhrase;
-    run.nextPhrase = run.stops[0]?.phrase ?? chart.phrases.length;
-    this.beginRound(chartSegment(chart, run.pieceStart, run.nextPhrase));
+    this.beginRound(this.createSession(next.chart, startTime));
   }
 
-  /** Backspace during a demo: drop every remaining demo and play the rest of the chart in one go. False outside a demo. */
+  /**
+   * Backspace during a demo: drop every remaining demo and play the rest of the chart in one go, from the demo's
+   * next bar line. False outside a demo.
+   */
   private skipTutorial(): boolean {
     const run = this.run;
-    if (!run || run.demo === null) return false;
+    const session = this.session;
+    if (!run || run.demo === null || !session) return false;
     run.stops = [];
-    this.advance();
+    this.dropUpcoming();
+    this.advance(false, this.nextBarTime(session.startTime, session.chart));
     return true;
   }
 
-  private beginRound(chart: Chart): void {
-    this.endRound();
+  /** Audio time of beat 0 for a round that doesn't follow on from another */
+  private leadIn(): number {
+    return this.context.clock.context.currentTime + ROUND_LEAD_IN;
+  }
+
+  /** The first bar line of `chart`'s grid, counting from the bar line at `from`, that is still far enough ahead to book */
+  private nextBarTime(from: number, chart: Chart): number {
+    const bar = chart.beatsPerBar * secondsPerBeat(chart.bpm);
+    return from + Math.ceil(Math.max(0, this.leadIn() - from) / bar) * bar;
+  }
+
+  /**
+   * Runs the level's first round with beat 0 shortly from now. Before anything is booked: getting chair-swivel's
+   * café ready can take a moment, so it happens here once rather than while a round plays.
+   */
+  private firstRound(chart: Chart): void {
+    if (hasCutaway(chart)) this.context.cutaway.prepare(this.sceneId);
+    this.advance(false, this.leadIn());
+  }
+
+  private dropUpcoming(): void {
+    this.upcoming?.session.stop();
+    this.upcoming = null;
+  }
+
+  /** Shows a round whose progress the run has taken; `handOver`: it follows on, so the round on's sounds play out */
+  private beginRound(session: S, handOver = false): void {
+    this.endRound(handOver);
     this.closeModal();
     this.setListVisible(false);
-    this.turnCues = buildTurnCues(chart);
-    this.beatGuide.setRound(chart);
-    // Before the session books its first beats: getting the café ready can take a moment
-    if (hasCutaway(chart)) this.context.cutaway.prepare(this.sceneId);
-    const session = this.createSession(chart);
+    this.turnCues = buildTurnCues(session.chart);
+    this.beatGuide.setRound(session.chart, this.hasNextRound());
     this.session = session;
     this.buildRound(session);
     this.cursorCover.eventMode = 'static';
@@ -945,9 +1002,23 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.playNow(this.resultSound());
   }
 
-  private endRound(): void {
+  /** Whether another round comes after the one on (a demo always has one) */
+  private hasNextRound(): boolean {
+    const run = this.run;
+    const chart = this.chart;
+    return (
+      run !== null && chart !== null && (run.demo !== null || run.nextPhrase < chart.phrases.length)
+    );
+  }
+
+  /** Tears the round on down; `handOver` keeps its sounds playing out while the next round begins */
+  private endRound(handOver = false): void {
+    this.dropUpcoming();
+    this.outgoing?.stop();
+    this.outgoing = null;
     this.leaveCutaway();
-    this.session?.stop();
+    if (handOver) this.outgoing = this.session;
+    else this.session?.stop();
     if (this.session) this.clearRound();
     this.session = null;
     this.cursorCover.eventMode = 'none';

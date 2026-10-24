@@ -30,6 +30,8 @@ export class Sequencer {
   private readonly pending = new Set<AudioBufferSourceNode>();
   private next = 0;
   private stopped = false;
+  /** Sounds at or after this audio time are never booked */
+  private cutTime = Infinity;
 
   constructor(
     context: BaseAudioContext,
@@ -46,19 +48,16 @@ export class Sequencer {
   }
 
   schedule(): void {
-    if (this.stopped) return;
-    const now = this.context.currentTime;
-    const horizon = now + this.lookAhead;
+    this.book(this.context.currentTime + this.lookAhead);
+  }
 
-    while (this.next < this.sounds.length) {
-      const sound = this.sounds[this.next]!;
-      const when = beatToTime(this.startTime, this.bpm, sound.beat);
-      if (when >= horizon) break;
-      this.next++;
-      // After a long stall, skip sounds already in the past instead of playing a burst
-      if (when < now) continue;
-      this.play(sound, when);
-    }
+  /**
+   * Books every sound before `time` now and none at or after it, ever: the song is handed over at that time, and
+   * what is left of it plays out without further schedule() calls.
+   */
+  finishAt(time: number): void {
+    this.cutTime = Math.min(this.cutTime, time);
+    this.book(this.cutTime);
   }
 
   /** Stops and cancels every scheduled sound that hasn't finished. */
@@ -69,6 +68,20 @@ export class Sequencer {
       source.stop();
     }
     this.pending.clear();
+  }
+
+  private book(horizon: number): void {
+    if (this.stopped) return;
+    const now = this.context.currentTime;
+    while (this.next < this.sounds.length) {
+      const sound = this.sounds[this.next]!;
+      const when = beatToTime(this.startTime, this.bpm, sound.beat);
+      if (when >= horizon || when >= this.cutTime) break;
+      this.next++;
+      // After a long stall, skip sounds already in the past instead of playing a burst
+      if (when < now) continue;
+      this.play(sound, when);
+    }
   }
 
   private play(sound: SequencedSound, when: number): void {

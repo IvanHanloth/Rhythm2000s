@@ -8,12 +8,14 @@ import { buildBackingTrack, hitSound, type XpSongSounds } from './song.ts';
 export type XpTarget = RoundTarget;
 
 export class XpSession extends RoundSession<XpTarget> {
-  constructor(context: SceneContext, chart: Chart, sounds: XpSongSounds) {
+  /** `startTime`: audio time of beat 0, see RoundSessionOptions */
+  constructor(context: SceneContext, chart: Chart, sounds: XpSongSounds, startTime?: number) {
     super(context, chart, {
       targets: pairTargets(chart),
       backingTrack: buildBackingTrack(chart, sounds),
       hitSound: (target, step) => hitSound(sounds, target.response.action, step),
       missSound: sounds.miss,
+      startTime,
     });
   }
 }

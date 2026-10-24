@@ -52,11 +52,23 @@ export class BeatGuideView {
     this.view.visible = false;
   }
 
-  /** New round (the chart or a demo chart): work out the presses and holds */
-  setRound(chart: Chart): void {
+  /**
+   * New round (the chart, a piece of it or a demo chart): work out the presses and holds. When another round
+   * follows on (`followedOn`), the beats keep coming past the round's end instead of stopping there.
+   */
+  setRound(chart: Chart, followedOn: boolean): void {
     this.presses = pressBeats(chart);
     this.holds = holdSpans(chart);
-    this.endBeat = chart.endBeat;
+    this.endBeat = followedOn ? Infinity : chart.endBeat;
+  }
+
+  /** The round that follows on has been booked: its presses and holds show too, `offset` beats into this round */
+  appendRound(chart: Chart, offset: number): void {
+    this.presses = [...this.presses, ...pressBeats(chart).map((beat) => beat + offset)];
+    this.holds = [
+      ...this.holds,
+      ...holdSpans(chart).map((hold) => ({ start: hold.start + offset, end: hold.end + offset })),
+    ];
   }
 
   /** Call every frame with the current (heard) beat */

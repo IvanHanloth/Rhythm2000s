@@ -54,12 +54,14 @@ export function buildTargets(chart: Chart): MacTarget[] {
 }
 
 export class MacSession extends RoundSession<MacTarget> {
-  constructor(context: SceneContext, chart: Chart, sounds: MacSongSounds) {
+  /** `startTime`: audio time of beat 0, see RoundSessionOptions */
+  constructor(context: SceneContext, chart: Chart, sounds: MacSongSounds, startTime?: number) {
     super(context, chart, {
       targets: buildTargets(chart),
       backingTrack: buildBackingTrack(chart, sounds),
       hitSound: (target, step) => hitSound(sounds, target.action, step),
       missSound: sounds.miss,
+      startTime,
     });
   }
 }

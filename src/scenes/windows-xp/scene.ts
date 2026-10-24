@@ -318,8 +318,8 @@ class WindowsXpScene extends LevelScene<XpSession> {
     this.mailBalloon = null;
   }
 
-  protected createSession(chart: Chart): XpSession {
-    return new XpSession(this.context, chart, this.sounds);
+  protected createSession(chart: Chart, startTime: number): XpSession {
+    return new XpSession(this.context, chart, this.sounds, startTime);
   }
 
   protected buildRound(session: XpSession): void {

@@ -138,7 +138,7 @@ class Mac2000Scene extends LevelScene<MacSession> {
       this.menuLayer,
       this.pointerLayer,
     );
-    // Combo glow and bands go right over the wallpaper; the beach ball sits beside the hit counter, above everything
+    // Combo bubbles, glow and Flurry go right over the wallpaper; the beach ball sits beside the hit counter, above everything
     this.comboEffects = new MacComboEffects({
       dock: this.dock,
       screenWidth: SCREEN_WIDTH,
@@ -270,8 +270,8 @@ class Mac2000Scene extends LevelScene<MacSession> {
     return browser;
   }
 
-  protected createSession(chart: Chart): MacSession {
-    return new MacSession(this.context, chart, this.sounds);
+  protected createSession(chart: Chart, startTime: number): MacSession {
+    return new MacSession(this.context, chart, this.sounds, startTime);
   }
 
   protected buildRound(session: MacSession): void {

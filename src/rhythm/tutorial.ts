@@ -1,7 +1,7 @@
 // The system demo (doc/level-design.md "Rule 1", ADR 0008): right before the first phrase that uses an action,
 // the chart stops and that action is demonstrated, and must be played back without a Miss before the next;
 // demos are not scored. This finds the stops, cuts the chart into the pieces between them, builds each demo
-// chart, judges a pass and holds the hint texts; scenes run the flow.
+// chart, judges a pass, works out which round comes next and holds the hint texts; scenes run the rounds.
 
 import type { ActionType } from './actions.ts';
 import { buildChart, type Chart, type ChartCue } from './chart.ts';
@@ -31,17 +31,18 @@ export function tutorialStops(chart: Chart): TutorialStop[] {
 }
 
 /**
- * The phrases [first, end) of a chart as a chart of their own, played after a demo: the first piece keeps the
- * chart's count-in, later ones get one count-in bar; only the piece that reaches the end keeps the outro.
+ * The phrases [first, end) of a chart as a chart of their own, played around demos. A piece that follows on from
+ * another round (`followsOn`) has no count-in, so its call bar starts on beat 0; otherwise the first piece keeps the
+ * chart's count-in and later ones get one count-in bar. Only the piece that reaches the end keeps the outro.
  * Phrase indices restart from 0, so add `first` to get back to the chart's phrase numbers.
  */
-export function chartSegment(chart: Chart, first: number, end: number): Chart {
+export function chartSegment(chart: Chart, first: number, end: number, followsOn: boolean): Chart {
   const firstPhrase = chart.phrases[first];
   const lastPhrase = chart.phrases[end - 1];
   if (!firstPhrase || !lastPhrase || end <= first) {
     throw new Error(`Chart ${chart.id} has no phrases ${first}..${end - 1}`);
   }
-  const countIn = first === 0 ? firstPhrase.callStart : chart.beatsPerBar;
+  const countIn = followsOn ? 0 : first === 0 ? firstPhrase.callStart : chart.beatsPerBar;
   const shift = countIn - firstPhrase.callStart;
   const outro = end === chart.phrases.length ? chart.endBeat - lastPhrase.end : 0;
   const take = (cues: readonly ChartCue[]) =>
@@ -67,10 +68,10 @@ export function chartSegment(chart: Chart, first: number, end: number): Chart {
 }
 
 /**
- * The demo chart for one action: the chart's tempo and metre, one count-in bar, then one phrase
- * (call and response) with the action on its first beat, and no outro.
+ * The demo chart for one action: the chart's tempo and metre, one count-in bar unless it follows on from another
+ * round (`followsOn`), then one phrase (call and response) with the action on its first beat, and no outro.
  */
-export function buildTutorialChart(chart: Chart, action: ActionType): Chart {
+export function buildTutorialChart(chart: Chart, action: ActionType, followsOn: boolean): Chart {
   return buildChart({
     format: 1,
     id: `${chart.id}--tutorial--${action}`,
@@ -78,11 +79,76 @@ export function buildTutorialChart(chart: Chart, action: ActionType): Chart {
     scene: chart.scene,
     bpm: chart.bpm,
     beatsPerBar: chart.beatsPerBar,
-    countInBars: 1,
+    countInBars: followsOn ? 0 : 1,
     outroBars: 0,
     responseGapBeats: 0,
     phrases: [{ call: [{ beat: 0, action }] }],
   });
+}
+
+/** How far a level with demos has got: the stops left and the round on */
+export interface TutorialProgress {
+  /** Stops not finished yet; the first is the one being demonstrated */
+  stops: readonly TutorialStop[];
+  /** Index into stops[0].actions of the demo round on, or null while a piece of the chart plays */
+  demo: number | null;
+  /** The demo round on repeats a failed one */
+  retry: boolean;
+  /** Demos passed */
+  passed: number;
+  /** First chart phrase of the piece playing */
+  pieceStart: number;
+  /** First chart phrase not played yet */
+  nextPhrase: number;
+}
+
+/** The round after the one on, and the progress once it starts; `chart` is null after the chart's last phrase */
+export interface NextRound {
+  progress: TutorialProgress;
+  chart: Chart | null;
+}
+
+/**
+ * What follows the round on (`demoPassed` says whether a demo round passed; ignored for a piece of the chart):
+ * the next demo if the chart has reached a stop, a failed demo again, otherwise the chart from the next unplayed
+ * phrase up to the following stop (or the end). `followsOn`: the round starts on the beat the round on ends, with
+ * no count-in. Pure, so a scene can work it out before the round on ends.
+ */
+export function nextRound(
+  chart: Chart,
+  progress: TutorialProgress,
+  demoPassed: boolean,
+  followsOn: boolean,
+): NextRound {
+  let { stops, demo, retry, passed } = progress;
+  if (demo !== null) {
+    if (demoPassed) {
+      demo++;
+      passed++;
+    }
+    retry = !demoPassed;
+  }
+  const stop = stops[0];
+  if (stop?.phrase === progress.nextPhrase) {
+    const index = demo ?? 0;
+    const action = stop.actions[index];
+    if (action !== undefined) {
+      return {
+        progress: { ...progress, demo: index, retry, passed },
+        chart: buildTutorialChart(chart, action, followsOn),
+      };
+    }
+    stops = stops.slice(1);
+  }
+  if (progress.nextPhrase >= chart.phrases.length) {
+    return { progress: { ...progress, stops, demo: null, retry: false, passed }, chart: null };
+  }
+  const pieceStart = progress.nextPhrase;
+  const nextPhrase = stops[0]?.phrase ?? chart.phrases.length;
+  return {
+    progress: { stops, demo: null, retry: false, passed, pieceStart, nextPhrase },
+    chart: chartSegment(chart, pieceStart, nextPhrase, followsOn),
+  };
 }
 
 /** A demo round passes when every press was judged and none missed */

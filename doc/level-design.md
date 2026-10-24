@@ -34,9 +34,10 @@ For chart authors: the first phrase is real content, so don't write a teaching p
 
 - **Order**: within a stop, actions in order of first appearance.
 - **Tempo**: the chart's BPM and metre.
-- **Each round**: a one-phrase chart (one count-in bar, a call bar, a response bar, no outro) with the action on beat 1; two-press actions keep their half-beat spacing.
+- **Each round**: a one-phrase chart (a call bar, a response bar, no outro) with the action on beat 1; two-press actions keep their half-beat spacing. Only the level's first round opens with one count-in bar.
 - **Pass**: no Miss on any press of the round (Perfect or Good).
-- **Resuming**: the first piece keeps the chart's count-in; later pieces start with one count-in bar. Only the last piece has the outro.
+- **Resuming**: the first piece keeps the chart's count-in when no demo comes before it; a piece that follows a demo has no count-in. Only the last piece has the outro.
+- **One beat throughout**: demos, retries and the chart's pieces follow on without a break and without a count-in: each round's first call bar starts exactly on the beat the round before ends, so the level keeps one beat grid and the call comes straight after the response. The next round is booked on the audio clock shortly before the round on ends; the round on drops its closing hit, which would fall on the next round's first beat. The screen passes to the next round half a beat early (with the "Follow me" banner, and windows can start popping up), which is safe because judging of every phrase but the last is over by then ([turn cue spacing](prototypes/mvp.md)); the round on's last sounds still play. The beat guide keeps counting beats past the round's end, and shows the next round's presses once it is booked. If a demo's last press is judged too late to book ahead, the next round starts on a later bar line of the same grid, with a count-in bar. Backspace during a demo starts the rest of the chart on the demo's next bar line, with a count-in bar.
 - **Caption**: right of the "Follow me / Your turn" banner, "Practice 2 of 4" (or "Try again") over the action name and how to handle it, counted over the whole level, with "Backspace: skip" at its top right; texts in `src/rhythm/tutorial.ts`.
 - **When**: entering a level from the list or "Next Level"; "Retry" on the results skips the demos.
 - **Skip toggle**: "Skip tutorial" in the settings window ([settings.md](settings.md)), saved in the browser.
