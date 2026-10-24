@@ -14,6 +14,7 @@
   1. Windows XP 桌面 → [scenes/windows-xp.md](scenes/windows-xp.md)
   2. 2000 年前后的 Mac 桌面 → [scenes/mac-2000.md](scenes/mac-2000.md)
 - **动作示例**：弹出窗口、关闭窗口、收邮件、点击刷新等。
+- **画布与场景**：所有场景共用一块 1280×720（16:9）的游戏画布，同一时间只显示一个场景，见 [ADR 0002](decisions/0002-游戏画布与场景结构.md)。
 
 ## 核心循环
 

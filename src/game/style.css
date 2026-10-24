@@ -1,0 +1,72 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+}
+
+/* 画布铺满整个窗口，舞台在画布里等比缩放、居中 */
+#game {
+  position: fixed;
+  inset: 0;
+}
+
+#game canvas {
+  display: block;
+}
+
+/* 开发面板：浮在右上角，平时半透明，悬停或聚焦时才完全显示；按 ` 键隐藏 / 显示 */
+.dev-panel {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  opacity: 0.45;
+  transition: opacity 0.15s;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.72);
+  font:
+    13px/1.2 system-ui,
+    sans-serif;
+  color: #fff;
+}
+
+.dev-panel:hover,
+.dev-panel:focus-within {
+  opacity: 1;
+}
+
+.dev-panel[hidden] {
+  display: none;
+}
+
+.dev-panel button {
+  padding: 4px 10px;
+  border: 1px solid #888;
+  border-radius: 4px;
+  background: #222;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dev-panel button[aria-pressed='true'] {
+  border-color: #8fb4ff;
+  background: #2f5fc0;
+}
+
+.dev-panel button:focus-visible,
+.dev-panel a:focus-visible {
+  outline: 2px solid #8fb4ff;
+  outline-offset: 2px;
+}
+
+.dev-panel a {
+  padding: 4px 6px;
+  color: #c8d8ff;
+}

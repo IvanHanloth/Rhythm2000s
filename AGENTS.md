@@ -16,7 +16,7 @@
 
 ## 当前阶段
 
-**设计阶段，技术栈已确定**（见 [ADR 0001](doc/decisions/0001-技术栈选型.md)），工程脚手架已搭好，游戏本体尚未开始开发。
+**开始开发游戏本体**。技术栈见 [ADR 0001](doc/decisions/0001-技术栈选型.md)；游戏画布和场景结构已搭好（[ADR 0002](doc/decisions/0002-游戏画布与场景结构.md)），Windows XP 和 Mac 两个场景目前只是占位画面。
 
 - 只使用已确定的技术栈；要引入新的运行时依赖（尤其是音频、渲染、状态管理类库）前，先向用户说明理由和取舍。
 - 已完成[延迟测试原型](doc/prototypes/latency-test.md)，下一步是在不同设备、浏览器、耳机上实测，把结果登记到该文档的「测试记录」。
@@ -28,9 +28,12 @@
 ├── AGENTS.md          # 本文件：给 AI 助手和协作者的项目说明
 ├── CLAUDE.md          # Claude Code 入口，引用本文件
 ├── README.md
-├── index.html         # 游戏入口页（目前只列出原型链接）
+├── index.html         # 游戏入口页：游戏画布 + 开发面板（切换场景、打开原型）
 ├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/index.html
 ├── src/
+│   ├── game/          # 游戏画布（1280×720 等比缩放）、场景接口、场景切换器、入口
+│   ├── scenes/        # 各场景，一个场景一个目录，例如 scenes/windows-xp/
+│   ├── theme/         # 场景主题颜色与字体，取自设计系统提案
 │   ├── audio/         # 音频时钟、节拍器、合成音效（游戏会复用）
 │   ├── rhythm/        # 拍 ↔ 音频时间换算
 │   ├── latency/       # 延迟与偏差统计
@@ -52,7 +55,8 @@
 ```
 
 - 单元测试与被测文件放在一起，命名为 `*.test.ts`，从 `vite-plus/test` 导入测试 API。
-- 新增原型页面时，在 `vite.config.ts` 的 `build.rolldownOptions.input` 中登记入口。
+- 新增原型页面时，在 `vite.config.ts` 的 `build.rolldownOptions.input` 中登记入口，并加到 `src/game/dev-panel.ts` 的原型列表里。
+- 新增场景时，在 `src/scenes/<场景名>/` 实现 `Scene` 接口（`src/game/scene.ts`），再在 `src/game/main.ts` 里登记。场景按 1280×720 的逻辑坐标绘制，颜色只取 `src/theme/` 的 token。
 
 ## 技术栈
 
@@ -85,6 +89,7 @@ vp preview     # 本地预览构建结果
 vp add <包名>  # 添加依赖
 ```
 
+- 游戏：开发服务器启动后打开 `http://localhost:5173/`，网址末尾的 `#场景标识`（如 `#mac-2000`）决定打开哪个场景；按 `` ` `` 键隐藏 / 显示开发面板。
 - 延迟测试原型：开发服务器启动后打开 `http://localhost:5173/prototypes/latency/`。
 - `dev`、`build`、`test` 等内置命令不读取 `package.json` 的 scripts。`vp build` 只构建、不做类型检查；要连 `tsc` 一起跑，用 `vp run build`。
 - 没有全局安装 `vp` 时（安装方法见 [Vite+ 文档](https://viteplus.dev/guide)），在命令前加 `pnpm exec`，例如 `pnpm exec vp dev`。
