@@ -1,5 +1,5 @@
-// 场景目录：每个场景的名称、支持的动作和对谱面的附加规则。
-// 不依赖 PixiJS，谱面加载器和单元测试都能直接用。
+// Scene catalog: each scene's name, supported actions and extra chart rules.
+// No PixiJS, so the chart loader and unit tests can use it directly.
 
 import type { ActionType } from '../rhythm/actions.ts';
 import type { Chart } from '../rhythm/chart.ts';
@@ -10,17 +10,17 @@ import { checkWindowsXpChart } from './windows-xp/chart-rules.ts';
 export type SceneId = 'windows-xp' | 'mac-2000';
 
 export interface SceneInfo {
-  /** 给人看的名称 */
+  /** Display name */
   label: string;
-  /** 这个场景能演出的动作 */
+  /** Actions this scene can perform */
   actions: readonly ActionType[];
-  /** 通用校验之外的附加规则；返回错误说明 */
+  /** Rules beyond the common validation; returns error messages */
   checkChart?(chart: Chart): string[];
 }
 
 export const SCENE_CATALOG: Record<SceneId, SceneInfo> = {
   'windows-xp': {
-    label: 'Windows XP 桌面',
+    label: 'Windows XP',
     actions: [
       'dialog-info',
       'dialog-warning',
@@ -35,13 +35,13 @@ export const SCENE_CATALOG: Record<SceneId, SceneInfo> = {
     checkChart: checkWindowsXpChart,
   },
   'mac-2000': {
-    label: 'Mac 桌面（水晶）',
+    label: 'Mac OS X (Aqua)',
     actions: MAC_ACTION_TYPES,
     checkChart: checkMacChart,
   },
 };
 
-/** 每个场景支持的动作，供谱面文件校验使用 */
+/** Actions each scene supports, for chart validation */
 export function sceneActions(): Record<string, readonly ActionType[]> {
   return Object.fromEntries(Object.entries(SCENE_CATALOG).map(([id, info]) => [id, info.actions]));
 }

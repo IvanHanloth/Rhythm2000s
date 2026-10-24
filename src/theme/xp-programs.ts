@@ -1,14 +1,14 @@
-// XP 自带程序窗口里的颜色：记事本、画图、IE、扫雷。窗口外框和系统控件的颜色在 xp-luna.ts。
-// 用在 window-minimize 动作弹出的程序窗口上（doc/scenes/windows-xp-levels.md）。
+// Colours inside XP's bundled programs: Notepad, Paint, Internet Explorer, Minesweeper. Window frames and system controls are in xp-luna.ts.
+// Used by the program windows that window-minimize opens (doc/scenes/windows-xp-levels.md).
 
 export const XP_PROGRAMS = {
-  /** 编辑区、网页、画布的白底 */
+  /** White behind editors, web pages and the canvas */
   paper: '#ffffff',
-  /** 编辑区、地址栏的凹陷边框 */
+  /** Sunken border of editors and the address bar */
   sunkenEdge: '#7f9db9',
-  /** IE 网页里的超链接 */
+  /** Hyperlinks in Internet Explorer pages */
   link: '#0000ff',
-  /** 扫雷沿用 Windows 经典配色 */
+  /** Minesweeper keeps the Windows Classic colours */
   minesweeper: {
     face: '#c0c0c0',
     light: '#ffffff',
@@ -18,7 +18,7 @@ export const XP_PROGRAMS = {
     smiley: '#ffff00',
     smileyInk: '#000000',
   },
-  /** 画图的调色板（经典 28 色里取前一行）和画布上的涂鸦 */
+  /** Paint's palette (the first row of the classic 28) and the doodle on the canvas */
   paint: {
     palette: [
       '#000000',

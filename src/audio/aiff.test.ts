@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { decodeAiff } from './aiff.ts';
 
-/** 拼一个最小的 AIFF：COMM + SSND，16 位 */
+/** Builds a minimal 16-bit AIFF: COMM + SSND */
 function makeAiff(samples: number[][], sampleRateBytes: number[]): ArrayBuffer {
   const channels = samples.length;
   const frames = samples[0]!.length;
@@ -30,11 +30,11 @@ function makeAiff(samples: number[][], sampleRateBytes: number[]): ArrayBuffer {
   return view.buffer;
 }
 
-/** 44100 的 80 位扩展精度表示 */
+/** 44100 as an 80-bit extended float */
 const RATE_44100 = [0x40, 0x0e, 0xac, 0x44, 0, 0, 0, 0, 0, 0];
 
 describe('decodeAiff', () => {
-  it('读出采样率、声道数，并把 16 位采样换算到 -1～1', () => {
+  it('reads sample rate and channels, and scales 16-bit samples to -1…1', () => {
     const decoded = decodeAiff(
       makeAiff(
         [
@@ -50,7 +50,7 @@ describe('decodeAiff', () => {
     expect(decoded.channels[1]![0]).toBeCloseTo(1, 4);
   });
 
-  it('不是 AIFF 时报错', () => {
-    expect(() => decodeAiff(new ArrayBuffer(16))).toThrow('不是 AIFF 文件');
+  it('rejects non-AIFF data', () => {
+    expect(() => decodeAiff(new ArrayBuffer(16))).toThrow('Not an AIFF file');
   });
 });

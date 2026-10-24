@@ -1,5 +1,5 @@
-// 游戏入口：创建画布和音频时钟，登记场景，每帧把音频时间交给当前场景，并转发玩家输入。
-// 默认打开街区大厅（开始界面 + 选关，ADR 0005）；在网吧里坐下开始关卡后切到节奏场景的画布。
+// Entry point: creates the canvas and audio clock, registers scenes, feeds them the audio time every frame and forwards input.
+// Opens the street hub by default (title screen + level select, ADR 0005); sitting at a computer switches to the rhythm scene's canvas.
 
 import './style.css';
 import { AudioClock } from '../audio/audio-clock.ts';
@@ -17,10 +17,10 @@ import { SceneDirector } from './scene-director.ts';
 import { clampCalibrationMs, loadCalibrationMs, saveCalibrationMs } from './settings.ts';
 
 const host = document.querySelector<HTMLElement>('#game');
-if (!host) throw new Error('找不到游戏容器 #game');
+if (!host) throw new Error('Game container #game not found');
 
 const clock = new AudioClock();
-// 画布和谱面同时准备；谱面从 public/charts/ 运行时下载（ADR 0003）
+// Prepare the canvas and charts together; charts are downloaded from public/charts/ at runtime (ADR 0003)
 const [canvas, { charts, errors: chartErrors }] = await Promise.all([
   GameCanvas.create(host),
   loadCharts(fetchChartFromSite(import.meta.env.BASE_URL)),
@@ -29,10 +29,10 @@ for (const error of chartErrors) console.error(error);
 let calibrationMs = loadCalibrationMs();
 
 const scenes = [windowsXpScene, mac2000Scene];
-// 场景素材在画布建好之后加载（PixiJS 的纹理加载放在渲染器初始化之后更稳妥）
+// Load scene assets after the canvas exists (PixiJS texture loading is safer once the renderer is initialised)
 await Promise.all(scenes.map(async (scene) => scene.preload?.(clock.context)));
 
-/** 街区大厅的网址标识；网址里没有写场景时也打开大厅 */
+/** URL id of the street hub; also opened when the URL names no scene */
 const HUB_ROUTE = 'street';
 
 const director = new SceneDirector(canvas.stage, scenes, {
@@ -44,7 +44,7 @@ const director = new SceneDirector(canvas.stage, scenes, {
   },
 });
 
-// 浏览器要求在用户操作里恢复音频；恢复之前音频时间不走
+// Browsers only resume audio inside a user gesture; audio time stands still until then
 const resumeAudio = () => void clock.resume();
 window.addEventListener('pointerdown', resumeAudio, { once: true });
 window.addEventListener('keydown', resumeAudio, { once: true });
@@ -54,28 +54,28 @@ canvas.onFrame(() => director.update({ audioTime: clock.heardNow() }));
 
 const sceneIds = director.entries.map((e) => e.id);
 
-/** 全部关卡：一首谱面一关，按场景、谱面清单的顺序排；进电脑后在资源管理器 / Finder 里选（doc/level-select.md） */
+/** All levels: one per chart, by scene then index order; picked in Explorer / Finder after sitting down (doc/level-select.md) */
 const levels = buildLevels(director.entries, charts);
 
-/** 当前关卡是从网吧坐下进来的；直接用网址打开时按 Esc 也回网吧，但大厅从开始界面开始 */
+/** This level was entered by sitting down in the café. Opened from a URL, Esc also goes to the café, but the hub starts at the title screen */
 let cameFromHub = false;
 
-// 网吧里每个场景一台电脑：坐下后的卡片列出这台电脑里的关卡
+// One computer per scene in the café: the card after sitting down lists that computer's levels
 const hub = new Hub({
   levels: director.entries.map(({ id, label }) => {
     const own = levels.filter((level) => level.sceneId === id);
-    const details = own.map((level) => `第 ${level.number} 关：${level.title}（${level.bpm} BPM）`);
-    if (details.length === 0) details.push('这台机器上还没有可玩的关卡。');
+    const details = own.map((level) => `Level ${level.number}: ${level.title} (${level.bpm} BPM)`);
+    if (details.length === 0) details.push('No playable levels on this machine yet.');
     return { id, sceneId: id, label, details, playable: own.length > 0 };
   }),
   recordOf: (sceneId) => {
     const own = levels.filter((level) => level.sceneId === sceneId);
     const played = own.filter((level) => loadBestScore(level.id) !== null).length;
-    return own.length > 0 ? `已有成绩：${played} / ${own.length} 关` : null;
+    return own.length > 0 ? `Played: ${played} / ${own.length} levels` : null;
   },
   audio: clock.context,
   onPlay: (sceneId) => {
-    // 进电脑后按 Esc 回到网吧
+    // Esc inside the computer goes back to the café
     cameFromHub = true;
     location.hash = sceneId;
   },
@@ -86,13 +86,13 @@ document.querySelector('#boot')?.remove();
 const intro = new LevelIntro();
 document.body.append(intro.element);
 
-/** 场景开始一关之前：显示这一关的开场页 */
+/** Before a scene starts a level: show that level's intro */
 director.setIntroduce((chartId) => {
   const level = levels.find((l) => l.id === chartId);
   if (!level) return;
   intro.show({
     sceneId: level.sceneId,
-    kicker: `${level.sceneLabel} · 第 ${level.number} 关`,
+    kicker: `${level.sceneLabel} · Level ${level.number}`,
     title: level.title,
     bpm: level.bpm,
     actions: level.actions,
@@ -102,19 +102,19 @@ director.setIntroduce((chartId) => {
 
 const backHint = document.createElement('div');
 backHint.className = 'back-hint';
-backHint.textContent = 'Esc 回到网吧';
+backHint.textContent = 'Esc: back to the café';
 backHint.hidden = true;
 document.body.append(backHint);
 
 window.addEventListener('keydown', (event) => {
   if (event.code !== 'Escape' || parseRoute(location.hash, sceneIds).kind === 'hub') return;
   intro.hide();
-  // 关卡里先回到关卡列表，关卡列表上再按才回街区（doc/level-select.md）
+  // Inside a level Esc goes back to the level list first; Esc on the list goes to the street (doc/level-select.md)
   if (!director.escape()) location.hash = HUB_ROUTE;
 });
 
 const panel = createDevPanel({
-  scenes: [{ id: HUB_ROUTE, label: '街区（开始 / 选关）' }, ...director.entries],
+  scenes: [{ id: HUB_ROUTE, label: 'Street (title / level select)' }, ...director.entries],
   onSelectScene: (id) => {
     location.hash = id;
   },
@@ -129,7 +129,7 @@ document.body.append(panel.element);
 
 const gameHost: HTMLElement = host;
 
-// 网址里的 #场景 或 #场景/谱面 决定打开哪里，刷新后停在原处
+// The URL's #scene or #scene/chart decides where to go, so a refresh stays put
 function showRoute(): void {
   const route = parseRoute(location.hash, sceneIds);
   intro.hide();
@@ -146,11 +146,11 @@ function showRoute(): void {
   hub.hide();
   canvas.app.ticker.start();
   director.show(route.sceneId, route.chartId);
-  // PixiJS 默认让画布继承容器的指针，所以设在容器上
+  // PixiJS makes the canvas inherit its container's cursor, so set it on the container
   gameHost.style.cursor = director.entries.find((e) => e.id === route.sceneId)?.cursor ?? '';
   backHint.hidden = false;
-  backHint.textContent = cameFromHub ? 'Esc 回到网吧' : 'Esc 回到街区';
-  // 只对这一次进关卡有效：之后从开发面板或网址直接进来的不算
+  backHint.textContent = cameFromHub ? 'Esc: back to the café' : 'Esc: back to the street';
+  // Only for this one entry: later entries from the dev panel or a URL don't count
   cameFromHub = false;
 }
 

@@ -1,5 +1,5 @@
-// 成绩记录：每首谱面的最好得分，保存在浏览器本地（doc/results.md）。
-// 读写失败（隐私模式等）时当作没有记录，不影响游戏。
+// Records: the best score per chart, kept in browser storage (doc/results.md).
+// Read / write failures (private mode etc.) count as no record and don't affect play.
 
 const KEY_PREFIX = 'rhythm2000s.best.';
 
@@ -13,7 +13,7 @@ export function loadBestScore(chartId: string): number | null {
   }
 }
 
-/** 记录这一局的得分；得分大于 0、且比以前的最好成绩高（或第一次玩）时保存并返回 true */
+/** Records a round's score; saves and returns true when it is above 0 and beats the previous best (or is the first) */
 export function recordScore(chartId: string, score: number): boolean {
   if (score <= 0) return false;
   const best = loadBestScore(chartId);
@@ -21,7 +21,7 @@ export function recordScore(chartId: string, score: number): boolean {
   try {
     localStorage.setItem(KEY_PREFIX + chartId, String(score));
   } catch {
-    // 保存失败只影响以后的「新纪录」判断
+    // A failed save only affects later "new record" checks
   }
   return true;
 }

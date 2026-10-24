@@ -1,27 +1,26 @@
-// 关卡开场页：进关卡时先显示「场景 · 第几关」、关卡名、速度、最佳成绩和玩法说明（参照设计画布的「关卡载入」）。
-// 第一下空格或点击就收起；这一下照常传给场景，所以按下去就直接开始。
+// Level intro: shown before a level with "scene · level N", title, tempo, best score and how to play (after the "level loading" design board).
+// The first Space or click dismisses it; that press still reaches the scene, so it starts the round straight away.
 
 import './screens.css';
 import { applyScreenTheme, screenThemeFor } from './screen-theme.ts';
 
 export interface LevelIntroInfo {
   sceneId: string;
-  /** 例如「Windows XP 桌面 · 第 2 关」 */
+  /** e.g. "Windows XP · Level 2" */
   kicker: string;
   title: string;
   bpm: number;
-  /** 这一关用到的部件，例如「错误消息框、警告消息框」 */
+  /** Widgets used in this level, e.g. "Error box, Warning box" */
   actions: string;
-  /** 最佳成绩的一行文字；还没打过时为 null */
+  /** Best score line; null if never played */
   record: string | null;
 }
 
-/** 每个场景的玩法说明 */
 const HOW_TO: Record<string, string> = {
   'windows-xp':
-    '电脑会先按节奏演示一遍：弹出消息框、冒出托盘气泡、打开程序窗口、掉下文件……轮到您时，请按同样的节奏逐个处理。',
+    'The computer plays it first: pop-ups, tray balloons, program windows, falling files… When it is your turn, handle each one in the same rhythm.',
   'mac-2000':
-    '提示框、Dock 图标、新邮件和文稿窗口会先按节奏出现。轮到您时，请按同样的节奏逐个处理。',
+    'Alerts, Dock icons, new mail and document windows appear in rhythm first. When it is your turn, handle each one in the same rhythm.',
 };
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className: string, text?: string) {
@@ -37,7 +36,7 @@ export class LevelIntro {
   constructor() {
     this.element.hidden = true;
     this.element.setAttribute('aria-live', 'polite');
-    // 收起：第一下空格或点击。监听在捕获阶段，不拦截，事件照常交给场景开始这一局
+    // Dismiss on the first Space or click. Listens in the capture phase without stopping the event, so the scene still gets it
     window.addEventListener(
       'keydown',
       (event) => {
@@ -61,9 +60,9 @@ export class LevelIntro {
     const body = el('div', 'screen-body');
     const facts = el('dl', 'level-intro-facts');
     const rows: [string, string][] = [
-      ['速度', `${info.bpm} BPM`],
-      ['部件', info.actions],
-      ['最佳', info.record ?? '还没有记录'],
+      ['Tempo', `${info.bpm} BPM`],
+      ['Widgets', info.actions],
+      ['Best', info.record ?? 'Not played yet'],
     ];
     for (const [term, value] of rows) facts.append(el('dt', '', term), el('dd', '', value));
     body.append(facts);
@@ -73,15 +72,15 @@ export class LevelIntro {
     const turns = el('p', 'level-intro-turns');
     turns.append(
       el('span', 'turn-chip turn-call', 'Follow me'),
-      ' 先看　→　',
+      ' watch  →  ',
       el('span', 'turn-chip turn-response', 'Your turn'),
-      ' 跟着按',
+      ' play it back',
     );
     tip.append(
-      el('strong', '', '玩法说明'),
+      el('strong', '', 'How to play'),
       el('p', '', HOW_TO[info.sceneId] ?? ''),
       turns,
-      el('p', 'level-intro-keys', '按空格键或点击画面开始 · Esc 回到街区'),
+      el('p', 'level-intro-keys', 'Press Space or click to start · Esc to go back'),
     );
 
     this.element.replaceChildren(header, card, tip);

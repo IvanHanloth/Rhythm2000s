@@ -1,5 +1,5 @@
-// 轮次横幅：Follow me（示范小节）/ Your turn（跟打小节）。原点在横幅中心。
-// 颜色由场景按自己的主题传入；Your turn 用强调色，比 Follow me 醒目。
+// Turn banner: Follow me (call bar) / Your turn (response bar). Origin at the banner's centre.
+// Colours come from the scene's theme; Your turn uses the accent colour so it stands out more than Follow me.
 
 import { Container, Graphics, Text } from 'pixi.js';
 import type { Turn } from '../rhythm/turn-cue.ts';
@@ -37,7 +37,7 @@ export class TurnBanner {
     this.show(null);
   }
 
-  /** 显示哪一面；null 表示隐藏。squash 是 0～1 的挤压量，0 表示原样。 */
+  /** Which side to show; null hides it. squash is 0…1, 0 meaning unsquashed. */
   show(turn: Turn | null, squash = 0): void {
     this.view.visible = turn !== null;
     this.faces.call.visible = turn === 'call';

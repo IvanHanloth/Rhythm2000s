@@ -1,22 +1,21 @@
-// 游戏画布：一个 PixiJS Application，铺满宿主元素。
-// 场景画在 1280×720 的「舞台」上，舞台等比缩放后居中，四周留黑边（ADR 0002）。
+// Game canvas: one PixiJS Application filling its host element.
+// Scenes draw on a 1280×720 stage, scaled to fit and centred, letterboxed in black (ADR 0002).
 
 import { Application, Container, Graphics } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH, fitToScreen } from './layout.ts';
 
-/** 舞台以外的黑边颜色 */
 const LETTERBOX_COLOR = 0x000000;
 
 export class GameCanvas {
   readonly app: Application;
-  /** 1280×720 的舞台，场景画面挂在这里 */
+  /** The 1280×720 stage that scenes attach to */
   readonly stage: Container;
 
   private constructor(app: Application) {
     this.app = app;
     this.stage = new Container({ label: 'stage' });
 
-    // 裁掉超出舞台的部分，避免场景画进黑边
+    // Clip anything outside the stage so scenes never draw into the letterbox
     const mask = new Graphics().rect(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT).fill(0xffffff);
     this.stage.addChild(mask);
     this.stage.mask = mask;
@@ -39,7 +38,7 @@ export class GameCanvas {
     return new GameCanvas(app);
   }
 
-  /** 每帧回调。回调里只读取音频时钟，不使用帧间隔。 */
+  /** Per-frame callback. Read the audio clock in it; never use the frame delta. */
   onFrame(callback: () => void): void {
     this.app.ticker.add(callback);
   }

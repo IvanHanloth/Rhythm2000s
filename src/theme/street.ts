@@ -1,25 +1,25 @@
-// 街区大厅（doc/hub.md）的颜色：明亮、带梦核感的白天（2026-10-24 用户要求），英国商业街。第一版，未经设计评审。
-// 设计系统提案里还没有大厅的 token，以后补进提案时两边一起改。
+// Colours of the street hub (doc/hub.md): a bright, dreamcore daytime British high street (user request, 2026-10-24). First pass, not design-reviewed.
+// The design-system proposal has no hub tokens yet; when they are added, change both together.
 
 export const STREET_COLORS = {
-  /** 天空：顶上饱和的蓝，往下变浅，地平线是淡淡的粉白；太阳周围一圈暖光 */
+  /** Sky: saturated blue overhead, lighter lower down, pale pink-white at the horizon; warm glow around the sun */
   skyTop: '#4f9cf5',
   skyMid: '#a8d2ff',
   skyHorizon: '#fde8f2',
   skySunGlow: '#fff4d6',
-  /** 远处的雾：淡淡的粉紫色，像梦里的雾气 */
+  /** Distant fog: a faint pink-lilac, like dream haze */
   fog: '#dcdcf5',
-  /** 环境光：天空一侧、地面一侧 */
+  /** Ambient light: sky side, ground side */
   ambientSky: '#cfe3ff',
   ambientGround: '#f0d9c4',
-  /** 阳光：偏暖的白 */
+  /** Sunlight: warm white */
   sun: '#fff1dc',
-  /** 梦核调色：暗部往这个粉彩色抬，画面边缘往这个颜色泛白 */
+  /** Dreamcore grade: shadows lift toward this pastel, screen edges fade toward it */
   dreamLift: '#f3d6ea',
   dreamHaze: '#fdf3ff',
-  /** 空中漂浮的光点 */
+  /** Floating light motes */
   dreamMote: '#ffe9b0',
-  /** 路灯、店里的灯 */
+  /** Street lamps and shop lights */
   lampWarm: '#ffd59a',
   lampCool: '#d8f0ff',
   neonPink: '#ff4fa3',
@@ -27,7 +27,7 @@ export const STREET_COLORS = {
   neonPurple: '#9a5cff',
   roadLine: '#e8e2c8',
 
-  /** 楼面 */
+  /** Facades */
   wallCream: '#d9cfb6',
   windowLit: '#ffd98a',
   windowDark: '#2f3346',
@@ -40,23 +40,23 @@ export const STREET_COLORS = {
   plasticDark: '#3a3a3e',
   trunk: '#5e4630',
   ceiling: '#e8e4d8',
-  /** 招牌底色 */
+  /** Sign backgrounds */
   signRed: '#c8241e',
   signBlue: '#1f4fa8',
   signYellow: '#ffd23a',
   signGreen: '#1f8a4c',
   signText: '#ffffff',
   signTextDark: '#1b1b1b',
-  /** 英国的红色电话亭、邮筒、巴士 */
+  /** British red phone boxes, post boxes, buses */
   postRed: '#d0161e',
-  /** 路边的双黄线 */
+  /** Double yellow lines along the kerb */
   roadYellow: '#f2c230',
-  /** 斑马线两头的黄色闪灯（Belisha beacon） */
+  /** Belisha beacons at the zebra crossing */
   beaconAmber: '#ffb31a',
-  /** 角色 */
+  /** Characters */
   skin: '#f0c8a0',
   hair: '#2a211c',
-  /** 玩家角色：DeepSeek 鲸鱼娘（2026-10-24 用户指定），主色取 DeepSeek 的品牌蓝 */
+  /** Player character: the DeepSeek whale girl (user's choice, 2026-10-24), keyed to DeepSeek's brand blue */
   whaleBlue: '#4d6bfe',
   whaleHair: '#3a55d8',
   whaleHairDark: '#2a3a9e',
@@ -69,8 +69,8 @@ export const STREET_COLORS = {
   whaleSock: '#f2f4fb',
   whaleShoe: '#1e2a5a',
   blush: '#f5a3a8',
-  /** 半透明一体机外壳 */
+  /** Translucent all-in-one shell */
   imacShell: '#2ab3c9',
-  /** 可以开始关卡的电脑上方的提示标记 */
+  /** Marker above computers where a level can start */
   marker: '#f2b705',
 };

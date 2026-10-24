@@ -1,18 +1,18 @@
-// 画布尺寸与适配：场景按固定的逻辑分辨率绘制，再整体等比缩放到窗口里（ADR 0002）。
+// Canvas size and fit: scenes draw at a fixed logical resolution, then scale uniformly into the window (ADR 0002).
 
-/** 逻辑分辨率：所有场景都按这个坐标系绘制。 */
+/** Logical resolution every scene draws in. */
 export const DESIGN_WIDTH = 1280;
 export const DESIGN_HEIGHT = 720;
 
 export interface Fit {
-  /** 逻辑坐标到屏幕坐标的缩放倍数 */
+  /** Scale from logical to screen coordinates */
   scale: number;
-  /** 画面左上角在屏幕上的位置（CSS 像素） */
+  /** Top-left of the picture on screen (CSS pixels) */
   x: number;
   y: number;
 }
 
-/** 把 designW×designH 的画面等比放进 screenW×screenH 的屏幕，居中，多出的部分留黑边。 */
+/** Fits a designW×designH picture into a screenW×screenH screen, centred, letterboxing the rest. */
 export function fitToScreen(
   screenWidth: number,
   screenHeight: number,

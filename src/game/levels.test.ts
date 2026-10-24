@@ -27,23 +27,23 @@ const charts = [
 ];
 
 describe('buildLevels', () => {
-  it('按场景登记顺序排，场景内按谱面清单顺序编号', () => {
+  it('orders by scene registration, numbering levels within a scene in index order', () => {
     const levels = buildLevels(scenes, charts);
     expect(levels.map((l) => `${l.id}#${l.number}`)).toEqual(['x1#1', 'x2#2', 'm1#1']);
-    expect(levels[0]!.actions).toBe('错误消息框、警告消息框');
+    expect(levels[0]!.actions).toBe('Error box, Warning box');
   });
 });
 
 describe('parseRoute', () => {
   const ids = scenes.map((s) => s.id);
 
-  it('空的、认不出来的都回街区', () => {
+  it('empty or unknown routes go back to the street', () => {
     expect(parseRoute('', ids)).toEqual({ kind: 'hub' });
     expect(parseRoute('#street', ids)).toEqual({ kind: 'hub' });
     expect(parseRoute('#nope/x1', ids)).toEqual({ kind: 'hub' });
   });
 
-  it('#场景 和 #场景/谱面', () => {
+  it('#scene and #scene/chart', () => {
     expect(parseRoute('#mac-2000', ids)).toEqual({ kind: 'scene', sceneId: 'mac-2000' });
     expect(parseRoute('#windows-xp/x2', ids)).toEqual({
       kind: 'scene',
@@ -52,7 +52,7 @@ describe('parseRoute', () => {
     });
   });
 
-  it('和 levelRoute 互逆', () => {
+  it('round-trips with levelRoute', () => {
     const level = buildLevels(scenes, charts)[1]!;
     expect(parseRoute(`#${levelRoute(level)}`, ids)).toEqual({
       kind: 'scene',
@@ -63,8 +63,8 @@ describe('parseRoute', () => {
 });
 
 describe('formatBestScore', () => {
-  it('补足五位；没有成绩时为 null', () => {
-    expect(formatBestScore(4250)).toBe('最佳得分 04250');
+  it('pads to five digits; null with no score', () => {
+    expect(formatBestScore(4250)).toBe('Best score 04250');
     expect(formatBestScore(null)).toBeNull();
   });
 });

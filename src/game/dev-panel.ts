@@ -1,35 +1,33 @@
-// 开发面板：用来直接切换到街区或某个场景、填写输入校准值、打开原型页面（ADR 0002）。
+// Dev panel: jump straight to the street or a scene, set input calibration, open prototype pages (ADR 0002).
 
 import { CALIBRATION_LIMIT_MS } from './settings.ts';
 
 const PROTOTYPES = [
-  { label: '延迟测试', href: '/prototypes/latency/' },
-  { label: 'XP 部件', href: '/prototypes/xp-components/' },
+  { label: 'Latency test', href: '/prototypes/latency/' },
+  { label: 'XP widgets', href: '/prototypes/xp-components/' },
 ];
 
 export interface DevPanelOptions {
-  /** 可以切换到的画面：街区大厅和各个场景 */
+  /** Places to switch to: the street hub and each scene */
   scenes: readonly { id: string; label: string }[];
   onSelectScene(id: string): void;
-  /** 当前校准值（毫秒） */
+  /** Current calibration (ms) */
   calibrationMs: number;
-  /** 校准值改变；返回实际采用的值（可能被限制在范围内） */
+  /** Calibration changed; returns the value actually used (may be clamped) */
   onCalibrationChange(value: number): number;
 }
 
 export interface DevPanel {
   element: HTMLElement;
-  /** 标出当前场景 */
   setActive(id: string): void;
 }
 
 export function createDevPanel(options: DevPanelOptions): DevPanel {
   const element = document.createElement('nav');
   element.className = 'dev-panel';
-  element.setAttribute('aria-label', '开发面板');
-  element.title = '开发面板：按 ` 键隐藏 / 显示';
+  element.setAttribute('aria-label', 'Dev panel');
+  element.title = 'Dev panel: press ` to hide / show';
 
-  // 看场景全貌时可以把面板藏起来
   window.addEventListener('keydown', (event) => {
     if (event.code === 'Backquote' && !event.repeat) element.hidden = !element.hidden;
   });
@@ -40,7 +38,7 @@ export function createDevPanel(options: DevPanelOptions): DevPanel {
     button.textContent = scene.label;
     button.dataset.sceneId = scene.id;
     button.addEventListener('click', () => {
-      // 去掉焦点，避免之后按空格又触发这个按钮
+      // Drop focus so a later Space press doesn't trigger this button again
       button.blur();
       options.onSelectScene(scene.id);
     });
@@ -48,7 +46,7 @@ export function createDevPanel(options: DevPanelOptions): DevPanel {
   });
 
   const calibration = document.createElement('label');
-  calibration.title = '正数表示你习惯按晚。可以填延迟测试原型给出的「建议校准」';
+  calibration.title = 'Positive means you tend to press late. You can enter the "suggested calibration" from the latency test';
   const input = document.createElement('input');
   input.type = 'number';
   input.min = String(-CALIBRATION_LIMIT_MS);
@@ -58,12 +56,12 @@ export function createDevPanel(options: DevPanelOptions): DevPanel {
   input.addEventListener('change', () => {
     input.value = String(options.onCalibrationChange(Number(input.value)));
   });
-  calibration.append('校准', input, 'ms');
+  calibration.append('Calibration', input, 'ms');
 
   const links = PROTOTYPES.map(({ label, href }) => {
     const link = document.createElement('a');
     link.href = href;
-    link.textContent = `原型：${label}`;
+    link.textContent = `Prototype: ${label}`;
     return link;
   });
 

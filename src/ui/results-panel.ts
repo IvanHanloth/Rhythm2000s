@@ -1,6 +1,6 @@
-// 结算窗口的内容（doc/results.md）：左边评级印章和评语，右边得分、三格计数和按键偏差柱状图。
-// 评级印章、判定标签、得分数字是游戏自己的演出，XP 和 Mac 一样；分组框、普通文字由各场景按原版样式传进来。
-// 左上角在 (0, 0)。
+// Contents of the results window (doc/results.md): rating stamp and comments on the left; score, three tallies and the offset histogram on the right.
+// The stamp, judgement chips and score digits are the game's own show and look the same on XP and Mac; group boxes and plain text come from each scene in its native style.
+// Top-left at (0, 0).
 
 import { Container, Graphics, Text } from 'pixi.js';
 import type { JudgementLevel } from '../rhythm/judge.ts';
@@ -22,22 +22,22 @@ export interface PanelTextStyle {
   lineHeight?: number;
 }
 
-/** 各场景按自己的原版样式提供的部件 */
+/** Widgets each scene supplies in its native style */
 export interface ResultsKit {
   text(text: string, style: PanelTextStyle): Text;
-  /** 带标题的分组框；inner 是放内容的容器，左上角在框的内边距处 */
+  /** Titled group box; inner is the content container, top-left at the box's padding */
   groupBox(title: string, width: number, height: number): { view: Container; inner: Container };
-  /** 分组框内边距占掉的宽、高（左右合计、上下合计） */
+  /** Width and height taken by the group box padding (left + right, top + bottom) */
   groupInset: { x: number; y: number };
-  /** 说明文字的颜色 */
+  /** Caption text colour */
   muted: string;
-  /** 「新纪录」小标签的底色（各系统的选中色） */
+  /** Background of the "New record" chip (each OS's selection colour) */
   accent: string;
 }
 
 export interface ResultsPanelOptions {
   summary: ResultSummary;
-  /** 得分超过了以前的最好成绩 */
+  /** The score beat the previous best */
   newRecord: boolean;
   width: number;
   height: number;
@@ -49,7 +49,7 @@ const LEFT_WIDTH = 230;
 const GAP = 14;
 const RANK_HEIGHT = 128;
 const SCORE_HEIGHT = 104;
-/** 演出用的字按 3 倍分辨率栅格化，整体放大后不发虚 */
+/** Show text is rasterised at 3× so it stays crisp when scaled up */
 const RESOLUTION = 3;
 
 const RANK_COLORS: Record<Rank, { fill: string; text: string }> = {
@@ -80,18 +80,18 @@ export function createResultsPanel({
   const rightX = LEFT_WIDTH + GAP;
   const rightWidth = width - rightX;
 
-  // 左：评级
-  const rank = kit.groupBox('评级', LEFT_WIDTH, RANK_HEIGHT);
+  // Left: rating
+  const rank = kit.groupBox('Rating', LEFT_WIDTH, RANK_HEIGHT);
   const stamp = rankStamp(summary.rank);
-  // 字多的评级（「再试一次」）印章更宽，缩到框里放得下
+  // Wordy ratings ("Try again") get a wider stamp, shrunk to fit the box
   const stampRoom = LEFT_WIDTH - kit.groupInset.x - 8;
   stamp.scale.set(Math.min(1, stampRoom / stamp.width));
   stamp.position.set((LEFT_WIDTH - kit.groupInset.x) / 2, (RANK_HEIGHT - kit.groupInset.y) / 2 + 2);
   rank.inner.addChild(stamp);
 
-  // 左：评语
+  // Left: comments
   const commentsHeight = height - RANK_HEIGHT - GAP;
-  const comments = kit.groupBox('评语', LEFT_WIDTH, commentsHeight);
+  const comments = kit.groupBox('Comments', LEFT_WIDTH, commentsHeight);
   comments.view.y = RANK_HEIGHT + GAP;
   let y = 0;
   for (const line of summary.comments) {
@@ -107,8 +107,8 @@ export function createResultsPanel({
     y += Math.ceil(text.height) + 6;
   }
 
-  // 右：得分和三格计数
-  const score = kit.groupBox('得分', rightWidth, SCORE_HEIGHT);
+  // Right: score and the three tallies
+  const score = kit.groupBox('Score', rightWidth, SCORE_HEIGHT);
   score.view.x = rightX;
   const innerWidth = rightWidth - kit.groupInset.x;
   const scoreText = hudText(formatScore(summary.score), 30);
@@ -116,7 +116,7 @@ export function createResultsPanel({
   scoreText.position.set(innerWidth, -6);
   score.inner.addChild(scoreText);
   if (newRecord) {
-    const badge = pill(kit.text('新纪录', { size: 11, color: '#ffffff' }), kit.accent, null, 8);
+    const badge = pill(kit.text('New record', { size: 11, color: '#ffffff' }), kit.accent, null, 8);
     badge.position.set(innerWidth - scoreText.width - 10 - badge.width, 2);
     score.inner.addChild(badge);
   }
@@ -128,15 +128,15 @@ export function createResultsPanel({
     score.inner.addChild(tile);
   });
 
-  // 右：按键偏差
+  // Right: timing
   const driftHeight = height - SCORE_HEIGHT - GAP;
-  const drift = kit.groupBox('按键偏差', rightWidth, driftHeight);
+  const drift = kit.groupBox('Timing', rightWidth, driftHeight);
   drift.view.position.set(rightX, SCORE_HEIGHT + GAP);
   const mean = summary.meanOffsetMs;
   const meanText = kit.text(
     mean === null
-      ? '没有命中'
-      : `平均：${mean >= 0 ? '晚' : '早'} ${Math.round(Math.abs(mean))} 毫秒`,
+      ? 'No hits'
+      : `Average: ${Math.round(Math.abs(mean))} ms ${mean >= 0 ? 'late' : 'early'}`,
     { size: 12 },
   );
   meanText.anchor.set(1, 0);
@@ -146,7 +146,7 @@ export function createResultsPanel({
   const chartHeight = driftHeight - kit.groupInset.y - 22;
   drift.inner.addChild(histogram(summary.bins, innerWidth, chartHeight));
   const range = ((OFFSET_BINS - 1) / 2) * OFFSET_BIN_MS;
-  const axis = [`← 早 ${range} 毫秒`, '拍点', `晚 ${range} 毫秒 →`].map((label, i) => {
+  const axis = [`← ${range} ms early`, 'On beat', `${range} ms late →`].map((label, i) => {
     const text = kit.text(label, { size: 11, color: kit.muted });
     text.anchor.set(i / 2, 0);
     text.position.set((innerWidth * i) / 2, chartHeight + 5);
@@ -158,7 +158,7 @@ export function createResultsPanel({
   return panel;
 }
 
-/** 盖上去的评级印章：粗黑边胶囊、硬投影、斜 5 度。原点在印章中心 */
+/** The rating stamp: thick black-edged capsule, hard shadow, tilted 5°. Origin at its centre */
 function rankStamp(rank: Rank): Container {
   const { fill, text } = RANK_COLORS[rank];
   const label = new Text({
@@ -182,7 +182,7 @@ function rankStamp(rank: Rank): Container {
   return stamp;
 }
 
-/** 一格计数：白底圆角框，左边判定标签，右边次数 */
+/** One tally: white rounded box, judgement chip on the left, count on the right */
 function countTile(label: string, fill: string, text: string, count: number, width: number) {
   const tile = new Container({ label: `count-${label}` });
   const height = 36;
@@ -208,7 +208,7 @@ function countTile(label: string, fill: string, text: string, count: number, wid
   return tile;
 }
 
-/** 胶囊形小标签，左上角在 (0, 0) */
+/** Capsule chip, top-left at (0, 0) */
 function pill(text: Text, fill: string, border: string | null, paddingX: number): Container {
   const view = new Container();
   const width = Math.ceil(text.width) + paddingX * 2;
@@ -229,7 +229,7 @@ function hudText(text: string, size: number): Text {
   });
 }
 
-/** 偏差柱状图：白底凹框，中间虚线是拍点，Perfect 范围内的格子用 Perfect 色 */
+/** Offset histogram: white sunken box, a dashed line on the beat, bins inside the Perfect range in the Perfect colour */
 function histogram(bins: readonly number[], width: number, height: number): Container {
   const view = new Container({ label: 'histogram' });
   const g = new Graphics()
@@ -256,7 +256,7 @@ function histogram(bins: readonly number[], width: number, height: number): Cont
     );
   });
 
-  // 拍点：中间一条虚线
+  // On the beat: a dashed line down the middle
   for (let y = 3; y < height - 3; y += 6) {
     g.moveTo(width / 2, y).lineTo(width / 2, Math.min(y + 3, height - 3));
   }

@@ -1,65 +1,63 @@
-// 场景接口：Windows XP 桌面、Mac 桌面等主题小游戏都是一个场景（ADR 0002）。
+// Scene interface: each themed minigame (Windows XP desktop, Mac desktop…) is a scene (ADR 0002).
 
 import type { Container } from 'pixi.js';
 import type { AudioClock } from '../audio/audio-clock.ts';
 import type { Chart } from '../rhythm/chart.ts';
 import type { SceneId } from '../scenes/catalog.ts';
 
-/** 每帧传给场景的信息。 */
 export interface FrameInfo {
-  /** 此刻扬声器正在播放的音频时间（秒，AudioContext 时间轴）。画面只根据它计算，不累加帧间隔。 */
+  /** Audio time the speakers are playing right now (s, AudioContext timeline). Draw only from this; never accumulate frame deltas. */
   audioTime: number;
 }
 
-/** 玩家的一次动作输入（按空格或点击画面）。 */
+/** One action input (Space or a click). */
 export interface TapInfo {
-  /** 输入那一刻扬声器正在播放的音频时间（秒）。还没有扣除玩家校准值。 */
+  /** Audio time the speakers were playing at the input (s), before calibration is subtracted. */
   audioTime: number;
 }
 
-/** 场景创建时拿到的共享资源。 */
+/** Shared resources a scene gets when created. */
 export interface SceneContext {
   clock: AudioClock;
-  /** 玩家校准值（秒），正数表示玩家习惯按晚。判定时从输入时间里扣除 */
+  /** Player calibration (s); positive means the player presses late. Subtracted from input times when judging */
   calibration(): number;
-  /** 已加载并通过校验的全部谱面；场景按 chart.scene 挑出自己的 */
+  /** Every loaded, validated chart; scenes pick theirs by chart.scene */
   charts: readonly Chart[];
-  /** 离开场景、回到街区大厅（选关界面的「后退」「返回」） */
+  /** Leave the scene and go back to the street hub ("Back" in the level select) */
   leave(): void;
-  /** 要打的那一首谱面（网址 #场景/谱面 直接打开某一关时有）；不写时场景先显示关卡列表 */
+  /** The chart to play (when #scene/chart opens a level directly); without it the scene shows its level list first */
   chartId?: string;
   /**
-   * 开始一关之前调用：游戏外壳显示这一关的开场页（关卡名、速度、部件、最佳成绩、玩法）。
-   * 开场页由玩家的第一下空格或点击收起，这一下照常传给场景，场景收到后再开始。
-   * 不提供时（单元测试、原型页面）场景直接开始。
+   * Called before a level starts: the shell shows the level intro (title, tempo, widgets, best score, how to play).
+   * The player's first Space or click dismisses it; that press still reaches the scene, which then starts.
+   * When absent (unit tests, prototype pages) the scene starts straight away.
    */
   introduce?(chartId: string): void;
 }
 
 export interface Scene {
-  /** 场景的全部画面，按 1280×720 的逻辑坐标绘制 */
+  /** Everything the scene draws, in 1280×720 logical coordinates */
   readonly view: Container;
-  /** 每帧调用一次 */
   update(frame: FrameInfo): void;
-  /** 玩家输入；不需要输入的场景可以不实现 */
+  /** Player input; scenes without input can leave it out */
   onTap?(tap: TapInfo): void;
   /**
-   * 玩家按了 Esc。场景自己处理了（例如从关卡回到关卡列表）就返回 true；
-   * 返回 false 或不实现时，由游戏入口回到街区大厅。
+   * The player pressed Esc. Return true if the scene handled it (e.g. going from a level back to the level list);
+   * otherwise the entry point goes back to the street hub.
    */
   onEscape?(): boolean;
-  /** 离开场景时调用，释放画面和其他资源 */
+  /** Called when leaving the scene; frees views and other resources */
   destroy(): void;
 }
 
 export interface SceneEntry {
-  /** 场景标识，与场景目录（scenes/catalog.ts）一致 */
+  /** Scene id, matching the scene catalog (scenes/catalog.ts) */
   id: SceneId;
-  /** 给人看的名称，例如「Windows XP 桌面」 */
+  /** Display name, e.g. "Windows XP" */
   label: string;
-  /** 场景素材（图片、字体、音效）的加载；游戏启动时等它完成，之后 create() 可以同步取用 */
+  /** Loads scene assets (images, fonts, sounds); awaited at start-up so create() can use them synchronously */
   preload?(audio: BaseAudioContext): Promise<void>;
-  /** 显示这个场景时游戏画面上的鼠标指针（CSS cursor 值）；不写时用浏览器默认指针 */
+  /** Mouse cursor over the game while this scene is shown (CSS cursor value); browser default when omitted */
   cursor?: string;
   create(context: SceneContext): Scene;
 }

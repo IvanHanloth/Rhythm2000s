@@ -6,7 +6,7 @@ body {
   overflow: hidden;
 }
 
-/* 画布铺满整个窗口，舞台在画布里等比缩放、居中 */
+/* The canvas fills the window; the stage scales and centres inside it */
 #game {
   position: fixed;
   inset: 0;
@@ -16,10 +16,10 @@ body {
   display: block;
 }
 
-/* 开发面板：浮在右上角，平时半透明，悬停或聚焦时才完全显示；按 ` 键隐藏 / 显示 */
+/* Dev panel: top right, translucent until hovered or focused; ` hides / shows it */
 .dev-panel {
   position: fixed;
-  /* 盖在街区大厅（z-index 5）上面 */
+  /* Above the street hub (z-index 5) */
   z-index: 10;
   top: 8px;
   right: 8px;

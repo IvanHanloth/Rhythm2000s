@@ -1,29 +1,29 @@
-// 判定：把玩家输入对到跟打目标上，给出 Perfect / Good / Miss。
-// 时间单位为秒，使用音频时间轴；输入时间应已扣除玩家校准值。
+// Judging: matches player input to response targets and grades Perfect / Good / Miss.
+// Times are in seconds on the audio timeline; input times must already have the calibration subtracted.
 
 export type JudgementLevel = 'perfect' | 'good' | 'miss';
 
 export interface JudgeWindows {
-  /** Perfect 的半宽（秒），偏差绝对值不超过它算 Perfect */
+  /** Half-width of Perfect (s): an absolute offset up to this is Perfect */
   perfect: number;
-  /** Good 的半宽（秒），偏差绝对值不超过它算 Good，超出算 Miss */
+  /** Half-width of Good (s): up to this is Good, beyond it is a Miss */
   good: number;
 }
 
-/** MVP 暂定的判定窗口，见 doc/prototypes/mvp.md */
+/** Provisional MVP windows, see doc/prototypes/mvp.md */
 export const MVP_WINDOWS: JudgeWindows = { perfect: 0.045, good: 0.1 };
 
 export interface Judgement {
-  /** 目标下标 */
+  /** Target index */
   target: number;
   level: JudgementLevel;
-  /** 偏差（秒），正数表示晚；Miss 时为 null */
+  /** Offset (s), positive is late; null for a Miss */
   offset: number | null;
-  /** 判定发生的时间（秒）：命中时是输入时间，Miss 时是 Good 窗口关闭的时间 */
+  /** When the judgement happened (s): the input time for hits, the moment the Good window closed for Misses */
   time: number;
 }
 
-/** 偏差对应的等级；超出 Good 窗口时返回 null（由调用方决定是 Miss 还是无效输入）。 */
+/** Grade for an offset; null outside the Good window (the caller decides between Miss and a stray press). */
 export function levelForOffset(offset: number, windows: JudgeWindows): JudgementLevel | null {
   const distance = Math.abs(offset);
   if (distance <= windows.perfect) return 'perfect';
@@ -36,14 +36,14 @@ export class ResponseJudge {
   private readonly windows: JudgeWindows;
   private readonly results: (Judgement | null)[];
 
-  /** targets：各跟打目标的时间（秒），从小到大排列 */
+  /** targets: times of the response targets (s), ascending */
   constructor(targets: readonly number[], windows: JudgeWindows = MVP_WINDOWS) {
     this.targets = targets;
     this.windows = windows;
     this.results = targets.map(() => null);
   }
 
-  /** 第 i 个目标的判定结果；还没判定时为 null。 */
+  /** Judgement for target i; null until judged. */
   result(target: number): Judgement | null {
     return this.results[target] ?? null;
   }
@@ -53,8 +53,8 @@ export class ResponseJudge {
   }
 
   /**
-   * 一次输入：对到最早的、还没判定的、偏差在 Good 窗口以内的目标。
-   * 附近没有目标时返回 null，这次输入不计分也不罚分。
+   * One input: matched to the earliest unjudged target whose offset is inside the Good window.
+   * Returns null when no target is near; such a press neither scores nor costs anything.
    */
   tap(time: number): Judgement | null {
     for (let i = 0; i < this.targets.length; i++) {
@@ -70,7 +70,7 @@ export class ResponseJudge {
     return null;
   }
 
-  /** 把 Good 窗口已经过去、仍没有输入的目标记为 Miss，返回这次新增的 Miss。 */
+  /** Marks targets whose Good window has passed with no input as Misses; returns the new Misses. */
   expire(time: number): Judgement[] {
     const missed: Judgement[] = [];
     for (let i = 0; i < this.targets.length; i++) {

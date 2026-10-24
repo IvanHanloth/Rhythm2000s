@@ -1,22 +1,22 @@
-// 音序器：按音频时钟预约播放一串以拍为单位的声音。
-// 和节拍器一样，每帧调用 schedule()，把未来 lookAhead 秒内的声音用 start(when) 预约好；
-// 帧只负责提前排队，声音何时响完全由音频时钟决定。
+// Sequencer: schedules a list of beat-timed sounds against the audio clock.
+// Like the metronome, call schedule() every frame to book sounds within the next lookAhead seconds with start(when);
+// frames only queue ahead, and when a sound plays is decided entirely by the audio clock.
 
 import { beatToTime } from '../rhythm/beat.ts';
 
 export interface SequencedSound {
-  /** 全曲拍位置 */
+  /** Beat position in the song */
   beat: number;
   buffer: AudioBuffer;
-  /** 音量倍数，默认 1 */
+  /** Volume multiplier, default 1 */
   gain?: number;
 }
 
 export interface SequencerOptions {
-  /** 第 0 拍的音频时间（秒） */
+  /** Audio time of beat 0 (s) */
   startTime: number;
   bpm: number;
-  /** 提前预约的时长（秒），要大于最长可能的掉帧时间 */
+  /** How far ahead to schedule (s); must exceed the longest likely frame stall */
   lookAhead?: number;
 }
 
@@ -45,7 +45,6 @@ export class Sequencer {
     this.lookAhead = lookAhead;
   }
 
-  /** 每帧调用一次。 */
   schedule(): void {
     if (this.stopped) return;
     const now = this.context.currentTime;
@@ -56,13 +55,13 @@ export class Sequencer {
       const when = beatToTime(this.startTime, this.bpm, sound.beat);
       if (when >= horizon) break;
       this.next++;
-      // 掉帧太久导致已经过时的声音直接跳过，避免一次性补放一串
+      // After a long stall, skip sounds already in the past instead of playing a burst
       if (when < now) continue;
       this.play(sound, when);
     }
   }
 
-  /** 停止并取消所有已预约、还没播完的声音。 */
+  /** Stops and cancels every scheduled sound that hasn't finished. */
   stop(): void {
     this.stopped = true;
     for (const source of this.pending) {

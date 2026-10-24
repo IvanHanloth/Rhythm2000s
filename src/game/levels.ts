@@ -1,20 +1,20 @@
-// 关卡：一首谱面就是一关。按场景登记的顺序、谱面清单（public/charts/index.json）的顺序排好，
-// 网吧里每个场景一台电脑，进去后在资源管理器 / Finder 里选关（doc/level-select.md）；网址 #场景/谱面 直接打开某一关。
-// 不依赖 DOM，单元测试可以直接用。
+// Levels: one chart is one level, ordered by scene registration and then by the chart index (public/charts/index.json).
+// The net café has one computer per scene; inside, levels are picked in Explorer / Finder (doc/level-select.md). #scene/chart opens a level directly.
+// No DOM, so unit tests can use it directly.
 
 import { ACTION_LABELS } from '../rhythm/actions.ts';
 import type { Chart } from '../rhythm/chart.ts';
 
 export interface Level {
-  /** 谱面 id */
+  /** Chart id */
   id: string;
   sceneId: string;
   sceneLabel: string;
-  /** 在所属场景里是第几关（从 1 开始） */
+  /** Level number within its scene (from 1) */
   number: number;
   title: string;
   bpm: number;
-  /** 谱面用到的部件，按第一次出现的顺序，例如「错误消息框、警告消息框」 */
+  /** Widgets the chart uses, in order of first appearance, e.g. "Error box, Warning box" */
   actions: string;
 }
 
@@ -32,7 +32,7 @@ export function buildLevels(
         number: i + 1,
         title: chart.title,
         bpm: chart.bpm,
-        actions: [...new Set(chart.calls.map((call) => ACTION_LABELS[call.action]))].join('、'),
+        actions: [...new Set(chart.calls.map((call) => ACTION_LABELS[call.action]))].join(', '),
       })),
   );
 }
@@ -40,8 +40,8 @@ export function buildLevels(
 export type Route = { kind: 'hub' } | { kind: 'scene'; sceneId: string; chartId?: string };
 
 /**
- * 解析网址里 # 后面的部分：空的或认不出来的都回到街区；
- * `场景` 打开场景（场景自己挑谱面），`场景/谱面` 打开某一关。
+ * Parses the part of the URL after #: empty or unknown goes back to the street;
+ * `scene` opens a scene (it picks the chart), `scene/chart` opens one level.
  */
 export function parseRoute(hash: string, sceneIds: readonly string[]): Route {
   const [sceneId, chartId] = decodeURIComponent(hash.replace(/^#/, '')).split('/');
@@ -53,7 +53,7 @@ export function levelRoute(level: Level): string {
   return `${level.sceneId}/${level.id}`;
 }
 
-/** 开场页上最佳成绩的一行文字，例如「最佳得分 04250」；还没有成绩时为 null（得分规则见 doc/results.md） */
+/** Best-score line on the intro, e.g. "Best score 04250"; null with no score (scoring rules: doc/results.md) */
 export function formatBestScore(score: number | null): string | null {
-  return score === null ? null : `最佳得分 ${String(score).padStart(5, '0')}`;
+  return score === null ? null : `Best score ${String(score).padStart(5, '0')}`;
 }
