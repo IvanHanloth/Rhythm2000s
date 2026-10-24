@@ -1,11 +1,11 @@
 ---
 name: project-uk-hackathon
-description: Rhythm 2000s 是用户参加英国黑客松的作品（2026-10-24 得知），评委和玩家在英国，街区场景因此改成 2000 年的英国商业街
+description: Rhythm 2000s is the user's entry to a UK hackathon (learnt 2026-10-24); judges and players are in the UK, so the street became a British high street around 2000
 metadata:
   type: project
 ---
 
-2026-10-24 用户说明这个项目是去参加英国的黑客松。用户同时觉得 3D 街区用中国千禧年元素「看起来怪怪的」（场景文字是英文、内容却是中国街头），要求改成英国元素。
+On 2026-10-24 the user said the project is for a hackathon in the UK, and that the 3D street with Chinese millennial details "looked odd" (English signs over Chinese street scenes), so it should use British elements instead.
 
-**Why:** 评委和玩家都在英国；英文招牌配中国街头内容会显得别扭。
-**How to apply:** 街区和以后的新场景优先用英国 2000 年前后的元素（红色电话亭和邮筒、斑马线与黄色闪灯、双黄线、网吧和录像带出租店、炸鱼薯条店、街机厅、英镑价格）；对外展示的文案要考虑英国观众。2026-10-24 用户决定玩家能看到的界面全部改成英文（含 DOM 界面、谱面曲名），注释、文档、汇报保持中文，见 AGENTS.md「工作约定」第 1 条。相关：[[feedback-hub-art-direction]]
+**Why:** the judges and players are in the UK; English signs over Chinese street content feel off.
+**How to apply:** use British elements from around 2000 for the street and new scenes (red phone boxes and pillar boxes, zebra crossings with Belisha beacons, double yellow lines, net cafés and video rental shops, chippies, arcades, prices in pounds), and write public-facing copy for a British audience. All text in the project is English ([[feedback-english-everywhere]]). Related: [[feedback-hub-art-direction]]

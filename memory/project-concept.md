@@ -1,13 +1,13 @@
 ---
 name: project-concept
-description: 项目核心概念与当前阶段（2026-10-24 立项，同日确定技术栈并搭好脚手架和延迟测试原型）
+description: The project's core concept and early timeline (started 2026-10-24; stack, scaffold and latency prototype the same day)
 metadata:
   type: project
 ---
 
-Rhythm 2000s（游戏名首字母大写；仓库、包名、存档键仍用 `rhythm2000s`，2026-10-24 用户定）是一款玩法完全仿照《节奏天国》的节奏游戏（先示范带节拍的动作，玩家按同样节奏重复），题材是 21 世纪初的电脑元素。首批场景已确定为 Windows XP 桌面和 2000 年前后的 Mac 桌面，动作示例有弹出/关闭窗口、收邮件、点击刷新。
+Rhythm 2000s (the game's name is capitalised; the repository, package name and save keys stay `rhythm2000s`) is a rhythm game that plays exactly like Rhythm Heaven — the game demonstrates a rhythmic action and the player repeats it in the same rhythm — themed on computers of the early 2000s. The first scenes are the Windows XP desktop and a Mac desktop from around 2000, with actions like opening and closing windows, getting mail and clicking refresh.
 
-2026-10-24 完成仓库初始化（AGENTS.md、doc/、memory/），同日用户确认技术栈为 TypeScript + PixiJS + Vite+（ADR 0001；最初定的是 Vite，用户随即改成了 Vite+，测试、代码检查、格式化统一由 Vite+ 提供）。此前也比较过 PocketJS，因缺少输入时间戳和音频时钟支持而放弃。同日搭好了工程脚手架和延迟测试原型（还没在真实设备上实测），随后开始开发游戏本体，先搭了游戏画布和 XP / Mac 两个占位场景（ADR 0002）。此时输入方式、判定窗口、美术与音乐方向仍未确定。
+On 2026-10-24 the repository was set up (AGENTS.md, doc/, memory/) and the user confirmed the stack as TypeScript + PixiJS + Vite+ (ADR 0001; first Vite, switched to Vite+ straight away so testing, linting and formatting all come from Vite+). PocketJS was considered and dropped for lacking input timestamps and an audio clock. The same day the scaffold and latency test prototype were built (not yet measured on real devices), then work on the game began with the game canvas and XP / Mac placeholder scenes (ADR 0002). Input, judgement windows, art and music direction were still open at that point.
 
-**Why:** 项目还在设计早期，很多看似合理的细节其实都没定。
-**How to apply:** 不要把提案当成已定事项；需要选型或补全设计时，先向用户确认，并把结果记录到 doc/decisions/。
+**Why:** the project is early in design and many reasonable-looking details are not decided.
+**How to apply:** never treat a proposal as settled; ask the user before choosing technology or filling in design, and record the outcome in doc/decisions/.

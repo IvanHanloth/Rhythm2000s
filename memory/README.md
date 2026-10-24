@@ -1,41 +1,41 @@
-# LLM 共享记忆
+# Shared LLM memory
 
-本目录存放需要跨会话、跨 AI 助手共享的项目记忆，随仓库一起提交，所有协作者和助手看到的内容一致。
+Project memory shared across sessions and AI assistants. It is committed with the repository, so every collaborator and assistant sees the same thing.
 
-## 什么该记
+## What to record
 
-- **user**：用户/团队的角色、偏好、习惯
-- **feedback**：用户对工作方式的纠正或确认（例如「文档不要写太长」），要写清原因
-- **project**：进行中的目标、约束、背景，以及无法从代码和文档中看出的信息。涉及日期时一律写绝对日期
-- **reference**：外部资源的指引（链接、看板、参考作品）
+- **user**: roles, preferences and habits of the user or team
+- **feedback**: corrections or confirmations of how to work (e.g. "keep docs short"), with the reason
+- **project**: goals, constraints and context in progress that the code and docs don't show. Always use absolute dates
+- **reference**: pointers to external resources (links, boards, reference works)
 
-## 什么不该记
+## What not to record
 
-- 能从代码、`doc/`、git 历史中直接得到的内容
-- 只与某一次对话有关的临时信息
-- 密钥、账号等敏感信息
+- Anything you can read from the code, `doc/` or git history
+- Details that only matter to one conversation
+- Secrets, accounts and other sensitive data
 
-## 格式
+## Format
 
-每条记忆一个文件，文件名使用 kebab-case，例如 `project-concept.md`：
+One memory per file, named in kebab-case, e.g. `project-concept.md`:
 
 ```markdown
 ---
 name: project-concept
-description: 一句话摘要，用于判断这条记忆是否与当前任务相关
+description: One-line summary, used to judge whether the memory is relevant
 metadata:
   type: user | feedback | project | reference
 ---
 
-记忆正文。feedback / project 类型需附上：
-**Why:** 原因
-**How to apply:** 如何应用
+The memory. feedback / project memories add:
+**Why:** the reason
+**How to apply:** how to act on it
 
-相关记忆用 [[name]] 互相链接。
+Link related memories with [[name]].
 ```
 
-## 维护规则
+## Maintenance
 
-1. 新建或修改记忆后，在 [MEMORY.md](MEMORY.md) 索引中增加或更新一行：`- [标题](文件名.md) — 一句话说明`。
-2. 写之前先查有没有相近的条目；有就更新，不要重复新建。
-3. 发现记忆过时或错误时，直接修正或删除，同时更新索引。
+1. After adding or changing a memory, add or update its line in [MEMORY.md](MEMORY.md): `- [Title](file.md) — one-line hook`.
+2. Check for a similar memory first; update it rather than adding a duplicate.
+3. Fix or delete memories that turn out to be stale or wrong, and update the index.

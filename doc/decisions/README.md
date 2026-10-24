@@ -1,40 +1,40 @@
-# 决策记录（ADR）
+# Architecture decision records (ADRs)
 
-重要决定（技术选型、架构、关键玩法规则）各记一条，保留「为什么这么选」，避免日后重复讨论。
+Each important decision (technology choice, architecture, key gameplay rule) gets a record that keeps the "why", so it isn't argued again later.
 
-## 命名
+## Naming
 
-`NNNN-short-english-title.md`（英文小写、连字符分隔），编号递增，例如 `0001-tech-stack.md`。
+`NNNN-short-english-title.md` (lowercase, hyphenated), numbered in sequence, e.g. `0001-tech-stack.md`.
 
-## 模板
+## Template
 
 ```markdown
-# NNNN 标题
+# NNNN Title
 
-- 状态：提议 / 已采纳 / 已废弃（被 NNNN 取代）
-- 日期：YYYY-MM-DD
+- Status: Proposed / Accepted / Superseded (by NNNN)
+- Date: YYYY-MM-DD
 
-## 背景
-要解决什么问题，有哪些约束。
+## Context
+The problem and its constraints.
 
-## 候选方案
-列出考虑过的选项及各自的优缺点。
+## Options
+The options considered, with their pros and cons.
 
-## 决定
-选了什么。
+## Decision
+What was chosen.
 
-## 影响
-这个决定带来的后果、代价，以及后续需要做的事。
+## Consequences
+What follows from it, its costs, and the work it creates.
 ```
 
-## 列表
+## Records
 
-| 编号 | 标题 | 状态 |
+| No. | Title | Status |
 | --- | --- | --- |
-| [0001](0001-tech-stack.md) | 技术栈选型 | 已采纳 |
-| [0002](0002-game-canvas-and-scenes.md) | 游戏画布与场景结构 | 已采纳 |
-| [0003](0003-chart-data-format.md) | 谱面数据格式 | 已采纳 |
-| [0004](0004-authentic-os-look.md) | 界面贴近原版 | 已采纳 |
-| [0005](0005-3d-street-hub-with-threejs.md) | 开始界面与选关大厅用 Three.js 做 3D 街区 | 已采纳 |
-| [0006](0006-actions-named-after-ui-classes.md) | 动作按界面部件类名命名 | 已采纳 |
-| [0007](0007-official-level-design-guidelines.md) | 官方关卡设计规范 | 已采纳 |
+| [0001](0001-tech-stack.md) | Tech stack | Accepted |
+| [0002](0002-game-canvas-and-scenes.md) | Game canvas and scene structure | Accepted |
+| [0003](0003-chart-data-format.md) | Chart data format | Accepted |
+| [0004](0004-authentic-os-look.md) | Look close to the original systems | Accepted |
+| [0005](0005-3d-street-hub-with-threejs.md) | A 3D street built with Three.js for the title screen and level select | Accepted |
+| [0006](0006-actions-named-after-ui-classes.md) | Actions named after UI widget classes | Accepted |
+| [0007](0007-official-level-design-guidelines.md) | Official level design guidelines | Accepted |

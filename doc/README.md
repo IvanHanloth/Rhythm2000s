@@ -1,28 +1,28 @@
-# 文档索引
+# Documentation index
 
-| 文档 | 内容 | 状态 |
+| Document | Contents | Status |
 | --- | --- | --- |
-| [game-design.md](game-design.md) | 游戏设计总览：核心玩法、判定、场景列表、待定问题 | 草稿 |
-| [scenes/windows-xp.md](scenes/windows-xp.md) | 场景：Windows XP 桌面；界面部件（桌面、开始菜单、消息框、托盘、音量控制）与音效对应表 | 草稿 |
-| [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md) | XP 场景的新动作（托盘气泡、最小化、开始菜单、回收站）和全部 XP 关卡 | 草稿 |
-| [scenes/mac-2000.md](scenes/mac-2000.md) | 场景：2000 年前后的 Mac 桌面 | 草稿 |
-| [hub.md](hub.md) | 开始界面与街区大厅：流程、操作、暂定的街道和店铺 | 草稿 |
-| [results.md](results.md) | 结算：一局结束后的成绩窗口，暂定的得分、评级、评语规则 | 草稿 |
-| [level-select.md](level-select.md) | 选关：电脑里的关卡列表（XP 资源管理器、Mac Finder），鼠标操作与返回流程 | 草稿 |
-| [hub-assets.md](hub-assets.md) | 街区的自制模型：规格（尺寸、朝向、原点、SCREEN 网格）和槽位清单 | 草稿 |
-| [level-design.md](level-design.md) | 官方关卡设计规范：开头由系统演示全部操作、从简单到难、正文至少 1 分钟 | 草稿 |
-| [beat-guide.md](beat-guide.md) | 律动组件（Beat Guide）：`((((O))))` 节拍提示，H 键开关，用了会在成绩上标出 | 草稿 |
-| [settings.md](settings.md) | 设置页面：跳过操作演示、延迟校准 | 草稿 |
-| [chart-format.md](chart-format.md) | 谱面 JSON 格式：文件位置、字段、动作 ID、校验规则 | 草稿 |
-| [tech-research.md](tech-research.md) | 技术调研：浏览器能力、候选技术栈对比、待验证风险 | 草稿 |
-| [prototypes/latency-test.md](prototypes/latency-test.md) | 原型：延迟测试（要回答的问题、时间换算方法、测试记录） | 草稿 |
-| [prototypes/mvp.md](prototypes/mvp.md) | MVP：XP 场景「弹窗 → 关窗」，暂定的输入、判定窗口、谱面与音效 | 草稿 |
-| [decisions/](decisions/README.md) | 决策记录（ADR） | — |
-| [设计系统（外部链接）](https://claude.ai/artifact/YTAfdQKAfiofe7o2vbNz5K) | 视觉规范提案：XP / Mac 铂金 / Mac 水晶三套场景主题，颜色、字体、间距、动效（以拍为单位），窗口、按钮、对话框、判定字样四个组件 | 提案 |
+| [game-design.md](game-design.md) | Game design overview: core loop, judging, scenes, open questions | Draft |
+| [scenes/windows-xp.md](scenes/windows-xp.md) | Scene: the Windows XP desktop; widgets (desktop, Start menu, message boxes, tray, volume control) and their sounds | Draft |
+| [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md) | The later XP actions (tray balloon, minimise, Start menu, Recycle Bin, download, volume) and every XP level | Draft |
+| [scenes/mac-2000.md](scenes/mac-2000.md) | Scene: a Mac desktop from around 2000 | Draft |
+| [hub.md](hub.md) | Title screen and street hub: flow, controls, the provisional street and shops | Draft |
+| [results.md](results.md) | Results: the score window after a round, provisional scoring, ratings and comments | Draft |
+| [level-select.md](level-select.md) | Level select: the level list on the in-game computer (XP Explorer, Mac Finder), mouse control and going back | Draft |
+| [hub-assets.md](hub-assets.md) | Custom models for the street: spec (size, facing, origin, SCREEN mesh) and slot list | Draft |
+| [level-design.md](level-design.md) | Official level design guidelines: the system demonstrates every action first, easy to hard, at least 1 minute of chart | Draft |
+| [beat-guide.md](beat-guide.md) | Beat guide: the `((((O))))` beat cue, toggled with H and flagged on scores | Draft |
+| [settings.md](settings.md) | Settings page: skip the demo, latency calibration | Draft |
+| [chart-format.md](chart-format.md) | Chart JSON format: location, fields, action IDs, validation | Draft |
+| [tech-research.md](tech-research.md) | Technical research: browser capabilities, stack comparison, risks to verify | Draft |
+| [prototypes/latency-test.md](prototypes/latency-test.md) | Prototype: latency test (questions, time conversion methods, test log) | Draft |
+| [prototypes/mvp.md](prototypes/mvp.md) | MVP: XP "pop up → close", provisional input, judgement windows, chart and sounds | Draft |
+| [decisions/](decisions/README.md) | Architecture decision records (ADRs) | — |
+| [Design system (external)](https://claude.ai/artifact/YTAfdQKAfiofe7o2vbNz5K) | Visual proposal: XP / Mac Platinum / Mac Aqua scene themes; colour, type, spacing, motion (in beats); window, button, dialog and judgement components | Proposal |
 
-## 写作约定
+## Conventions
 
-- 使用中文 Markdown，每篇文档开头注明**状态**：`草稿` / `评审中` / `已定稿`。
-- 已确定的内容与想法、提案要分开写。提案统一放在「候选 / 待讨论」小节，不要写成已定事项。
-- 谱面和节奏相关的时间一律以「拍」为单位，例如「第 3 拍的反拍」，不要写毫秒。
-- 新增文档后，在本索引中登记。
+- Write in English Markdown and state the **status** at the top of each document: `Draft` / `In review` / `Final`.
+- Keep what is decided apart from ideas and proposals. Proposals go in a "Candidates / open questions" section, never written as settled.
+- Chart and rhythm timing is always in beats (e.g. "the off-beat of beat 3"), never milliseconds.
+- Register every new document in this index.

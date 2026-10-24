@@ -1,16 +1,16 @@
 ---
 name: feedback-hub-art-direction
-description: 3D 街区大厅的美术要求（2026-10-24）：不要方块人、不要代码拼的简陋造型，场景要写实；场景内文字只用英文；主角是 DeepSeek 鲸鱼娘
+description: Art direction for the 3D street hub (2026-10-24): no blocky figures or crude code-built shapes, realistic scenery, English only in the world, the DeepSeek whale girl as lead
 metadata:
   type: feedback
 ---
 
-2026-10-24 用户在看过第一版 3D 街区后接连提出：
-- 方块人「太丑」，代码拼的圆润二头身人偶也不行；主角要用 DeepSeek 鲸鱼娘，用户让我直接上网找现成模型 → 采用了 ai-girls-3d 的 GLB（CC BY 4.0）。
-- 场景建模要写实风格，不要 PS1 低模像素风（推翻了 ADR 0005 里的低模方向）。
-- 写实但不要昏暗：黄昏版被评价为「太 GTA 昏暗」，要「原神的明亮和梦核感」→ 白天、饱和的渐变蓝天、粉彩调色、漂浮光点。辉光只给专门调亮的自发光，否则画面会糊成一片白。
-- 「不要用 svg 绘制了」：不要再用代码画贴图、拼几何体当正式美术；做不出来的模型由用户用 Blender 或 Tripo 来做。
-- 3D 场景里（招牌、海报、屏幕）不能出现中文。叠在画面上的 DOM 界面原先可以保留中文，2026-10-24 用户改为全部英文，见 AGENTS.md「工作约定」第 1 条。
+After the first version of the 3D street on 2026-10-24 the user asked, in turn:
+- Blocky figures are "too ugly", and so is the rounded code-built chibi puppet; the lead should be the DeepSeek whale girl, and the user asked me to find a ready-made model online → the ai-girls-3d GLB (CC BY 4.0) was adopted.
+- Realistic modelling, not PS1-style low-poly pixel art (overturning the low-poly direction in ADR 0005).
+- Realistic but not gloomy: the dusk version was "too GTA, too dark"; they wanted "Genshin's brightness and a dreamcore feel" → daytime, a saturated gradient sky, pastel grading and drifting motes. Bloom only on emissives tuned for it, or the frame washes out white.
+- "Stop drawing with SVG": no more code-painted textures or primitive-built geometry as final art; models we can't source are made by the user in Blender or Tripo.
+- No Chinese in the 3D world (signs, posters, screens); all DOM overlays are English too (see [[feedback-english-everywhere]]).
 
-**Why:** 用户对画面质量要求高，代码生成的造型达不到。
-**How to apply:** 大厅的美术优先用现成的可商用素材（CC0 / CC BY，下载前征得同意并在 assets/README.md 登记）或用户提供的模型；代码只负责摆放、动画、交互和渲染设置；需要定制模型时，给用户列出规格清单（尺寸、原点、朝向、命名）让用户去做。相关：[[project-concept]]
+**Why:** the user holds the visuals to a high standard that code-generated shapes can't reach.
+**How to apply:** prefer ready-made assets cleared for commercial use (CC0 / CC BY; ask before downloading and register them in assets/README.md) or models from the user; code only places, animates, wires interaction and sets up rendering. When a custom model is needed, give the user a spec (size, origin, facing, naming) to build it from. Related: [[project-concept]]

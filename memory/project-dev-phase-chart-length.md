@@ -1,12 +1,12 @@
 ---
 name: project-dev-phase-chart-length
-description: 开发阶段新谱面不必满 1 分钟；优化阶段会重写全部谱面，那时才按 level-design.md 的时长规则
+description: During development new charts needn't reach 1 minute; the polish phase rewrites every chart and applies the length rule from level-design.md then
 metadata:
   type: project
 ---
 
-2026-10-24 用户说明：现在是开发阶段，新写的谱面**不需要**满足「正文至少 1 分钟」（doc/level-design.md 规则 3）。等到优化阶段，所有谱面都会重写，到时候才会满 1 分钟。
+On 2026-10-24 the user explained that during development new charts do **not** need the "at least 1 minute of chart" rule (doc/level-design.md, rule 3). In the polish phase every chart will be rewritten, and only then will they reach 1 minute.
 
-**Why:** 开发阶段的谱面只用来试新动作、验证玩法，正式关卡会在优化阶段统一重做。
+**Why:** development charts only try out new actions and gameplay; the real levels are remade together in the polish phase.
 
-**How to apply:** 给新动作配谱面时写短的就行（8 个乐句左右，够试玩），不要为了凑时长加乐句；也不必把现有短谱面加长。「从简单到难」仍然照常遵守。
+**How to apply:** charts for a new action can be short (about 8 phrases, enough to play-test); don't pad them with phrases or lengthen existing short charts. "Easy to hard" still applies.
