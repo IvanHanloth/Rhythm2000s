@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { cursorAt, type CursorStop } from './cursor-path.ts';
+import { cursorAt, returnToCenterStops, turnGaps, type CursorStop } from './cursor-path.ts';
 
 const options = { leadBeats: 0.25, holdBeats: 0.0625, maxMoveBeats: 0.5 };
 
@@ -41,5 +41,45 @@ describe('cursorAt', () => {
     expect(cursorAt(tight, 0.4, options)).toEqual({ x: 0, y: 0 });
     expect(cursorAt(tight, 0.4 + 1 / 32, options).x).toBeCloseTo(5, 10);
     expect(cursorAt(tight, 0.5, options)).toEqual({ x: 10, y: 0 });
+  });
+});
+
+describe('示范完回到屏幕中央', () => {
+  const center = { x: 500, y: 300 };
+
+  it('按乐句汇总：示范段最后一下、跟打段第一下', () => {
+    expect(
+      turnGaps([
+        { phrase: 0, callBeats: [4], responseBeats: [8] },
+        { phrase: 0, callBeats: [5, 5.5], responseBeats: [9, 9.5] },
+        { phrase: 1, callBeats: [12], responseBeats: [16] },
+      ]),
+    ).toEqual([
+      { lastCall: 5.5, firstResponse: 8 },
+      { lastCall: 12, firstResponse: 16 },
+    ]);
+  });
+
+  it('在两者正中间停在中央；相隔太近的乐句不回中央', () => {
+    expect(
+      returnToCenterStops(
+        [
+          { lastCall: 4, firstResponse: 8 },
+          { lastCall: 11.5, firstResponse: 12 },
+        ],
+        center,
+      ),
+    ).toEqual([{ beat: 6, x: 500, y: 300 }]);
+  });
+
+  it('鼠标示范完先回中央，跟打段再出发去目标', () => {
+    const target = { x: 100, y: 100 };
+    const stops = [
+      { beat: 4, ...target },
+      ...returnToCenterStops([{ lastCall: 4, firstResponse: 8 }], center),
+      { beat: 8, ...target },
+    ];
+    expect(cursorAt(stops, 6, options)).toEqual(center);
+    expect(cursorAt(stops, 7.75, options)).toEqual(target);
   });
 });

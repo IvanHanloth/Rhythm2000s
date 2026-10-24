@@ -11,11 +11,20 @@ import { MVP_WINDOWS } from '../../rhythm/judge.ts';
 import { xpAssets } from './assets.ts';
 import { DESKTOP_MENU, XpContextMenu } from './components/context-menu.ts';
 import type { XpDesktop } from './components/desktop.ts';
-import { cursorAt, type CursorStop, type Point } from './cursor-path.ts';
+import { WORK_AREA_HEIGHT, XP_SCREEN_WIDTH } from './components/screen.ts';
+import {
+  cursorAt,
+  returnToCenterStops,
+  turnGaps,
+  type CursorStop,
+  type Point,
+} from './cursor-path.ts';
 import type { PopupSession, PopupWindowState } from './popup-session.ts';
 
 /** 一局开始前、结束后鼠标停的位置：屏幕中央偏右下 */
 const HOME: Point = { x: 700, y: 420 };
+/** 示范完回到的屏幕中央（桌面工作区的中心） */
+const CENTER: Point = { x: XP_SCREEN_WIDTH / 2, y: WORK_AREA_HEIGHT / 2 };
 /** desktop-refresh 右键的位置：桌面中间的空白处，按乐句里的序号轮换（暂定） */
 const REFRESH_SPOTS: readonly Point[] = [
   { x: 400, y: 200 },
@@ -129,6 +138,15 @@ export class VirtualMouse {
         stops.push({ stop: { beat: click.beat, ...points[step]! }, click: { event, step } });
       });
     });
+    // 示范完回到屏幕中央，跟打段再出发去目标
+    const gaps = turnGaps(
+      this.session.windows.map((state) => ({
+        phrase: state.call.phrase,
+        callBeats: state.clicks.map((c) => c.beat - state.response.beat + state.call.beat),
+        responseBeats: state.clicks.map((c) => c.beat),
+      })),
+    );
+    for (const stop of returnToCenterStops(gaps, CENTER)) stops.push({ stop });
     stops.push({ stop: { beat: this.session.chart.endBeat, ...HOME } });
     return stops.sort((a, b) => a.stop.beat - b.stop.beat);
   }

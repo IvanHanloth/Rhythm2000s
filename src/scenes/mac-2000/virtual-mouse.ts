@@ -7,12 +7,20 @@ import { Container } from 'pixi.js';
 import { secondsPerBeat } from '../../rhythm/beat.ts';
 import { MVP_WINDOWS } from '../../rhythm/judge.ts';
 // 轨迹算法和 XP 共用（不依赖 PixiJS 的纯函数）
-import { cursorAt, type CursorStop, type Point } from '../windows-xp/cursor-path.ts';
+import {
+  cursorAt,
+  returnToCenterStops,
+  turnGaps,
+  type CursorStop,
+  type Point,
+} from '../windows-xp/cursor-path.ts';
 import { drawArrowCursor } from './components/icons.ts';
 import type { MacSession, MacTarget } from './session.ts';
 
 /** 一局开始前、结束后鼠标停的位置：屏幕中央偏右下 */
 const HOME: Point = { x: 700, y: 400 };
+/** 示范完回到的屏幕中央：1024×576 虚拟屏幕里菜单栏和 Dock 之间的中心 */
+const CENTER: Point = { x: 512, y: 270 };
 /** 点下去时指针缩一下的时长（拍） */
 const PRESS_BEATS = 1 / 8;
 /** 示范段点完以后停多久再走（拍） */
@@ -56,6 +64,15 @@ export class MacVirtualMouse {
         stops.push({ stop: { beat: click.beat, ...point }, click: { event, step } });
       });
     });
+    // 示范完回到屏幕中央，跟打段再出发去目标
+    const gaps = turnGaps(
+      session.targets.map((target) => ({
+        phrase: target.call.phrase,
+        callBeats: target.clicks.map((c) => c.beat - target.response.beat + target.call.beat),
+        responseBeats: target.clicks.map((c) => c.beat),
+      })),
+    );
+    for (const stop of returnToCenterStops(gaps, CENTER)) stops.push({ stop });
     stops.push({ stop: { beat: session.chart.endBeat, ...HOME } });
     this.stops = stops.sort((a, b) => a.stop.beat - b.stop.beat);
   }
