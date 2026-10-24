@@ -2,6 +2,7 @@
 // 开始界面镜头摇过街道 →「开始游戏」后镜头落到角色身后 → 走进网吧坐到电脑前 → 进入节奏关卡。
 // 大厅不做节奏判定，运动用 requestAnimationFrame 的帧时间（每帧间隔有上限），不用音频时钟（ADR 0005）。
 
+import type { SceneId } from '@/scenes/catalog.ts';
 import {
   ACESFilmicToneMapping,
   DefaultLoadingManager,
@@ -71,7 +72,7 @@ const LAUNCH_SECONDS = 0.8;
 const FADE_MS = 600;
 
 /** 每个场景的电脑长什么样；没登记的场景用 XP 画面 */
-const MACHINE_LOOKS: Record<string, { screen: ScreenImage; imac?: boolean }> = {
+const MACHINE_LOOKS: Record<SceneId, { screen: ScreenImage; imac?: boolean }> = {
   'windows-xp': { screen: 'xp-bliss' },
   'mac-2000': { screen: 'mac-aqua-blue', imac: true },
 };
@@ -184,7 +185,7 @@ export class Hub {
       options.levels.map((level) => ({
         levelId: level.id,
         sceneId: level.sceneId,
-        ...(MACHINE_LOOKS[level.sceneId] ?? { screen: 'xp-bliss' }),
+        ...MACHINE_LOOKS[level.sceneId],
       })),
     );
     this.world.root.updateMatrixWorld(true);

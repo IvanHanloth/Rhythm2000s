@@ -1,6 +1,6 @@
-// 菜单栏音量小工具（NSMenuExtra，Volume.menu）点开后垂下的窄菜单：里面是一根竖向滑块，
-// 灰色凹槽、蓝色果冻圆钮。只是画面，不改游戏的实际音量。原点在菜单左上角（贴着菜单栏下沿）。
-// 另有 drawSpeakerIcon()：菜单栏上的黑色小喇叭。
+// The narrow menu that drops from the menu bar volume extra (NSMenuExtra, Volume.menu): a vertical slider with a grey
+// groove and a blue gel knob. Visual only; it never changes the game's volume. Origin at the top left, under the menu bar.
+// drawSpeakerIcon() draws the black speaker on the menu bar.
 
 import { Container, Graphics } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
@@ -41,7 +41,7 @@ export class VolumeMenu {
           [1, AQUA.slider.trackLight],
         ]),
       );
-    // 滑钮以下的凹槽是蓝色（已有的音量）
+    // Below the knob the groove is blue (the current volume)
     this.fill = new Graphics();
     this.knob = drawGelBall(new Graphics(), 0, 0, KNOB_RADIUS, AQUA.slider.knob);
     this.view.addChild(
@@ -54,7 +54,7 @@ export class VolumeMenu {
     this.setLevel(1);
   }
 
-  /** 滑块位置：0 在底，1 在顶 */
+  /** Slider position: 0 at the bottom, 1 at the top */
   setLevel(level: number): void {
     const center = this.knobCenter(level);
     this.knob.position.set(center.x, center.y);
@@ -65,7 +65,7 @@ export class VolumeMenu {
       .fill({ color: AQUA.slider.knob.dark, alpha: 0.8 });
   }
 
-  /** 滑钮中心（菜单自己的坐标） */
+  /** Knob centre (menu coordinates) */
   knobCenter(level: number): { x: number; y: number } {
     const clamped = Math.min(1, Math.max(0, level));
     const top = TRACK_TOP + KNOB_RADIUS - 2;
@@ -79,8 +79,8 @@ export class VolumeMenu {
 }
 
 /**
- * 菜单栏的小喇叭：喇叭本体加三道声波；muted 时没有声波。白色版本用在菜单打开时的蓝色标题底上。
- * 左上角在 (0, 0)，大约 18×16。
+ * The menu bar speaker: a speaker with three sound waves, none when muted. The white version goes on the blue open title.
+ * Top left at (0, 0), about 18×16.
  */
 export function drawSpeakerIcon({ muted = false, white = false } = {}): Graphics {
   const color = white ? AQUA.white : AQUA.ink;

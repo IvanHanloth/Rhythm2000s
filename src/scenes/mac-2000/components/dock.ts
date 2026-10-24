@@ -1,6 +1,6 @@
-// Dock（10.0–10.2 样式）：贴着屏幕底边、水平居中的半透明白色圆角条，带淡淡的细条纹。
-// 左边是程序，正在运行的程序下面有黑色小三角；废纸篓放在最右，前面有一道分隔线。
-// 图标可以弹跳（requestUserAttention），可以带红色未读角标（Mail 的新邮件数）。
+// The Dock (10.0–10.2): a translucent white rounded bar along the bottom edge, centred, with faint pinstripes.
+// Applications on the left, with a small black triangle under running ones; the Trash on the far right
+// past a divider. Icons can bounce (requestUserAttention) and carry a red badge (Mail's unread count).
 
 import { Container, Graphics, type Text } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
@@ -9,10 +9,10 @@ import { drawFinderIcon, drawTrashIcon } from './icons.ts';
 import { aquaText, stripes, vGradient } from './paint.ts';
 
 export const DOCK_ICON_SIZE = 48;
-/** 图标之间、图标与两端的间距 */
+/** Gap between icons and at both ends */
 const GAP = 4;
 const PADDING_TOP = 3;
-/** 图标下方留给小三角的高度 */
+/** Room under the icons for the running triangle */
 const PADDING_BOTTOM = 6;
 const SEPARATOR_WIDTH = 13;
 const RADIUS = 8;
@@ -21,16 +21,16 @@ const BADGE_HEIGHT = 20;
 export const DOCK_HEIGHT = PADDING_TOP + DOCK_ICON_SIZE + PADDING_BOTTOM;
 
 export interface DockItem {
-  /** 'finder' 用矢量画的笑脸；其余取 assets/reference/mac-os-x/icons/ */
+  /** 'finder' is the vector smiley; the rest come from assets/reference/mac-os-x/icons/ */
   icon: AppIconName | 'finder';
   running?: boolean;
 }
 
 interface ItemView {
-  /** 图标（弹跳时上下移动）；原点在图标底边中点，挤压时以底边为准 */
+  /** The icon (moves when bouncing); origin at the middle of its bottom edge so it squashes from there */
   icon: Container;
   indicator: Graphics;
-  /** 角标；原点在角标中心 */
+  /** Badge; origin at its centre */
   badge: Container;
   badgeShape: Graphics;
   badgeText: Text;
@@ -47,12 +47,12 @@ export class Dock {
   private readonly trashEmpty: Graphics;
   private readonly trashFull: Graphics;
 
-  /** 左上角在 (0, 0)；调用方负责把它放到屏幕底边居中 */
+  /** Top left at (0, 0); the caller centres it on the bottom of the screen */
   constructor(items: readonly DockItem[]) {
     this.width =
       GAP + items.length * (DOCK_ICON_SIZE + GAP) + SEPARATOR_WIDTH + DOCK_ICON_SIZE + GAP;
 
-    // 底边贴着屏幕，所以下方两角画到屏幕外
+    // It sits on the bottom edge, so the lower corners are drawn off screen
     const shelf = new Graphics()
       .roundRect(0, 0, this.width, DOCK_HEIGHT + RADIUS, RADIUS)
       .fill({ fill: stripes(AQUA.stripe), alpha: 0.5 })
@@ -96,7 +96,7 @@ export class Dock {
       x += DOCK_ICON_SIZE + GAP;
     }
 
-    // 分隔线：一道暗线配一道亮线
+    // Divider: a dark line beside a light one
     this.separatorX = x + (SEPARATOR_WIDTH - GAP) / 2;
     const separator = new Graphics()
       .rect(this.separatorX, 6, 1, DOCK_HEIGHT - 10)
@@ -115,28 +115,28 @@ export class Dock {
     this.view.addChild(separator, this.trashEmpty, this.trashFull, iconLayer, overlay);
   }
 
-  /** 第 index 个图标中心（Dock 自己的坐标） */
+  /** Centre of icon `index` (Dock coordinates) */
   iconCenter(index: number): { x: number; y: number } {
     return { x: this.items[index]!.centerX, y: PADDING_TOP + DOCK_ICON_SIZE / 2 };
   }
 
-  /** 最小化的窗口缩进去的位置：分隔线旁边（原版的最小化窗口排在分隔线和废纸篓之间） */
+  /** Where minimised windows shrink to: beside the divider (the original lines them up between it and the Trash) */
   minimizeTarget(): { x: number; y: number } {
     return { x: this.separatorX, y: PADDING_TOP + DOCK_ICON_SIZE / 2 };
   }
 
-  /** 废纸篓图标的中心（Dock 自己的坐标） */
+  /** Centre of the Trash icon (Dock coordinates) */
   trashCenter(): { x: number; y: number } {
     return { x: this.trashX + DOCK_ICON_SIZE / 2, y: PADDING_TOP + DOCK_ICON_SIZE / 2 };
   }
 
-  /** 废纸篓空 / 满 */
+  /** Empty or full Trash */
   setTrashFull(full: boolean): void {
     this.trashEmpty.visible = !full;
     this.trashFull.visible = full;
   }
 
-  /** 图标离开 Dock 的高度（弹跳）和落地时的挤压量（0～1） */
+  /** How far the icon is off the Dock (bounce) and how much it squashes on landing (0–1) */
   setLift(index: number, lift: number, squash = 0): void {
     const icon = this.items[index]!.icon;
     icon.y = PADDING_TOP + DOCK_ICON_SIZE - lift;
@@ -147,7 +147,7 @@ export class Dock {
     this.items[index]!.indicator.visible = running;
   }
 
-  /** 未读角标：0 表示不显示。pop 是 0～1 的弹出量，数字刚变时放大一下 */
+  /** Unread badge; 0 hides it. `pop` (0–1) briefly enlarges it when the number changes */
   setBadge(index: number, count: number, pop = 0): void {
     const item = this.items[index]!;
     item.badge.visible = count > 0;

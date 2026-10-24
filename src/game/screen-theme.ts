@@ -4,11 +4,14 @@
 import { AQUA, AQUA_FONT } from '@/theme/aqua.ts';
 import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS } from '@/theme/tokens.ts';
 import { LUNA } from '@/theme/xp-luna.ts';
+import type { SceneId } from '@/scenes/catalog.ts';
 
 export type ScreenTheme = 'xp' | 'aqua';
 
-export function screenThemeFor(sceneId: string): ScreenTheme {
-  return sceneId === 'mac-2000' ? 'aqua' : 'xp';
+const SCENE_THEMES: Record<SceneId, ScreenTheme> = { 'windows-xp': 'xp', 'mac-2000': 'aqua' };
+
+export function screenThemeFor(sceneId: SceneId): ScreenTheme {
+  return SCENE_THEMES[sceneId];
 }
 
 function gradient(stops: readonly (readonly [number, string])[]): string {

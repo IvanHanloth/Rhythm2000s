@@ -2,10 +2,11 @@
 // The first Space or click dismisses it; that press still reaches the scene, so it starts the round straight away.
 
 import './screens.css';
+import type { SceneId } from '@/scenes/catalog.ts';
 import { applyScreenTheme, screenThemeFor } from './screen-theme.ts';
 
 export interface LevelIntroInfo {
-  sceneId: string;
+  sceneId: SceneId;
   /** e.g. "Windows XP · Level 2" */
   kicker: string;
   title: string;
@@ -16,7 +17,7 @@ export interface LevelIntroInfo {
   record: string | null;
 }
 
-const HOW_TO: Record<string, string> = {
+const HOW_TO: Record<SceneId, string> = {
   'windows-xp':
     'The computer plays it first: pop-ups, tray balloons, program windows, falling files… When it is your turn, handle each one in the same rhythm.',
   'mac-2000':
@@ -78,7 +79,7 @@ export class LevelIntro {
     );
     tip.append(
       el('strong', '', 'How to play'),
-      el('p', '', HOW_TO[info.sceneId] ?? ''),
+      el('p', '', HOW_TO[info.sceneId]),
       turns,
       el('p', 'level-intro-keys', 'Press Space or click to start · Esc to go back'),
     );

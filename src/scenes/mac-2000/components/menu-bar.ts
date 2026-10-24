@@ -1,6 +1,6 @@
-// 菜单栏：22 像素高的白色细条纹，横贯屏幕顶端。左边蓝色苹果、加粗的程序名和各菜单，
-// 右边音量小工具（黑色小喇叭）和时钟。
-// 菜单名用美国英文版 Finder 的说法。
+// Menu bar: 22 px of white pinstripes across the top of the screen. The blue Apple, the bold application name and
+// the menus on the left; the volume menu extra (black speaker) and the clock on the right.
+// Menu names follow US English Finder.
 
 import { Container, Graphics, type Text } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
@@ -11,21 +11,21 @@ import { drawSpeakerIcon, VOLUME_MENU_WIDTH } from './volume-menu.ts';
 export const MENU_BAR_HEIGHT = 22;
 const APPLE_X = 14;
 const APPLE_HEIGHT = 17;
-/** 苹果菜单标题的高亮范围（菜单打开时的蓝底）；苹果菜单从 APPLE_MENU_LEFT 垂下 */
+/** Highlight of the Apple menu title when open (blue); the Apple menu drops from APPLE_MENU_LEFT */
 export const APPLE_MENU_LEFT = 4;
 const APPLE_TITLE_WIDTH = 32;
 const FIRST_MENU_X = 40;
-/** 菜单名左右各留的空白 */
+/** Padding either side of a menu name */
 const MENU_PADDING = 10;
 const CLOCK_RIGHT = 14;
-/** 小喇叭标题的左沿离右边多远：留出时钟「Sat 12:59 PM」的宽度 */
+/** Left edge of the speaker title from the right: leaves room for the clock "Sat 12:59 PM" */
 const SPEAKER_FROM_RIGHT = 150;
 const SPEAKER_TITLE_WIDTH = VOLUME_MENU_WIDTH;
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export interface MenuBarOptions {
   width: number;
-  /** 当前程序名，加粗显示在苹果右边 */
+  /** Current application name, bold right of the Apple */
   appName: string;
   menus: readonly string[];
 }
@@ -33,9 +33,9 @@ export interface MenuBarOptions {
 export class MenuBar {
   readonly view = new Container({ label: 'menu-bar' });
   private readonly clock: Text;
-  /** 苹果菜单打开时的蓝色标题底和白色苹果 */
+  /** Blue title and white Apple while the Apple menu is open */
   private readonly appleHighlight: Container;
-  /** 音量小工具：普通、静音两种小喇叭，和菜单打开时的蓝色标题底 + 白色小喇叭 */
+  /** Volume menu extra: normal and muted speakers, plus the blue title with a white speaker while open */
   private readonly speakerLeft: number;
   private readonly speaker: Graphics;
   private readonly speakerMuted: Graphics;
@@ -50,7 +50,7 @@ export class MenuBar {
       .fill(stripes(AQUA.menuStripe))
       .rect(0, MENU_BAR_HEIGHT - 1, width, 1)
       .fill(AQUA.separator)
-      // 菜单栏下沿的一道浅影
+      // A light shadow under the menu bar
       .rect(0, MENU_BAR_HEIGHT, width, 3)
       .fill(
         vGradient([
@@ -117,22 +117,22 @@ export class MenuBar {
     this.view.addChild(this.clock);
   }
 
-  /** 苹果标志的中心（菜单栏自己的坐标），虚拟鼠标点这里打开苹果菜单 */
+  /** Centre of the Apple (menu bar coordinates), where the virtual mouse opens the Apple menu */
   get appleCenter(): { x: number; y: number } {
     return { x: APPLE_MENU_LEFT + APPLE_TITLE_WIDTH / 2, y: MENU_BAR_HEIGHT / 2 };
   }
 
-  /** 苹果菜单打开时，苹果的标题底变蓝 */
+  /** The Apple's title turns blue while its menu is open */
   setAppleHighlighted(highlighted: boolean): void {
     this.appleHighlight.visible = highlighted;
   }
 
-  /** 音量菜单垂下的位置：小喇叭标题的左下角（菜单栏自己的坐标） */
+  /** Where the volume menu drops from: bottom left of the speaker title (menu bar coordinates) */
   get volumeMenuOrigin(): { x: number; y: number } {
     return { x: this.speakerLeft, y: MENU_BAR_HEIGHT };
   }
 
-  /** 小喇叭：muted 时没有声波；open 时标题底变蓝、喇叭变白 */
+  /** Speaker: no sound waves when muted; blue title and white speaker when open */
   setVolumeExtra({ muted, open }: { muted: boolean; open: boolean }): void {
     this.speaker.visible = !open && !muted;
     this.speakerMuted.visible = !open && muted;
@@ -141,7 +141,7 @@ export class MenuBar {
     this.speakerWhiteMuted.visible = muted;
   }
 
-  /** 显示本机时间，例如「Thu 3:01 PM」。分钟变了才重画文字。 */
+  /** Local time, e.g. "Thu 3:01 PM"; redraws only when the minute changes */
   update(now: Date): void {
     const hours = now.getHours();
     const label = `${WEEKDAYS[now.getDay()]} ${hours % 12 || 12}:${String(now.getMinutes()).padStart(2, '0')} ${hours < 12 ? 'AM' : 'PM'}`;

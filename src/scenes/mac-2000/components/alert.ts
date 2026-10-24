@@ -1,6 +1,6 @@
-// 提示框（NSAlert）：没有标题栏的细条纹窗口。左上 64 像素程序图标，右侧粗体主文字和 11 像素说明文字，
-// 按钮靠右下排列，默认按钮在最右。大小随文字自动调整。原点在提示框中心，方便做缩放动画。
-// 边距按原版人机界面指南：四周 20–24 像素，图标与文字之间 16 像素，按钮之间 12 像素。
+// Alert (NSAlert): a pinstriped window with no title bar. 64 px application icon at the top left, bold message and
+// 11 px informative text on the right, buttons at the bottom right with the default rightmost. Sized to its text;
+// origin at the centre for scaling. Spacing per the original HIG: 20–24 px margins, 16 px icon gap, 12 px between buttons.
 
 import { Container, Graphics } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
@@ -15,13 +15,13 @@ const TEXT_X = MARGIN_X + ICON_SIZE + 16;
 const BUTTON_GAP = 12;
 
 export interface AquaAlertOptions {
-  /** 程序图标，左上角在 (0, 0)、边长 64 */
+  /** Application icon with its top left at (0, 0), 64 px square */
   icon: Container;
-  /** 粗体主文字：一句话说清发生了什么 */
+  /** Bold message: one sentence saying what happened */
   message: string;
-  /** 小字说明 */
+  /** Small informative text */
   informative?: string;
-  /** 从左到右排列；默认按钮放最后 */
+  /** Left to right; the default button goes last */
   buttons: PushButtonOptions[];
   width?: number;
 }
@@ -30,7 +30,7 @@ export class AquaAlert {
   readonly view: Container;
   readonly width: number;
   readonly height: number;
-  /** 按钮，从左到右；可以挂鼠标事件 */
+  /** Buttons, left to right; can take pointer events */
   readonly buttons: PushButton[];
 
   constructor({ icon, message, informative, buttons, width = 420 }: AquaAlertOptions) {
@@ -77,7 +77,7 @@ export class AquaAlert {
     );
   }
 
-  /** 默认按钮（最右边那个）的中心（以提示框中心为原点，与 view 的坐标一致） */
+  /** Centre of the default (rightmost) button relative to the alert centre, in view coordinates */
   get defaultButtonCenter(): { x: number; y: number } {
     const button = this.buttons.at(-1);
     if (!button) return { x: 0, y: 0 };
@@ -87,12 +87,12 @@ export class AquaAlert {
     };
   }
 
-  /** 不在最前面的提示框：默认按钮变白、不再呼吸 */
+  /** An alert that is not frontmost: its default button turns white and stops pulsing */
   setActive(active: boolean): void {
     for (const button of this.buttons) button.setActive(active);
   }
 
-  /** 每帧传入音频时间（秒），让默认按钮呼吸 */
+  /** Call every frame with the audio time (s) so the default button pulses */
   update(audioTime: number): void {
     for (const button of this.buttons) button.update(audioTime);
   }

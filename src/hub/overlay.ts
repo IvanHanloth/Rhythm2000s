@@ -1,6 +1,7 @@
 // 大厅画面上叠的 DOM 界面：开始界面、操作提示、对话框、选关卡片、暂停菜单、黑场。
 // 这些是菜单类界面，可以用 CSS 过渡（设计系统「动效」一节）；颜色从 src/theme 注入成 CSS 变量。
 
+import type { SceneId } from '@/scenes/catalog.ts';
 import './hub.css';
 import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS, THEMES } from '@/theme/tokens.ts';
 
@@ -8,7 +9,7 @@ import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS, THEMES } from '@/theme/
 export interface LevelInfo {
   /** 关卡 id（谱面 id） */
   id: string;
-  sceneId: string;
+  sceneId: SceneId;
   /** 关卡名（曲名），卡片的标题 */
   label: string;
   /** 曲名、速度等，一行一条 */

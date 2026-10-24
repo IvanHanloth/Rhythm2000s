@@ -1,6 +1,6 @@
-// 一局里第二批三个动作的画面（doc/scenes/mac-2000.md「玩法」）：带存储表单的窗口（sheet-save）、
-// iChat 消息窗（ichat-message）、菜单栏音量（menu-volume）。由 MacTargetsView 调用。
-// 画面每帧只根据拍位置计算，不累加帧间隔。坐标都是虚拟 Mac 屏幕坐标。
+// The later Mac actions in a round (doc/scenes/mac-2000.md "Gameplay"): the window with a save sheet
+// (sheet-save), the iChat message (ichat-message) and the menu bar volume (menu-volume). Driven by MacTargetsView.
+// Everything is computed from the beat; coordinates are virtual Mac screen coordinates.
 
 import { Container } from 'pixi.js';
 import { BEATS } from '@/theme/tokens.ts';
@@ -17,32 +17,32 @@ import type { MacSession, MacTarget } from './session.ts';
 
 type Point = { x: number; y: number };
 
-/** 带表单的窗口比文稿窗口大：放得下表单 */
+/** Windows with a sheet are larger than document windows, to fit the sheet */
 const SHEET_WINDOW_WIDTH = 320;
 const SHEET_WINDOW_HEIGHT = 200;
 const SHEET_WIDTH = 300;
-/** 窗口上沿最高到哪：轮次横幅的下沿再往下一点，免得标题栏钻到横幅底下 */
+/** Highest a window's top may go: just below the turn banner, so the title bar stays visible */
 const WINDOW_TOP_MIN = 64;
-/** 窗口在事件拍位置之前多久弹出（拍） */
+/** How long before the event beat the window appears (beats) */
 const SHEET_WINDOW_LEAD = 1;
-/** 表单滑出的时长（拍） */
+/** How long the sheet takes to slide out (beats) */
 const SHEET_SLIDE_BEATS = 0.25;
 const DONT_SAVE = "Don't Save";
 
-/** iChat 图标在 Dock 里的位置（scene.ts 的 DOCK_ITEMS） */
+/** iChat's place in the Dock (DOCK_ITEMS in scene.ts) */
 const ICHAT_DOCK_INDEX = 2;
 const CHAT_GAP = 6;
 
-/** 音量菜单：拍点前多久垂下、滑块掉到底的时长；松开后多久收起（拍） */
+/** Volume menu: how long before the beat it drops and the slider falls, and how long after release it closes (beats) */
 const VOLUME_LEAD = 0.25;
 const VOLUME_CLOSE_BEATS = 1 / 16;
 
-/** Miss 后抖动的时长（拍）、淡出的时长（拍） */
+/** Shake and fade-out after a Miss (beats) */
 const SHAKE_BEATS = 0.25;
 const FADE_BEATS = 0.25;
 const CLOSE_BEATS = 0.25;
 
-/** 没存盘的文稿：标题和正文。新增的玩家可见文字只用英文 */
+/** Unsaved documents: title and text */
 const DOCUMENTS = [
   { title: 'Untitled', text: 'Dear diary,\nToday I finally got broadband.' },
   { title: 'Essay.rtf', text: 'Chapter 1\nIt was a dark and stormy night…' },
@@ -50,7 +50,7 @@ const DOCUMENTS = [
   { title: 'Letter.rtf', text: 'Hi Mum,\nThe new iMac is great!' },
 ];
 
-/** iChat 消息：对方名字和一句话 */
+/** iChat messages: sender and line */
 const CHATS = [
   { buddy: 'Sam', text: 'u there?' },
   { buddy: 'Alex', text: 'did you get my email?' },
@@ -71,7 +71,7 @@ interface ChatTarget {
   target: MacTarget;
   index: number;
   chat: ChatWindow;
-  /** 窗口中心 */
+  /** Window centre */
   center: Point;
 }
 
@@ -80,7 +80,7 @@ export interface ExtrasViewOptions {
   menuLayer: Container;
   dock: Dock;
   menuBar: MenuBar;
-  /** 提示框、窗口共用的 6 个位置（窗口中心） */
+  /** The 6 slots (window centres) shared by alerts and windows */
   slots: readonly Point[];
 }
 
@@ -152,12 +152,12 @@ export class MacExtrasView {
     options.menuLayer.addChild(this.volumeMenu.view);
   }
 
-  /** 这个目标是不是这里画的 */
+  /** Whether this view draws the target */
   handles(target: MacTarget): boolean {
     return target.kind === 'sheet' || target.kind === 'chat' || target.kind === 'volume';
   }
 
-  /** 虚拟鼠标每一下要点的位置 */
+  /** Where the virtual mouse presses for each step */
   clickPoints(index: number): Point[] {
     const sheet = this.sheets.find((s) => s.index === index);
     if (sheet) {
@@ -173,7 +173,7 @@ export class MacExtrasView {
     ];
   }
 
-  /** 判定字样的位置（目标上方） */
+  /** Where the judgement label goes (above the target) */
   judgementAnchor(target: MacTarget): Point {
     const sheet = this.sheets.find((s) => s.target === target);
     if (sheet) return { x: sheet.slot.x, y: sheet.slot.y - SHEET_WINDOW_HEIGHT / 2 };
@@ -182,7 +182,7 @@ export class MacExtrasView {
     return { x: this.volumeOrigin.x - 50, y: this.volumeOrigin.y + 70 };
   }
 
-  /** focus：下一个目标（targets 的下标），它的窗口显示为活动状态 */
+  /** focus: the next target (index into targets), whose window shows as active */
   update(beat: number, audioTime: number, focus: number): void {
     for (const sheet of this.sheets) this.renderSheet(sheet, beat, audioTime, focus);
     for (const chat of this.chats) this.renderChat(chat, beat, focus);
@@ -197,8 +197,8 @@ export class MacExtrasView {
   }
 
   /**
-   * 音量滑块的位置（0 在底，1 在顶）：示范段和跟打段都是从按下那一刻起，1 拍里拖到顶后自动松开。
-   * 虚拟鼠标按住期间也按它走，所以放在这里共用。没有在拖时返回 null。
+   * Volume slider position (0 at the bottom, 1 at the top): in call and response it is dragged to the top over 1 beat
+   * from the press, then released. The virtual mouse follows it while held, hence shared here. Null when not dragging.
    */
   dragProgress(target: MacTarget, beat: number): number | null {
     const [press, release] = target.clicks;
@@ -212,11 +212,11 @@ export class MacExtrasView {
     return (beat - pressBeat) / holdBeats;
   }
 
-  // ---------- 各动作 ----------
+  // ---------- Actions ----------
 
   /**
-   * 带表单的窗口。示范段和跟打段各弹一次窗口（同一位置）：
-   * 第一下点关闭按钮，表单滑出；第二下点「Don't Save」，窗口关闭。
+   * Window with a save sheet, opening once in the call and once in the response (same slot):
+   * the first press clicks close and the sheet slides out; the second clicks "Don't Save" and the window closes.
    */
   private renderSheet(
     { target, index, window, sheet, slot }: SheetTarget,
@@ -236,7 +236,7 @@ export class MacExtrasView {
     let closedAt: number | null = null;
     let missedAt: number | null = null;
     if (beat < responseStart) {
-      // 示范段
+      // Call
       appear = target.call.beat - SHEET_WINDOW_LEAD;
       reveal = target.call.beat;
       closedAt = target.call.beat + gap;
@@ -253,7 +253,7 @@ export class MacExtrasView {
     let scale = 1;
     let alpha = 1;
     if (visible && closedAt !== null && beat >= closedAt) {
-      // 点了「Don't Save」：表单收回、窗口缩小淡出
+      // "Don't Save" clicked: the sheet retracts and the window shrinks and fades
       const p = (beat - closedAt) / CLOSE_BEATS;
       visible = p < 1;
       scale = 1 - 0.2 * clamp01(p);
@@ -279,7 +279,7 @@ export class MacExtrasView {
     sheet.update(audioTime);
   }
 
-  /** iChat 消息窗：从 iChat 图标处弹出；点中后缩回图标 */
+  /** iChat message: pops out of the iChat icon and shrinks back into it once clicked */
   private renderChat(
     { target, index, chat, center }: ChatTarget,
     beat: number,
@@ -316,8 +316,8 @@ export class MacExtrasView {
   }
 
   /**
-   * 音量菜单：同一时间最多一个。拍点前垂下、滑块掉到底、小喇叭静音；按下命中后滑块 1 拍里拖到顶，
-   * 自动松开、菜单收起、小喇叭恢复；按下 Miss 时滑块停在底部，抖一下后收起。
+   * Volume menu, at most one at a time. Before the beat it drops, the slider falls and the speaker mutes; a hit press drags
+   * the slider up over 1 beat, then it releases, closes and unmutes; a missed press leaves it at the bottom, shakes and closes.
    */
   private renderVolume(beat: number): void {
     const { session } = this;
@@ -329,7 +329,7 @@ export class MacExtrasView {
       const holdBeats = release.beat - press.beat;
       const drag = this.dragProgress(target, beat);
 
-      // 示范段
+      // Call
       const callOpen = target.call.beat - VOLUME_LEAD;
       const callRelease = target.call.beat + holdBeats;
       if (beat >= callOpen && beat < callRelease + VOLUME_CLOSE_BEATS) {
@@ -339,7 +339,7 @@ export class MacExtrasView {
         continue;
       }
 
-      // 跟打段
+      // Response
       const open = target.response.beat - VOLUME_LEAD;
       if (beat < open) continue;
       if (drag !== null) {

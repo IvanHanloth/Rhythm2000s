@@ -1,10 +1,11 @@
 // 大厅的声音：坐到电脑前时，XP 机器响 XP 的登录声，iMac 响经典 Mac 的开机和弦（原版素材，ADR 0004）。
 // 用到时才下载、解码，之后缓存。音频上下文和节奏关卡共用同一个。
 
+import type { SceneId } from '@/scenes/catalog.ts';
 import xpLogonUrl from '@assets/reference/windows-xp/sounds/Windows XP Logon Sound.wav?url';
 import macChimeUrl from '@assets/reference/mac-os-classic/sounds/Startup Chime.mp3?url';
 
-const STARTUP_URLS: Record<string, string> = {
+const STARTUP_URLS: Record<SceneId, string> = {
   'windows-xp': xpLogonUrl,
   'mac-2000': macChimeUrl,
 };
@@ -20,9 +21,8 @@ export class HubSounds {
   }
 
   /** 这个场景的电脑「开机」；没有对应的声音或下载失败时什么都不做 */
-  playStartup(sceneId: string): void {
+  playStartup(sceneId: SceneId): void {
     const url = STARTUP_URLS[sceneId];
-    if (!url) return;
     void this.load(url).then((buffer) => {
       if (!buffer) return;
       const source = this.audio.createBufferSource();

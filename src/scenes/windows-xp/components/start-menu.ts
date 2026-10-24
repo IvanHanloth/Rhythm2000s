@@ -132,10 +132,10 @@ export class XpStartMenu {
     if (label) this.items.get(label)?.setHot(true);
   }
 
-  /** Centre of an item in menu coordinates for the virtual mouse; null if there is no such item */
-  itemCenter(label: string): { x: number; y: number } | null {
+  /** Centre of an item in menu coordinates, for the virtual mouse */
+  itemCenter(label: string): { x: number; y: number } {
     const entry = this.items.get(label);
-    if (!entry) return null;
+    if (!entry) throw new Error(`No Start menu item "${label}"`);
     // Nothing in the menu is scaled, so summing the container positions works before the first render
     const { x, y, width, height } = entry.hitArea;
     const center = { x: x + width / 2, y: y + height / 2 };

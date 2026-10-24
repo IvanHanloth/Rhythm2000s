@@ -1,12 +1,12 @@
-// Aqua 部件共用的画法：细条纹、果冻胶囊、果冻圆球、渐变和文字。
-// 原版的这些图形都是位图，这里用渐变矢量近似（doc/scenes/mac-2000.md「本地素材缺口」）。
+// Drawing shared by the Aqua widgets: pinstripes, gel capsules, gel balls, gradients and text.
+// The originals are bitmaps; these are vector approximations (doc/scenes/mac-2000.md "Missing assets").
 
 import { BlurFilter, FillGradient, FillPattern, Graphics, Text, Texture } from 'pixi.js';
 import { AQUA, AQUA_FONT, type BallColors, type GelColors } from '@/theme/aqua.ts';
 
 type Stops = readonly (readonly [offset: number, color: string])[];
 
-// 渐变用局部坐标（0–1 对应图形的包围盒），同一组色标可以给任意大小的图形共用，所以缓存起来一直用
+// Gradients use local coordinates (0–1 over the shape's bounds), so one set of stops fits any size and is cached
 const gradients = new Map<string, FillGradient>();
 
 function gradient(kind: 'v' | 'h', stops: Stops): FillGradient {
@@ -22,12 +22,12 @@ function gradient(kind: 'v' | 'h', stops: Stops): FillGradient {
   return fill;
 }
 
-/** 从上到下的线性渐变 */
+/** Top-to-bottom linear gradient */
 export const vGradient = (stops: Stops) => gradient('v', stops);
-/** 从左到右的线性渐变 */
+/** Left-to-right linear gradient */
 export const hGradient = (stops: Stops) => gradient('h', stops);
 
-/** 果冻圆球的透光：亮部在底部偏下，向上、向外变暗 */
+/** Light through a gel ball: brightest low down, darkening upwards and outwards */
 function ballGradient(colors: BallColors): FillGradient {
   const key = `ball${colors.dark}${colors.light}`;
   let fill = gradients.get(key);
@@ -48,7 +48,7 @@ function ballGradient(colors: BallColors): FillGradient {
   return fill;
 }
 
-/** 果冻上方的高光：白色，从上到下变透明 */
+/** Highlight on top of the gel: white fading out downwards */
 const SHINE: Stops = [
   [0, 'rgba(255,255,255,0.95)'],
   [1, 'rgba(255,255,255,0.2)'],
@@ -56,7 +56,7 @@ const SHINE: Stops = [
 
 const patterns = new Map<string, FillPattern>();
 
-/** 横向细条纹：2 像素浅色、2 像素深色交替 */
+/** Horizontal pinstripes: 2 px light and 2 px dark */
 export function stripes(colors: { light: string; dark: string }): FillPattern {
   const key = colors.light + colors.dark;
   let pattern = patterns.get(key);
@@ -75,7 +75,7 @@ export function stripes(colors: { light: string; dark: string }): FillPattern {
   return pattern;
 }
 
-/** 只圆上方两个角的矩形路径（Aqua 窗口的外形：下方两角是直角）。画完路径再 fill / stroke。 */
+/** Rectangle path with only the top corners rounded (an Aqua window has square bottom corners). Fill or stroke after. */
 export function topRoundedRect(
   g: Graphics,
   x: number,
@@ -94,7 +94,7 @@ export function topRoundedRect(
     .closePath();
 }
 
-/** 横放的果冻胶囊（推按钮）。高光在上半部，底部透光。 */
+/** Horizontal gel capsule (push button): highlight on the upper half, light through the bottom. */
 export function drawGelPill(
   g: Graphics,
   x: number,
@@ -122,7 +122,7 @@ export function drawGelPill(
     .fill(vGradient(SHINE));
 }
 
-/** 竖放的果冻胶囊（滚动条滑块）。高光在左半部，右侧透光。 */
+/** Vertical gel capsule (scroller thumb): highlight on the left half, light through the right. */
 export function drawGelThumb(
   g: Graphics,
   x: number,
@@ -153,7 +153,7 @@ export function drawGelThumb(
     );
 }
 
-/** 果冻圆球（窗口左上角的三颗按钮），圆心在 (cx, cy) */
+/** Gel ball (the three window buttons) centred at (cx, cy) */
 export function drawGelBall(
   g: Graphics,
   cx: number,
@@ -172,12 +172,12 @@ export function drawGelBall(
     .fill(vGradient(SHINE));
 }
 
-/** 窗口投影共用一个模糊滤镜：同一个滤镜可以挂在多个图形上 */
+/** One blur filter shared by every window shadow */
 let shadowBlur: BlurFilter | null = null;
 
 /**
- * Aqua 窗口大而柔和的投影：比窗口略向下偏，四周晕开。
- * 返回的图形左上角对齐窗口左上角，放在窗口图形下面。
+ * The large soft Aqua window shadow, offset slightly down and spread all round.
+ * Its top left lines up with the window's; place it under the window.
  */
 export function drawWindowShadow(width: number, height: number, alpha: number): Graphics {
   shadowBlur ??= new BlurFilter({ strength: 9, quality: 3 });
@@ -189,7 +189,7 @@ export function drawWindowShadow(width: number, height: number, alpha: number): 
 }
 
 /**
- * 文字按 3 倍分辨率栅格化：桌面整体放大 1.25 倍、再按屏幕缩放，默认分辨率会糊。
+ * Text rasterised at 3× resolution: the desktop is scaled 1.25× and then to the screen, so the default blurs.
  */
 const TEXT_RESOLUTION = 3;
 
@@ -197,7 +197,7 @@ export interface AquaTextOptions {
   size: number;
   bold?: boolean;
   color?: string;
-  /** 自动换行的宽度；不传则不换行 */
+  /** Wrap width; no wrapping if omitted */
   wrapWidth?: number;
   lineHeight?: number;
   align?: 'left' | 'center' | 'right';
@@ -215,7 +215,7 @@ export function aquaText(
       fontSize: size,
       fontWeight: bold ? '700' : '400',
       fill: color,
-      // 没给的项不写进样式，避免用 undefined 盖掉 PixiJS 的默认值
+      // Leave out unset options so undefined doesn't override PixiJS defaults
       ...(lineHeight !== undefined && { lineHeight }),
       ...(align !== undefined && { align }),
       ...(wrapWidth !== undefined && {

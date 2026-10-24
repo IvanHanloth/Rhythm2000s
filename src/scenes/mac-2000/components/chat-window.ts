@@ -1,6 +1,6 @@
-// iChat 1.0（10.2）收到新消息时弹出的小窗：细条纹标题栏「Message from …」，
-// 白底内容区左边是对方头像，右边是浅蓝色对话气泡，尖角指向头像。原点在窗口中心（与 AquaWindow 一致）。
-// 头像本地没有原版素材，暂用 iChat 图标。
+// The small window iChat 1.0 (10.2) pops up for a new message: a pinstriped "Message from …" title bar,
+// the sender's picture on a white body and a pale blue speech bubble pointing at it. Origin at the centre, as AquaWindow.
+// No original buddy picture is available, so the iChat icon stands in.
 
 import { Container, Graphics } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
@@ -20,7 +20,7 @@ export interface ChatWindowOptions {
 
 export class ChatWindow {
   readonly window: AquaWindow;
-  /** 气泡中心（以窗口中心为原点） */
+  /** Bubble centre relative to the window centre */
   readonly bubbleCenter: { x: number; y: number };
 
   constructor({ buddy, text }: ChatWindowOptions) {
@@ -42,7 +42,7 @@ export class ChatWindow {
     const bubbleHeight = Math.min(contentHeight - 8, Math.max(24, label.height + 10));
     const bubbleY = (contentHeight - bubbleHeight) / 2;
     const bubble = new Graphics()
-      // 尖角指向头像
+      // Tail pointing at the picture
       .poly([
         bubbleX + 2,
         bubbleY + bubbleHeight / 2 - 5,

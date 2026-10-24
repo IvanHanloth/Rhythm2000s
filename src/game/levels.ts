@@ -4,11 +4,12 @@
 
 import { ACTION_LABELS } from '@/rhythm/actions.ts';
 import type { Chart } from '@/rhythm/chart.ts';
+import type { SceneId } from '@/scenes/catalog.ts';
 
 export interface Level {
   /** Chart id */
   id: string;
-  sceneId: string;
+  sceneId: SceneId;
   sceneLabel: string;
   /** Level number within its scene (from 1) */
   number: number;
@@ -19,7 +20,7 @@ export interface Level {
 }
 
 export function buildLevels(
-  scenes: readonly { id: string; label: string }[],
+  scenes: readonly { id: SceneId; label: string }[],
   charts: readonly Chart[],
 ): Level[] {
   return scenes.flatMap((scene) =>
@@ -37,15 +38,16 @@ export function buildLevels(
   );
 }
 
-export type Route = { kind: 'hub' } | { kind: 'scene'; sceneId: string; chartId?: string };
+export type Route = { kind: 'hub' } | { kind: 'scene'; sceneId: SceneId; chartId?: string };
 
 /**
  * Parses the part of the URL after #: empty or unknown goes back to the street;
  * `scene` opens a scene (it picks the chart), `scene/chart` opens one level.
  */
-export function parseRoute(hash: string, sceneIds: readonly string[]): Route {
-  const [sceneId, chartId] = decodeURIComponent(hash.replace(/^#/, '')).split('/');
-  if (!sceneId || !sceneIds.includes(sceneId)) return { kind: 'hub' };
+export function parseRoute(hash: string, sceneIds: readonly SceneId[]): Route {
+  const [id, chartId] = decodeURIComponent(hash.replace(/^#/, '')).split('/');
+  const sceneId = sceneIds.find((known) => known === id);
+  if (!sceneId) return { kind: 'hub' };
   return chartId ? { kind: 'scene', sceneId, chartId } : { kind: 'scene', sceneId };
 }
 

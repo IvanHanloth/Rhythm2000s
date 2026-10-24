@@ -1,32 +1,32 @@
-// 推按钮（NSButton 的 push button）：20 像素高的胶囊形果冻按钮。
-// 默认按钮是蓝色，并且会缓慢「呼吸」（原版的默认按钮一直在明暗之间脉动）；其他按钮是白色。
+// Push button (NSButton, push style): a 20 px gel capsule. The default button is blue and slowly pulses
+// between light and dark like the original; other buttons are white.
 
 import { Container, Graphics } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
 import { aquaText, drawGelPill } from './paint.ts';
 
 export const PUSH_BUTTON_HEIGHT = 20;
-/** 原版人机界面指南里推按钮的最小宽度 */
+/** Minimum push button width from the original HIG */
 const MIN_WIDTH = 69;
-/** 文字两侧的留白 */
+/** Padding either side of the label */
 const PADDING = 14;
-/** 呼吸一次的时长（秒） */
+/** One pulse (s) */
 const PULSE_SECONDS = 1.2;
 
 export interface PushButtonOptions {
   label: string;
-  /** 默认按钮（按回车触发的那个）：蓝色、会呼吸 */
+  /** Default button (triggered by Return): blue and pulsing */
   isDefault?: boolean;
-  /** 不传则按文字宽度自动算 */
+  /** Sized to the label if omitted */
   width?: number;
 }
 
 export class PushButton {
   readonly view: Container;
   readonly width: number;
-  /** 默认按钮呼吸时叠在上面的亮层 */
+  /** Brighter layer the default button fades to while pulsing */
   private readonly glow: Graphics | null = null;
-  /** 默认按钮的蓝色外观；窗口不在最前面时换成白色 */
+  /** The default button's blue look; white while its window is not frontmost */
   private readonly blue: Container | null = null;
   private readonly white: Graphics | null = null;
 
@@ -41,7 +41,7 @@ export class PushButton {
     if (isDefault) {
       const colors = AQUA.gel.blue;
       this.blue = new Container({ label: 'default' });
-      // 呼吸：同样的胶囊再画一层更亮的，靠透明度在两者之间过渡
+      // Pulse: a brighter copy of the capsule, cross-faded by opacity
       this.glow = drawGelPill(new Graphics(), 0, 0, this.width, PUSH_BUTTON_HEIGHT, {
         ...colors,
         top: colors.mid,
@@ -61,14 +61,14 @@ export class PushButton {
     this.view.addChild(text);
   }
 
-  /** 原版里窗口不在最前面时，默认按钮变成白色、不再呼吸 */
+  /** As in the original, the default button turns white and stops pulsing when its window is not frontmost */
   setActive(active: boolean): void {
     if (!this.blue || !this.white) return;
     this.blue.visible = active;
     this.white.visible = !active;
   }
 
-  /** 每帧传入音频时间（秒），让默认按钮呼吸。普通按钮不受影响。 */
+  /** Call every frame with the audio time (s) so the default button pulses; other buttons ignore it. */
   update(audioTime: number): void {
     if (!this.glow) return;
     const phase = (audioTime / PULSE_SECONDS) * Math.PI * 2;

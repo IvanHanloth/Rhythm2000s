@@ -1,5 +1,5 @@
-// 竖向滚动条（NSScroller）：15 像素宽。滑块是果冻胶囊，窗口活动时蓝色、非活动时白色；
-// 上下箭头按原版默认设置并排放在底部。
+// Vertical scroller (NSScroller), 15 px wide. The thumb is a gel capsule, blue in an active window and white
+// otherwise; the arrows sit together at the bottom as in the original default.
 
 import { Graphics } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
@@ -11,20 +11,20 @@ const THUMB_MIN = 20;
 
 export interface ScrollerOptions {
   height: number;
-  /** 滑块顶端在滑轨里的位置，0–1 */
+  /** Thumb top within the track, 0–1 */
   thumbStart: number;
-  /** 滑块长度占滑轨的比例，0–1（可见内容 / 全部内容） */
+  /** Thumb length as a share of the track, 0–1 (visible / total content) */
   thumbSize: number;
   active: boolean;
 }
 
-/** 画一根竖向滚动条，左上角在 (0, 0) */
+/** Draws a vertical scroller with its top left at (0, 0) */
 export function drawScroller({ height, thumbStart, thumbSize, active }: ScrollerOptions): Graphics {
   const { trackDark, trackLight, trackEdge, arrow } = AQUA.scroller;
   const trackHeight = height - ARROW * 2;
   const g = new Graphics({ label: 'scroller' });
 
-  // 滑轨：左暗右亮的凹槽
+  // Track: a groove darker on the left, lighter on the right
   g.rect(0, 0, SCROLLER_WIDTH, trackHeight).fill(
     hGradient([
       [0, trackDark],
@@ -33,7 +33,7 @@ export function drawScroller({ height, thumbStart, thumbSize, active }: Scroller
     ]),
   );
 
-  // 滑块
+  // Thumb
   const room = trackHeight - 4;
   const thumbHeight = Math.min(room, Math.max(THUMB_MIN, room * thumbSize));
   const thumbY = 2 + (room - thumbHeight) * thumbStart;
@@ -46,7 +46,7 @@ export function drawScroller({ height, thumbStart, thumbSize, active }: Scroller
     active ? AQUA.gel.blue : AQUA.gel.white,
   );
 
-  // 底部并排的上、下箭头按钮
+  // Up and down arrows side by side at the bottom
   for (const [i, up] of [
     [0, true],
     [1, false],
@@ -68,7 +68,7 @@ export function drawScroller({ height, thumbStart, thumbSize, active }: Scroller
     g.fill(arrow);
   }
 
-  // 和内容区之间的分隔线
+  // Divider from the content area
   g.rect(0, 0, 1, height).fill(trackEdge);
   return g;
 }

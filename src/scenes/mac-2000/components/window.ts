@@ -1,6 +1,6 @@
-// Aqua 文稿窗口（NSWindow）：22 像素细条纹标题栏，上方两角圆角、下方直角；
-// 左边关闭 / 最小化 / 缩放三颗果冻按钮，标题居中，右边工具栏开关；可选工具栏、状态栏、滚动条、缩放手柄。
-// 原点在窗口中心，方便做缩放动画（与 XP 的弹出窗口一致）。
+// Aqua document window (NSWindow): 22 px pinstriped title bar with rounded top and square bottom corners; close,
+// minimise and zoom gel buttons on the left, centred title, toolbar button on the right; optional toolbar, status bar, scroller and grow box.
+// Origin at the centre for scaling (like XP's pop-up windows).
 
 import { Container, Graphics, type Text } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
@@ -18,7 +18,7 @@ import { drawScroller, SCROLLER_WIDTH } from './scroller.ts';
 export const TITLE_BAR_HEIGHT = 22;
 export const STATUS_BAR_HEIGHT = 18;
 const CORNER_RADIUS = 6;
-/** 三颗按钮的半径、第一颗的圆心横坐标、相邻两颗的间距 */
+/** Radius of the three buttons, centre x of the first, spacing between them */
 const LIGHT_RADIUS = 7;
 const LIGHT_X = 15;
 const LIGHT_PITCH = 21;
@@ -28,29 +28,29 @@ export interface AquaWindowOptions {
   title: string;
   width: number;
   height: number;
-  /** 内容区底色：白色（Finder、文本编辑）或细条纹（对话框、偏好设置）。默认细条纹 */
+  /** Content background: white (Finder, TextEdit) or pinstripes (dialogs, preferences). Defaults to pinstripes */
   content?: 'white' | 'pinstripe';
-  /** 标题栏右边的工具栏开关（白色椭圆）。默认有 */
+  /** Toolbar button (white oval) on the right of the title bar. On by default */
   toolbarButton?: boolean;
-  /** 标题栏下方工具栏的高度（Finder 是 58）；工具栏里的东西放进 toolbar 容器。默认 0，没有工具栏 */
+  /** Toolbar height under the title bar (Finder: 58); toolbar items go in `toolbar`. Defaults to 0, no toolbar */
   toolbarHeight?: number;
-  /** 标题栏下方状态栏的文字，例如「17 项，6.8 GB 可用」；不传则没有状态栏 */
+  /** Status bar text under the toolbar, e.g. "17 items, 6.8 GB available"; no status bar if omitted */
   statusText?: string;
-  /** 右侧竖向滚动条；不传则没有 */
+  /** Vertical scroller on the right; none if omitted */
   scroller?: { thumbStart: number; thumbSize: number };
-  /** 右下角的缩放手柄。默认有 */
+  /** Grow box at the bottom right. On by default */
   growBox?: boolean;
 }
 
 export class AquaWindow {
   readonly view: Container;
-  /** 内容区：左上角在内容区左上角，超出内容区的部分被裁掉 */
+  /** Content area, top left at its top left; anything outside is clipped */
   readonly content: Container;
   readonly contentWidth: number;
   readonly contentHeight: number;
-  /** 工具栏：左上角在标题栏下方；没有工具栏时是空的 */
+  /** Toolbar, top left just under the title bar; empty without a toolbar */
   readonly toolbar = new Container({ label: 'toolbar' });
-  /** 活动 / 非活动两种状态下各画一份的部分：标题栏、三颗按钮、工具栏开关、滚动条 */
+  /** Parts drawn twice, once per active state: title bar, the three buttons, toolbar button, scroller */
   private readonly activeLayer: Container;
   private readonly inactiveLayer: Container;
   private readonly activeShadow: Graphics;
@@ -77,7 +77,7 @@ export class AquaWindow {
     this.inactiveShadow = drawWindowShadow(width, height, 0.3);
     this.inactiveShadow.visible = false;
 
-    // 窗口底：整块细条纹
+    // Window body: pinstripes throughout
     const frame = topRoundedRect(new Graphics(), 0, 0, width, height, CORNER_RADIUS).fill(
       stripes(AQUA.stripe),
     );
@@ -155,12 +155,12 @@ export class AquaWindow {
     this.view.addChild(edge);
   }
 
-  /** 红色关闭按钮的中心（以窗口中心为原点，与 view 的坐标一致） */
+  /** Centre of the red close button relative to the window centre, in view coordinates */
   get closeCenter(): { x: number; y: number } {
     return { x: LIGHT_X - this.view.pivot.x, y: TITLE_BAR_HEIGHT / 2 - this.view.pivot.y };
   }
 
-  /** 黄色最小化按钮的中心（以窗口中心为原点，与 view 的坐标一致） */
+  /** Centre of the yellow minimise button relative to the window centre, in view coordinates */
   get minimizeCenter(): { x: number; y: number } {
     return {
       x: LIGHT_X + LIGHT_PITCH - this.view.pivot.x,
@@ -168,7 +168,7 @@ export class AquaWindow {
     };
   }
 
-  /** 非活动窗口：三颗按钮变灰、标题字变灰、标题栏条纹变淡、投影变浅 */
+  /** Inactive window: grey buttons and title, fainter title bar stripes, lighter shadow */
   setActive(active: boolean): void {
     if (this.active === active) return;
     this.active = active;
@@ -193,7 +193,7 @@ function drawTitleBar(width: number, active: boolean): Graphics {
     TITLE_BAR_HEIGHT,
     CORNER_RADIUS,
   ).fill(stripes(active ? AQUA.titleStripe : AQUA.titleStripeInactive));
-  // 上亮下暗的一层光泽，让条纹有一点弧面感
+  // A light-to-dark sheen so the stripes look slightly curved
   topRoundedRect(g, 0, 0, width, TITLE_BAR_HEIGHT, CORNER_RADIUS).fill(
     vGradient([
       [0, 'rgba(255,255,255,0.55)'],
@@ -204,7 +204,7 @@ function drawTitleBar(width: number, active: boolean): Graphics {
   return g.rect(0, TITLE_BAR_HEIGHT - 1, width, 1).fill(AQUA.separator);
 }
 
-/** 关闭（红）、最小化（黄）、缩放（绿）；非活动时三颗都是灰色 */
+/** Close (red), minimise (yellow), zoom (green); all grey when inactive */
 function drawLights(active: boolean): Graphics {
   const { close, minimize, zoom, inactive } = AQUA.lights;
   const colors = active ? [close, minimize, zoom] : [inactive, inactive, inactive];
@@ -215,7 +215,7 @@ function drawLights(active: boolean): Graphics {
   return g;
 }
 
-/** 右下角的缩放手柄：三道斜纹，每道一暗一亮 */
+/** Grow box at the bottom right: three diagonal ridges, each dark then light */
 function drawGrowBox(x: number, y: number): Graphics {
   const g = new Graphics({ label: 'grow-box' });
   for (const d of [4, 8, 12]) {

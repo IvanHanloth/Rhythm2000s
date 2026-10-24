@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { buildChart } from '@/rhythm/chart.ts';
+import type { SceneId } from '@/scenes/catalog.ts';
 import { buildLevels, formatBestScore, parseRoute } from './levels.ts';
 
 function chart(id: string, scene: string, actions: string[]) {
@@ -16,7 +17,7 @@ function chart(id: string, scene: string, actions: string[]) {
   } as Parameters<typeof buildChart>[0]);
 }
 
-const scenes = [
+const scenes: { id: SceneId; label: string }[] = [
   { id: 'windows-xp', label: 'XP' },
   { id: 'mac-2000', label: 'Mac' },
 ];

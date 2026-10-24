@@ -1,13 +1,13 @@
-// Mac 场景用到的原版素材：Jaguar 的 Aqua Blue 壁纸、10.4 自带的应用图标、系统提示音，
-// 全部取自 assets/reference/mac-os-x/。场景创建前先调用 preloadMacAssets() 加载完，之后用 macAssets() 同步取用。
-// 提示音与事件的对应关系见 doc/scenes/mac-2000.md「音效」。
+// Original assets for the Mac scene, all from assets/reference/mac-os-x/: Jaguar's Aqua Blue wallpaper,
+// the 10.4 application icons and the system alert sounds. Call preloadMacAssets() before creating the scene, then read them with macAssets().
+// Which sound goes with which event: doc/scenes/mac-2000.md "Sounds".
 
 import { Assets, Sprite, type Texture } from 'pixi.js';
 import { loadAiffSample } from '@/audio/aiff.ts';
 import wallpaperUrl from '@assets/reference/mac-os-x/wallpapers/aqua/10.4 Jaguar Aqua Blue.jpg?url';
 import type { MacSoundName } from './action-kinds.ts';
 
-/** 文件名（不含扩展名） → 地址 */
+/** File name (without extension) → URL */
 function urlsByName(files: Record<string, string>): Map<string, string> {
   return new Map(
     Object.entries(files).map(([path, url]) => [path.replace(/^.*\/(.+)\.\w+$/, '$1'), url]),
@@ -30,7 +30,7 @@ const SOUND_URLS = urlsByName(
   }),
 );
 
-/** 场景用到的提示音和各自的峰值音量 */
+/** Alert sounds the scene uses, with their peak volume */
 const SOUNDS: Record<MacSoundName, number> = {
   Basso: 0.7,
   Blow: 0.6,
@@ -48,7 +48,7 @@ const SOUNDS: Record<MacSoundName, number> = {
   Tink: 0.7,
 };
 
-/** assets/reference/mac-os-x/icons/ 里的文件名（不含扩展名） */
+/** File names under assets/reference/mac-os-x/icons/ (without extension) */
 export type AppIconName =
   | 'AddressBook'
   | 'Calculator'
@@ -73,26 +73,26 @@ export type MacSounds = Record<MacSoundName, AudioBuffer>;
 export interface MacAssets {
   wallpaper: Texture;
   sounds: MacSounds;
-  /** 按文件名取应用图标 */
+  /** Application icon by file name */
   icon(name: AppIconName): Texture;
 }
 
 let loading: Promise<MacAssets> | null = null;
 let loaded: MacAssets | null = null;
 
-/** 加载全部素材。重复调用返回同一个结果。 */
+/** Loads every asset; repeated calls share one result. */
 export function preloadMacAssets(audio: BaseAudioContext): Promise<MacAssets> {
   loading ??= load(audio).then((assets) => (loaded = assets));
   return loading;
 }
 
-/** 取已加载的素材；还没加载完时抛出错误。 */
+/** The loaded assets; throws if they are not loaded yet. */
 export function macAssets(): MacAssets {
-  if (!loaded) throw new Error('Mac 素材还没有加载，先调用 preloadMacAssets()');
+  if (!loaded) throw new Error('Mac assets are not loaded yet; call preloadMacAssets() first');
   return loaded;
 }
 
-/** 应用图标，左上角在 (0, 0)、边长 size */
+/** An application icon with its top left at (0, 0), `size` square */
 export function appIcon(name: AppIconName, size: number): Sprite {
   const sprite = new Sprite({ texture: macAssets().icon(name), label: name });
   sprite.setSize(size);
@@ -104,7 +104,7 @@ async function load(audio: BaseAudioContext): Promise<MacAssets> {
   const soundNames = Object.keys(SOUNDS) as MacSoundName[];
   const [wallpaper, icons, buffers] = await Promise.all([
     Assets.load<Texture>(wallpaperUrl),
-    // 图标原图 256 像素，画出来只有 32–64 像素，要开 mipmap 才不会缩得发毛
+    // The icons are 256 px but drawn at 32–64 px, so they need mipmaps to shrink cleanly
     Promise.all(
       iconEntries.map(([, url]) =>
         Assets.load<Texture>({ src: url, data: { autoGenerateMipmaps: true } }),
@@ -113,7 +113,7 @@ async function load(audio: BaseAudioContext): Promise<MacAssets> {
     Promise.all(
       soundNames.map((name) => {
         const url = SOUND_URLS.get(name);
-        if (!url) throw new Error(`没有 Mac 提示音 ${name}.aiff`);
+        if (!url) throw new Error(`No Mac alert sound ${name}.aiff`);
         return loadAiffSample(audio, url, { peak: SOUNDS[name] });
       }),
     ),
@@ -124,7 +124,7 @@ async function load(audio: BaseAudioContext): Promise<MacAssets> {
     sounds: Object.fromEntries(soundNames.map((name, i) => [name, buffers[i]!])) as MacSounds,
     icon(name) {
       const texture = iconTextures.get(name);
-      if (!texture) throw new Error(`没有 Mac 图标 ${name}.png`);
+      if (!texture) throw new Error(`No Mac icon ${name}.png`);
       return texture;
     },
   };

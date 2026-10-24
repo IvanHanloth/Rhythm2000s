@@ -1,6 +1,6 @@
-// 选关：Jaguar Finder 的「My Levels」窗口（图标视图）+ 右边的简介（Get Info）窗口
-// （doc/level-select.md、doc/scenes/mac-2000.md「选谱面」）。按原版像素尺寸绘制。
-// 单击图标选中，双击或点简介窗口里的「Start」开始；「Back」回到网吧。原点在虚拟屏幕左上角。
+// Level select: Jaguar Finder's "My Levels" window (icon view) with a Get Info window beside it
+// (doc/level-select.md, doc/scenes/mac-2000.md "Level select"), at original pixel size.
+// Click an icon to select it; double-click or "Start" in the info window starts; "Back" returns to the café. Origin at the screen's top left.
 
 import { Container, Graphics, Rectangle, type Text } from 'pixi.js';
 import type { Chart } from '@/rhythm/chart.ts';
@@ -14,9 +14,9 @@ import { aquaText, drawGelPill } from './components/paint.ts';
 import { PUSH_BUTTON_HEIGHT, PushButton } from './components/push-button.ts';
 import { AquaWindow, TITLE_BAR_HEIGHT } from './components/window.ts';
 
-/** Finder 窗口和简介窗口在虚拟屏幕上的位置和大小（设计稿换算到 1024×576） */
+/** Finder and info window positions on the virtual screen (the mock-up scaled to 1024×576) */
 const FINDER = { x: 56, y: 40, width: 616, height: 445 };
-// 宽度要放得下「Take Out the Trash Info」这样的英文标题，不压到左边三颗按钮
+// Wide enough for titles like "Take Out the Trash Info" without running into the window buttons
 const INFO = { x: 688, y: 74, width: 296, height: 252 };
 
 const TOOLBAR_HEIGHT = 58;
@@ -27,7 +27,7 @@ const CELL_HEIGHT = 100;
 const ICON_BOX = 60;
 const ICON_SIZE = 48;
 
-/** 简介窗口里「Actions」一栏的叫法：按部件种类合并（三种提示框都算「Alert」），免得混音关一长串 */
+/** Names in the info window's "Actions" row, grouped by widget (all three alerts are "Alert") to keep remix levels short */
 const KIND_LABELS: Record<MacTargetKind, string> = {
   alert: 'Alert',
   dock: 'Dock bounce',
@@ -40,7 +40,7 @@ const KIND_LABELS: Record<MacTargetKind, string> = {
   volume: 'Volume',
 };
 
-/** 每种动作代表的图标；混用多种动作的关卡用 iTunes（混音） */
+/** Icon standing for each widget kind; levels mixing several use iTunes (a remix) */
 const KIND_ICONS: Record<MacTargetKind, AppIconName | 'caution' | 'trash'> = {
   alert: 'caution',
   dock: 'iChat',
@@ -54,11 +54,11 @@ const KIND_ICONS: Record<MacTargetKind, AppIconName | 'caution' | 'trash'> = {
 };
 
 export interface MacLevelSelectOptions {
-  /** 这台电脑上的全部谱面，按清单顺序 */
+  /** Every chart on this computer, in index order */
   charts: readonly Chart[];
-  /** 开始第 index 关（双击图标、「Start」、回车） */
+  /** Start level `index` (double-click, "Start", Enter) */
   onStart(index: number): void;
-  /** 回到网吧（工具栏、简介窗口的「Back」） */
+  /** Back to the café (the toolbar's or the info window's "Back") */
   onBack(): void;
 }
 
@@ -111,17 +111,17 @@ export class MacLevelSelect {
     this.showInfo(this.options.charts[this.selected] ?? null);
   }
 
-  /** 方向键：左右挪一格，上下挪一行 */
+  /** Arrow keys: left and right by one icon, up and down by a row */
   move(dx: number, dy: number): void {
     this.select(this.selected + dx + dy * GRID_COLUMNS);
   }
 
-  /** 每帧传入音频时间，让「Start」按钮呼吸 */
+  /** Call every frame with the audio time so "Start" pulses */
   update(audioTime: number): void {
     this.info?.update(audioTime);
   }
 
-  /** 有提示框盖在上面时两扇窗口都变成非活动 */
+  /** Both windows go inactive while an alert covers them */
   setActive(active: boolean): void {
     this.finder.setActive(active);
     this.info?.setActive(active);
@@ -142,7 +142,7 @@ export class MacLevelSelect {
     this.view.addChild(this.info.view);
   }
 
-  // ---------- 图标视图 ----------
+  // ---------- Icon view ----------
 
   private grid(width: number): Container {
     const grid = new Container({ label: 'icon-grid' });
@@ -181,7 +181,7 @@ export class MacLevelSelect {
     return grid;
   }
 
-  // ---------- 工具栏 ----------
+  // ---------- Toolbar ----------
 
   private toolbar(): Container {
     const bar = new Container({ label: 'finder-toolbar' });
@@ -189,7 +189,7 @@ export class MacLevelSelect {
     const add = (icon: Container, iconWidth: number, label: string, onTap?: () => void) => {
       const item = new Container({ label: `toolbar-${label}` });
       const text = aquaText(label, { size: 11 });
-      // 标签比图标宽时（如「Rhythm 2000s」）按标签留位置，免得和旁边的标签挤在一起
+      // Labels wider than their icon ("Rhythm 2000s") set the spacing so neighbours don't crowd
       const width = Math.max(48, iconWidth + 8, Math.ceil(text.width) + 8);
       icon.position.set((width - iconWidth) / 2, 6);
       text.anchor.set(0.5, 0);
@@ -215,7 +215,7 @@ export class MacLevelSelect {
     add(drawHomeIcon(), 32, 'Home');
     add(drawFolderIcon(), 32, 'Rhythm 2000s');
 
-    // 右边的搜索框
+    // Search field on the right
     const search = new Container({ label: 'search' });
     const field = new Graphics()
       .roundRect(0, 0, 120, 20, 10)
@@ -236,13 +236,13 @@ export class MacLevelSelect {
   }
 }
 
-/** 谱面里用到的部件种类，按第一次出现的顺序 */
+/** Widget kinds the chart uses, in order of first appearance */
 function chartKinds(chart: Chart): MacTargetKind[] {
   const actions = summarizeChart(chart).actions.filter(isMacAction);
   return [...new Set(actions.map((a) => MAC_ACTIONS[a].kind))];
 }
 
-/** 关卡图标：只用一种部件就用那种部件的图标，混用多种的用 iTunes */
+/** Level icon: the widget's icon when the chart uses one kind, iTunes for a mix */
 function levelIcon(chart: Chart, size: number): Container {
   const kinds = chartKinds(chart);
   const only = kinds.length === 1 ? kinds[0]! : null;
@@ -252,9 +252,9 @@ function levelIcon(chart: Chart, size: number): Container {
   return appIcon(name, size);
 }
 
-// ---------- 简介窗口 ----------
+// ---------- Info window ----------
 
-/** 简介（Get Info）窗口：大图标、名字，「General」里列动作、速度、乐句、时长，右下「Back」「Start」 */
+/** Get Info window: large icon and name, actions, tempo, phrases and length under "General", "Back" and "Start" at the bottom right */
 class InfoWindow {
   readonly view: Container;
   private readonly window: AquaWindow;
@@ -300,7 +300,7 @@ class InfoWindow {
           ];
         })()
       : [['', 'There are no playable levels on this computer.']];
-    // 一行字太长会换行，所以按实际高度往下排，最后再画外框
+    // Long values wrap, so rows stack by their real height and the frame is drawn last
     const groupTop = 92;
     const group = new Graphics();
     content.addChild(group);
@@ -319,7 +319,7 @@ class InfoWindow {
       .fill({ color: AQUA.white, alpha: 0.35 })
       .stroke({ width: 1, color: AQUA.separator, alpha: 0.8 });
 
-    // 右下角的按钮，默认按钮在最右
+    // Buttons at the bottom right, default rightmost
     const contentHeight = INFO.height - TITLE_BAR_HEIGHT;
     const buttonTop = contentHeight - PUSH_BUTTON_HEIGHT - 14;
     const back = new PushButton({ label: 'Back' });
@@ -359,9 +359,9 @@ class InfoWindow {
   }
 }
 
-// ---------- 工具栏图标（本地没有原版图标，按原版样子矢量绘制） ----------
+// ---------- Toolbar icons (vector versions of the originals, which aren't available) ----------
 
-/** 后退：白色果冻方块里一个向左的箭头 */
+/** Back: a left arrow in a white gel square */
 function drawBackButton(): Graphics {
   return drawGelPill(new Graphics(), 0, 2, 32, 26, AQUA.gel.white)
     .moveTo(19, 9)
@@ -370,7 +370,7 @@ function drawBackButton(): Graphics {
     .stroke({ width: 2, color: AQUA.inkSoft, cap: 'round', join: 'round' });
 }
 
-/** 显示方式：图标（选中，蓝色）、列表、分栏三段 */
+/** View: icon (selected, blue), list and column segments */
 function drawViewButtons(): Container {
   const root = new Container();
   root.addChild(
@@ -399,7 +399,7 @@ function drawViewButtons(): Container {
   return root;
 }
 
-/** 电脑：灰色显示器，蓝屏 */
+/** Computer: a grey monitor with a blue screen */
 function drawComputerIcon(): Graphics {
   return new Graphics()
     .roundRect(3, 3, 26, 19, 2)
@@ -412,7 +412,7 @@ function drawComputerIcon(): Graphics {
     .stroke({ width: 1, color: '#666666' });
 }
 
-/** 个人：红屋顶的小房子 */
+/** Home: a small house with a red roof */
 function drawHomeIcon(): Graphics {
   return new Graphics()
     .poly([4, 16, 16, 5, 28, 16, 28, 29, 4, 29])
@@ -426,7 +426,7 @@ function drawHomeIcon(): Graphics {
     .stroke({ width: 2.4, color: '#b5261b', join: 'round' });
 }
 
-/** 关卡文件夹：Aqua 的蓝色文件夹 */
+/** Levels folder: an Aqua blue folder */
 function drawFolderIcon(): Graphics {
   return new Graphics()
     .poly([3, 8, 13, 8, 16, 11, 29, 11, 29, 28, 3, 28])

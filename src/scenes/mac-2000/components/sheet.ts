@@ -1,6 +1,6 @@
-// 表单（NSWindow beginSheet:，内容是 NSAlert）：从文稿窗口标题栏下方滑出的细条纹面板。
-// 左上程序图标，右侧粗体主文字和小字说明；「Don't Save」靠左，其余按钮靠右，默认按钮在最右。
-// 原点在面板上沿中点，放在窗口标题栏下沿；setReveal() 控制滑出了多少（上沿以上的部分被裁掉）。
+// Sheet (NSWindow beginSheet: with an NSAlert): a pinstriped panel sliding out below a document's title bar.
+// Application icon top left, bold message and small text on the right; "Don't Save" alone on the left, the other
+// buttons on the right with the default last. Origin at the middle of its top edge, placed at the title bar's bottom; setReveal() sets how far it is out.
 
 import { Container, Graphics } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
@@ -15,13 +15,13 @@ const TEXT_X = MARGIN_X + ICON_SIZE + 14;
 const BUTTON_GAP = 10;
 
 export interface AquaSheetOptions {
-  /** 程序图标，左上角在 (0, 0)、边长 48 */
+  /** Application icon with its top left at (0, 0), 48 px square */
   icon: Container;
   message: string;
   informative?: string;
-  /** 靠左单放的按钮（例如「Don't Save」）；不传则没有 */
+  /** A button on its own at the left (e.g. "Don't Save"); none if omitted */
   leftButton?: string;
-  /** 靠右排列的按钮，从左到右；最后一个是默认按钮 */
+  /** Buttons on the right, left to right; the last is the default */
   buttons: readonly string[];
   width: number;
 }
@@ -30,9 +30,9 @@ export class AquaSheet {
   readonly view = new Container({ label: 'sheet' });
   readonly width: number;
   readonly height: number;
-  /** 全部按钮，按文字找 */
+  /** Every button, by label */
   private readonly buttons = new Map<string, PushButton>();
-  /** 面板本体：滑出时上下移动 */
+  /** The panel itself, which moves as it slides */
   private readonly panel = new Container({ label: 'sheet-panel' });
 
   constructor({ icon, message, informative, leftButton, buttons, width }: AquaSheetOptions) {
@@ -72,7 +72,7 @@ export class AquaSheet {
       .fill(stripes(AQUA.stripe))
       .rect(0, 0, width, this.height)
       .stroke({ width: 1, color: AQUA.windowEdge, alpha: 0.45, alignment: 1 })
-      // 上沿一道暗线，像是从标题栏下面钻出来
+      // A dark line along the top, as if it came out from under the title bar
       .rect(0, 0, width, 2)
       .fill({ color: AQUA.shadow, alpha: 0.18 });
 
@@ -85,7 +85,7 @@ export class AquaSheet {
     );
     this.panel.x = -width / 2;
 
-    // 只露出上沿以下的部分
+    // Only what is below the top edge shows
     const mask = new Graphics()
       .rect(-width / 2 - 20, 0, width + 40, this.height + 30)
       .fill(0xffffff);
@@ -93,13 +93,13 @@ export class AquaSheet {
     this.panel.mask = mask;
   }
 
-  /** 滑出了多少：0 完全收在标题栏下面，1 完全滑出 */
+  /** How far it is out: 0 tucked under the title bar, 1 fully out */
   setReveal(progress: number): void {
     this.panel.y = -(1 - Math.min(1, Math.max(0, progress))) * this.height;
     this.view.visible = progress > 0;
   }
 
-  /** 按钮中心（以面板上沿中点为原点，完全滑出时） */
+  /** Button centre relative to the top edge's middle, when fully out */
   buttonCenter(label: string): { x: number; y: number } {
     const button = this.buttons.get(label);
     if (!button) return { x: 0, y: this.height / 2 };
@@ -109,7 +109,7 @@ export class AquaSheet {
     };
   }
 
-  /** 按下的按钮显示成按下（稍暗） */
+  /** Shows the given button pressed (slightly darker) */
   setPressed(label: string | null): void {
     for (const [name, button] of this.buttons) button.view.alpha = name === label ? 0.7 : 1;
   }
@@ -118,7 +118,7 @@ export class AquaSheet {
     for (const button of this.buttons.values()) button.setActive(active);
   }
 
-  /** 每帧传入音频时间（秒），让默认按钮呼吸 */
+  /** Call every frame with the audio time (s) so the default button pulses */
   update(audioTime: number): void {
     for (const button of this.buttons.values()) button.update(audioTime);
   }

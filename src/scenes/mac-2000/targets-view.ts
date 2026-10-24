@@ -1,5 +1,5 @@
-// 一局里各个目标的画面：提示框、文稿窗口、Dock 弹跳、Mail 未读角标、苹果菜单、扔进废纸篓的文件，以及判定字样。
-// 每帧只根据当前拍位置计算，不累加帧间隔（doc/scenes/mac-2000.md「玩法」）。
+// Targets in a round: alerts, document windows, Dock bounces, Mail's badge, the Apple menu, files for the Trash,
+// and judgement labels. Everything is computed from the current beat (doc/scenes/mac-2000.md "Gameplay").
 
 import { Container } from 'pixi.js';
 import { BEATS } from '@/theme/tokens.ts';
@@ -19,7 +19,7 @@ import { MacExtrasView } from './extras-view.ts';
 import type { JudgementRecord } from '@/scenes/shared/round-session.ts';
 import type { MacSession, MacTarget } from './session.ts';
 
-/** 提示框和文稿窗口的中心位置（虚拟屏幕坐标），按乐句内序号依次使用 */
+/** Alert and document window centres (virtual screen), used in order of their index in the phrase */
 export const SLOTS = [
   { x: 190, y: 150 },
   { x: 512, y: 138 },
@@ -29,9 +29,9 @@ export const SLOTS = [
   { x: 846, y: 362 },
 ];
 
-/** Dock 上用来弹跳的程序在 Dock 里的位置，按乐句内序号依次使用 */
+/** Dock places of the programs that bounce, used in order of their index in the phrase */
 export const BOUNCE_DOCK_INDICES = [2, 3, 4, 5, 6, 7, 8, 9];
-/** Mail 在 Dock 里的位置 */
+/** Mail's place in the Dock */
 export const MAIL_DOCK_INDEX = 1;
 
 type Point = { x: number; y: number };
@@ -40,27 +40,27 @@ const ALERT_WIDTH = 300;
 const DOC_WIDTH = 240;
 const DOC_HEIGHT = 150;
 
-/** 弹跳：第一跳的高度、之后等待时小跳的高度、Mail 新邮件轻跳的高度（屏幕像素） */
+/** Bounce heights: the first jump, the small waiting hops, and Mail's light hop for new mail (screen px) */
 const BOUNCE_HEIGHT = 26;
 const WAIT_HOP_HEIGHT = 10;
 const MAIL_HOP_HEIGHT = 12;
-/** 被点中后落回 Dock 的时长（拍） */
+/** How long a clicked icon takes to settle back into the Dock (beats) */
 const SETTLE_BEATS = 0.125;
-/** Miss 后抖动的时长（拍） */
+/** Shake after a Miss (beats) */
 const SHAKE_BEATS = 0.25;
-/** 消息框、判定字样淡出的时长（拍） */
+/** Fade-out of alerts and judgement labels (beats) */
 const FADE_BEATS = 0.25;
-/** 最小化缩进 Dock 的时长（拍） */
+/** Minimising into the Dock (beats) */
 const MINIMIZE_BEATS = 0.5;
-/** 文件飞进废纸篓的时长（拍）、落下的高度（像素） */
+/** A file's flight into the Trash (beats) and its drop height (px) */
 const THROW_BEATS = 0.25;
 const DROP_PIXELS = 24;
-/** 苹果菜单：第二下之前多久菜单项开始高亮（虚拟鼠标移上去了）；选中后菜单项闪一下再收起（拍） */
+/** Apple menu: how long before the second press the item lights up, and the blink before closing after the pick (beats) */
 const MENU_HOVER_BEATS = 0.2;
 const MENU_BLINK_BEATS = 1 / 16;
 const MENU_CLOSE_BEATS = 1 / 8;
 
-/** 苹果菜单里会被点到的条目，按顺序轮换（只是画面，不打开任何东西） */
+/** Apple menu items picked, in rotation (visual only; nothing opens) */
 const MENU_PICKS = [
   'About This Mac',
   'System Preferences…',
@@ -68,7 +68,7 @@ const MENU_PICKS = [
   'Get Mac OS X Software…',
 ];
 
-/** 扔进废纸篓的文件：文稿（中间叠程序小图标）或文件夹。新增的玩家可见文字只用英文 */
+/** Files for the Trash: documents (with a small application icon) or folders */
 const FILES: { label: string; app: AppIconName | 'folder' }[] = [
   { label: 'Untitled.rtf', app: 'TextEdit' },
   { label: 'Mix Tape.mp3', app: 'iTunes' },
@@ -77,14 +77,14 @@ const FILES: { label: string; app: AppIconName | 'folder' }[] = [
   { label: 'Homework.txt', app: 'TextEdit' },
   { label: 'Screen Shot.pdf', app: 'Preview' },
 ];
-/** 文件那一行：Dock 上方，从左往右；纵坐标是图标中心（虚拟屏幕坐标） */
+/** The file row above the Dock, left to right; y is the icon centre (virtual screen) */
 const FILE_ROW_LEFT = 120;
 const FILE_ROW_STEP = 92;
 const FILE_ROW_Y = 466;
 
 type AlertAction = Extract<MacAction, `alert-${string}`>;
 
-/** 提示框文案：模仿 Mac OS X 当年的系统提示，全部原创 */
+/** Alert texts in the voice of period Mac OS X notices, all original */
 const ALERT_TEXTS: Record<
   AlertAction,
   { app: AppIconName | 'finder'; message: string; informative: string }[]
@@ -142,7 +142,7 @@ const ALERT_TEXTS: Record<
   ],
 };
 
-/** 文稿窗口：标题和正文，全部原创 */
+/** Document windows: title and text, all original */
 const DOCUMENTS = [
   { title: 'Untitled', text: 'Dear Sam,\nThe weather is great today.\nLet’s go to the park!' },
   {
@@ -171,7 +171,7 @@ interface ScreenTarget {
 interface FileTarget {
   target: MacTarget;
   view: Container;
-  /** 图标中心 */
+  /** Icon centre */
   center: Point;
 }
 
@@ -181,17 +181,17 @@ interface ActiveJudgement {
 }
 
 export interface TargetsViewOptions {
-  /** 提示框、窗口所在的图层（虚拟屏幕坐标） */
+  /** Layer for alerts and windows (virtual screen) */
   windowLayer: Container;
-  /** 判定字样所在的图层（画布坐标） */
+  /** Layer for judgement labels (canvas) */
   judgementLayer: Container;
   dock: Dock;
   menuBar: MenuBar;
-  /** 扔进废纸篓的文件所在的图层：在 Dock 之上，飞进废纸篓时不会被 Dock 挡住 */
+  /** Layer for files, above the Dock so it doesn't hide them flying into the Trash */
   fileLayer: Container;
-  /** 苹果菜单所在的图层：在菜单栏之上、虚拟鼠标之下 */
+  /** Layer for the Apple menu, above the menu bar and below the virtual mouse */
   menuLayer: Container;
-  /** 虚拟屏幕放大到画布的倍数 */
+  /** Scale from the virtual screen to the canvas */
   screenScale: number;
 }
 
@@ -202,7 +202,7 @@ export class MacTargetsView {
   private readonly files: FileTarget[] = [];
   private readonly menu = new AquaMenu({ entries: APPLE_MENU });
   private readonly menuOrigin: Point = { x: APPLE_MENU_LEFT, y: MENU_BAR_HEIGHT };
-  /** 表单、iChat 消息窗、菜单栏音量 */
+  /** Save sheets, iChat messages and the menu bar volume */
   private readonly extras: MacExtrasView;
   private judgementViews: ActiveJudgement[] = [];
   private shownJudgements = 0;
@@ -231,13 +231,13 @@ export class MacTargetsView {
     this.extras = new MacExtrasView(session, { ...options, slots: SLOTS });
   }
 
-  /** 长按（menu-volume）拖动滑块的进度，虚拟鼠标按住时跟着走；不在拖时返回 null */
+  /** Slider drag progress of a hold (menu-volume), followed by the virtual mouse; null when not dragging */
   dragProgress(event: number, beat: number): number | null {
     const target = this.session.targets[event]!;
     return target.kind === 'volume' ? this.extras.dragProgress(target, beat) : null;
   }
 
-  /** 虚拟鼠标每一下要点的位置（虚拟屏幕坐标） */
+  /** Where the virtual mouse presses for each step (virtual screen) */
   clickPoints(event: number): Point[] {
     const target = this.session.targets[event]!;
     const { dock, menuBar } = this.options;
@@ -255,7 +255,7 @@ export class MacTargetsView {
       case 'mail':
         return [add(dock.view.position, dock.iconCenter(this.dockIndex(target)))];
       case 'menu': {
-        const item = this.menu.itemCenter(this.menuPick(target)) ?? { x: 0, y: 0 };
+        const item = this.menu.itemCenter(this.menuPick(target));
         return [add(menuBar.view.position, menuBar.appleCenter), add(this.menuOrigin, item)];
       }
       case 'file':
@@ -293,8 +293,8 @@ export class MacTargetsView {
   }
 
   /**
-   * 下一个目标：示范小节里是最新出现的那个；空档和跟打小节里是下一个该处理的那个。
-   * 它是提示框或窗口时显示为活动状态，其余显示为非活动，让玩家看懂下一个目标。
+   * The next target: in the call bar the newest; in the gap and response bar the next to handle.
+   * Alerts and windows show it as active and the rest inactive, so the player can read what comes next.
    */
   private focusedTarget(beat: number): number {
     const { chart, targets } = this.session;
@@ -331,7 +331,7 @@ export class MacTargetsView {
       if (visible && target.handledAt !== null) {
         const since = beat - session.beatAt(target.handledAt);
         if (target.kind === 'window') {
-          // 最小化（原版的「缩放效果」）：缩小着飞进 Dock
+          // Minimise (the original genie/scale effect): shrink while flying into the Dock
           const p = clamp01(since / MINIMIZE_BEATS);
           const eased = p * p;
           const to = this.minimizeTarget();
@@ -340,14 +340,14 @@ export class MacTargetsView {
           scale = 1 - 0.92 * easeOutCubic(p);
           visible = p < 1;
         } else {
-          // 按下「OK」：提示框缩小淡出
+          // OK clicked: the alert shrinks and fades
           const p = since / BEATS.windowClose;
           visible = p < 1;
           scale = 1 - 0.2 * clamp01(p);
           alpha = 1 - clamp01(p);
         }
       } else if (visible && target.missedAt !== null) {
-        // Miss：左右抖一下，留到这一乐句结束再淡出
+        // Miss: a sideways shake, then it stays until the phrase ends and fades
         const since = beat - session.beatAt(target.missedAt);
         if (since < SHAKE_BEATS) {
           x += Math.sin(since * Math.PI * 16) * 7 * (1 - since / SHAKE_BEATS);
@@ -356,7 +356,7 @@ export class MacTargetsView {
         visible = p < 1;
         alpha = 1 - clamp01(p);
       } else if (visible) {
-        // 弹出：在示范拍点那一刻刚好弹到最大
+        // Pops up to full size exactly on the call beat
         scale = easeOutBack((beat - appearBeat) / BEATS.windowOpen);
       }
 
@@ -370,7 +370,7 @@ export class MacTargetsView {
     }
   }
 
-  /** 最小化的窗口飞去的位置（虚拟屏幕坐标） */
+  /** Where a minimised window flies (virtual screen) */
   private minimizeTarget(): { x: number; y: number } {
     const { dock } = this.options;
     const to = dock.minimizeTarget();
@@ -401,7 +401,7 @@ export class MacTargetsView {
         const index = BOUNCE_DOCK_INDICES[target.order % BOUNCE_DOCK_INDICES.length]!;
         if (beat < callBeat - 1 || beat >= end) continue;
         if (handledBeat !== null && beat >= handledBeat) {
-          // 被点中：落回 Dock，下面出现「正在运行」的小三角
+          // Clicked: settles back into the Dock with the running triangle below
           const p = clamp01((beat - handledBeat) / SETTLE_BEATS);
           raise(index, bounceLift(handledBeat, callBeat) * (1 - p), 0);
           running.add(index);
@@ -410,7 +410,7 @@ export class MacTargetsView {
           raise(index, bounceLift(beat, callBeat), squash);
         }
       } else if (target.kind === 'mail') {
-        // 新邮件：Mail 图标在拍点前轻跳一下，落下时角标加 1
+        // New mail: Mail hops lightly before the beat and the badge goes up by one as it lands
         const hop = (beat - (callBeat - 0.5)) / 0.5;
         if (hop >= 0 && hop < 1) raise(MAIL_DOCK_INDEX, MAIL_HOP_HEIGHT * 4 * hop * (1 - hop), 0);
         const arrived = beat >= callBeat;
@@ -432,19 +432,19 @@ export class MacTargetsView {
     dock.setBadge(MAIL_DOCK_INDEX, unread, unread > 0 ? badgePop : 0);
   }
 
-  /** Dock 弹跳、新邮件用的是 Dock 上的第几个图标 */
+  /** Which Dock icon a dock-bounce or new mail uses */
   private dockIndex(target: MacTarget): number {
     return target.kind === 'mail'
       ? MAIL_DOCK_INDEX
       : BOUNCE_DOCK_INDICES[target.order % BOUNCE_DOCK_INDICES.length]!;
   }
 
-  /** 这个 menu-apple 要点的菜单项 */
+  /** The menu item this menu-apple picks */
   private menuPick(target: MacTarget): string {
     return MENU_PICKS[(target.call.phrase + target.order) % MENU_PICKS.length]!;
   }
 
-  /** 苹果菜单：同一时间最多一个；打开时菜单栏上的苹果标题变蓝 */
+  /** Apple menu, at most one at a time; the Apple's title turns blue while it is open */
   private renderMenu(beat: number): void {
     let open = false;
     let hot: string | null = null;
@@ -461,8 +461,8 @@ export class MacTargetsView {
   }
 
   /**
-   * 苹果菜单的状态。示范段：第一下打开，第二下选中，菜单项闪一下后收起。
-   * 跟打段：命中第一下才打开；第二下命中就同样闪一下收起，Miss 就一直开到乐句结束。
+   * Apple menu state. Call: the first press opens it, the second picks, the item blinks and the menu closes.
+   * Response: it opens only when the first press hits; a hit second press blinks and closes, a Miss leaves it open to the phrase end.
    */
   private menuState(target: MacTarget, beat: number): { open: boolean; hot: boolean } {
     const { session } = this;
@@ -471,7 +471,7 @@ export class MacTargetsView {
     const [first, second] = target.clicks;
     if (!first || !second) return closed;
     const gap = second.beat - first.beat;
-    /** 选中那一下之后：先灭一下再亮，然后收起 */
+    /** After the pick: off, on again, then closed */
     const chosen = (pick: number) => {
       const since = beat - pick;
       if (since >= MENU_CLOSE_BEATS) return closed;
@@ -493,7 +493,7 @@ export class MacTargetsView {
     return { open: true, hot: beat >= second.beat - MENU_HOVER_BEATS };
   }
 
-  /** 扔进废纸篓的文件；这一乐句里有文件扔进去了，废纸篓就是满的 */
+  /** Files for the Trash; the Trash shows full once a file in this phrase is thrown in */
   private renderFiles(beat: number): void {
     const { session } = this;
     const { dock } = this.options;
@@ -510,7 +510,7 @@ export class MacTargetsView {
       let scale = 1;
       let alpha = 1;
       if (visible && target.handledAt !== null) {
-        // 沿弧线飞进废纸篓，越飞越小
+        // Arcs into the Trash, shrinking as it goes
         const p = clamp01((beat - session.beatAt(target.handledAt)) / THROW_BEATS);
         x = center.x + (trash.x - center.x) * p;
         y = center.y + (trash.y - center.y) * p - 60 * Math.sin(Math.PI * p);
@@ -518,7 +518,7 @@ export class MacTargetsView {
         visible = p < 1;
         if (p >= 1 && target.call.phrase === currentPhrase) full = true;
       } else if (visible && target.missedAt !== null) {
-        // Miss：左右抖一下，留到这一乐句结束再淡出
+        // Miss: a sideways shake, then it stays until the phrase ends and fades
         const since = beat - session.beatAt(target.missedAt);
         if (since < SHAKE_BEATS) {
           x += Math.sin(since * Math.PI * 16) * 7 * (1 - since / SHAKE_BEATS);
@@ -526,7 +526,7 @@ export class MacTargetsView {
         alpha = 1 - clamp01((beat - this.phraseEnd(target)) / FADE_BEATS);
         visible = alpha > 0;
       } else if (visible) {
-        // 从上方落下，在示范拍点那一刻落地并轻弹一下
+        // Drops from above, landing with a small bounce on the call beat
         const p = (beat - appearBeat) / BEATS.windowOpen;
         y -= DROP_PIXELS * (1 - easeOutBack(p));
         alpha = clamp01(p * 2);
@@ -552,7 +552,7 @@ export class MacTargetsView {
       this.judgementViews.push({ record, view });
     }
 
-    // 挤压回弹 → 停留 → 淡出
+    // Squash and spring back, hold, fade out
     this.judgementViews = this.judgementViews.filter(({ record, view }) => {
       const since = beat - session.beatAt(record.shownAt);
       if (since >= BEATS.judgementHold + FADE_BEATS) {
@@ -566,7 +566,7 @@ export class MacTargetsView {
     });
   }
 
-  /** 判定字样放在目标上方（虚拟屏幕坐标） */
+  /** Judgement labels go above their target (virtual screen) */
   private judgementAnchor(target: MacTarget): { x: number; y: number } {
     const { dock } = this.options;
     if (target.kind === 'dock' || target.kind === 'mail') {
@@ -574,7 +574,7 @@ export class MacTargetsView {
       return { x: dock.view.x + center.x, y: dock.view.y - BOUNCE_HEIGHT };
     }
     if (target.kind === 'menu') {
-      // 菜单右边，菜单栏下方
+      // Right of the menu, below the menu bar
       return { x: this.menuOrigin.x + this.menu.width + 60, y: this.menuOrigin.y + 50 };
     }
     if (target.kind === 'file') {
@@ -590,7 +590,7 @@ export class MacTargetsView {
 }
 
 /**
- * Dock 弹跳的高度：拍点前 1 拍起跳、在拍点上落下（第一跳），之后每拍小跳一次，一直等到被点中。
+ * Dock bounce height: takes off 1 beat before the beat and lands on it (the first jump), then hops every beat until clicked.
  */
 function bounceLift(beat: number, callBeat: number): number {
   if (beat < callBeat) {
@@ -606,7 +606,7 @@ function alertIcon(action: AlertAction, app: AppIconName | 'finder'): Container 
   const appGraphic = (size: number) =>
     app === 'finder' ? drawFinderIcon(size) : appIcon(app, size);
   if (action === 'alert-caution') {
-    // 警告提示框：黄色三角，右下角带程序小图标
+    // Caution alert: the yellow triangle with a small application badge at the bottom right
     const badge = appGraphic(32);
     badge.position.set(32, 32);
     icon.addChild(drawCautionIcon(64), badge);

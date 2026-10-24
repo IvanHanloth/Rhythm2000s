@@ -5,6 +5,7 @@
 // 等用户用 Tripo / Blender 做好后放进 public/models/custom/（规格见 doc/hub-assets.md）。
 // 坐标：x 沿街道（西负东正），z 从北向南，y 向上，单位米。马路在 |z| < 4，两侧人行道到 |z| = 7。
 
+import type { SceneId } from '@/scenes/catalog.ts';
 import {
   BoxGeometry,
   BufferGeometry,
@@ -99,7 +100,7 @@ export type ScreenImage = 'xp-bliss' | 'xp-azul' | 'xp-autumn' | 'xp-desert' | '
 /** 入口电脑：每个场景一台，坐下后进这个场景的关卡列表（场景 id 见 src/scenes/catalog.ts） */
 export interface LevelMachine {
   levelId: string;
-  sceneId: string;
+  sceneId: SceneId;
   /** 屏幕上显示的壁纸（public/textures/screens/） */
   screen: ScreenImage;
   /** 半透明外壳的一体机；否则是米色 CRT */

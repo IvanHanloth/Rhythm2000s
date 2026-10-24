@@ -7,14 +7,18 @@
 
 import { Container } from 'pixi.js';
 import { actionTapOffsets } from '@/rhythm/actions.ts';
+import type { Turn } from '@/scenes/shared/cursor-path.ts';
 import { BEATS } from '@/theme/tokens.ts';
 import { clamp01, easeOutBack, easeOutCubic } from '@/ui/easing.ts';
 import { XpDownloadDialog } from './components/download-dialog.ts';
 import { WORK_AREA_HEIGHT, XP_SCREEN_WIDTH } from './components/screen.ts';
 import type { XpTaskbar } from './components/taskbar.ts';
-import { XpVolumeControl } from './components/volume-control.ts';
+import {
+  VOLUME_CONTROL_HEIGHT,
+  VOLUME_CONTROL_WIDTH,
+  XpVolumeControl,
+} from './components/volume-control.ts';
 import type { XpSession, XpTarget } from './session.ts';
-import type { Turn } from '@/scenes/shared/cursor-path.ts';
 
 type Point = { x: number; y: number };
 
@@ -296,13 +300,9 @@ export class WaitHoldView {
 
   /** Top left of the volume pop-up: right above the tray speaker, kept inside the screen */
   private volumeOrigin(): Point {
-    const speaker = this.taskbar.volumeIcon;
-    const trayX = speaker.parent?.x ?? 0;
-    const probe = new XpVolumeControl({ volume: 0, muted: false });
-    const { width, height } = probe;
-    probe.destroy();
-    const centerX = trayX + speaker.x + 8;
+    const centerX = this.taskbar.volumeIconTop.x;
+    const width = VOLUME_CONTROL_WIDTH;
     const x = Math.min(XP_SCREEN_WIDTH - width - 2, Math.round(centerX - width / 2));
-    return { x, y: WORK_AREA_HEIGHT - height - 2 };
+    return { x, y: WORK_AREA_HEIGHT - VOLUME_CONTROL_HEIGHT - 2 };
   }
 }

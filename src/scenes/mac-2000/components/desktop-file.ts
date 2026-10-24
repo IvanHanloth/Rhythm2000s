@@ -1,5 +1,5 @@
-// 桌面上的文件（Finder 桌面图标）：48 像素文稿图标（白纸中间叠程序小图标）或蓝色文件夹，
-// 下面是白色带阴影的文件名。dock-trash 动作和 Mac 部件展示页共用。
+// A file on the desktop (Finder desktop icon): a 48 px document icon (white page with a small application icon)
+// or a blue folder, over a white shadowed name. Shared by dock-trash and the Mac widget gallery.
 
 import { Container } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
@@ -9,7 +9,7 @@ import { aquaText } from './paint.ts';
 
 export const FILE_ICON_SIZE = 48;
 
-/** 桌面上的文件：48 像素图标，下面是白色带阴影的文件名。原点在图标中心 */
+/** A desktop file: 48 px icon over a white shadowed name. Origin at the icon centre */
 export function createDesktopFile(label: string, app: AppIconName | 'folder'): Container {
   const view = new Container({ label: `file-${label}` });
   const half = FILE_ICON_SIZE / 2;
@@ -18,7 +18,7 @@ export function createDesktopFile(label: string, app: AppIconName | 'folder'): C
     folder.position.set(-half, -half);
     view.addChild(folder);
   } else {
-    // 文稿：白纸中间叠程序小图标
+    // Document: a white page with a small application icon on it
     const page = drawDocumentIcon(FILE_ICON_SIZE);
     page.position.set(-half, -half);
     const badge = appIcon(app, 24);

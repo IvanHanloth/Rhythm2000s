@@ -1,5 +1,5 @@
-// 结算窗口（doc/results.md）：Aqua 细条纹窗口，里面是共用的结算内容（src/ui/results-panel.ts），
-// 右下「Retry」「Levels」「Next Level」三个推按钮可以用鼠标点，默认按钮是蓝色并会呼吸。原点在窗口中心。
+// Results window (doc/results.md): a pinstriped Aqua window around the shared results panel (src/ui/results-panel.ts),
+// with clickable "Retry", "Levels" and "Next Level" push buttons at the bottom right; the default is blue and pulses. Origin at the centre.
 
 import { Container, Graphics } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
@@ -14,7 +14,7 @@ export const RESULTS_HEIGHT = 448;
 const PADDING_X = 18;
 const PADDING_Y = 14;
 
-/** Aqua 分组框：半透明白底、灰色细边的圆角框，粗体标题写在框里左上角 */
+/** Aqua group box: translucent white, thin grey rounded border, bold title inside at the top left */
 const kit: ResultsKit = {
   text: (text, { size, bold, color, wrapWidth, lineHeight }) =>
     aquaText(text, {
@@ -85,7 +85,7 @@ export class MacResultsWindow {
     hint.position.set(PADDING_X, buttonsTop + PUSH_BUTTON_HEIGHT / 2);
     content.addChild(panel, hint);
 
-    // 从右往左排，默认按钮在最右（Aqua 的规矩）
+    // Laid out right to left, default rightmost (the Aqua convention)
     const specs: [string, () => void, boolean, boolean][] = [
       ['Next Level', options.onNext, options.hasNext, options.hasNext],
       ['Levels', options.onList, false, true],
@@ -113,7 +113,7 @@ export class MacResultsWindow {
     }
   }
 
-  /** 每帧传入音频时间，让默认按钮呼吸 */
+  /** Call every frame with the audio time so the default button pulses */
   update(audioTime: number): void {
     for (const button of this.buttons) button.update(audioTime);
   }

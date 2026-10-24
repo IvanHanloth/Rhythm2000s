@@ -1,6 +1,6 @@
-// 下拉菜单（NSMenu，10.0–10.2 样式）：从菜单栏下沿垂下，上方直角、下方两角小圆角，
-// 略透明的白色细条纹底、大而柔和的投影。条目 20 像素高，左边留出勾选列，右边是快捷键或子菜单箭头。
-// 鼠标所在的条目是蓝色果冻底、白字。原点在菜单左上角。
+// Pull-down menu (NSMenu, 10.0–10.2): drops from the menu bar with square top corners and small rounded bottom ones,
+// slightly translucent white pinstripes and a large soft shadow. 20 px items with a check column on the left and
+// shortcuts or submenu arrows on the right; the hovered item is white on blue gel. Origin at the top left.
 
 import { Container, Graphics, type Text } from 'pixi.js';
 import { AQUA } from '@/theme/aqua.ts';
@@ -9,19 +9,19 @@ import { aquaText, drawWindowShadow, stripes, vGradient } from './paint.ts';
 export const MENU_ITEM_HEIGHT = 20;
 const SEPARATOR_HEIGHT = 12;
 const PADDING_Y = 4;
-/** 文字左边留出的勾选列 */
+/** Check column left of the text */
 const TEXT_X = 20;
 const PADDING_RIGHT = 14;
-/** 文字和快捷键之间至少留的空 */
+/** Minimum gap between text and shortcut */
 const SHORTCUT_GAP = 28;
 const RADIUS = 5;
 const FONT_SIZE = 14;
 
 export interface MenuItemSpec {
   label: string;
-  /** 快捷键，例如「⇧⌘Q」 */
+  /** Shortcut, e.g. "⇧⌘Q" */
   shortcut?: string;
-  /** 有子菜单：右边画一个小三角 */
+  /** Has a submenu: a small arrow on the right */
   submenu?: boolean;
   disabled?: boolean;
 }
@@ -49,7 +49,7 @@ export class AquaMenu {
   private hot: string | null = null;
 
   constructor({ entries, minWidth = 180 }: AquaMenuOptions) {
-    // 先排版文字，量出最宽的一行
+    // Lay out the text first to find the widest line
     let y = PADDING_Y;
     let widest = minWidth;
     const content = new Container({ label: 'items' });
@@ -82,7 +82,7 @@ export class AquaMenu {
     this.width = widest;
     this.height = y + PADDING_Y;
 
-    // 快捷键靠右对齐；子菜单箭头放在最右
+    // Shortcuts right-aligned; submenu arrows at the far right
     for (const item of this.items) {
       const shortcut = item.texts[1];
       if (shortcut) shortcut.x = this.width - PADDING_RIGHT;
@@ -121,14 +121,14 @@ export class AquaMenu {
     );
   }
 
-  /** 某个条目的中心（菜单自己的坐标）；没有这个条目时返回 null */
-  itemCenter(label: string): { x: number; y: number } | null {
+  /** Centre of an item (menu coordinates) */
+  itemCenter(label: string): { x: number; y: number } {
     const item = this.items.find((i) => i.spec.label === label);
-    if (!item) return null;
+    if (!item) throw new Error(`No menu item "${label}"`);
     return { x: this.width / 2, y: item.top + MENU_ITEM_HEIGHT / 2 };
   }
 
-  /** 鼠标所在的条目：蓝色果冻底、白字；null 表示没有 */
+  /** The hovered item, white on blue gel; null for none */
   setHot(label: string | null): void {
     if (label === this.hot) return;
     this.hot = label;
@@ -153,7 +153,7 @@ export class AquaMenu {
   }
 }
 
-/** 只圆下方两个角的矩形路径（菜单的外形：上方贴着菜单栏）。画完路径再 fill / stroke。 */
+/** Rectangle path with only the bottom corners rounded (a menu hangs from the menu bar). Fill or stroke after. */
 function bottomRoundedRect(
   g: Graphics,
   x: number,
@@ -172,7 +172,7 @@ function bottomRoundedRect(
     .closePath();
 }
 
-/** 苹果菜单（10.2 英文版的条目，按记忆写的，没有对照原机核对） */
+/** The Apple menu (10.2 English items, from memory, not checked on a real machine) */
 export const APPLE_MENU: readonly MenuEntry[] = [
   { label: 'About This Mac' },
   { label: 'Get Mac OS X Software…' },

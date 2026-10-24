@@ -226,7 +226,7 @@ export class ShellTargetsView {
       case 'file':
         return [this.fileCenter(target)];
       case 'menu': {
-        const item = this.menu.itemCenter(target.item) ?? { x: 0, y: 0 };
+        const item = this.menu.itemCenter(target.item);
         return [
           { x: START_BUTTON_CENTER_X, y: this.taskbarTop + TASKBAR_HEIGHT / 2 },
           add(this.menuOrigin, item),
@@ -465,18 +465,16 @@ export class ShellTargetsView {
 
   /** Middle of the top edge of the network, Messenger and volume tray icons (where balloon tails point) */
   private trayIcons(): Point[] {
-    const speaker = this.taskbar.volumeIcon;
-    const trayX = speaker.parent?.x ?? 0;
-    const x = trayX + speaker.x + 8;
+    const speaker = this.taskbar.volumeIconTop;
+    const x = speaker.x;
     const y = this.taskbarTop + speaker.y + 2;
     return [x - 2 * TRAY_STEP, x - TRAY_STEP, x].map((ix) => ({ x: ix, y }));
   }
 
   /** Narrows the buttons like the original when 1 + the program window limit won't fit at standard width */
   private taskButtonScale(): number {
-    const trayLeft = this.taskbar.volumeIcon.parent?.x ?? Infinity;
     const count = 1 + PHRASE_LIMITS.programs;
-    const available = trayLeft - TASK_LEFT - 4;
+    const available = this.taskbar.trayLeft - TASK_LEFT - 4;
     return Math.min(1, available / (count * (TASK_WIDTH + TASK_GAP)));
   }
 }

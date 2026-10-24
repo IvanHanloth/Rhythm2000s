@@ -139,7 +139,7 @@ function itemAt(menu: AquaMenu, y: number): string | null {
   for (const entry of APPLE_MENU) {
     if (entry === 'separator' || entry.submenu) continue;
     const center = menu.itemCenter(entry.label);
-    if (center && Math.abs(center.y - y) < 10) return entry.label;
+    if (Math.abs(center.y - y) < 10) return entry.label;
   }
   return null;
 }

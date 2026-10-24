@@ -31,6 +31,8 @@ export class XpTaskbar {
   readonly startButton: StartButton;
   /** Tray volume icon; can take pointer events to open the volume control */
   readonly volumeIcon = new Container({ label: 'tray-volume' });
+  /** Left edge of the notification area (taskbar coordinates) */
+  readonly trayLeft: number;
   private readonly muteBadge = new Graphics();
   private readonly clock: Text;
   private clockText = '';
@@ -82,7 +84,8 @@ export class XpTaskbar {
       .rect(1, 1, 1, TASKBAR_HEIGHT - 2)
       .fill(LUNA.taskbar.trayHighlight);
     tray.addChild(trayFace, ...icons, this.volumeIcon, this.clock);
-    tray.position.set(XP_SCREEN_WIDTH - trayWidth, 0);
+    this.trayLeft = XP_SCREEN_WIDTH - trayWidth;
+    tray.position.set(this.trayLeft, 0);
 
     this.view.addChild(bar, this.startButton.view, tray);
     tasks.forEach((task, i) => {
@@ -93,6 +96,11 @@ export class XpTaskbar {
       this.view.addChild(button.view);
     });
     this.setClock(new Date());
+  }
+
+  /** Top centre of the tray speaker icon (taskbar coordinates) */
+  get volumeIconTop(): { x: number; y: number } {
+    return { x: this.trayLeft + this.volumeIcon.x + TRAY_ICON / 2, y: this.volumeIcon.y };
   }
 
   /** Local time in the English 12-hour format, e.g. "5:49 PM"; redraws only when the minute changes */
