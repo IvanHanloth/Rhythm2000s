@@ -29,7 +29,7 @@
 ├── README.md
 ├── index.html         # 游戏入口页（目前只列出原型链接）
 ├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/index.html
-├── assets/            # 共用素材：原版系统素材参考、字体等，大多不进 git，见 assets/README.md
+├── assets/            # 共用素材：原版系统素材参考、字体等，来源与授权见 assets/README.md
 ├── promo/             # 宣发视频（HyperFrames：HTML + GSAP 渲染成 MP4），独立于游戏工程，说明见 promo/AGENTS.md
 ├── src/
 │   ├── audio/         # 音频时钟、节拍器、合成音效（游戏会复用）
@@ -117,9 +117,9 @@ vp add <包名>  # 添加依赖
 
 本项目模仿 Windows XP 与经典 Mac OS 的视觉风格。微软和苹果的原版素材（壁纸、图标、系统音效、字体、Logo）受版权和商标保护。
 
-- **不要**直接把原版系统素材提交到仓库。
-- 美术与音效应原创，做到「一看就是那个年代」，但不是像素级复制。
-- 如需临时占位素材，放在被忽略的本地目录中，并在文档里注明。
+- 原版系统素材统一放在 `assets/reference/`，只作风格参考和临时占位（2026-10-24 用户决定直接提交到仓库，来源见 [assets/README.md](assets/README.md)）。
+- 游戏正式版和公开发布的宣发视频里，美术与音效应原创，做到「一看就是那个年代」，但不是像素级复制；不要把 `assets/reference/` 里的文件直接用进去。
+- 素材放在别处时，在 `assets/README.md` 登记来源和授权。
 
 ## LLM 记忆目录（memory/）
 
