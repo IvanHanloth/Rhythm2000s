@@ -124,6 +124,16 @@ export const AQUA = {
   folder: { top: '#a9d1ff', bottom: '#4d8fe6', tab: '#7fb4f6', edge: '#2f69bf' },
   /** 桌面图标下的白色文件名和它的投影 */
   desktopLabel: { text: '#ffffff', shadow: '#000000' },
+
+  /** iChat 1.0 的对话气泡：浅蓝渐变、稍深的描边 */
+  chatBubble: { top: '#e3f0ff', bottom: '#b9d6fb', edge: '#7da5d8' },
+
+  /** 竖向滑块（音量菜单）：灰色凹槽，蓝色果冻圆钮 */
+  slider: {
+    trackDark: '#9a9a9a',
+    trackLight: '#dcdcdc',
+    knob: { rim: '#163f94', dark: '#2f6fe0', light: '#bfe6ff' } satisfies BallColors,
+  },
 };
 
 /**

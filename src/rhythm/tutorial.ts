@@ -66,6 +66,9 @@ const HINTS: Record<string, TutorialHint> = {
   'window-miniaturize': { name: 'Window', how: 'Minimize it to the Dock on the beat' },
   'menu-apple': { name: 'Apple menu', how: 'Click the Apple, then an item half a beat later' },
   'dock-trash': { name: 'Trash', how: 'Drag the file to the Trash on the beat' },
+  'sheet-save': { name: 'Save sheet', how: "Close the window, then Don't Save half a beat later" },
+  'ichat-message': { name: 'iChat message', how: 'Click it on the beat' },
+  'menu-volume': { name: 'Volume', how: 'Grab the slider on the beat' },
 };
 
 /** 某个动作的提示；还没写提示的动作只显示动作 ID */

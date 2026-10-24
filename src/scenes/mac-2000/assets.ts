@@ -35,6 +35,7 @@ const SOUNDS: Record<MacSoundName, number> = {
   Basso: 0.7,
   Blow: 0.6,
   Bottle: 0.6,
+  Frog: 0.6,
   Funk: 0.7,
   Glass: 0.6,
   Hero: 0.6,
@@ -43,6 +44,7 @@ const SOUNDS: Record<MacSoundName, number> = {
   Pop: 0.7,
   Purr: 0.7,
   Sosumi: 0.6,
+  Submarine: 0.6,
   Tink: 0.7,
 };
 

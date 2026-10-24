@@ -155,6 +155,11 @@ export class AquaWindow {
     this.view.addChild(edge);
   }
 
+  /** 红色关闭按钮的中心（以窗口中心为原点，与 view 的坐标一致） */
+  get closeCenter(): { x: number; y: number } {
+    return { x: LIGHT_X - this.view.pivot.x, y: TITLE_BAR_HEIGHT / 2 - this.view.pivot.y };
+  }
+
   /** 黄色最小化按钮的中心（以窗口中心为原点，与 view 的坐标一致） */
   get minimizeCenter(): { x: number; y: number } {
     return {

@@ -1,14 +1,22 @@
 // Mac 场景的一局：谱面、伴奏、判定串在一起，不负责画面。
 // 时间都是音频时间（秒）。画面用「听到的」时间；判定用扣除校准值之后的时间。
 // 一个目标可能要按几下（menu-apple 先点苹果、再点菜单项），每一下单独判定。
+// menu-volume 只判定按下：按下命中后，第二下（松开）由游戏在 1 拍后自己完成，不判定、不计分
+// （和 XP 的 volume-mute 相同，2026-10-24 用户要求）。
 
 import { Sequencer } from '../../audio/sequencer.ts';
 import type { SceneContext } from '../../game/scene.ts';
-import { actionTapOffsets } from '../../rhythm/actions.ts';
+import { actionTapKind, actionTapOffsets } from '../../rhythm/actions.ts';
 import { beatToTime, timeToBeat } from '../../rhythm/beat.ts';
 import type { Chart, ChartCue } from '../../rhythm/chart.ts';
 import { ResponseJudge, type Judgement, type JudgementLevel } from '../../rhythm/judge.ts';
-import { isMacAction, MAC_ACTIONS, type MacAction, type MacTargetKind } from './action-kinds.ts';
+import {
+  isMacAction,
+  MAC_ACTIONS,
+  usesWindowSlot,
+  type MacAction,
+  type MacTargetKind,
+} from './action-kinds.ts';
 import { buildBackingTrack, handledSound, type MacSongSounds } from './song.ts';
 
 /** 按下开始后，第 0 拍延后多久（秒） */
@@ -44,9 +52,9 @@ export interface MacTarget {
   missedAt: number | null;
 }
 
-/** 画面位置的分组：提示框和窗口共用一组位置 */
+/** 画面位置的分组：提示框、窗口、带表单的窗口共用一组位置 */
 function slotGroup(kind: MacTargetKind): string {
-  return kind === 'alert' || kind === 'window' ? 'screen' : kind;
+  return usesWindowSlot(kind) ? 'screen' : kind;
 }
 
 /** 把谱面里的示范 / 跟打事件配成一个个目标。谱面应已通过 checkMacChart（个数、动作一一对应）。 */
@@ -102,7 +110,7 @@ export class MacSession {
   private readonly output: GainNode;
   private readonly sequencer: Sequencer;
   private readonly judge: ResponseJudge;
-  /** 判定目标（每一下）对应哪个目标的第几下，按时间排 */
+  /** 判定目标（每一下）对应哪个目标的第几下，按时间排；不含游戏自己完成的 auto 各下 */
   private readonly taps: TapTarget[] = [];
 
   constructor(context: SceneContext, chart: Chart, sounds: MacSongSounds) {
@@ -123,7 +131,10 @@ export class MacSession {
     this.targets = buildTargets(chart);
     // 谱面校验保证下一个事件在上一个事件的最后一下之后，所以按目标顺序展开就是按时间排好的
     this.targets.forEach((target, event) => {
-      target.clicks.forEach((_, step) => this.taps.push({ event, step }));
+      target.clicks.forEach((_, step) => {
+        // auto 的一下由游戏自己完成，不是判定目标
+        if (actionTapKind(target.action, step) !== 'auto') this.taps.push({ event, step });
+      });
     });
     this.judge = new ResponseJudge(
       this.taps.map(({ event, step }) => this.timeAt(this.targets[event]!.clicks[step]!.beat)),
@@ -165,8 +176,27 @@ export class MacSession {
     if (step === target.clicks.length - 1) target.handledAt = audioTime;
     const record = { ...judgement, event, step, shownAt: audioTime };
     this.judgements.push(record);
-    this.playNow(handledSound(this.sounds, target.action, step));
+    this.playAt(handledSound(this.sounds, target.action, step));
+    this.completeAuto(target, step, audioTime);
     return record;
+  }
+
+  /** 第 step 下命中后，紧接着的 auto 各下按谱面间隔由游戏自己完成：记下完成时间，预约声音 */
+  private completeAuto(target: MacTarget, step: number, audioTime: number): void {
+    const audio = this.context.clock.context;
+    const secondsPerBeat = 60 / this.chart.bpm;
+    for (let next = step + 1; next < target.clicks.length; next++) {
+      if (actionTapKind(target.action, next) !== 'auto') return;
+      const delay = (target.clicks[next]!.beat - target.clicks[step]!.beat) * secondsPerBeat;
+      target.clicks[next]!.hitAt = audioTime + delay;
+      if (next === target.clicks.length - 1) target.handledAt = audioTime + delay;
+      this.playAt(handledSound(this.sounds, target.action, next), audio.currentTime + delay);
+    }
+  }
+
+  /** 要判定的下数（不含游戏自己完成的 auto 各下） */
+  get targetCount(): number {
+    return this.taps.length;
   }
 
   counts(): Record<JudgementLevel, number> {
@@ -187,16 +217,17 @@ export class MacSession {
     target.missedAt ??= shownAt;
     const record = { ...judgement, event, step, shownAt };
     this.judgements.push(record);
-    this.playNow(this.sounds.miss);
+    this.playAt(this.sounds.miss);
     return record;
   }
 
-  /** 玩家动作的反馈音跟随输入立即播放，不预约在拍点上。 */
-  private playNow(buffer: AudioBuffer): void {
+  /** 玩家动作的反馈音跟随输入立即播放，不预约在拍点上；auto 的一下按 when 预约。 */
+  private playAt(buffer: AudioBuffer, when?: number): void {
     const audio = this.context.clock.context;
     const source = audio.createBufferSource();
     source.buffer = buffer;
     source.connect(this.output);
-    source.start();
+    if (when === undefined) source.start();
+    else source.start(when);
   }
 }

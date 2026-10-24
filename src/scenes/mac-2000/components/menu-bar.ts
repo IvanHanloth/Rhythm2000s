@@ -1,10 +1,12 @@
-// 菜单栏：22 像素高的白色细条纹，横贯屏幕顶端。左边蓝色苹果、加粗的程序名和各菜单，右边时钟。
+// 菜单栏：22 像素高的白色细条纹，横贯屏幕顶端。左边蓝色苹果、加粗的程序名和各菜单，
+// 右边音量小工具（黑色小喇叭）和时钟。
 // 菜单名用简体中文版 Finder 的说法。
 
 import { Container, Graphics, type Text } from 'pixi.js';
 import { AQUA } from '../../../theme/aqua.ts';
 import { drawAppleLogo } from './icons.ts';
 import { aquaText, stripes, vGradient } from './paint.ts';
+import { drawSpeakerIcon, VOLUME_MENU_WIDTH } from './volume-menu.ts';
 
 export const MENU_BAR_HEIGHT = 22;
 const APPLE_X = 14;
@@ -16,6 +18,9 @@ const FIRST_MENU_X = 40;
 /** 菜单名左右各留的空白 */
 const MENU_PADDING = 10;
 const CLOCK_RIGHT = 14;
+/** 小喇叭标题的左沿离右边多远：留出时钟「周六 下午12:59」的宽度 */
+const SPEAKER_FROM_RIGHT = 150;
+const SPEAKER_TITLE_WIDTH = VOLUME_MENU_WIDTH;
 const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 export interface MenuBarOptions {
@@ -30,6 +35,13 @@ export class MenuBar {
   private readonly clock: Text;
   /** 苹果菜单打开时的蓝色标题底和白色苹果 */
   private readonly appleHighlight: Container;
+  /** 音量小工具：普通、静音两种小喇叭，和菜单打开时的蓝色标题底 + 白色小喇叭 */
+  private readonly speakerLeft: number;
+  private readonly speaker: Graphics;
+  private readonly speakerMuted: Graphics;
+  private readonly speakerHighlight: Container;
+  private readonly speakerWhite: Graphics;
+  private readonly speakerWhiteMuted: Graphics;
   private clockLabel = '';
 
   constructor({ width, appName, menus }: MenuBarOptions) {
@@ -75,6 +87,30 @@ export class MenuBar {
       this.view.addChild(text);
     });
 
+    this.speakerLeft = width - SPEAKER_FROM_RIGHT;
+    const iconX = this.speakerLeft + (SPEAKER_TITLE_WIDTH - 18) / 2;
+    const place = (g: Graphics) => {
+      g.position.set(iconX, 3);
+      return g;
+    };
+    this.speaker = place(drawSpeakerIcon());
+    this.speakerMuted = place(drawSpeakerIcon({ muted: true }));
+    this.speakerWhite = place(drawSpeakerIcon({ white: true }));
+    this.speakerWhiteMuted = place(drawSpeakerIcon({ muted: true, white: true }));
+    this.speakerHighlight = new Container({ label: 'speaker-highlight' });
+    this.speakerHighlight.addChild(
+      new Graphics().rect(this.speakerLeft, 0, SPEAKER_TITLE_WIDTH, MENU_BAR_HEIGHT - 1).fill(
+        vGradient([
+          [0, AQUA.menu.highlightTop],
+          [1, AQUA.menu.highlightBottom],
+        ]),
+      ),
+      this.speakerWhite,
+      this.speakerWhiteMuted,
+    );
+    this.view.addChild(this.speaker, this.speakerMuted, this.speakerHighlight);
+    this.setVolumeExtra({ muted: false, open: false });
+
     this.clock = aquaText('', { size: 14 });
     this.clock.anchor.set(1, 0.5);
     this.clock.position.set(width - CLOCK_RIGHT, MENU_BAR_HEIGHT / 2);
@@ -89,6 +125,20 @@ export class MenuBar {
   /** 苹果菜单打开时，苹果的标题底变蓝 */
   setAppleHighlighted(highlighted: boolean): void {
     this.appleHighlight.visible = highlighted;
+  }
+
+  /** 音量菜单垂下的位置：小喇叭标题的左下角（菜单栏自己的坐标） */
+  get volumeMenuOrigin(): { x: number; y: number } {
+    return { x: this.speakerLeft, y: MENU_BAR_HEIGHT };
+  }
+
+  /** 小喇叭：muted 时没有声波；open 时标题底变蓝、喇叭变白 */
+  setVolumeExtra({ muted, open }: { muted: boolean; open: boolean }): void {
+    this.speaker.visible = !open && !muted;
+    this.speakerMuted.visible = !open && muted;
+    this.speakerHighlight.visible = open;
+    this.speakerWhite.visible = !muted;
+    this.speakerWhiteMuted.visible = muted;
   }
 
   /** 显示本机时间，例如「周四 下午3:01」。分钟变了才重画文字。 */

@@ -1,0 +1,63 @@
+{
+  "format": 1,
+  "id": "mac-volume",
+  "title": "Turn It Up",
+  "scene": "mac-2000",
+  "bpm": 104,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [{ "beat": 0, "action": "menu-volume" }]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-volume" },
+        { "beat": 2, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 1, "action": "menu-volume" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-volume" },
+        { "beat": 2, "action": "menu-volume" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 0.5, "action": "dock-bounce" },
+        { "beat": 1, "action": "menu-volume" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-volume" },
+        { "beat": 1.5, "action": "dock-bounce" },
+        { "beat": 2, "action": "menu-volume" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 1, "action": "menu-volume" },
+        { "beat": 2.5, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-volume" },
+        { "beat": 1.5, "action": "dock-bounce" },
+        { "beat": 2, "action": "dock-bounce" },
+        { "beat": 3, "action": "dock-bounce" }
+      ]
+    }
+  ]
+}

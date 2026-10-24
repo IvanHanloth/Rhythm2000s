@@ -324,10 +324,9 @@ class Mac2000Scene implements Scene {
     const tutorial = this.tutorial;
     const chart = this.chart;
     if (!tutorial || !chart) return;
-    const targets = session.targets.reduce((n, target) => n + target.clicks.length, 0);
     const passed = tutorialPassed(
       session.judgements.map((j) => j.level),
-      targets,
+      session.targetCount,
     );
     if (passed) tutorial.index++;
     tutorial.retry = !passed;
@@ -357,8 +356,10 @@ class Mac2000Scene implements Scene {
       screenScale: SCREEN_SCALE,
     });
     const targetsView = this.targetsView;
-    this.virtualMouse = new MacVirtualMouse(this.session, (_, event) =>
-      targetsView.clickPoints(event),
+    this.virtualMouse = new MacVirtualMouse(
+      this.session,
+      (_, event) => targetsView.clickPoints(event),
+      (event, beat) => targetsView.dragProgress(event, beat),
     );
     this.pointerLayer.addChild(this.virtualMouse.view);
     this.cursorCover.eventMode = 'static';

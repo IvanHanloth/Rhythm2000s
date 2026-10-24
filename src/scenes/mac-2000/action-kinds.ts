@@ -13,16 +13,32 @@ export type MacAction = Extract<
   | 'window-miniaturize'
   | 'menu-apple'
   | 'dock-trash'
+  | 'sheet-save'
+  | 'ichat-message'
+  | 'menu-volume'
 >;
 
-/** 部件种类：提示框、Dock 弹跳、新邮件、文稿窗口、苹果菜单、扔进废纸篓的文件 */
-export type MacTargetKind = 'alert' | 'dock' | 'mail' | 'window' | 'menu' | 'file';
+/**
+ * 部件种类：提示框、Dock 弹跳、新邮件、文稿窗口、苹果菜单、扔进废纸篓的文件、
+ * 带存储表单的窗口、iChat 消息窗、菜单栏音量
+ */
+export type MacTargetKind =
+  | 'alert'
+  | 'dock'
+  | 'mail'
+  | 'window'
+  | 'menu'
+  | 'file'
+  | 'sheet'
+  | 'chat'
+  | 'volume';
 
 /** assets/reference/mac-os-x/sounds/ 里的文件名（不含 .aiff） */
 export type MacSoundName =
   | 'Basso'
   | 'Blow'
   | 'Bottle'
+  | 'Frog'
   | 'Funk'
   | 'Glass'
   | 'Hero'
@@ -31,6 +47,7 @@ export type MacSoundName =
   | 'Pop'
   | 'Purr'
   | 'Sosumi'
+  | 'Submarine'
   | 'Tink';
 
 export interface MacActionInfo {
@@ -55,6 +72,12 @@ export const MAC_ACTIONS: Record<MacAction, MacActionInfo> = {
   'menu-apple': { kind: 'menu', sound: 'Morse', handled: ['Morse', 'Tink'] },
   // 文件落下 / 扔进废纸篓（原版的揉纸声本地没有，暂定）
   'dock-trash': { kind: 'file', sound: 'Purr', handled: ['Blow'] },
+  // 第一下点关闭按钮、表单滑出，第二下点「Don't Save」（原版都没有声音，暂定）
+  'sheet-save': { kind: 'sheet', sound: 'Frog', handled: ['Frog', 'Tink'] },
+  // iChat 原版的新消息提示音本地没有，暂定
+  'ichat-message': { kind: 'chat', sound: 'Submarine' },
+  // 按下滑块 / 松开（原版松开时按新音量响一声，暂定）
+  'menu-volume': { kind: 'volume', sound: 'Tink', handled: ['Tink', 'Pop'] },
 };
 
 export const MAC_ACTION_TYPES = Object.keys(MAC_ACTIONS) as MacAction[];
@@ -74,3 +97,10 @@ export const MAX_WINDOWS_PER_PHRASE = 6;
 export const MAX_BOUNCES_PER_PHRASE = 8;
 /** Dock 上方那一行摆得下的文件个数（每个乐句） */
 export const MAX_FILES_PER_PHRASE = 6;
+/** iChat 图标上方叠得下的消息窗个数（每个乐句） */
+export const MAX_CHATS_PER_PHRASE = 3;
+
+/** 占用画面上那 6 个窗口位置的部件种类 */
+export function usesWindowSlot(kind: MacTargetKind): boolean {
+  return kind === 'alert' || kind === 'window' || kind === 'sheet';
+}

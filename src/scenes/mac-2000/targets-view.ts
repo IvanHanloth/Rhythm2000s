@@ -2,7 +2,6 @@
 // 每帧只根据当前拍位置计算，不累加帧间隔（doc/scenes/mac-2000.md「玩法」）。
 
 import { Container } from 'pixi.js';
-import { AQUA } from '../../theme/aqua.ts';
 import { BEATS } from '../../theme/tokens.ts';
 import { clamp01, easeOutBack, easeOutCubic } from '../../ui/easing.ts';
 import { createJudgementView } from '../../ui/judgement-view.ts';
@@ -10,16 +9,13 @@ import type { MacAction } from './action-kinds.ts';
 import { appIcon, type AppIconName } from './assets.ts';
 import { AquaAlert } from './components/alert.ts';
 import type { Dock } from './components/dock.ts';
-import {
-  drawCautionIcon,
-  drawDocumentIcon,
-  drawFinderIcon,
-  drawFolderIcon,
-} from './components/icons.ts';
+import { createDesktopFile, FILE_ICON_SIZE } from './components/desktop-file.ts';
+import { drawCautionIcon, drawFinderIcon } from './components/icons.ts';
 import { APPLE_MENU, AquaMenu } from './components/menu.ts';
 import { APPLE_MENU_LEFT, MENU_BAR_HEIGHT, type MenuBar } from './components/menu-bar.ts';
 import { aquaText } from './components/paint.ts';
 import { AquaWindow } from './components/window.ts';
+import { MacExtrasView } from './extras-view.ts';
 import type { JudgementRecord, MacSession, MacTarget } from './session.ts';
 
 /** 提示框和文稿窗口的中心位置（虚拟屏幕坐标），按乐句内序号依次使用 */
@@ -84,7 +80,6 @@ const FILES: { label: string; app: AppIconName | 'folder' }[] = [
 const FILE_ROW_LEFT = 120;
 const FILE_ROW_STEP = 92;
 const FILE_ROW_Y = 466;
-const FILE_ICON_SIZE = 48;
 
 type AlertAction = Extract<MacAction, `alert-${string}`>;
 
@@ -195,6 +190,8 @@ export class MacTargetsView {
   private readonly files: FileTarget[] = [];
   private readonly menu = new AquaMenu({ entries: APPLE_MENU });
   private readonly menuOrigin: Point = { x: APPLE_MENU_LEFT, y: MENU_BAR_HEIGHT };
+  /** 表单、iChat 消息窗、菜单栏音量 */
+  private readonly extras: MacExtrasView;
   private judgementViews: ActiveJudgement[] = [];
   private shownJudgements = 0;
 
@@ -219,6 +216,13 @@ export class MacTargetsView {
     this.menu.view.position.set(this.menuOrigin.x, this.menuOrigin.y);
     this.menu.view.visible = false;
     options.menuLayer.addChild(this.menu.view);
+    this.extras = new MacExtrasView(session, { ...options, slots: SLOTS });
+  }
+
+  /** 长按（menu-volume）拖动滑块的进度，虚拟鼠标按住时跟着走；不在拖时返回 null */
+  dragProgress(event: number, beat: number): number | null {
+    const target = this.session.targets[event]!;
+    return target.kind === 'volume' ? this.extras.dragProgress(target, beat) : null;
   }
 
   /** 虚拟鼠标每一下要点的位置（虚拟屏幕坐标） */
@@ -244,6 +248,10 @@ export class MacTargetsView {
       }
       case 'file':
         return [this.files.find((f) => f.target === target)!.center];
+      case 'sheet':
+      case 'chat':
+      case 'volume':
+        return this.extras.clickPoints(event);
     }
   }
 
@@ -254,12 +262,14 @@ export class MacTargetsView {
     this.renderDock(beat);
     this.renderMenu(beat);
     this.renderFiles(beat);
+    this.extras.update(beat, audioTime, focus);
     this.renderJudgements(beat);
   }
 
   destroy(): void {
     for (const { window } of this.screenTargets) window.destroy();
     for (const { view } of this.files) view.destroy({ children: true });
+    this.extras.destroy();
     this.menu.destroy();
     this.options.menuBar.setAppleHighlighted(false);
     this.options.dock.setTrashFull(false);
@@ -559,6 +569,7 @@ export class MacTargetsView {
       const file = this.files.find((f) => f.target === target)!;
       return { x: file.center.x, y: file.center.y - FILE_ICON_SIZE / 2 - 4 };
     }
+    if (this.extras.handles(target)) return this.extras.judgementAnchor(target);
     const slot = SLOTS[target.order % SLOTS.length]!;
     const alert = this.screenTargets.find((t) => t.target === target)?.alert;
     const height = alert ? alert.height : DOC_HEIGHT;
@@ -626,34 +637,6 @@ function createScreenTarget(target: MacTarget): { window: WindowLike; alert: Aqu
   text.position.set(8, 6);
   window.content.addChild(text);
   return { window, alert: null };
-}
-
-/** 桌面上的文件：48 像素图标，下面是白色带阴影的文件名。原点在图标中心 */
-function createDesktopFile(label: string, app: AppIconName | 'folder'): Container {
-  const view = new Container({ label: `file-${label}` });
-  const half = FILE_ICON_SIZE / 2;
-  if (app === 'folder') {
-    const folder = drawFolderIcon(FILE_ICON_SIZE);
-    folder.position.set(-half, -half);
-    view.addChild(folder);
-  } else {
-    // 文稿：白纸中间叠程序小图标
-    const page = drawDocumentIcon(FILE_ICON_SIZE);
-    page.position.set(-half, -half);
-    const badge = appIcon(app, 24);
-    badge.position.set(-12, -8);
-    view.addChild(page, badge);
-  }
-  const textY = half + 2;
-  const shadow = aquaText(label, { size: 12, bold: true, color: AQUA.desktopLabel.shadow });
-  shadow.anchor.set(0.5, 0);
-  shadow.position.set(1, textY + 1);
-  shadow.alpha = 0.6;
-  const text = aquaText(label, { size: 12, bold: true, color: AQUA.desktopLabel.text });
-  text.anchor.set(0.5, 0);
-  text.position.set(0, textY);
-  view.addChild(shadow, text);
-  return view;
 }
 
 function add(a: Point, b: Point): Point {

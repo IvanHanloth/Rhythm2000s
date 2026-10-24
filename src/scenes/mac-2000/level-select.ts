@@ -35,6 +35,9 @@ const KIND_LABELS: Record<MacTargetKind, string> = {
   // 2026-10-24 起新增的玩家可见文字只用英文
   menu: 'Apple menu',
   file: 'Trash',
+  sheet: 'Save sheet',
+  chat: 'iChat',
+  volume: 'Volume',
 };
 
 /** 每种动作代表的图标；混用多种动作的关卡用 iTunes（混音） */
@@ -45,6 +48,9 @@ const KIND_ICONS: Record<MacTargetKind, AppIconName | 'caution' | 'trash'> = {
   window: 'TextEdit',
   menu: 'System Preferences',
   file: 'trash',
+  sheet: 'TextEdit',
+  chat: 'iChat',
+  volume: 'iTunes',
 };
 
 export interface MacLevelSelectOptions {

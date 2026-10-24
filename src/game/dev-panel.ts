@@ -6,6 +6,7 @@ import { CALIBRATION_LIMIT_MS } from './settings.ts';
 const PROTOTYPES = [
   { label: '延迟测试', href: '/prototypes/latency/' },
   { label: 'XP 部件', href: '/prototypes/xp-components/' },
+  { label: 'Mac 部件', href: '/prototypes/mac-components/' },
 ];
 
 export interface DevPanelOptions {

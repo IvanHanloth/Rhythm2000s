@@ -6,8 +6,10 @@ import {
   isMacAction,
   MAC_ACTIONS,
   MAX_BOUNCES_PER_PHRASE,
+  MAX_CHATS_PER_PHRASE,
   MAX_FILES_PER_PHRASE,
   MAX_WINDOWS_PER_PHRASE,
+  usesWindowSlot,
 } from './action-kinds.ts';
 
 export function checkMacChart(chart: Chart): string[] {
@@ -31,7 +33,7 @@ export function checkMacChart(chart: Chart): string[] {
     }
 
     const kinds = calls.map((c) => (isMacAction(c.action) ? MAC_ACTIONS[c.action].kind : null));
-    const windows = kinds.filter((k) => k === 'alert' || k === 'window').length;
+    const windows = kinds.filter((k) => k !== null && usesWindowSlot(k)).length;
     if (windows > MAX_WINDOWS_PER_PHRASE) {
       errors.push(
         `phrases[${phrase}]：提示框和文稿窗口合计 ${windows} 个，Mac 场景每个乐句最多 ${MAX_WINDOWS_PER_PHRASE} 个`,
@@ -41,6 +43,12 @@ export function checkMacChart(chart: Chart): string[] {
     if (bounces > MAX_BOUNCES_PER_PHRASE) {
       errors.push(
         `phrases[${phrase}]：dock-bounce 有 ${bounces} 个，Mac 场景每个乐句最多 ${MAX_BOUNCES_PER_PHRASE} 个`,
+      );
+    }
+    const chats = kinds.filter((k) => k === 'chat').length;
+    if (chats > MAX_CHATS_PER_PHRASE) {
+      errors.push(
+        `phrases[${phrase}]：ichat-message 有 ${chats} 个，Mac 场景每个乐句最多 ${MAX_CHATS_PER_PHRASE} 个`,
       );
     }
     const files = kinds.filter((k) => k === 'file').length;

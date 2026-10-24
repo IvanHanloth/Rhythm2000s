@@ -130,8 +130,11 @@ public/charts/
 | `window-miniaturize` | Mac 文稿窗口（`NSWindow miniaturize:`） | `mac-2000` | 在拍点上弹出窗口，响 `Bottle` | 在拍点上把它最小化到 Dock |
 | `menu-apple` | Mac 苹果菜单（`NSMenu`，菜单栏最左边的苹果） | `mac-2000` | 虚拟鼠标在拍点上点苹果，菜单落下，响 `Morse`；**0.5 拍后**点一个菜单项，响 `Tink`，菜单收起 | 按两下：拍点上一下（苹果），0.5 拍后再一下（菜单项） |
 | `dock-trash` | Dock 上的废纸篓（`NSWorkspaceRecycleOperation`） | `mac-2000` | 在拍点上 Dock 上方落下一个文件，响 `Purr` | 在拍点上把它扔进废纸篓，响 `Blow`，废纸篓由空变满 |
+| `sheet-save` | Mac 文稿窗口的存储表单（`NSWindow beginSheet:`） | `mac-2000` | 拍点前弹出一个窗口；虚拟鼠标在拍点上点关闭按钮，表单滑出，响 `Frog`；**0.5 拍后**点「Don't Save」，响 `Tink`，窗口关闭 | 同一位置再弹出一个窗口；按两下：拍点上一下（关闭按钮），0.5 拍后再一下（Don't Save） |
+| `ichat-message` | iChat 新消息窗 | `mac-2000` | 在拍点上从 Dock 的 iChat 图标上方弹出消息窗，响 `Submarine` | 在拍点上点它，它缩回 iChat 图标 |
+| `menu-volume` | Mac 菜单栏的音量小工具（`NSMenuExtra`），只是画面，不改实际音量 | `mac-2000` | 拍点前音量菜单垂下、滑块掉到底；虚拟鼠标在拍点上按住滑块（响 `Tink`），**1 拍**里拖到顶后自动松开（响 `Pop`） | 拍点上按一下；松开由游戏在 1 拍后自己完成，只判定按下（和 `volume-mute` 相同） |
 
-四种消息框玩法相同，只是图标、按钮和提示音不同，同一乐句里可以混用。`desktop-refresh` 也可以和消息框混用；它的第二下固定在第一下之后 0.5 拍（2026-10-24 用户选定：一个事件、固定间隔），谱面里只写第一下的拍位置。`balloon-info`、`window-minimize`、`start-menu`、`recycle-bin` 是 2026-10-24 加的四个 XP 动作，同样可以和其他 XP 动作混用，`start-menu` 的两下和 `desktop-refresh` 一样固定相隔 0.5 拍，设计见 [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md)。`progress-download`、`volume-mute` 同样是固定间隔（判定点分别在 +3 拍和 0、+1 拍），设计见 [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md#等待与长按下载进度窗音量控制2026-10-24)；`volume-mute` 的第二下是「松开」，由游戏在第一下命中后自动完成，只判定第一下。Mac 场景的动作也一样，玩法相同，同一乐句里可以混用（Mac 提示音的选择见 [scenes/mac-2000.md](scenes/mac-2000.md#音效)）；`menu-apple` 的两下和 `start-menu` 一样固定相隔 0.5 拍。设计文档里的其他动作（XP 的收邮件等）实现后再按同样规则加入此表。谱面用了所在场景不支持的动作，视为错误。
+四种消息框玩法相同，只是图标、按钮和提示音不同，同一乐句里可以混用。`desktop-refresh` 也可以和消息框混用；它的第二下固定在第一下之后 0.5 拍（2026-10-24 用户选定：一个事件、固定间隔），谱面里只写第一下的拍位置。`balloon-info`、`window-minimize`、`start-menu`、`recycle-bin` 是 2026-10-24 加的四个 XP 动作，同样可以和其他 XP 动作混用，`start-menu` 的两下和 `desktop-refresh` 一样固定相隔 0.5 拍，设计见 [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md)。`progress-download`、`volume-mute` 同样是固定间隔（判定点分别在 +3 拍和 0、+1 拍），设计见 [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md#等待与长按下载进度窗音量控制2026-10-24)；`volume-mute` 的第二下是「松开」，由游戏在第一下命中后自动完成，只判定第一下。Mac 场景的动作也一样，玩法相同，同一乐句里可以混用（Mac 提示音的选择见 [scenes/mac-2000.md](scenes/mac-2000.md#音效)）；`menu-apple`、`sheet-save` 的两下和 `start-menu` 一样固定相隔 0.5 拍，`menu-volume` 和 `volume-mute` 一样：按下在 0 拍，松开在 +1 拍由游戏自己完成。设计文档里的其他动作（XP 的收邮件等）实现后再按同样规则加入此表。谱面用了所在场景不支持的动作，视为错误。
 
 ## 官方关卡的要求
 
@@ -142,11 +145,11 @@ public/charts/
 | 场景 | 规则 |
 | --- | --- |
 | `windows-xp` | 每个乐句的 `response` 与 `call` 事件个数相同、动作依次相同：第几个弹出的消息框，就由第几下关掉。另外同一乐句里消息框和程序窗口合计不超过 6 个，`window-minimize` 不超过 4 个，`balloon-info` 不超过 3 个，`recycle-bin` 不超过 6 个（[原因](scenes/windows-xp-levels.md#每个乐句的上限)） |
-| `mac-2000` | 同上：第几个出现的提示框 / 弹跳图标 / 新邮件 / 窗口 / 菜单 / 文件，就由第几下处理。另外同一乐句里提示框和文稿窗口合计不超过 6 个，`dock-bounce` 不超过 8 个，`dock-trash` 不超过 6 个（画面上的位置和 Dock 图标就这么多） |
+| `mac-2000` | 同上：第几个出现的提示框 / 弹跳图标 / 新邮件 / 窗口 / 菜单 / 文件，就由第几下处理。另外同一乐句里提示框和文稿窗口合计不超过 6 个，`dock-bounce` 不超过 8 个，`dock-trash` 不超过 6 个，`ichat-message` 不超过 3 个；`sheet-save` 的窗口也算进「提示框和文稿窗口」（画面上的位置和 Dock 图标就这么多） |
 
 ## 时间上的限制
 
-「Follow me / Your turn」提示会在示范小节、跟打小节结束前半拍切换（见 [prototypes/mvp.md](prototypes/mvp.md#轮次提示2026-10-24-用户要求加入)），所以这两种小节里最后一下的 Good 判定窗口必须在小节结束前半拍之前关闭。120 BPM、Good ±100 毫秒时，最后一下最晚在第 3.25 拍；要按两下的 `desktop-refresh`、`start-menu`、`menu-apple` 最晚放在第 2.75 拍（第二下在 3.25 拍），`volume-mute` 最晚放在第 2.25 拍，`progress-download` 最晚放在第 0.25 拍。加载谱面时会检查，不满足的谱面视为错误。
+「Follow me / Your turn」提示会在示范小节、跟打小节结束前半拍切换（见 [prototypes/mvp.md](prototypes/mvp.md#轮次提示2026-10-24-用户要求加入)），所以这两种小节里最后一下的 Good 判定窗口必须在小节结束前半拍之前关闭。120 BPM、Good ±100 毫秒时，最后一下最晚在第 3.25 拍；要按两下的 `desktop-refresh`、`start-menu`、`menu-apple`、`sheet-save` 最晚放在第 2.75 拍（第二下在 3.25 拍），`volume-mute`、`menu-volume` 最晚放在第 2.25 拍，`progress-download` 最晚放在第 0.25 拍。加载谱面时会检查，不满足的谱面视为错误。
 
 ## 校验与报错
 

@@ -22,6 +22,9 @@ export const ACTION_TYPES = [
   'window-miniaturize',
   'menu-apple',
   'dock-trash',
+  'sheet-save',
+  'ichat-message',
+  'menu-volume',
 ] as const;
 
 export type ActionType = (typeof ACTION_TYPES)[number];
@@ -47,6 +50,9 @@ export const ACTION_LABELS: Record<ActionType, string> = {
   'window-miniaturize': '最小化窗口',
   'menu-apple': 'Apple menu',
   'dock-trash': 'Trash',
+  'sheet-save': 'Save sheet',
+  'ichat-message': 'iChat message',
+  'menu-volume': 'Volume menu',
 };
 
 /**
@@ -60,6 +66,9 @@ const TAP_OFFSETS: Partial<Record<ActionType, readonly number[]>> = {
   'start-menu': [0, 0.5],
   // Mac 苹果菜单：先点苹果、0.5 拍后点菜单项（doc/scenes/mac-2000.md）
   'menu-apple': [0, 0.5],
+  // Mac 存储表单：先点关闭按钮、0.5 拍后点「Don't Save」；菜单栏音量：和 volume-mute 一样，1 拍后自动松开
+  'sheet-save': [0, 0.5],
+  'menu-volume': [0, 1],
   'progress-download': [3],
   'volume-mute': [0, 1],
 };
@@ -72,6 +81,7 @@ const TAP_OFFSETS: Partial<Record<ActionType, readonly number[]>> = {
 export type TapKind = 'press' | 'release' | 'auto';
 const TAP_KINDS: Partial<Record<ActionType, readonly TapKind[]>> = {
   'volume-mute': ['press', 'auto'],
+  'menu-volume': ['press', 'auto'],
 };
 
 /** 这个动作第 step 下是按下还是松开 */
