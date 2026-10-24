@@ -13,8 +13,8 @@ import { XpDownloadDialog } from './components/download-dialog.ts';
 import { WORK_AREA_HEIGHT, XP_SCREEN_WIDTH } from './components/screen.ts';
 import type { XpTaskbar } from './components/taskbar.ts';
 import { XpVolumeControl } from './components/volume-control.ts';
-import type { PopupSession, PopupWindowState } from './popup-session.ts';
-import type { Turn } from './virtual-mouse.ts';
+import type { XpSession, XpTarget } from './session.ts';
+import type { Turn } from '../shared/cursor-path.ts';
 
 type Point = { x: number; y: number };
 
@@ -69,21 +69,21 @@ interface VolumeTarget {
 type Target = DownloadTarget | VolumeTarget;
 
 export interface WaitHoldViewOptions {
-  session: PopupSession;
+  session: XpSession;
   taskbar: XpTaskbar;
 }
 
 export class WaitHoldView {
   /** 下载窗和音量小窗都在任务栏之上、虚拟鼠标之下 */
   readonly layer = new Container({ label: 'wait-hold' });
-  private readonly session: PopupSession;
+  private readonly session: XpSession;
   private readonly taskbar: XpTaskbar;
   private readonly targets = new Map<number, Target>();
 
   constructor({ session, taskbar }: WaitHoldViewOptions) {
     this.session = session;
     this.taskbar = taskbar;
-    session.windows.forEach((state, event) => {
+    session.targets.forEach((state, event) => {
       const { action, phrase } = state.call;
       if (action === 'progress-download') {
         const make = () => {
@@ -154,7 +154,7 @@ export class WaitHoldView {
   update(beat: number, pointer: Point): void {
     let muted = false;
     for (const target of this.targets.values()) {
-      const state = this.session.windows[target.event]!;
+      const state = this.session.targets[target.event]!;
       const call = this.callRun(state, beat);
       const response = this.responseRun(state);
       if (target.kind === 'download') {
@@ -177,18 +177,18 @@ export class WaitHoldView {
   // ---------- 两段的时间点 ----------
 
   /** 示范段：电脑自己做完，最后一下就是完成的时间 */
-  private callRun(state: PopupWindowState, beat: number): Run {
+  private callRun(state: XpTarget, beat: number): Run {
     const start = state.call.beat;
     const end = start + actionTapOffsets(state.call.action).at(-1)!;
     return { start, done: end, missed: null, held: beat >= start && beat < end };
   }
 
   /** 跟打段：看玩家的判定 */
-  private responseRun(state: PopupWindowState): Run {
+  private responseRun(state: XpTarget): Run {
     const toBeat = (time: number | null) => (time === null ? null : this.session.beatAt(time));
     return {
       start: state.response.beat,
-      done: toBeat(state.closedAt),
+      done: toBeat(state.handledAt),
       missed: toBeat(state.missedAt),
       // 只判定按下：按下命中后滑块跟着鼠标走，到自动松开为止
       held: state.clicks[0]?.hitAt != null,
@@ -287,7 +287,7 @@ export class WaitHoldView {
   }
 
   /** 托盘小喇叭显示静音：从示范段松开起，到跟打段松开或 Miss 后小窗收起为止 */
-  private volumeMuted(state: PopupWindowState, response: Run, beat: number): boolean {
+  private volumeMuted(state: XpTarget, response: Run, beat: number): boolean {
     const mutedFrom = state.call.beat + actionTapOffsets(state.call.action).at(-1)!;
     const mutedUntil =
       response.done ??

@@ -2,8 +2,8 @@
 // 右下「Retry」「Levels」「Next Level」三个推按钮可以用鼠标点，默认按钮是蓝色并会呼吸。原点在窗口中心。
 
 import { Container, Graphics } from 'pixi.js';
-import type { ResultSummary } from '../../rhythm/result-summary.ts';
 import { AQUA } from '../../theme/aqua.ts';
+import type { ResultsWindowOptions } from '../shared/level-scene.ts';
 import { createResultsPanel, type ResultsKit } from '../../ui/results-panel.ts';
 import { aquaText } from './components/paint.ts';
 import { PUSH_BUTTON_HEIGHT, PushButton } from './components/push-button.ts';
@@ -13,19 +13,6 @@ export const RESULTS_WIDTH = 688;
 export const RESULTS_HEIGHT = 448;
 const PADDING_X = 18;
 const PADDING_Y = 14;
-
-export interface MacResultsOptions {
-  title: string;
-  summary: ResultSummary;
-  newRecord: boolean;
-  /** 这一局正文里开过律动组件（doc/beat-guide.md） */
-  assisted?: boolean;
-  /** 列表里还有下一关；没有时「Next Level」灰掉，默认按钮换成「Retry」 */
-  hasNext: boolean;
-  onRetry: () => void;
-  onList: () => void;
-  onNext: () => void;
-}
 
 /** Aqua 分组框：半透明白底、灰色细边的圆角框，粗体标题写在框里左上角 */
 const kit: ResultsKit = {
@@ -60,7 +47,7 @@ export class MacResultsWindow {
   private readonly window: AquaWindow;
   private readonly buttons: PushButton[] = [];
 
-  constructor(options: MacResultsOptions) {
+  constructor(options: ResultsWindowOptions) {
     const width = RESULTS_WIDTH;
     const height = RESULTS_HEIGHT;
     this.window = new AquaWindow({
@@ -80,7 +67,7 @@ export class MacResultsWindow {
     const panel = createResultsPanel({
       summary: options.summary,
       newRecord: options.newRecord,
-      assisted: options.assisted ?? false,
+      assisted: options.assisted,
       width: contentWidth,
       height: contentHeight - PUSH_BUTTON_HEIGHT - 14,
       kit,

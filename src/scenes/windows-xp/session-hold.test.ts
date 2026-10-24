@@ -5,8 +5,8 @@ import type { SceneContext } from '../../game/scene.ts';
 import { buildChart } from '../../rhythm/chart.ts';
 import { sourceFromPatterns } from '../../rhythm/test-charts.ts';
 import { DIALOG_KINDS } from './dialog-kinds.ts';
-import { PopupSession } from './popup-session.ts';
-import { buildBackingTrack, type PopupSounds } from './song.ts';
+import { XpSession } from './session.ts';
+import { buildBackingTrack, type XpSongSounds } from './song.ts';
 
 /** 用名字代替真正的 AudioBuffer */
 const sounds = {
@@ -27,7 +27,7 @@ const sounds = {
   ),
   dialogs: Object.fromEntries(Object.keys(DIALOG_KINDS).map((kind) => [kind, kind])),
   download: { appear: 'downloadAppear', open: 'downloadOpen' },
-} as unknown as PopupSounds;
+} as unknown as XpSongSounds;
 
 function fakeContext() {
   const played: string[] = [];
@@ -61,8 +61,8 @@ function chartWith(action: 'volume-mute' | 'progress-download', beat = 0) {
 describe('volume-mute：只判定按下', () => {
   it('拍点上按下命中：只记一次判定，1 拍后自动松开，预约 volumeRelease', () => {
     const { context, played, scheduled } = fakeContext();
-    const session = new PopupSession(context, chartWith('volume-mute'), sounds);
-    const state = session.windows[0]!;
+    const session = new XpSession(context, chartWith('volume-mute'), sounds);
+    const state = session.targets[0]!;
     const [press, release] = state.clicks;
 
     const tapTime = session.timeAt(press!.beat) + 0.02;
@@ -71,15 +71,15 @@ describe('volume-mute：只判定按下', () => {
     expect(session.targetCount).toBe(1);
     const beat = 60 / session.chart.bpm;
     expect(release!.hitAt).toBeCloseTo(tapTime + beat);
-    expect(state.closedAt).toBeCloseTo(tapTime + beat);
+    expect(state.handledAt).toBeCloseTo(tapTime + beat);
     expect(played).toEqual(['close']);
     expect(scheduled).toEqual([{ name: 'volumeRelease', when: 10 + beat }]);
   });
 
   it('按下之后不管什么时候松手、一直按着，都不再判定', () => {
     const { context } = fakeContext();
-    const session = new PopupSession(context, chartWith('volume-mute'), sounds);
-    const [press, release] = session.windows[0]!.clicks;
+    const session = new XpSession(context, chartWith('volume-mute'), sounds);
+    const [press, release] = session.targets[0]!.clicks;
 
     session.tap(session.timeAt(press!.beat));
     session.update(session.timeAt(release!.beat) + 1);
@@ -89,20 +89,20 @@ describe('volume-mute：只判定按下', () => {
 
   it('按下 Miss：只记一次 Miss，不会自动松开', () => {
     const { context, played } = fakeContext();
-    const session = new PopupSession(context, chartWith('volume-mute'), sounds);
-    const [press, release] = session.windows[0]!.clicks;
+    const session = new XpSession(context, chartWith('volume-mute'), sounds);
+    const [press, release] = session.targets[0]!.clicks;
 
     session.update(session.timeAt(press!.beat) + 0.15);
     expect(session.counts()).toEqual({ perfect: 0, good: 0, miss: 1 });
     expect(release!.hitAt).toBeNull();
-    expect(session.windows[0]!.closedAt).toBeNull();
+    expect(session.targets[0]!.handledAt).toBeNull();
     expect(played).toEqual(['miss']);
   });
 
   it('松开的拍点上按下不算：那里没有判定目标', () => {
     const { context } = fakeContext();
-    const session = new PopupSession(context, chartWith('volume-mute'), sounds);
-    const [, release] = session.windows[0]!.clicks;
+    const session = new XpSession(context, chartWith('volume-mute'), sounds);
+    const [, release] = session.targets[0]!.clicks;
     expect(session.tap(session.timeAt(release!.beat))).toBeNull();
   });
 });
@@ -110,8 +110,8 @@ describe('volume-mute：只判定按下', () => {
 describe('progress-download：等进度条走满', () => {
   it('判定点在事件后 3 拍；走满那一拍点命中，响 downloadOpen', () => {
     const { context, played } = fakeContext();
-    const session = new PopupSession(context, chartWith('progress-download'), sounds);
-    const state = session.windows[0]!;
+    const session = new XpSession(context, chartWith('progress-download'), sounds);
+    const state = session.targets[0]!;
     expect(state.clicks.map((c) => c.beat - state.response.beat)).toEqual([3]);
 
     // 刚弹出时点：离判定点很远，不计分（灰掉的按钮点了没反应）

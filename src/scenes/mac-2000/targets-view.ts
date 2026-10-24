@@ -16,7 +16,8 @@ import { APPLE_MENU_LEFT, MENU_BAR_HEIGHT, type MenuBar } from './components/men
 import { aquaText } from './components/paint.ts';
 import { AquaWindow } from './components/window.ts';
 import { MacExtrasView } from './extras-view.ts';
-import type { JudgementRecord, MacSession, MacTarget } from './session.ts';
+import type { JudgementRecord } from '../shared/round-session.ts';
+import type { MacSession, MacTarget } from './session.ts';
 
 /** 提示框和文稿窗口的中心位置（虚拟屏幕坐标），按乐句内序号依次使用 */
 export const SLOTS = [

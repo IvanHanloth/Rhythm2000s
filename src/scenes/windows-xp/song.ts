@@ -1,52 +1,39 @@
-// XP 场景的伴奏和音效（doc/prototypes/mvp.md）。鼓点、节拍器现场合成，MVP 暂定；
-// 界面音效用 XP 原版声音，对应关系见 doc/scenes/windows-xp.md「音效」。
-// 谱面不在这里，存放在 public/charts/（ADR 0003）。
+// XP backing track and sound effects. Interface sounds are the original XP sounds,
+// mapped in doc/scenes/windows-xp.md "Sounds".
 
 import type { SequencedSound } from '../../audio/sequencer.ts';
-import { createBlip, createHat, createKick, createSnare } from '../../audio/synth.ts';
 import { actionTapOffsets, type ActionType } from '../../rhythm/actions.ts';
 import type { Chart } from '../../rhythm/chart.ts';
+import { buildDrumTrack, createDrumKit, type DrumKit } from '../shared/backing-track.ts';
 import type { XpSounds } from './assets.ts';
 import { DIALOG_KINDS, isDialogKind, type DialogKind } from './dialog-kinds.ts';
 import { isShellAction, SHELL_ACTIONS, type ShellAction } from './shell-actions.ts';
 
-export interface PopupSounds {
-  kick: AudioBuffer;
-  snare: AudioBuffer;
-  hat: AudioBuffer;
-  /** 预备拍的节拍器点击，重音和普通各一个 */
-  countAccent: AudioBuffer;
-  count: AudioBuffer;
-  /** 示范段弹出各种消息框时的 XP 提示音 */
+export interface XpSongSounds extends DrumKit {
+  /** Alert sound for each message box popping up in the call */
   dialogs: Record<DialogKind, AudioBuffer>;
-  /** 虚拟鼠标左键点下去（关掉消息框）的点击声 */
+  /** Left click of the virtual mouse (closing a message box) */
   close: AudioBuffer;
-  /** 右键桌面、弹出右键菜单（desktop-refresh 第一下），暂定 */
+  /** desktop-refresh: right-click on the desktop, then "Refresh" in the menu */
   rightClick: AudioBuffer;
-  /** 点右键菜单里的「刷新」（desktop-refresh 第二下），暂定 */
   menuCommand: AudioBuffer;
-  /** Miss：XP 默认提示音 */
   miss: AudioBuffer;
-  /** 一局结束：tada */
+  /** End of a round: tada */
   result: AudioBuffer;
-  /** 气泡、程序窗口、开始菜单、回收站：示范段出现时的声音（没有则为 null）和跟打段命中时的声音 */
+  /** Balloon, program window, Start menu, Recycle Bin: sound when it appears in the call (if any) and when handled */
   shell: Record<ShellAction, { appear: AudioBuffer | null; handled: AudioBuffer }>;
-  /** progress-download：下载窗弹出（示范段、跟打段都响）、走满后点「Open」 */
+  /** progress-download: the window opens (in both call and response), then "Open" once the bar fills */
   download: { appear: AudioBuffer; open: AudioBuffer };
-  /** volume-mute 松开滑块；按下用 close 点击声 */
+  /** volume-mute releasing the slider; the press uses `close` */
   volumeRelease: AudioBuffer;
 }
 
-export function createPopupSounds(context: BaseAudioContext, xp: XpSounds): PopupSounds {
+export function createXpSongSounds(context: BaseAudioContext, xp: XpSounds): XpSongSounds {
   const dialogs = Object.fromEntries(
     Object.entries(DIALOG_KINDS).map(([kind, info]) => [kind, xp[info.sound]]),
   ) as Record<DialogKind, AudioBuffer>;
   return {
-    kick: createKick(context),
-    snare: createSnare(context),
-    hat: createHat(context),
-    countAccent: createBlip(context, { from: 1760, duration: 0.05, gain: 0.5 }),
-    count: createBlip(context, { from: 880, duration: 0.05, gain: 0.5 }),
+    ...createDrumKit(context),
     dialogs,
     close: xp.navigate,
     rightClick: xp.navigate,
@@ -58,98 +45,49 @@ export function createPopupSounds(context: BaseAudioContext, xp: XpSounds): Popu
         action,
         { appear: info.appear ? xp[info.appear] : null, handled: xp[info.handled] },
       ]),
-    ) as PopupSounds['shell'],
+    ) as XpSongSounds['shell'],
     download: { appear: xp.downloadStart, open: xp.downloadOpen },
     volumeRelease: xp.volumeRelease,
   };
 }
 
-/**
- * 虚拟鼠标点某个动作的第 step 下时响的声音：消息框是点击声；
- * desktop-refresh 第一下右键、第二下点「刷新」。示范段按拍点预约，跟打段命中时立即播放。
- */
-export function clickSound(sounds: PopupSounds, action: ActionType, step: number): AudioBuffer {
+/** Sound of the step-th press of an action: booked on the beat in the call, played on the hit in the response. */
+export function hitSound(sounds: XpSongSounds, action: ActionType, step: number): AudioBuffer {
   if (action === 'desktop-refresh') return step === 0 ? sounds.rightClick : sounds.menuCommand;
   if (action === 'progress-download') return sounds.download.open;
-  // 音量：按下是点击声，松开响 volumeRelease
   if (action === 'volume-mute') return step === 0 ? sounds.close : sounds.volumeRelease;
-  // 开始菜单：第一下按「开始」是点击声，第二下点菜单项
   if (action === 'start-menu') return step === 0 ? sounds.close : sounds.shell[action].handled;
   if (isShellAction(action)) return sounds.shell[action].handled;
   return sounds.close;
 }
 
 /**
- * 伴奏：预备小节打节拍器，示范 / 跟打小节「底鼓、军鼓交替，每半拍踩镲」，空档只有踩镲，结尾只收一下；
- * 再加上示范段的提示音：消息框弹出的提示音，以及虚拟鼠标示范 desktop-refresh 的两下。
- * progress-download 的下载窗在跟打段也会自己弹出，弹出声两段都响。
+ * Drums plus the call cues: message boxes play their alert sound, shell targets their appear sound,
+ * and the other actions the virtual mouse's presses. The download window also opens by itself in the response.
  */
-export function buildBackingTrack(chart: Chart, sounds: PopupSounds): SequencedSound[] {
-  const { beatsPerBar } = chart;
-  const track: SequencedSound[] = [];
-  const firstBodyBeat = chart.phrases[0]?.callStart ?? beatsPerBar;
-  const lastBodyBeat = chart.phrases.at(-1)?.end ?? firstBodyBeat;
+export function buildBackingTrack(chart: Chart, sounds: XpSongSounds): SequencedSound[] {
+  const track = buildDrumTrack(chart, sounds);
+  const pushPresses = (beat: number, action: ActionType) => {
+    actionTapOffsets(action).forEach((offset, step) => {
+      track.push({ beat: beat + offset, buffer: hitSound(sounds, action, step) });
+    });
+  };
 
-  // 预备小节：节拍器点击（每小节第 1 拍重音）+ 每半拍踩镲
-  for (let beat = 0; beat < firstBodyBeat; beat++) {
-    track.push({ beat, buffer: beat % beatsPerBar === 0 ? sounds.countAccent : sounds.count });
-  }
-  for (let half = 0; half / 2 < firstBodyBeat; half++) {
-    track.push({ beat: half / 2, buffer: sounds.hat, gain: 0.6 });
-  }
-
-  // 示范小节和跟打小节：鼓点各自从小节第 1 拍开始（底鼓、军鼓交替，每半拍踩镲），
-  // 这样空档不是整拍时，跟打的拍子也和鼓点对齐。
-  // 空档：只留踩镲，底鼓和军鼓停下，让玩家听出「停了一下」。
-  for (const phrase of chart.phrases) {
-    pushBar(track, sounds, phrase.callStart, phrase.callEnd);
-    for (let beat = phrase.callEnd; beat < phrase.responseStart; beat += 0.5) {
-      track.push({ beat, buffer: sounds.hat, gain: 0.5 });
-    }
-    pushBar(track, sounds, phrase.responseStart, phrase.end);
-  }
-
-  // 结尾只收一下
-  track.push(
-    { beat: lastBodyBeat, buffer: sounds.kick },
-    { beat: lastBodyBeat, buffer: sounds.snare },
-  );
-
-  for (const call of chart.calls) {
-    const appear = isShellAction(call.action) ? sounds.shell[call.action].appear : null;
-    if (isDialogKind(call.action)) {
-      track.push({ beat: call.beat, buffer: sounds.dialogs[call.action] });
-    } else if (call.action === 'progress-download') {
-      // 示范段：弹出 → 走满那一拍虚拟鼠标点「Open」
-      track.push({ beat: call.beat, buffer: sounds.download.appear });
-      actionTapOffsets(call.action).forEach((offset, step) => {
-        track.push({ beat: call.beat + offset, buffer: clickSound(sounds, call.action, step) });
-      });
+  for (const { beat, action } of chart.calls) {
+    const appear = isShellAction(action) ? sounds.shell[action].appear : null;
+    if (isDialogKind(action)) {
+      track.push({ beat, buffer: sounds.dialogs[action] });
+    } else if (action === 'progress-download') {
+      track.push({ beat, buffer: sounds.download.appear });
+      pushPresses(beat, action);
     } else if (appear) {
-      // 气泡、程序窗口、文件：示范段只是出现，响出现的声音
-      track.push({ beat: call.beat, buffer: appear });
+      track.push({ beat, buffer: appear });
     } else {
-      actionTapOffsets(call.action).forEach((offset, step) => {
-        track.push({ beat: call.beat + offset, buffer: clickSound(sounds, call.action, step) });
-      });
+      pushPresses(beat, action);
     }
   }
-  // 跟打段自己弹出的下载窗
-  for (const response of chart.responses) {
-    if (response.action === 'progress-download') {
-      track.push({ beat: response.beat, buffer: sounds.download.appear });
-    }
+  for (const { beat, action } of chart.responses) {
+    if (action === 'progress-download') track.push({ beat, buffer: sounds.download.appear });
   }
   return track;
-}
-
-/** 从 start 到 end 打一段鼓点：整拍上底鼓、军鼓交替（从底鼓开始），每半拍踩镲。 */
-function pushBar(track: SequencedSound[], sounds: PopupSounds, start: number, end: number): void {
-  for (let half = 0; start + half / 2 < end; half++) {
-    const beat = start + half / 2;
-    track.push({ beat, buffer: sounds.hat, gain: half % 2 === 0 ? 0.8 : 0.5 });
-    if (half % 2 === 0) {
-      track.push({ beat, buffer: (half / 2) % 2 === 0 ? sounds.kick : sounds.snare });
-    }
-  }
 }

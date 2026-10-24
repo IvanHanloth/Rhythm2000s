@@ -5,7 +5,7 @@ import { sourceFromPatterns } from '../../rhythm/test-charts.ts';
 import { checkWindowsXpChart } from './chart-rules.ts';
 import { DIALOG_KINDS } from './dialog-kinds.ts';
 import { SHELL_ACTIONS } from './shell-actions.ts';
-import { buildBackingTrack, clickSound, type PopupSounds } from './song.ts';
+import { buildBackingTrack, hitSound, type XpSongSounds } from './song.ts';
 
 /** 用名字代替真正的 AudioBuffer，只检查排了哪些声音 */
 const sounds = {
@@ -23,7 +23,7 @@ const sounds = {
       { appear: info.appear, handled: info.handled },
     ]),
   ),
-} as unknown as PopupSounds;
+} as unknown as XpSongSounds;
 
 /** 一个乐句，示范小节里按给定的拍位置放这些动作 */
 function chartWith(events: [number, ActionType][]) {
@@ -59,11 +59,11 @@ describe('新动作的示范音', () => {
 
 describe('新动作跟打命中的声音', () => {
   it('每种动作各有自己的声音', () => {
-    expect(clickSound(sounds, 'balloon-info', 0)).toBe('navigate');
-    expect(clickSound(sounds, 'window-minimize', 0)).toBe('minimize');
-    expect(clickSound(sounds, 'recycle-bin', 0)).toBe('recycle');
-    expect(clickSound(sounds, 'start-menu', 0)).toBe('close');
-    expect(clickSound(sounds, 'start-menu', 1)).toBe('menuCommand');
+    expect(hitSound(sounds, 'balloon-info', 0)).toBe('navigate');
+    expect(hitSound(sounds, 'window-minimize', 0)).toBe('minimize');
+    expect(hitSound(sounds, 'recycle-bin', 0)).toBe('recycle');
+    expect(hitSound(sounds, 'start-menu', 0)).toBe('close');
+    expect(hitSound(sounds, 'start-menu', 1)).toBe('menuCommand');
   });
 });
 

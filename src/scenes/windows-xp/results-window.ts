@@ -2,8 +2,8 @@
 // 底部「Retry」「Levels」「Next Level」三个按钮可以用鼠标点。原点在窗口中心，方便做弹出动画。
 
 import { Container, Graphics } from 'pixi.js';
-import type { ResultSummary } from '../../rhythm/result-summary.ts';
 import { LUNA } from '../../theme/xp-luna.ts';
+import type { ResultsWindowOptions } from '../shared/level-scene.ts';
 import { createResultsPanel, type ResultsKit } from '../../ui/results-panel.ts';
 import { BUTTON_HEIGHT, XpButton } from './components/button.ts';
 import { CAPTION_HEIGHT, FRAME_WIDTH, XpWindowFrame } from './components/window-frame.ts';
@@ -15,19 +15,6 @@ const PADDING = 14;
 /** Luna 分组框（GroupBox）：浅灰细边圆角框，蓝色标题压在上边线上 */
 const GROUP_BORDER = '#d0d0bf';
 const GROUP_TITLE = '#0046d5';
-
-export interface XpResultsOptions {
-  title: string;
-  summary: ResultSummary;
-  newRecord: boolean;
-  /** 这一局正文里开过律动组件（doc/beat-guide.md） */
-  assisted?: boolean;
-  /** 列表里还有下一关；没有时「Next Level」灰掉，默认按钮换成「Retry」 */
-  hasNext: boolean;
-  onRetry: () => void;
-  onList: () => void;
-  onNext: () => void;
-}
 
 const kit: ResultsKit = {
   text: (text, { size, bold, color, wrapWidth, lineHeight }) =>
@@ -67,7 +54,7 @@ export class XpResultsWindow {
   readonly view = new Container({ label: 'results' });
   readonly frame: XpWindowFrame;
 
-  constructor(options: XpResultsOptions) {
+  constructor(options: ResultsWindowOptions) {
     const width = RESULTS_WIDTH;
     const height = RESULTS_HEIGHT;
     this.view.pivot.set(width / 2, height / 2);
@@ -84,7 +71,7 @@ export class XpResultsWindow {
     const panel = createResultsPanel({
       summary: options.summary,
       newRecord: options.newRecord,
-      assisted: options.assisted ?? false,
+      assisted: options.assisted,
       width: clientWidth,
       height: buttonsTop - 12,
       kit,

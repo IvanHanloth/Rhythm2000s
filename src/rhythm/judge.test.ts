@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { levelForOffset, MVP_WINDOWS, ResponseJudge } from './judge.ts';
+import { levelForOffset, JUDGE_WINDOWS, ResponseJudge } from './judge.ts';
 
 describe('levelForOffset', () => {
   it('grades by absolute offset, boundaries included', () => {
-    expect(levelForOffset(0, MVP_WINDOWS)).toBe('perfect');
-    expect(levelForOffset(-0.045, MVP_WINDOWS)).toBe('perfect');
-    expect(levelForOffset(0.046, MVP_WINDOWS)).toBe('good');
-    expect(levelForOffset(-0.1, MVP_WINDOWS)).toBe('good');
-    expect(levelForOffset(0.101, MVP_WINDOWS)).toBeNull();
+    expect(levelForOffset(0, JUDGE_WINDOWS)).toBe('perfect');
+    expect(levelForOffset(-0.045, JUDGE_WINDOWS)).toBe('perfect');
+    expect(levelForOffset(0.046, JUDGE_WINDOWS)).toBe('good');
+    expect(levelForOffset(-0.1, JUDGE_WINDOWS)).toBe('good');
+    expect(levelForOffset(0.101, JUDGE_WINDOWS)).toBeNull();
   });
 });
 

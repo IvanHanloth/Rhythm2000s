@@ -278,6 +278,7 @@ function showResults(): void {
     title: 'Pop-up Sweep',
     summary: summarizeResult(hits),
     newRecord: true,
+    assisted: false,
     hasNext: true,
     onRetry: close,
     onList: close,

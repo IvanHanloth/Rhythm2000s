@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import { buildChart } from '../../rhythm/chart.ts';
 import { sourceFromPatterns } from '../../rhythm/test-charts.ts';
 import { DIALOG_KINDS } from './dialog-kinds.ts';
-import { buildBackingTrack, type PopupSounds } from './song.ts';
+import { buildBackingTrack, type XpSongSounds } from './song.ts';
 import { loadMvpChart } from './test-mvp-chart.ts';
 
 /** 用名字代替真正的 AudioBuffer，只检查排了哪些声音 */
@@ -22,7 +22,7 @@ const sounds = {
     ].map((n) => [n, n]),
   ),
   dialogs: Object.fromEntries(Object.keys(DIALOG_KINDS).map((kind) => [kind, kind])),
-} as unknown as PopupSounds;
+} as unknown as XpSongSounds;
 
 describe('MVP 谱面文件', () => {
   it('8 个乐句，每句「示范 + 跟打」，中间没有空档，全曲 72 拍', () => {

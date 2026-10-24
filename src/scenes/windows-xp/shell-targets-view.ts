@@ -23,7 +23,7 @@ import {
   TaskButton,
   type XpTaskbar,
 } from './components/taskbar.ts';
-import type { PopupSession, PopupWindowState } from './popup-session.ts';
+import type { XpSession, XpTarget } from './session.ts';
 import { isShellAction, PHRASE_LIMITS } from './shell-actions.ts';
 
 type Point = { x: number; y: number };
@@ -120,7 +120,7 @@ interface MenuTarget {
 type Target = BalloonTarget | ProgramTarget | FileTarget | MenuTarget;
 
 export interface ShellTargetsViewOptions {
-  session: PopupSession;
+  session: XpSession;
   desktop: XpDesktop;
   taskbar: XpTaskbar;
   /** 消息框也在这一层；程序窗口和消息框共用屏幕位置 */
@@ -134,7 +134,7 @@ export class ShellTargetsView {
   readonly desktopLayer = new Container({ label: 'shell-desktop' });
   /** 气泡、开始菜单、任务栏上的程序按钮：放在任务栏之上 */
   readonly overlayLayer = new Container({ label: 'shell-overlay' });
-  private readonly session: PopupSession;
+  private readonly session: XpSession;
   private readonly desktop: XpDesktop;
   private readonly taskbar: XpTaskbar;
   private readonly targets = new Map<number, Target>();
@@ -156,7 +156,7 @@ export class ShellTargetsView {
     const taskScale = this.taskButtonScale();
     let balloonStack = 0;
 
-    session.windows.forEach((state, event) => {
+    session.targets.forEach((state, event) => {
       const action = state.call.action;
       if (!isShellAction(action)) return;
       const order = orderInPhrase(session, event, (a) => a === action);
@@ -261,7 +261,7 @@ export class ShellTargetsView {
     );
 
     for (const target of this.targets.values()) {
-      const state = this.session.windows[target.event]!;
+      const state = this.session.targets[target.event]!;
       switch (target.kind) {
         case 'balloon':
           this.renderBalloon(target, state, beat);
@@ -303,7 +303,7 @@ export class ShellTargetsView {
 
   // ---------- 各动作 ----------
 
-  private renderBalloon(target: BalloonTarget, state: PopupWindowState, beat: number): void {
+  private renderBalloon(target: BalloonTarget, state: XpTarget, beat: number): void {
     const view = target.view.view;
     const appearBeat = state.call.beat - BEATS.windowOpen;
     let visible = beat >= appearBeat;
@@ -311,9 +311,9 @@ export class ShellTargetsView {
     let alpha = 1;
     let shake = 0;
     target.view.setCloseHot(false);
-    if (visible && state.closedAt !== null) {
+    if (visible && state.handledAt !== null) {
       target.view.setCloseHot(true);
-      const p = (beat - this.session.beatAt(state.closedAt)) / BEATS.windowClose;
+      const p = (beat - this.session.beatAt(state.handledAt)) / BEATS.windowClose;
       visible = p < 1;
       scale = 1 - 0.3 * clamp01(p);
       alpha = 1 - clamp01(p);
@@ -334,7 +334,7 @@ export class ShellTargetsView {
 
   private renderProgram(
     target: ProgramTarget,
-    state: PopupWindowState,
+    state: XpTarget,
     beat: number,
     focused: boolean,
   ): void {
@@ -349,9 +349,9 @@ export class ShellTargetsView {
     let active = focused;
     let progress = 1;
     let alpha = 1;
-    if (visible && state.closedAt !== null) {
+    if (visible && state.handledAt !== null) {
       // 最小化：缩小飞向自己的任务栏按钮，按钮弹起
-      const p = (beat - this.session.beatAt(state.closedAt)) / MINIMIZE_BEATS;
+      const p = (beat - this.session.beatAt(state.handledAt)) / MINIMIZE_BEATS;
       visible = p < 1;
       progress = 1 - easeOutCubic(p);
       alpha = 1 - 0.5 * clamp01(p);
@@ -365,7 +365,7 @@ export class ShellTargetsView {
       // 还原：从任务栏按钮放大弹出，在示范拍点那一刻到位
       progress = easeOutBack((beat - appearBeat) / BEATS.windowOpen);
     }
-    target.task.setActive(visible && state.closedAt === null && active);
+    target.task.setActive(visible && state.handledAt === null && active);
 
     view.visible = visible;
     if (!visible) return;
@@ -380,7 +380,7 @@ export class ShellTargetsView {
   }
 
   /** 画一个文件；返回它是否已经扔进了回收站 */
-  private renderFile(target: FileTarget, state: PopupWindowState, beat: number): boolean {
+  private renderFile(target: FileTarget, state: XpTarget, beat: number): boolean {
     const view = target.view;
     const appearBeat = state.call.beat - BEATS.windowOpen;
     const center = this.fileCenter(target);
@@ -390,9 +390,9 @@ export class ShellTargetsView {
     let scale = 1;
     let alpha = 1;
     let thrown = false;
-    if (visible && state.closedAt !== null) {
+    if (visible && state.handledAt !== null) {
       // 沿弧线飞进回收站，越飞越小
-      const p = clamp01((beat - this.session.beatAt(state.closedAt)) / THROW_BEATS);
+      const p = clamp01((beat - this.session.beatAt(state.handledAt)) / THROW_BEATS);
       const bin = this.desktop.recycleBinCenter;
       x = center.x + (bin.x - center.x) * p;
       y = center.y + (bin.y - center.y) * p - 60 * Math.sin(Math.PI * p);
@@ -422,7 +422,7 @@ export class ShellTargetsView {
    * 开始菜单的状态。示范段：第一下打开，第二下关上。
    * 跟打段：命中第一下才打开；第二下命中就关上，Miss 就一直开到乐句结束。
    */
-  private menuState(state: PopupWindowState, beat: number): { open: boolean; hover: boolean } {
+  private menuState(state: XpTarget, beat: number): { open: boolean; hover: boolean } {
     const phrase = this.session.chart.phrases[state.call.phrase]!;
     const closed = { open: false, hover: false };
     if (beat < phrase.callEnd) {
@@ -458,7 +458,7 @@ export class ShellTargetsView {
   }
 
   /** Miss 的目标留到乐句结束，再用 FADE_BEATS 淡出 */
-  private fadeAtPhraseEnd(state: PopupWindowState, beat: number): number {
+  private fadeAtPhraseEnd(state: XpTarget, beat: number): number {
     const phraseEnd = this.session.chart.phrases[state.call.phrase]!.end;
     return 1 - clamp01((beat - phraseEnd) / FADE_BEATS);
   }
@@ -485,7 +485,7 @@ export class ShellTargetsView {
  * 程序窗口和消息框在屏幕上的位置序号：同一乐句里第几个「消息框或程序窗口」。
  * 场景给消息框排位置时也要用它，两种窗口才不会叠在一起。
  */
-export function windowSlotIndex(session: PopupSession, event: number): number {
+export function windowSlotIndex(session: XpSession, event: number): number {
   return orderInPhrase(
     session,
     event,
@@ -495,14 +495,14 @@ export function windowSlotIndex(session: PopupSession, event: number): number {
 
 /** 这个事件在本乐句里、满足条件的事件中排第几（从 0 开始） */
 function orderInPhrase(
-  session: PopupSession,
+  session: XpSession,
   event: number,
   test: (action: string) => boolean,
 ): number {
-  const phrase = session.windows[event]!.call.phrase;
+  const phrase = session.targets[event]!.call.phrase;
   let order = 0;
   for (let i = 0; i < event; i++) {
-    const call = session.windows[i]!.call;
+    const call = session.targets[i]!.call;
     if (call.phrase === phrase && test(call.action)) order++;
   }
   return order;

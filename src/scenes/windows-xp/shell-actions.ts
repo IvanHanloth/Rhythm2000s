@@ -10,7 +10,7 @@ export type ShellAction = Extract<
 >;
 
 export interface ShellActionInfo {
-  /** 示范段在拍点上响的声音；start-menu 的两下是点击声，不在这里（见 song.ts clickSound） */
+  /** 示范段在拍点上响的声音；start-menu 的两下是点击声，不在这里（见 song.ts hitSound） */
   appear: XpSoundName | null;
   /** 跟打段命中时的声音 */
   handled: XpSoundName;

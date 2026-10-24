@@ -16,7 +16,7 @@ export interface JudgeWindows {
 }
 
 /** Provisional MVP windows, see doc/prototypes/mvp.md */
-export const MVP_WINDOWS: JudgeWindows = { perfect: 0.045, good: 0.1, early: 0.2 };
+export const JUDGE_WINDOWS: JudgeWindows = { perfect: 0.045, good: 0.1, early: 0.2 };
 
 export interface Judgement {
   /** Target index */
@@ -45,7 +45,7 @@ export class ResponseJudge {
   private readonly results: (Judgement | null)[];
 
   /** targets: times of the response targets (s), ascending */
-  constructor(targets: readonly number[], windows: JudgeWindows = MVP_WINDOWS) {
+  constructor(targets: readonly number[], windows: JudgeWindows = JUDGE_WINDOWS) {
     this.targets = targets;
     this.windows = windows;
     this.results = targets.map(() => null);

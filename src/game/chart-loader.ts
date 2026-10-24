@@ -3,7 +3,7 @@
 
 import { buildChart, type Chart } from '../rhythm/chart.ts';
 import { parseChartFile, parseChartIndex } from '../rhythm/chart-file.ts';
-import { MVP_WINDOWS } from '../rhythm/judge.ts';
+import { JUDGE_WINDOWS } from '../rhythm/judge.ts';
 import { checkTurnCueSpacing } from '../rhythm/turn-cue.ts';
 import { sceneActions, SCENE_CATALOG, type SceneId } from '../scenes/catalog.ts';
 
@@ -72,7 +72,7 @@ export function checkChartData(
   const scene = SCENE_CATALOG[chart.scene as SceneId];
   const errors = [
     ...(scene.checkChart?.(chart) ?? []),
-    ...checkTurnCueSpacing(chart, MVP_WINDOWS.good),
+    ...checkTurnCueSpacing(chart, JUDGE_WINDOWS.good),
   ];
   return errors.length > 0 ? { chart: null, errors } : { chart, errors: [] };
 }

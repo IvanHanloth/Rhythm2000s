@@ -2,6 +2,10 @@
 // 轨迹由一串「停靠点」决定：在某一拍要停在某个位置。位置只由拍算出来，跟着音频时钟走，不累加帧间隔。
 // 不依赖 PixiJS，便于测试。
 
+import { secondsPerBeat } from '../../rhythm/beat.ts';
+import { JUDGE_WINDOWS } from '../../rhythm/judge.ts';
+import type { RoundSession, RoundTarget } from './round-session.ts';
+
 export interface CursorStop {
   /** 要在这一拍停在这里（全曲拍） */
   beat: number;
@@ -103,4 +107,100 @@ export function turnGaps(
   return [...byPhrase.values()].filter(
     (gap) => Number.isFinite(gap.lastCall) && Number.isFinite(gap.firstResponse),
   );
+}
+
+/** Call or response */
+export type Turn = 'call' | 'response';
+
+/** Where each press of an event lands (virtual screen coordinates), one point per press; may differ between call and response */
+export type PressPoints = (event: number, turn: Turn) => readonly Point[];
+
+interface TrackStop {
+  stop: CursorStop;
+  /** Response stops wait until this press is judged before leaving */
+  press?: { event: number; step: number };
+}
+
+/** Pause after a demonstrated press before moving on (beats) */
+const HOLD_BEATS = 1 / 16;
+
+/**
+ * The virtual mouse's path through one round. In the call it demonstrates each press on its beat;
+ * after the call it returns to `center`; in the response it arrives early at the next target,
+ * presses in place when the player does, and leaves only once that press is judged.
+ */
+export class PointerTrack {
+  /** How early the pointer arrives: the Good window plus 1/16 beat, so even the earliest valid press lands on target */
+  readonly leadBeats: number;
+  private readonly goodBeats: number;
+  private readonly session: RoundSession;
+  private readonly stops: TrackStop[];
+
+  constructor(session: RoundSession, points: PressPoints, places: { home: Point; center: Point }) {
+    this.session = session;
+    this.goodBeats = JUDGE_WINDOWS.good / secondsPerBeat(session.chart.bpm);
+    this.leadBeats = this.goodBeats + 1 / 16;
+
+    const { home, center } = places;
+    const stops: TrackStop[] = [{ stop: { beat: -Infinity, ...home } }];
+    session.targets.forEach((target, event) => {
+      const call = points(event, 'call');
+      const response = points(event, 'response');
+      target.clicks.forEach((click, step) => {
+        stops.push({ stop: { beat: demoBeat(target, step), ...pressPoint(call, event, step) } });
+        stops.push({
+          stop: { beat: click.beat, ...pressPoint(response, event, step) },
+          press: { event, step },
+        });
+      });
+    });
+    const gaps = turnGaps(
+      session.targets.map((target) => ({
+        phrase: target.call.phrase,
+        callBeats: target.clicks.map((_, step) => demoBeat(target, step)),
+        responseBeats: target.clicks.map((c) => c.beat),
+      })),
+    );
+    for (const stop of returnToCenterStops(gaps, center)) stops.push({ stop });
+    stops.push({ stop: { beat: session.chart.endBeat, ...home } });
+    this.stops = stops.sort((a, b) => a.stop.beat - b.stop.beat);
+  }
+
+  /** Pointer position at a beat */
+  positionAt(beat: number): Point {
+    // A response stop is left once its press is judged, or when the Good window closes
+    for (const { stop, press } of this.stops) {
+      if (!press) continue;
+      const click = this.session.targets[press.event]!.clicks[press.step]!;
+      const done = click.hitAt ?? click.missedAt;
+      stop.leave = done !== null ? this.session.beatAt(done) : stop.beat + this.goodBeats;
+    }
+    return cursorAt(
+      this.stops.map((s) => s.stop),
+      beat,
+      { leadBeats: this.leadBeats, holdBeats: HOLD_BEATS },
+    );
+  }
+
+  /** Beats at which the player's presses hit */
+  hitBeats(): number[] {
+    const beats: number[] = [];
+    for (const target of this.session.targets) {
+      for (const click of target.clicks) {
+        if (click.hitAt !== null) beats.push(this.session.beatAt(click.hitAt));
+      }
+    }
+    return beats;
+  }
+}
+
+/** Beat of a target's step-th press as demonstrated in the call */
+export function demoBeat(target: RoundTarget, step: number): number {
+  return target.call.beat + (target.clicks[step]!.beat - target.response.beat);
+}
+
+function pressPoint(points: readonly Point[], event: number, step: number): Point {
+  const point = points[step];
+  if (!point) throw new Error(`No pointer position for press ${step} of event ${event}`);
+  return point;
 }

@@ -5,8 +5,8 @@ import type { FrameInfo, Scene, SceneContext, SceneEntry, TapInfo } from './scen
 
 /** Where scene views attach. Only these two methods, to keep it testable. */
 export interface SceneHost {
-  addChild(view: Scene['view']): unknown;
-  removeChild(view: Scene['view']): unknown;
+  addChild(view: Scene['view']): void;
+  removeChild(view: Scene['view']): void;
 }
 
 export class SceneDirector {
