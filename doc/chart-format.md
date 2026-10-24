@@ -129,6 +129,10 @@ public/charts/
 
 四种消息框玩法相同，只是图标、按钮和提示音不同，同一乐句里可以混用。`desktop-refresh` 也可以和消息框混用；它的第二下固定在第一下之后 0.5 拍（2026-10-24 用户选定：一个事件、固定间隔），谱面里只写第一下的拍位置。`balloon-info`、`window-minimize`、`start-menu`、`recycle-bin` 是 2026-10-24 加的四个 XP 动作，同样可以和其他 XP 动作混用，`start-menu` 的两下和 `desktop-refresh` 一样固定相隔 0.5 拍，设计见 [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md)。Mac 场景的六个动作也一样，玩法相同，同一乐句里可以混用（Mac 提示音的选择见 [scenes/mac-2000.md](scenes/mac-2000.md#音效)）。设计文档里的其他动作（XP 的收邮件等）实现后再按同样规则加入此表。谱面用了所在场景不支持的动作，视为错误。
 
+## 官方关卡的要求
+
+官方关卡还要符合 [level-design.md](level-design.md)：从简单到难、正文至少 1 分钟。开头的操作演示由系统按谱面里出现的动作自动生成，**不要写进谱面**。
+
 ## 场景附加规则
 
 | 场景 | 规则 |

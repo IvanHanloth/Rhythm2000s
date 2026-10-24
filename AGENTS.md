@@ -63,7 +63,7 @@
 - 单元测试与被测文件放在一起，命名为 `*.test.ts`，从 `vite-plus/test` 导入测试 API。
 - 新增原型页面时，在 `vite.config.ts` 的 `build.rolldownOptions.input` 中登记入口，并加到 `src/game/dev-panel.ts` 的原型列表里。
 - 新增场景时，在 `src/scenes/<场景名>/` 实现 `Scene` 接口（`src/game/scene.ts`），在 `src/scenes/catalog.ts` 登记场景名称和支持的动作，再在 `src/game/main.ts` 里登记。场景按 1280×720 的逻辑坐标绘制，颜色只取 `src/theme/` 的 token。
-- 新增谱面时，在 `public/charts/` 放 `<谱面 id>.json` 并加进 `index.json`；`vp test` 会校验目录下的每个谱面。新增动作类型时，先更新 [doc/chart-format.md](doc/chart-format.md) 的动作表，再改 `src/rhythm/actions.ts` 和场景目录。
+- 新增谱面时，先读[官方关卡设计规范](doc/level-design.md)（开头的操作演示由系统生成、不写进谱面；从简单到难；正文至少 1 分钟），在 `public/charts/` 放 `<谱面 id>.json` 并加进 `index.json`；`vp test` 会校验目录下的每个谱面。新增动作类型时，先更新 [doc/chart-format.md](doc/chart-format.md) 的动作表，再改 `src/rhythm/actions.ts` 和场景目录。
 - `promo/` 不属于游戏构建：它用 `npx hyperframes`（版本钉在 `promo/package.json`）预览和渲染，不进游戏的 pnpm 依赖。`promo/assets` 是指向根目录 `assets/` 的符号链接，视频里用 `assets/...` 引用素材（HyperFrames 预览服务读不到工程目录以外的文件；Windows 上克隆需开启 `git config core.symlinks true`）。做视频前先用 `/hyperframes` 技能。
 
 ## 技术栈
