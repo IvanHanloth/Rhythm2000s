@@ -89,7 +89,10 @@ export function drawSpeakerIcon({ muted = false, white = false } = {}): Graphics
     .fill(color);
   if (!muted) {
     for (const r of [3, 6, 9]) {
-      g.arc(8, 8, r, -Math.PI / 4, Math.PI / 4);
+      // Lift the pen to the arc's start, or PixiJS joins it to the path's last point with a straight line
+      const start = -Math.PI / 4;
+      g.moveTo(8 + r * Math.cos(start), 8 + r * Math.sin(start));
+      g.arc(8, 8, r, start, Math.PI / 4);
       g.stroke({ width: 1.3, color });
     }
   }
