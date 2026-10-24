@@ -49,10 +49,6 @@ export function parseRoute(hash: string, sceneIds: readonly string[]): Route {
   return chartId ? { kind: 'scene', sceneId, chartId } : { kind: 'scene', sceneId };
 }
 
-export function levelRoute(level: Level): string {
-  return `${level.sceneId}/${level.id}`;
-}
-
 /**
  * Best-score line on the intro, e.g. "Best score 04250"; null with no score (scoring rules: doc/results.md).
  * 最好成绩是开着律动组件打的，后面加「(Beat Guide)」（doc/beat-guide.md）

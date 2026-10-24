@@ -44,9 +44,6 @@ export const AQUA = {
 
   /** Blue behind selected items in Finder */
   selection: '#3875d7',
-  /** List view headers: white gradient, light blue gel for the sorted column */
-  listHeader: { top: '#ffffff', bottom: '#dadada', edge: '#a2a2a2' },
-  listHeaderSorted: { top: '#d3e6fc', bottom: '#86b6ee' },
 
   gel: {
     /** Default button, active window scroller thumb */

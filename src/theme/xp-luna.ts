@@ -16,8 +16,6 @@ export const LUNA = {
   edgeDarkShadow: '#716f64',
   /** Blue behind selected items and highlighted menu items */
   selection: '#316ac5',
-  /** Border of text boxes, check boxes and similar controls */
-  controlBorder: '#1c5180',
   /** Shadow under desktop icon labels */
   desktopTextShadow: '#000000',
 

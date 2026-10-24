@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { buildChart } from '../rhythm/chart.ts';
-import { buildLevels, formatBestScore, levelRoute, parseRoute } from './levels.ts';
+import { buildLevels, formatBestScore, parseRoute } from './levels.ts';
 
 function chart(id: string, scene: string, actions: string[]) {
   return buildChart({
@@ -46,15 +46,6 @@ describe('parseRoute', () => {
   it('#scene and #scene/chart', () => {
     expect(parseRoute('#mac-2000', ids)).toEqual({ kind: 'scene', sceneId: 'mac-2000' });
     expect(parseRoute('#windows-xp/x2', ids)).toEqual({
-      kind: 'scene',
-      sceneId: 'windows-xp',
-      chartId: 'x2',
-    });
-  });
-
-  it('round-trips with levelRoute', () => {
-    const level = buildLevels(scenes, charts)[1]!;
-    expect(parseRoute(`#${levelRoute(level)}`, ids)).toEqual({
       kind: 'scene',
       sceneId: 'windows-xp',
       chartId: 'x2',
