@@ -1,0 +1,71 @@
+{
+  "format": 1,
+  "id": "mac-alert-basics",
+  "title": "提示框入门",
+  "scene": "mac-2000",
+  "bpm": 104,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 1,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 2, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-caution" },
+        { "beat": 2, "action": "alert-caution" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-stop" },
+        { "beat": 1, "action": "alert-stop" },
+        { "beat": 2, "action": "alert-stop" },
+        { "beat": 3, "action": "alert-stop" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "alert-caution" },
+        { "beat": 2, "action": "alert-stop" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1.5, "action": "alert-note" },
+        { "beat": 2, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-caution" },
+        { "beat": 0.5, "action": "alert-caution" },
+        { "beat": 2, "action": "alert-stop" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 2, "action": "alert-caution" },
+        { "beat": 2.5, "action": "alert-caution" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-stop" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 2, "action": "alert-caution" },
+        { "beat": 3, "action": "alert-stop" }
+      ]
+    }
+  ]
+}

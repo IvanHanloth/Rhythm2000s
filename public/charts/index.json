@@ -1,4 +1,11 @@
 {
   "format": 1,
-  "charts": ["xp-popup-mvp.json"]
+  "charts": [
+    "xp-popup-mvp.json",
+    "mac-alert-basics.json",
+    "mac-dock-hop.json",
+    "mac-mail-rush.json",
+    "mac-minimize.json",
+    "mac-remix-1.json"
+  ]
 }

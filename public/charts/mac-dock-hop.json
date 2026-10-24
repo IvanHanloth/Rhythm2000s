@@ -1,0 +1,75 @@
+{
+  "format": 1,
+  "id": "mac-dock-hop",
+  "title": "Dock 弹弹跳",
+  "scene": "mac-2000",
+  "bpm": 116,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 1,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 1, "action": "dock-bounce" },
+        { "beat": 2, "action": "dock-bounce" },
+        { "beat": 3, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 2, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 1.5, "action": "dock-bounce" },
+        { "beat": 2, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0.5, "action": "dock-bounce" },
+        { "beat": 1.5, "action": "dock-bounce" },
+        { "beat": 2.5, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 1, "action": "dock-bounce" },
+        { "beat": 2, "action": "dock-bounce" },
+        { "beat": 2.5, "action": "dock-bounce" },
+        { "beat": 3, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 0.5, "action": "dock-bounce" },
+        { "beat": 1, "action": "dock-bounce" },
+        { "beat": 3, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 1.5, "action": "dock-bounce" },
+        { "beat": 3, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 0.5, "action": "dock-bounce" },
+        { "beat": 1, "action": "dock-bounce" },
+        { "beat": 1.5, "action": "dock-bounce" },
+        { "beat": 2, "action": "dock-bounce" },
+        { "beat": 3, "action": "dock-bounce" }
+      ]
+    }
+  ]
+}

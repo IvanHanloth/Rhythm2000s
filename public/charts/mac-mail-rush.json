@@ -1,0 +1,83 @@
+{
+  "format": 1,
+  "id": "mac-mail-rush",
+  "title": "新邮件来啦",
+  "scene": "mac-2000",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 1,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "mail-new" },
+        { "beat": 1, "action": "mail-new" },
+        { "beat": 2, "action": "mail-new" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "mail-new" },
+        { "beat": 0.5, "action": "mail-new" },
+        { "beat": 1, "action": "mail-new" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "mail-new" },
+        { "beat": 1, "action": "mail-new" },
+        { "beat": 2, "action": "mail-new" },
+        { "beat": 2.5, "action": "mail-new" },
+        { "beat": 3, "action": "mail-new" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "mail-new" },
+        { "beat": 0.5, "action": "mail-new" },
+        { "beat": 1, "action": "mail-new" },
+        { "beat": 1.5, "action": "mail-new" },
+        { "beat": 2, "action": "mail-new" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "mail-new" },
+        { "beat": 2, "action": "mail-new" },
+        { "beat": 2.5, "action": "mail-new" },
+        { "beat": 3, "action": "mail-new" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "mail-new" },
+        { "beat": 0.5, "action": "mail-new" },
+        { "beat": 1, "action": "mail-new" },
+        { "beat": 2, "action": "mail-new" },
+        { "beat": 2.5, "action": "mail-new" },
+        { "beat": 3, "action": "mail-new" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "mail-new" },
+        { "beat": 1, "action": "mail-new" },
+        { "beat": 1.5, "action": "mail-new" },
+        { "beat": 2, "action": "mail-new" },
+        { "beat": 3, "action": "mail-new" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "mail-new" },
+        { "beat": 0.5, "action": "mail-new" },
+        { "beat": 1, "action": "mail-new" },
+        { "beat": 1.5, "action": "mail-new" },
+        { "beat": 2, "action": "mail-new" },
+        { "beat": 2.5, "action": "mail-new" },
+        { "beat": 3, "action": "mail-new" }
+      ]
+    }
+  ]
+}
