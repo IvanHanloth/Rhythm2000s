@@ -518,6 +518,15 @@ function buildStreet(b: Builder): void {
     width: 256,
     height: 96,
   });
+  // The cheat code on the back of the east barrier, the far end from the spawn point (doc/cheat-code.md): seen by
+  // turning the camera round at the barrier
+  const cheatCode = signTexture({
+    text: 'Cheat Code: IvanHanloth',
+    background: C.plasticDark,
+    color: C.signYellow,
+    width: 512,
+    height: 96,
+  });
   const farWall = surface('red_brick_03', { tile: 2, tint: '#e8d8d0' });
   for (const side of [-1, 1]) {
     const x = side * STREET_END;
@@ -531,6 +540,17 @@ function buildStreet(b: Builder): void {
       -side * (Math.PI / 2),
       b.glow(closed, '#ffffff', 1.2),
     );
+    if (side === 1) {
+      b.panel(
+        3.2,
+        0.6,
+        x + side * 0.16,
+        0.6,
+        0,
+        side * (Math.PI / 2),
+        b.glow(cheatCode, '#ffffff', 1.2),
+      );
+    }
     b.box(4, 16, 60, x + side * 6, -CURB_HEIGHT, 0, farWall, { blockCamera: true });
   }
 }

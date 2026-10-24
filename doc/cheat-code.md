@@ -7,6 +7,7 @@ A hidden cheat for showing the game off or getting through a hard level: typing 
 ## Decided
 
 - **The code** is `IvanHanloth` (after one of the makers), typed as letters anywhere in the game: the street, the level list or during a level. Case is ignored.
+- **The hint**: the back of the roadworks barrier at the east end of the street, the far end from where the player starts, reads "Cheat Code: IvanHanloth"; the west barrier has none. The back faces away from the street, so it is seen by walking up to the barrier and turning the camera round toward the street.
 - **Invincible**: the player presses as usual and every press counts as Perfect; a target the player doesn't press also counts as Perfect. A round can't be failed.
 - **Scores aren't recorded** while the cheat is on: no best score is saved and the level doesn't count as played.
 - **The coin**: entering the code gives the player a 10p coin. Putting it into **any of the four arcade machines** at FUNLAND AMUSEMENTS ends the cheat; the coin is used up.
