@@ -1,6 +1,7 @@
 // The level flow every desktop scene shares: pick a level on the in-game desktop (doc/level-select.md),
-// show the shell's level intro, run the system demo — one small round per action the chart uses, each
-// repeated until passed (doc/level-design.md "Rule 1") — then play the chart and show the results (doc/results.md).
+// show the shell's level intro, then play the chart in pieces: before the first phrase that uses an action the
+// chart stops for its demo, one small round per new action, each repeated until passed (doc/level-design.md
+// "Rule 1", ADR 0008); Tab skips every remaining demo. The results count all pieces together (doc/results.md).
 // Subclasses draw the desktop and its widgets; everything is computed from audio time, never from frame deltas.
 //
 // States: select (choosing in the level list); ready (the shell shows the intro and waits for the first press);
@@ -12,15 +13,16 @@ import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
 import { recordScore } from '@/game/records.ts';
 import type { FrameInfo, Scene, SceneContext, TapInfo } from '@/game/scene.ts';
 import { loadSkipTutorial } from '@/game/settings.ts';
-import type { ActionType } from '@/rhythm/actions.ts';
 import type { Chart } from '@/rhythm/chart.ts';
-import { summarizeResult, type ResultSummary } from '@/rhythm/result-summary.ts';
+import { summarizeResult, type HitResult, type ResultSummary } from '@/rhythm/result-summary.ts';
 import { buildTurnCues, turnCueAt, type TurnCue } from '@/rhythm/turn-cue.ts';
 import {
   buildTutorialChart,
-  tutorialActions,
+  chartSegment,
   tutorialHint,
   tutorialPassed,
+  tutorialStops,
+  type TutorialStop,
 } from '@/rhythm/tutorial.ts';
 import { BEATS, type ThemeColors } from '@/theme/tokens.ts';
 import { BEAT_GUIDE_POSITION, BeatGuideView } from '@/ui/beat-guide-view.ts';
@@ -43,6 +45,27 @@ const LIST_MOVES: Record<string, [number, number]> = {
 };
 
 type State = 'select' | 'ready' | 'starting' | 'playing' | 'result';
+
+/** A level in progress: the demo stops still ahead, the round that is on, and the chart's judgements so far */
+interface LevelRun {
+  /** Stops not finished yet; the first is the one being demonstrated. Emptied when the tutorial is skipped */
+  stops: TutorialStop[];
+  /** Index into stops[0].actions of the demo round on, or null while a piece of the chart plays */
+  demo: number | null;
+  /** The demo round on repeats a failed one */
+  retry: boolean;
+  /** Demos passed, and how many the level has (for the caption) */
+  passed: number;
+  total: number;
+  /** First chart phrase of the piece playing */
+  pieceStart: number;
+  /** First chart phrase not played yet */
+  nextPhrase: number;
+  /** Judgements of the pieces played, with the chart's phrase numbers */
+  hits: HitResult[];
+  /** The beat guide was on at some point during the chart */
+  assisted: boolean;
+}
 
 /** The scene's level list (Explorer / Finder window) */
 export interface LevelList {
@@ -102,13 +125,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   /** Scene sounds outside a round (clicks, the results jingle); a round plays through its session */
   private readonly output: GainNode;
   private state: State = 'select';
-  /** The chosen level's chart (during the demo the session plays a small demo chart instead) */
+  /** The chosen level's chart (the session plays a demo chart or a piece of this one) */
   private chart: Chart | null = null;
-  /** Demo progress: actions to demonstrate, the current one, and whether this round is a retry */
-  private tutorial: { actions: ActionType[]; index: number; retry: boolean } | null = null;
+  private run: LevelRun | null = null;
   private turnCues: TurnCue[] = [];
-  /** The beat guide was on at some point during the chart */
-  private assisted = false;
   private modal: ModalWindow | null = null;
   /** What Enter / Space does on the results window */
   private resultDefault: () => void = () => {};
@@ -189,8 +209,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.renderBeatGuide(beat);
 
     if (audioTime < session.endTime) return;
-    if (this.tutorial) this.nextTutorialRound(session);
-    else this.finish(session);
+    this.roundEnded(session);
   }
 
   /** Space and clicks are rhythm input only during a round; on the intro the first press starts the level */
@@ -252,7 +271,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.ready(chart);
   }
 
-  /** List: arrow keys select, Enter starts. Results: Enter / Space press the default button, R retries */
+  /** List: arrow keys select, Enter starts. Demo: Tab skips the tutorial. Results: Enter / Space press the default button, R retries */
   private readonly onKeyDown = (event: KeyboardEvent) => {
     if (event.repeat) return;
     if (this.state === 'select' && !this.modal) {
@@ -263,6 +282,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       } else if (event.code === 'Enter') {
         this.openLevel(this.levelList.selectedIndex);
       }
+    } else if (this.state === 'playing') {
+      if (event.code === 'Tab' && this.skipTutorial()) event.preventDefault();
     } else if (this.state === 'result') {
       if (event.code === 'Enter' || event.code === 'Space') this.resultDefault();
       else if (event.code === 'KeyR') this.retry();
@@ -288,7 +309,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.context.introduce(chart.id);
   }
 
-  /** Starts a level, first running the demo unless skipped (here or in the settings) */
+  /** Starts a level, with its demos unless skipped (here or in the settings) */
   private async start(chart: Chart, withTutorial = true): Promise<void> {
     this.state = 'starting';
     this.chart = chart;
@@ -296,12 +317,22 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     // The scene may have been left, or Esc pressed, while audio resumed
     if (this.destroyed || this.state !== 'starting') return;
 
-    const actions = withTutorial && !loadSkipTutorial() ? tutorialActions(chart) : [];
-    this.tutorial = actions.length > 0 ? { actions, index: 0, retry: false } : null;
-    this.beginRound(this.tutorial ? buildTutorialChart(chart, actions[0]!) : chart);
+    const stops = withTutorial && !loadSkipTutorial() ? tutorialStops(chart) : [];
+    this.run = {
+      stops,
+      demo: null,
+      retry: false,
+      passed: 0,
+      total: stops.reduce((n, stop) => n + stop.actions.length, 0),
+      pieceStart: 0,
+      nextPhrase: 0,
+      hits: [],
+      assisted: false,
+    };
+    this.advance();
   }
 
-  /** Retry from the results: the demo was just played, so go straight to the chart */
+  /** Retry from the results: the demos were just played, so play the chart in one go */
   private retry(): void {
     if (performance.now() - this.resultShownAt < RESULT_INPUT_DELAY_MS) return;
     if (this.chart) void this.start(this.chart, false);
@@ -319,30 +350,75 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
 
   private backToList(): void {
     this.endRound();
-    this.tutorial = null;
+    this.run = null;
     this.state = 'select';
     this.closeModal();
     this.setListVisible(true);
   }
 
-  /** A demo round ended: move on if passed, otherwise repeat; after the last action the chart starts. Demos are not scored. */
-  private nextTutorialRound(session: S): void {
-    const tutorial = this.tutorial;
-    const chart = this.chart;
-    if (!tutorial || !chart) return;
-    const passed = tutorialPassed(
-      session.judgements.map((j) => j.level),
-      session.targetCount,
-    );
-    if (passed) tutorial.index++;
-    tutorial.retry = !passed;
-    const action = tutorial.actions[tutorial.index];
-    if (action === undefined) {
-      this.tutorial = null;
-      this.beginRound(chart);
+  /** A round ended: a demo moves on if passed, otherwise repeats; a piece of the chart keeps its judgements. Demos are not scored. */
+  private roundEnded(session: S): void {
+    const run = this.run;
+    if (!run) return;
+    if (run.demo !== null) {
+      const passed = tutorialPassed(
+        session.judgements.map((j) => j.level),
+        session.targetCount,
+      );
+      if (passed) {
+        run.demo++;
+        run.passed++;
+      }
+      run.retry = !passed;
     } else {
-      this.beginRound(buildTutorialChart(chart, action));
+      run.hits.push(
+        ...session.judgements.map((j) => ({
+          level: j.level,
+          offset: j.offset,
+          phrase: run.pieceStart + session.targets[j.event]!.call.phrase,
+        })),
+      );
     }
+    this.advance();
+  }
+
+  /**
+   * Starts the next round: the next demo if the chart has reached a stop, otherwise the chart from the next
+   * unplayed phrase up to the following stop (or the end); after the last phrase, the results.
+   */
+  private advance(): void {
+    const run = this.run;
+    const chart = this.chart;
+    if (!run || !chart) return;
+    const stop = run.stops[0];
+    if (stop?.phrase === run.nextPhrase) {
+      const demo = run.demo ?? 0;
+      const action = stop.actions[demo];
+      if (action !== undefined) {
+        run.demo = demo;
+        this.beginRound(buildTutorialChart(chart, action));
+        return;
+      }
+      run.stops.shift();
+    }
+    run.demo = null;
+    run.retry = false;
+    if (run.nextPhrase >= chart.phrases.length) {
+      this.finish(run, chart);
+      return;
+    }
+    run.pieceStart = run.nextPhrase;
+    run.nextPhrase = run.stops[0]?.phrase ?? chart.phrases.length;
+    this.beginRound(chartSegment(chart, run.pieceStart, run.nextPhrase));
+  }
+
+  /** Tab during a demo: drop every remaining demo and play the rest of the chart in one go. False outside a demo. */
+  private skipTutorial(): boolean {
+    const run = this.run;
+    if (!run || run.demo === null) return false;
+    run.stops = [];
+    this.advance();
+    return true;
   }
 
   private beginRound(chart: Chart): void {
@@ -351,7 +427,6 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.setListVisible(false);
     this.turnCues = buildTurnCues(chart);
     this.beatGuide.setRound(chart);
-    this.assisted = false;
     const session = this.createSession(chart);
     this.session = session;
     this.buildRound(session);
@@ -359,17 +434,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.state = 'playing';
   }
 
-  /** The chart ended: record the best score and open the results */
-  private finish(session: S): void {
-    const chart = session.chart;
-    const summary = summarizeResult(
-      session.judgements.map((j) => ({
-        level: j.level,
-        offset: j.offset,
-        phrase: session.targets[j.event]!.call.phrase,
-      })),
-    );
-    const assisted = this.assisted;
+  /** The chart's last piece ended: record the best score and open the results */
+  private finish(run: LevelRun, chart: Chart): void {
+    const summary = summarizeResult(run.hits);
+    const assisted = run.assisted;
     const newRecord = recordScore(chart.id, summary.score, assisted);
     const hasNext = this.charts.indexOf(chart) < this.charts.length - 1;
     this.endRound();
@@ -405,29 +473,28 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
 
   /** Demo caption: which practice this is (or "Try again") and how to handle the action */
   private renderCaption(): void {
-    const tutorial = this.tutorial;
-    const action = tutorial?.actions[tutorial.index];
-    if (!tutorial || action === undefined) {
+    const run = this.run;
+    const action = run && run.demo !== null ? run.stops[0]?.actions[run.demo] : undefined;
+    if (!run || action === undefined) {
       this.caption.show(null);
       return;
     }
     const hint = tutorialHint(action);
-    const step = tutorial.retry
-      ? 'Try again'
-      : `Practice ${tutorial.index + 1} of ${tutorial.actions.length}`;
+    const step = run.retry ? 'Try again' : `Practice ${run.passed + 1} of ${run.total}`;
     this.caption.show({ title: `${step} · ${hint.name}`, how: hint.how });
   }
 
   /**
-   * The beat guide is always shown during the demo, and follows the player's toggle afterwards
+   * The beat guide is always shown during demos, and follows the player's toggle while the chart plays
    * (doc/beat-guide.md "Toggle"); using it during the chart marks the score as assisted.
    */
   private renderBeatGuide(beat: number): void {
-    const on = this.tutorial !== null || (this.context.beatGuide?.() ?? false);
+    const demo = this.run !== null && this.run.demo !== null;
+    const on = demo || (this.context.beatGuide?.() ?? false);
     this.beatGuide.view.visible = on;
     if (!on) return;
     this.beatGuide.update(beat);
-    if (!this.tutorial) this.assisted = true;
+    if (this.run && !demo) this.run.assisted = true;
   }
 
   /** Turn banner: squashes and springs back once on each switch */

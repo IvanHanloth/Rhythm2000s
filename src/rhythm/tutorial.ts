@@ -1,15 +1,69 @@
-// The system demo (doc/level-design.md "Rule 1"): before the chart, each action it uses is demonstrated
-// in turn and must be played back without a Miss before the next; demos are not scored.
-// This picks the actions, builds each demo chart, judges a pass and holds the hint texts; scenes run the flow.
+// The system demo (doc/level-design.md "Rule 1", ADR 0008): right before the first phrase that uses an action,
+// the chart stops and that action is demonstrated, and must be played back without a Miss before the next;
+// demos are not scored. This finds the stops, cuts the chart into the pieces between them, builds each demo
+// chart, judges a pass and holds the hint texts; scenes run the flow.
 
 import type { ActionType } from './actions.ts';
-import { buildChart, type Chart } from './chart.ts';
+import { buildChart, type Chart, type ChartCue } from './chart.ts';
 import type { JudgementLevel } from './judge.ts';
 
-/** Actions the chart uses, in order of first appearance */
-export function tutorialActions(chart: Chart): ActionType[] {
+/** A place where the chart stops for demos: the actions first used in this phrase, in order of appearance */
+export interface TutorialStop {
+  phrase: number;
+  actions: ActionType[];
+}
+
+/** One stop per phrase that brings in actions not used in any earlier phrase, in phrase order */
+export function tutorialStops(chart: Chart): TutorialStop[] {
   const cues = [...chart.calls, ...chart.responses].sort((a, b) => a.beat - b.beat);
-  return [...new Set(cues.map((cue) => cue.action))];
+  const seen = new Set<ActionType>();
+  const stops: TutorialStop[] = [];
+  chart.phrases.forEach((_, phrase) => {
+    const actions = cues
+      .filter((cue) => cue.phrase === phrase && !seen.has(cue.action))
+      .map((cue) => cue.action);
+    const fresh = [...new Set(actions)];
+    if (fresh.length === 0) return;
+    for (const action of fresh) seen.add(action);
+    stops.push({ phrase, actions: fresh });
+  });
+  return stops;
+}
+
+/**
+ * The phrases [first, end) of a chart as a chart of their own, played after a demo: the first piece keeps the
+ * chart's count-in, later ones get one count-in bar; only the piece that reaches the end keeps the outro.
+ * Phrase indices restart from 0, so add `first` to get back to the chart's phrase numbers.
+ */
+export function chartSegment(chart: Chart, first: number, end: number): Chart {
+  const firstPhrase = chart.phrases[first];
+  const lastPhrase = chart.phrases[end - 1];
+  if (!firstPhrase || !lastPhrase || end <= first) {
+    throw new Error(`Chart ${chart.id} has no phrases ${first}..${end - 1}`);
+  }
+  const countIn = first === 0 ? firstPhrase.callStart : chart.beatsPerBar;
+  const shift = countIn - firstPhrase.callStart;
+  const outro = end === chart.phrases.length ? chart.endBeat - lastPhrase.end : 0;
+  const take = (cues: readonly ChartCue[]) =>
+    cues
+      .filter((cue) => cue.phrase >= first && cue.phrase < end)
+      .map((cue) => ({ ...cue, beat: cue.beat + shift, phrase: cue.phrase - first }));
+  return {
+    ...chart,
+    id:
+      first === 0 && end === chart.phrases.length
+        ? chart.id
+        : `${chart.id}--phrases-${first}-${end}`,
+    phrases: chart.phrases.slice(first, end).map((phrase) => ({
+      callStart: phrase.callStart + shift,
+      callEnd: phrase.callEnd + shift,
+      responseStart: phrase.responseStart + shift,
+      end: phrase.end + shift,
+    })),
+    calls: take(chart.calls),
+    responses: take(chart.responses),
+    endBeat: lastPhrase.end + shift + outro,
+  };
 }
 
 /**

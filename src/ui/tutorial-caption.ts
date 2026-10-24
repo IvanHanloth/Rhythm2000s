@@ -1,5 +1,5 @@
 // The demo caption (doc/level-design.md "Rule 1"), right of the Follow me / Your turn banner:
-// "Practice 2 of 4 · Volume" (or "Try again · Volume") over how to handle the action.
+// "Practice 2 of 4 · Volume" (or "Try again · Volume") over how to handle the action, with the skip key at the top right.
 // Coloured like the banner's call side, as given by the scene. Origin at the left edge, vertically centred.
 
 import { Container, Graphics, Text } from 'pixi.js';
@@ -9,6 +9,8 @@ import type { TurnBannerStyle } from './turn-banner.ts';
 const WIDTH = 460;
 const HEIGHT = 56;
 const PADDING_X = 18;
+/** The key that skips the tutorial (handled by the level scene) */
+const SKIP_HINT = 'Tab: skip';
 
 export interface TutorialCaptionContent {
   /** First line, e.g. "Practice 2 of 4 · Volume" */
@@ -21,6 +23,7 @@ export class TutorialCaption {
   readonly view = new Container({ label: 'tutorial-caption' });
   private readonly title: Text;
   private readonly how: Text;
+  private readonly skip: Text;
 
   constructor(style: TurnBannerStyle) {
     const pill = new Graphics()
@@ -44,7 +47,14 @@ export class TutorialCaption {
     });
     this.how.anchor.set(0, 0);
     this.how.position.set(PADDING_X + 6, 2);
-    this.view.addChild(pill, this.title, this.how);
+    this.skip = new Text({
+      text: SKIP_HINT,
+      style: { fontFamily: FONT_FAMILIES.display, fontSize: 13, fill: style.text },
+    });
+    this.skip.anchor.set(1, 1);
+    this.skip.position.set(WIDTH - PADDING_X - 6, 1);
+    this.skip.alpha = 0.7;
+    this.view.addChild(pill, this.title, this.how, this.skip);
     this.show(null);
   }
 
