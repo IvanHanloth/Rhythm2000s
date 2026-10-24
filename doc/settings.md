@@ -1,23 +1,23 @@
-# 设置
+# Settings
 
-> 状态：草稿（2026-10-24）。设置页面由用户要求加入；页面放在哪里、长什么样还没定。
+> Status: Draft. The user asked for a settings page; where it lives and how it looks are not decided.
 
-目前唯一的玩家设置是输入校准值，只能在开发面板里改（`src/game/settings.ts`，保存在浏览器本地）。2026-10-24 用户要求加一个正式的设置页面。
+The only player setting so far is the input calibration, editable in the dev panel (`src/game/settings.ts`, saved in the browser). The user asked for a proper settings page.
 
-## 设置项
+## Settings
 
-| 设置项 | 默认值 | 作用 | 状态 |
+| Setting | Default | Effect | Status |
 | --- | --- | --- | --- |
-| 跳过操作演示（界面文字暂定 Skip tutorial） | 关 | 打开后，进入关卡不再演示动作，直接从谱面正文开始（演示规则见 [level-design.md](level-design.md#规则-1开头由系统演示全部操作)）。设置页面做好之前，先放在开发面板里 | 已定，暂放开发面板 |
-| 律动组件（Beat Guide） | 关 | 一局里的 `((((O))))` 节拍提示，关卡里按 H 切换，见 [beat-guide.md](beat-guide.md)。开着时打的成绩会标出「Beat Guide」 | 已定，用 H 键切换 |
-| 输入延迟校准 | 0 毫秒 | 判定时扣除的偏移量，范围 ±300 毫秒；现有的值，搬到设置页面里 | 已有，待搬入 |
+| Skip tutorial | Off | Levels start straight from the chart without the action demo (demo rules in [level-design.md](level-design.md#rule-1-the-system-demonstrates-every-action-first)). Lives in the dev panel until the settings page exists | Decided, in the dev panel for now |
+| Beat Guide | Off | The `((((O))))` beat cue in a round, toggled with H in a level, see [beat-guide.md](beat-guide.md). Scores set with it on are marked "Beat Guide" | Decided, toggled with H |
+| Input latency calibration | 0 ms | Offset subtracted when judging, within ±300 ms; the existing value, to move to the settings page | Exists, to move |
 
-设置都保存在浏览器本地；读写失败（隐私模式等）时退回默认值，和现在的校准值一样。
+Settings are saved in the browser; when reading or writing fails (private mode etc.) they fall back to their defaults, as the calibration does now.
 
-## 候选 / 待讨论
+## Candidates / open questions
 
-> 以下只是想法，尚未确定。
+> Ideas only, not decided.
 
-- 设置页面放在哪里：3D 街区里（开始界面的菜单）、电脑里（XP 的「控制面板」/ Mac 的「系统预置」），还是两处都能进。[主要界面设计稿](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB)里有一张「设置」画板可以参考。
-- 结算窗口里「调整延迟校准…」链接（见 [results.md](results.md)）指向设置页面。
-- 其他可能的设置项：音量（音乐 / 音效）、判定字样显示、全屏。
+- Where the page lives: in the 3D street (title screen menu), on the computer (XP's Control Panel / Mac's System Preferences), or both. The [main screen designs](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB) include a "Settings" board for reference.
+- The "Adjust latency calibration…" link in the results window (see [results.md](results.md)) points to the settings page.
+- Other possible settings: volume (music / effects), judgement labels, full screen.

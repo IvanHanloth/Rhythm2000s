@@ -1,59 +1,59 @@
-# 游戏设计总览
+# Game design overview
 
-> 状态：草稿
+> Status: Draft
 
-## 一句话概念
+## Concept
 
-一款《节奏天国》式的节奏游戏，把 21 世纪初的电脑日常（弹窗、关窗、收邮件、刷新网页……）变成跟着音乐打拍子的小游戏。
+A Rhythm Heaven-style rhythm game that turns everyday computing of the early 2000s (pop-ups, closing windows, getting mail, refreshing pages…) into minigames played to the music.
 
-## 已确定
+## Decided
 
-- **玩法完全仿照《节奏天国》**：游戏先示范一段带节拍的动作，玩家随后按相同节奏完成同样的动作。
-- **题材**：21 世纪初的电脑与网络文化元素。
-- **首批场景**：
-  1. Windows XP 桌面 → [scenes/windows-xp.md](scenes/windows-xp.md)
-  2. 2000 年前后的 Mac 桌面 → [scenes/mac-2000.md](scenes/mac-2000.md)
-- **动作示例**：弹出窗口、关闭窗口、收邮件、点击刷新等。
-- **画布与场景**：所有场景共用一块 1280×720（16:9）的游戏画布，同一时间只显示一个场景，见 [ADR 0002](decisions/0002-game-canvas-and-scenes.md)。
+- **Plays exactly like Rhythm Heaven**: the game demonstrates a rhythmic action, then the player does the same action in the same rhythm.
+- **Theme**: computers and internet culture of the early 2000s.
+- **First scenes**:
+  1. The Windows XP desktop → [scenes/windows-xp.md](scenes/windows-xp.md)
+  2. A Mac desktop from around 2000 → [scenes/mac-2000.md](scenes/mac-2000.md)
+- **Example actions**: windows popping up, closing windows, getting mail, clicking refresh.
+- **Canvas and scenes**: every scene shares one 1280×720 (16:9) game canvas and only one scene shows at a time, see [ADR 0002](decisions/0002-game-canvas-and-scenes.md).
 
-## 核心循环
+## Core loop
 
 ```
-示范段（call）──► 跟打段（response）──► 判定反馈 ──► 下一组（节奏逐渐变难）
-     ▲                                                        │
-     └────────────────────────────────────────────────────────┘
+Call ──► Response ──► Feedback ──► Next phrase (gradually harder)
+  ▲                                         │
+  └─────────────────────────────────────────┘
 ```
 
-1. **示范段**：画面中的「示范者」（例如鼠标指针或另一位角色）按节奏完成一组动作，并配有清晰的音效提示。
-2. **跟打段**：玩家在对应拍点完成同样的动作。
-3. **判定反馈**：每个动作即时给出视觉与音效反馈，例如成功时窗口利落地关闭，失败时弹出错误对话框。
-4. **曲目结构**：难度逐步提高，中途变奏，结尾通常是一段高潮。
+1. **Call**: a demonstrator on screen (the mouse pointer, or another character) performs a set of actions on the beat, with clear sound cues.
+2. **Response**: the player performs the same actions on the matching beats.
+3. **Feedback**: each action gets instant visual and sound feedback, e.g. a window snaps shut on success, an error dialog pops up on failure.
+4. **Song structure**: difficulty rises step by step, with variations midway and usually a climax at the end.
 
-官方关卡开头由系统把谱面用到的动作逐个演示、让玩家跟打成功后才进入正文，正文从简单到难、至少 1 分钟，见 [level-design.md](level-design.md)。
+Official levels open with the system demonstrating each action the chart uses, which the player must play back before the chart starts; the chart goes from easy to hard and lasts at least 1 minute, see [level-design.md](level-design.md).
 
-## 判定（待细化）
+## Judging (to be refined)
 
-- 判定等级初步设想：Perfect / Good / Miss，具体时间窗口待原型测试后确定。
-- MVP 暂用 Perfect ±45 毫秒、Good ±100 毫秒；目标前 100–200 毫秒提前按下算 Miss，防止连按蒙中，见 [prototypes/mvp.md](prototypes/mvp.md#判定规则)。
-- 判定以音频播放时间为准。
-- 需要提供输入延迟校准（《节奏天国》系列也有类似设置）。
+- Initial grades: Perfect / Good / Miss; exact windows to be set after prototype testing.
+- The MVP uses Perfect ±45 ms and Good ±100 ms; pressing 100–200 ms before a target counts as a Miss, so mashing can't guess, see [prototypes/mvp.md](prototypes/mvp.md#judging-rules).
+- Judging follows the audio playback time.
+- Input latency calibration is needed (the Rhythm Heaven series has a similar setting).
 
-## 输入方式（待定）
+## Input (open)
 
-- 候选：单键 / 双键（贴近《节奏天国》的 A 键 + 方向键）、鼠标点击，或两者结合。
-- 「点鼠标」很贴合题材，但鼠标需要移动定位，可能影响节奏判定。需要用原型验证。
-- MVP 暂用「空格键或点击画面任意位置」，不需要移动定位，见 [prototypes/mvp.md](prototypes/mvp.md)。
+- Options: one or two keys (close to Rhythm Heaven's A button + D-pad), mouse clicks, or both.
+- Clicking fits the theme, but the mouse has to be moved into position, which may hurt rhythm judging. Needs a prototype.
+- The MVP uses "Space or a click anywhere on the canvas", with no positioning, see [prototypes/mvp.md](prototypes/mvp.md).
 
-## 待讨论问题
+## Open questions
 
-- [x] 技术栈与目标平台：Web 优先（TypeScript + PixiJS + Vite+），需要时用 Electron 套壳上桌面，见 [ADR 0001](decisions/0001-tech-stack.md)。移动端是否作为正式目标仍待定
-- [ ] 输入方式：键盘还是鼠标？是否需要移动定位？
-- [ ] 判定窗口的具体数值
-- [ ] 音乐来源：原创配乐的风格（2000 年代电子乐 / 流行乐 / 系统音效采样拼贴）
-- [x] 美术风格：界面贴近原版，可以直接使用原版系统素材（项目仅作学术用途），见 [ADR 0004](decisions/0004-authentic-os-look.md)
-  - 2026-10-24 有一份[设计系统提案](https://claude.ai/artifact/YTAfdQKAfiofe7o2vbNz5K)，**尚未定稿**：配色、字体、动效拍数、示例文案都只是候选。Mac 场景的铂金（OS 9）和水晶（早期 Aqua）两套主题并列，供选定参照版本时对比。
-  - 2026-10-24 Mac 场景的参照版本定为 Mac OS X 10.0–10.2 的早期 Aqua，见 [scenes/mac-2000.md](scenes/mac-2000.md)。
-  - 2026-10-24 主要界面（开始、选关、载入、暂停、结算、设置）的近原版设计稿：[设计画布](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB)，**尚未定稿**。
-- [ ] 两个场景之外，其他 2000 年代元素的候选清单（MSN / QQ、拨号上网、千千静听、Flash 小游戏、诺基亚手机……）
-- [ ] 进度结构：关卡解锁、评级、混音关（Remix）
-  - 2026-10-24 暂定：一首谱面一关；网吧里每个场景一台入口电脑，进去后在资源管理器 / Finder 里选关（[level-select.md](level-select.md)）；一局结束在场景里弹出结算窗口，每关的最好得分存在浏览器本地（[results.md](results.md)）。评级门槛和得分算法都是暂定值，解锁规则还没做
+- [x] Stack and platforms: web first (TypeScript + PixiJS + Vite+), wrapped with Electron for desktop when needed, see [ADR 0001](decisions/0001-tech-stack.md). Whether mobile is an official target is still open
+- [ ] Input: keyboard or mouse? Does the player need to aim?
+- [ ] Exact judgement windows
+- [ ] Music: the style of the original soundtrack (2000s electronic / pop / collage of system sounds)
+- [x] Art style: interfaces close to the originals, using the original system assets directly (academic use only), see [ADR 0004](decisions/0004-authentic-os-look.md)
+  - A [design system proposal](https://claude.ai/artifact/YTAfdQKAfiofe7o2vbNz5K) exists and is **not final**: colours, fonts, animation beats and sample copy are all candidates. It shows Mac Platinum (OS 9) and Aqua (early OS X) side by side for choosing a reference.
+  - The Mac scene's reference is the early Aqua of Mac OS X 10.0–10.2, see [scenes/mac-2000.md](scenes/mac-2000.md).
+  - Near-original designs of the main screens (title, level select, loading, pause, results, settings): [design canvas](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB), **not final**.
+- [ ] Other 2000s elements beyond the two scenes (MSN / QQ, dial-up, TTPlayer, Flash games, Nokia phones…)
+- [ ] Progression: unlocking, ratings, remix levels
+  - Provisional: one chart per level; one entry computer per scene in the net café, with levels picked in Explorer / Finder ([level-select.md](level-select.md)); a results window after each round, with each level's best score saved in the browser ([results.md](results.md)). Rating thresholds and scoring are provisional; unlocking isn't built

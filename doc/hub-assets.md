@@ -1,58 +1,56 @@
-# 街区大厅的自制模型
+# Custom models for the street hub
 
-> 状态：草稿
+> Status: Draft
 
-街区（[hub.md](hub.md)）的写实素材分两类：
+The street's ([hub.md](hub.md)) realistic assets come in two kinds:
 
-- **现成素材**：墙面、地面的照片贴图，路灯、垃圾桶、吊扇这类通用道具，来自 Poly Haven（CC0），登记在 [assets/README.md](../assets/README.md)。
-- **自制模型**：有 2000 年代特征、网上找不到的东西，由用户用 Tripo / Blender 制作（2026-10-24 用户确认）。做好之前，游戏里用简单形体占位。
+- **Stock**: photo textures for walls and ground and generic props (street lamps, bins, ceiling fans) from Poly Haven (CC0), listed in [assets/README.md](../assets/README.md).
+- **Custom**: period-specific things that can't be found online, made by the user in Tripo / Blender. Simple placeholder shapes stand in until they exist.
 
-本文是自制模型的规格和清单。
+## Adding a model
 
-## 放进游戏的方法
+1. Export a GLB named `<slot>.glb` into `public/models/custom/`.
+2. Add the slot to `manifest.json` in that folder: `{ "slots": ["crt-pc", "office-chair"] }`.
+3. Reload; every use of the slot switches to the model. Slots missing from the manifest keep their placeholder.
 
-1. 导出为 GLB，命名为 `<槽位>.glb`，放进 `public/models/custom/`。
-2. 把槽位名加进同目录的 `manifest.json`：`{ "slots": ["crt-pc", "office-chair"] }`。
-3. 刷新页面，所有用到这个槽位的地方都会换成新模型；清单里没有的槽位继续用占位形体。
+Large files can be compressed with glTF-Transform (command in assets/README.md, on the whale girl line).
 
-文件太大时，可以用 glTF-Transform 压缩（命令见 assets/README.md 里鲸鱼娘模型那一行），三角面和贴图尺寸参考下面的上限。
+## Spec
 
-## 规格
-
-| 项目 | 要求 |
+| Item | Requirement |
 | --- | --- |
-| 单位 | 米，按真实尺寸建模，游戏里不缩放 |
-| 朝向 | Y 轴向上，正面朝 +Z（Blender 里正面朝 -Y，导出 glTF 时勾选「+Y Up」即可自动转换） |
-| 原点 | 底面中心，贴在地面上（y = 0） |
-| 面数 | 小道具 ≤ 5,000 三角面，大件（街机、报刊亭）≤ 20,000 |
-| 贴图 | PBR 金属度 / 粗糙度流程，单张 ≤ 2048 × 2048，嵌在 GLB 里 |
-| 屏幕 | 带屏幕的模型，把屏幕做成单独的网格并命名为 `SCREEN`，游戏会把它换成屏幕画面；镜头推进时对准它的中心 |
-| 文字 | 模型上的招牌、贴纸只用英文（场景里不出现中文） |
+| Units | Metres, modelled at real size; never scaled in game |
+| Axes | Y up, front facing +Z (in Blender front faces -Y; export glTF with "+Y Up") |
+| Origin | Centre of the base, on the ground (y = 0) |
+| Triangles | Small props ≤ 5,000; large ones (arcade cabinets, newsstand) ≤ 20,000 |
+| Textures | PBR metallic / roughness, each ≤ 2048 × 2048, embedded in the GLB |
+| Screens | Make the screen a separate mesh named `SCREEN`; the game replaces it with the screen image and aims the camera at its centre |
+| Text | Signs and stickers on models in English only |
 
-碰撞不用做：碰撞盒由代码按占位形体的尺寸给出。模型尺寸和下表差太多时告诉我，我来改碰撞盒和摆放位置。
+No collision meshes: collision boxes come from code, sized like the placeholders. Tell me if a model differs much from the sizes below so I can adjust its collision and placement.
 
-## 槽位清单
+## Slots
 
-尺寸是占位形体的大小（宽 × 高 × 深，米），模型尽量接近。
+Sizes are the placeholder's (width × height × depth, m); models should come close.
 
-| 槽位 | 东西 | 尺寸 | 在哪里 | 备注 |
+| Slot | Object | Size | Where | Notes |
 | --- | --- | --- | --- | --- |
-| `crt-pc` | 米色 CRT 显示器 + 键盘 + 主机箱（一个模型） | 桌面以上约 0.56 × 0.5 × 0.6；主机放在桌下右侧 | 网吧前排 XP 区和空位 | 原点在**电脑桌**底面中心，桌面高 0.77 m；显示器屏幕命名 `SCREEN` |
-| `imac-g3` | 半透明彩色外壳一体机（邦迪蓝）+ 键盘 | 0.58 × 0.54 × 0.5 | 网吧后两排 Mac 区，每关一台 | 原点同上；屏幕命名 `SCREEN` |
-| `computer-desk` | 网吧电脑桌 | 2.0 × 0.77 × 0.8 | 网吧，12 张 | 隔板由代码另放，模型里不要带 |
-| `office-chair` | 网吧转椅 | 0.5 × 1.1 × 0.5，椅面高 0.5 | 网吧，12 把 | 正面朝 +Z 时人坐下面朝 -Z：**椅背在 +Z 一侧** |
-| `cafe-counter` | 网吧前台 | 2.6 × 1.05 × 0.8 | 网吧门口右侧 | 台面上会放一台老笔记本 |
-| `shop-counter` | 唱片行柜台 | 3.0 × 1.0 × 0.7 | 唱片行后部 | 台面上会放录音机、随身听 |
-| `cd-rack` | 装满 CD、黑胶、磁带的货架 | 约 0.6 × 2.0 × 2.2 | 唱片行（现在用铁架 + 纸箱代替） | 还没接进代码，做好后告诉我 |
-| `arcade-cabinet` | 立式街机 | 0.9 × 2.2 × 0.8 | 街机厅，4 台 | 屏幕命名 `SCREEN`（以后用来放演示画面） |
-| `dance-machine` | 跳舞机（踏板 + 后面的屏幕机身） | 1.6 × 2.2 × 2.0 | 街机厅 | 原点在踏板中心 |
-| `tv-stand` | 矮电视柜 | 0.5 × 0.55 × 1.2（长边沿 Z） | 街机厅试玩台 | 上面会放老电视和游戏机 |
-| `newsstand` | 英国街头报摊（挂着晚报和杂志，立着头条告示板） | 2.2 × 2.4 × 1.4 | 南侧人行道 | 正面朝 +Z；游戏里转 180° 朝向马路 |
-| `phone-box` | 英国红色电话亭（K6 款，顶上写 TELEPHONE） | 1.0 × 2.5 × 1.0 | 南侧人行道 | 同上 |
-| `pillar-box` | 英国红色邮筒（圆柱形） | 0.6 × 1.5 × 0.6 | 南侧人行道 | 同上 |
-| `belisha-beacon` | 斑马线两头的黄色闪灯（黑白条纹杆 + 黄色灯球） | 0.2 × 2.7 × 0.2 | 斑马线两头，4 个 | 灯球单独做一个网格并命名为 `BEACON`（还没接进代码，做好后告诉我，我来接上闪烁） |
-| `bus-stop` | 英国公交站亭（玻璃背板 + 顶棚 + 站牌） | 4.0 × 2.6 × 1.4 | 南侧人行道 | 同上 |
+| `crt-pc` | Beige CRT monitor, keyboard and tower (one model) | about 0.56 × 0.5 × 0.6 above the desk; tower under the desk on the right | Café front row (XP) and spare seats | Origin at the **desk's** base centre, desk top at 0.77 m; screen mesh `SCREEN` |
+| `imac-g3` | Translucent all-in-one (Bondi blue) and keyboard | 0.58 × 0.54 × 0.5 | Café back rows (Mac) | Origin as above; screen mesh `SCREEN` |
+| `computer-desk` | Café computer desk | 2.0 × 0.77 × 0.8 | Café, 12 | Dividers are placed by code; leave them out |
+| `office-chair` | Swivel chair | 0.5 × 1.1 × 0.5, seat at 0.5 | Café, 12 | Facing +Z the sitter faces -Z: **back rest on the +Z side** |
+| `cafe-counter` | Café front desk | 2.6 × 1.05 × 0.8 | Right of the café door | An old laptop goes on top |
+| `shop-counter` | Record shop counter | 3.0 × 1.0 × 0.7 | Back of the record shop | A tape deck and portable player go on top |
+| `cd-rack` | Rack full of CDs, vinyl and tapes | about 0.6 × 2.0 × 2.2 | Record shop (steel shelves and boxes for now) | Not wired up yet; tell me when it exists |
+| `arcade-cabinet` | Upright arcade cabinet | 0.9 × 2.2 × 0.8 | Arcade, 4 | Screen mesh `SCREEN` (for attract mode later) |
+| `dance-machine` | Dance machine (pads and screen cabinet behind) | 1.6 × 2.2 × 2.0 | Arcade | Origin at the pad centre |
+| `tv-stand` | Low TV cabinet | 0.5 × 0.55 × 1.2 (long side along Z) | Arcade demo stand | An old TV and console go on top |
+| `newsstand` | British newsstand (papers and magazines, a headline board) | 2.2 × 2.4 × 1.4 | South pavement | Front +Z; turned 180° in game to face the road |
+| `phone-box` | Red K6 phone box (TELEPHONE on top) | 1.0 × 2.5 × 1.0 | South pavement | As above |
+| `pillar-box` | Red cylindrical pillar box | 0.6 × 1.5 × 0.6 | South pavement | As above |
+| `belisha-beacon` | Belisha beacon (striped pole, yellow globe) | 0.2 × 2.7 × 0.2 | Both ends of the zebra crossing, 4 | Make the globe a mesh named `BEACON` (flashing not wired up yet; tell me when it exists) |
+| `bus-stop` | British bus shelter (glass back, roof, stop sign) | 4.0 × 2.6 × 1.4 | South pavement | As above |
 
-## 以后可能需要
+## Possibly later
 
-不在第一批，做之前先确认：店面门头（现在是代码拼的墙面 + 灯箱）、路人 NPC、自行车、小汽车（英国的黑色出租车、红色双层巴士）、行道树、酒吧门面。
+Not in the first batch; check before making: shopfront fascias (code-built walls and light boxes now), passers-by, bicycles, cars (black cabs, red double-deckers), street trees, a pub front.

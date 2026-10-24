@@ -1,120 +1,77 @@
-# 官方关卡设计规范
+# Official level design guidelines
 
-> 状态：草稿（2026-10-24）。三条规则由用户确定；标「暂定」的细节和「候选 / 待讨论」里的内容还没定。
->
-> 决策记录见 [ADR 0007](decisions/0007-official-level-design-guidelines.md)。
+> Status: Draft. The three rules are set by the user; details marked provisional and the open questions are not. Decision record: [ADR 0007](decisions/0007-official-level-design-guidelines.md).
 
-「官方关卡」指随游戏发布、放在 `public/charts/` 并登记在 `index.json` 里的谱面。新写或修改官方关卡时，必须满足下面三条规则。
+Official levels are the charts shipped in `public/charts/` and listed in `index.json`. Every new or changed official level follows the three rules below.
 
-## 一局的结构
+## Shape of a round
 
 ```
-选关 ──► 关卡开场页 ──► 操作演示（系统生成，不计分，可在设置里跳过）──► 谱面正文（预备小节 → 乐句 → 结尾留空）──► 结算窗口
+Level select ──► intro ──► action demo (generated, unscored, skippable) ──► chart (count-in → phrases → outro) ──► results
 ```
 
-开场页（见 [hub.md](hub.md)）由玩家的第一下收起，之后场景才开始，所以演示接在开场页之后。
+The intro ([hub.md](hub.md)) is dismissed by the player's first press, and the scene starts after it, so the demo follows the intro.
 
-## 规则 1：开头由系统演示全部操作
+## Rule 1: the system demonstrates every action first
 
-**操作演示不写在谱面里**，由游戏统一生成：进入关卡后，系统把这首谱面会用到的每一种动作都演示一遍，玩家逐个跟打成功后，才正式进入谱面内容。
+**The demo is not written in the chart**; the game generates it. Before the chart, every action the chart uses is demonstrated and must be played back successfully before the next.
 
-| 项目 | 规定 |
+| Item | Rule |
 | --- | --- |
-| 演示哪些动作 | 谱面里出现过的所有动作 ID（`call` 和 `response` 里的都算），每种一次 |
-| 每种动作怎么演示 | 一轮「示范 + 跟打」：电脑先做一遍，玩家再在同样的拍点上做一遍 |
-| 什么时候进入下一种 | 这一种的示范和跟打都结束、并且玩家跟打成功之后 |
-| 失败了怎么办 | 重来这一种动作，直到成功 |
-| 什么时候进入正文 | 所有动作都跟打成功之后 |
-| 计分 | 练习性质，**不计入**得分、结算和最好成绩 |
-| 跳过 | 设置里有「跳过操作演示」开关（界面上写英文，如 Skip tutorial），打开后直接从谱面正文开始，见 [settings.md](settings.md) |
+| Which actions | Every action ID in the chart (`call` and `response`), once each |
+| How | One call and response round: the computer does it, then the player does it on the same beats |
+| Next action | After the round ends with a successful response |
+| On failure | Repeat that action until it passes |
+| The chart starts | When every action has passed |
+| Scoring | Practice only: **not** counted in the score, results or best score |
+| Skipping | "Skip tutorial" in the settings starts straight from the chart, see [settings.md](settings.md) |
 
-对谱面作者的要求：
+For chart authors: the first phrase is real content, so don't write a teaching phrase at the start; and every extra action type adds a demo round before the chart.
 
-- 谱面第一句就是正式内容，不要在开头另写「教学乐句」重复演示。
-- 谱面用了几种动作，演示就有几轮；动作种类越多，正式开始前的等待越长，写谱时心里要有数。
+### Provisional details
 
-### 暂定细节
+- **Order**: actions in order of first appearance.
+- **Tempo**: the chart's BPM and metre.
+- **Each round**: a one-phrase chart (one count-in bar, a call bar, a response bar, no outro) with the action on beat 1; two-press actions keep their half-beat spacing.
+- **Pass**: no Miss on any press of the round (Perfect or Good).
+- **Caption**: right of the "Follow me / Your turn" banner, "Practice 2 of 4" (or "Try again") over the action name and how to handle it; texts in `src/rhythm/tutorial.ts`.
+- **When**: entering a level from the list or "Next Level"; "Retry" on the results skips it.
+- **Skip toggle**: in the dev panel until the settings page exists, saved in the browser.
 
-以下是为了能实现先定的做法，试玩后再调：
+## Rule 2: easy to hard
 
-- **顺序**：按动作在谱面里第一次出现的先后演示。
-- **速度**：用这首谱面的 BPM 和拍号。
-- **节奏**：每轮只有一下，放在小节第 1 拍；要按两下的动作（`desktop-refresh`、`start-menu`）照常是「一下 + 0.5 拍后一下」。
-- **成功**：这一轮的每一下都不是 Miss（Perfect 或 Good 都算）。
-- **提示**：每轮画面上写出动作名称和处理方法，例如「Message box: close it on the beat」。文案只用英文，按场景的系统腔调写，具体内容待定。
-- **每一轮的结构**（2026-10-24 实现时定）：一轮就是一份只有一个乐句的小谱面——1 小节预备拍 + 示范小节 + 跟打小节，没有结尾留空。每轮都有预备拍，玩家有时间看提示、重新跟上拍子。
-- **提示条**：在「Follow me / Your turn」横幅右边，第一行「Practice 2 of 4」（重来时写「Try again」），第二行是动作名称和处理方法。文案在 `src/rhythm/tutorial.ts`。
-- **什么时候演示**：从关卡列表或结算的「下一关」进入一关时演示；结算窗口点「重试」时不再演示，直接从正文开始。
-- **跳过开关**：设置页面还没定放在哪（见 [settings.md](settings.md)），先在开发面板里放一个「跳过演示」勾选框，保存在浏览器本地。
-- **实现进度**：XP、Mac 两个场景都已接入。
+Difficulty **rises phrase by phrase**: the start is easiest and the climax comes late. A lighter phrase between hard ones is fine, but the overall trend goes up.
 
-## 规则 2：从简单到难
+The BPM is fixed for the whole chart, so difficulty comes from these; move from the left column towards the right as the chart goes on:
 
-一首谱面的难度要随乐句**逐步上升**，开头最简单，高潮放在后段。可以在难段之间插一两句较轻松的乐句让玩家喘口气，但整体走势必须向上，不能开头就上最难的节奏。
-
-谱面的 BPM 全曲固定（格式只有一个 `bpm`），所以难度靠下面这些因素拉开。写谱时先用左边的写法，越往后越多地用右边的写法：
-
-| 因素 | 简单 | 难 |
+| Factor | Easy | Hard |
 | --- | --- | --- |
-| 拍位置 | 只在整拍上 | 反拍（`x.5`）、切分、附点 |
-| 每小节几下 | 1–2 下 | 4 下以上、连续八分音符 |
-| 同一乐句里的动作种类 | 一种 | 几种混用 |
-| 要按两下的动作 | 不用 | 和其他动作紧挨着 |
-| 示范和跟打是否相同 | 相同（不写 `response`） | 跟打与示范节奏不同 |
-| 休止 | 规整、可预期 | 出乎意料的空拍 |
+| Beat positions | Whole beats only | Off-beats (`x.5`), syncopation, dotted rhythms |
+| Presses per bar | 1–2 | 4 or more, runs of eighths |
+| Actions per phrase | One kind | Several mixed |
+| Two-press actions | None | Right next to other actions |
+| Call vs response | The same (no `response`) | A different response rhythm |
+| Rests | Regular, predictable | Unexpected gaps |
 
-推荐的分段（暂定，供参考）：
+Suggested sections (provisional): an opening quarter on whole beats with one action per phrase in demo order; a middle adding off-beats, rests and two mixed actions; a dense, mixed climax; an ending that eases off or finishes on the climax.
 
-1. **开头**（约前 1/4）：只用整拍，每个乐句一种动作，按演示的顺序逐个出现。
-2. **中段**：加入反拍、休止，开始在同一乐句里混用两种动作。
-3. **后段 / 高潮**：密集节奏、多种动作混用、两下动作和其他动作紧挨着。
-4. **收尾**：最后一两句可以回到较简单的节奏收住，也可以在高潮上结束。
+## Rule 3: at least 1 minute of chart
 
-## 规则 3：正文至少 1 分钟
-
-谱面正文的时长不少于 **60 秒**。正文时长按全曲结束的拍位置换算（与选关「简介」里的时长一致），包含预备小节和结尾留空，**不含**操作演示：
+The chart lasts at least **60 seconds**, counted to its end beat (as the level details show), including count-in and outro but **not** the demo:
 
 ```
-总拍数 = (countInBars + outroBars) × beatsPerBar + 每个乐句的 (2 × beatsPerBar + 空档拍数) 之和
-时长（秒）= 总拍数 × 60 ÷ bpm
+total beats = (countInBars + outroBars) × beatsPerBar + Σ over phrases (2 × beatsPerBar + gap beats)
+seconds     = total beats × 60 ÷ bpm
 ```
 
-参考：4/4 拍、空档为 0 时，一个乐句是 8 拍。
+In 4/4 with no gap a phrase is 8 beats: at 120 BPM a minute takes 14 phrases plus one bar each of count-in and outro.
 
-| BPM | 一个乐句 | 预备、结尾各 1 小节时至少几个乐句 |
-| --- | --- | --- |
-| 104 | 约 4.6 秒 | 12 |
-| 120 | 4 秒 | 14 |
-| 138 | 约 3.5 秒 | 17 |
+During development new charts may be shorter; all charts are rewritten to this rule in the polish phase.
 
-## 现有谱面与规范的差距
+## Candidates / open questions
 
-2026-10-24 统计（合并远端 7597c65 之后），现有 15 首谱面都短于 1 分钟，需要加长后才符合规范；演示改由系统生成后，谱面本身不需要为演示改动。
-
-| 谱面 | BPM | 乐句 | 时长 |
-| --- | --- | --- | --- |
-| `xp-popup-mvp` Pop-up Sweep | 120 | 8 | 36.0 秒 |
-| `xp-error-storm` Error Storm | 128 | 8 | 33.8 秒 |
-| `xp-yes-no` Yes or No? | 104 | 8 | 41.5 秒 |
-| `xp-crash` Before the Blue Screen | 138 | 8 | 31.3 秒 |
-| `xp-desktop-refresh` Right-Click Refresh | 120 | 6 | 28.0 秒 |
-| `xp-tray` Tray Balloons | 120 | 8 | 36.0 秒 |
-| `xp-minimize` Minimize All | 112 | 8 | 38.6 秒 |
-| `xp-start-menu` Start Me Up | 116 | 8 | 37.2 秒 |
-| `xp-recycle` Empty the Bin | 124 | 8 | 34.8 秒 |
-| `xp-remix-1` XP Remix 1 | 128 | 8 | 33.8 秒 |
-| `mac-alert-basics` Alert 101 | 104 | 8 | 41.5 秒 |
-| `mac-dock-hop` Dock Hop | 116 | 8 | 37.2 秒 |
-| `mac-mail-rush` Mail Rush | 120 | 8 | 36.0 秒 |
-| `mac-minimize` Into the Dock | 112 | 8 | 38.6 秒 |
-| `mac-remix-1` Mac Remix 1 | 124 | 10 | 42.6 秒 |
-
-## 候选 / 待讨论
-
-> 以下只是想法，尚未确定。
-
-- 加载谱面时自动检查「正文至少 60 秒」，不满足的官方谱面视为错误（和现有的格式校验一样，`vp test` 也会跑到）。规则 2 难以自动检查，靠写谱和试玩把关。
-- 演示是否设失败次数上限（例如连续失败 3 次后给出更明显的提示），以及演示途中能否按键直接跳过。
-- 演示段的画面：示范者、动作名称和处理方法的文案放在哪里、用什么系统部件呈现（XP 的气泡提示 / Mac 的帮助标签……）。
-- 关卡列表之间是否也要求从简单到难（同一场景内按难度排列、混音关放最后）。目前的 `index.json` 大致是这样排的，但还没写成规则。
-- 玩家自制谱面（如果以后支持）是否适用本规范。
+- Checking "at least 60 seconds" at load time so `vp test` fails short official charts. Rule 2 can't be checked automatically.
+- A limit on demo failures (e.g. a stronger hint after 3), and skipping a demo midway.
+- How the demo is presented: where the caption sits, and which system widget shows it (XP balloon tip / Mac help tag…).
+- Ordering levels easy to hard within a scene, remix last (roughly how `index.json` is ordered now).
+- Whether player-made charts, if ever supported, follow these rules.

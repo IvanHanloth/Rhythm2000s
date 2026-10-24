@@ -1,41 +1,41 @@
-# 选关：电脑里的关卡列表
+# Level select: the level list on the computer
 
-> 状态：草稿（2026-10-24）
+> Status: Draft
 
-在网吧里坐到一台电脑前、按 E 开始后，镜头推进屏幕，进到这台电脑的系统里，先看到一个关卡列表，再用鼠标点选要玩的关卡（[hub.md](hub.md)）。XP 机器里是「资源管理器」（窗口标题「My Levels」），Mac 机器里是「Finder」（同样叫「My Levels」）。界面文字都是英文，按英文版原版的说法。外观参照[主要界面设计稿](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB)的「关卡选择 · XP 资源管理器」「关卡选择 · Mac Finder」两张画板，部件按各自场景的原版尺寸还原（[scenes/windows-xp.md](scenes/windows-xp.md)、[scenes/mac-2000.md](scenes/mac-2000.md)）。
+Sitting at a computer in the net café and pressing E pushes the camera into the screen and into that computer's system, which shows a level list to pick from with the mouse ([hub.md](hub.md)). XP machines show Explorer (window title "My Levels"), Macs show the Finder (also "My Levels"). Interface text is English, as in the original English versions. The look follows the "Level select · XP Explorer" and "Level select · Mac Finder" boards of the [main screen designs](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB), with widgets at each scene's original size ([scenes/windows-xp.md](scenes/windows-xp.md), [scenes/mac-2000.md](scenes/mac-2000.md)).
 
-## 已确定（2026-10-24 用户要求）
+## Decided
 
-- XP 和 Mac 之间的切换靠在 3D 街区里走到另一台电脑，所以设计稿里资源管理器任务窗格的「其它场景：XP 桌面 / Mac 桌面」不做。
-- 关卡可以用鼠标点选。
+- Switching between XP and Mac means walking to the other computer in the 3D street, so the design's "Other scenes: XP desktop / Mac desktop" in Explorer's task pane is not built.
+- Levels can be picked with the mouse.
 
-## 流程
+## Flow
 
 ```
-网吧坐下 ── E ──► 电脑里的关卡列表 ──双击 / 「Start」──► 节奏关卡
-   ▲                   │      ▲                            │
-   │      Esc /「Back」 │      └──── Esc / 结果框「Levels」  ┘
-   └───────────────────┘
+Seated in café ── E ──► level list on the computer ── double-click / "Start" ──► level
+      ▲                     │        ▲                                          │
+      │      Esc / "Back"   │        └──────── Esc / "Levels" on the results ───┘
+      └─────────────────────┘
 ```
 
-- 关卡里、结果框上按 Esc：回到关卡列表。在关卡列表上按 Esc 或点「Back」：回到网吧座位。
-- 页面切到后台时中止这一局，回到关卡列表。
+- Esc in a level or on the results returns to the level list. Esc or "Back" on the level list returns to the café seat.
+- Leaving the tab aborts the round and returns to the level list.
 
-## 操作
+## Controls
 
-| 操作 | XP 资源管理器 | Mac Finder |
+| Action | XP Explorer | Mac Finder |
 | --- | --- | --- |
-| 选中一关 | 单击图标 | 单击图标 |
-| 开始 | 双击图标，或点左边任务窗格的「Play this level」 | 双击图标，或点「Info」窗口的「Start」 |
-| 回网吧 | 工具栏「Back」 | 工具栏「Back」、「Info」窗口的「Back」 |
-| 键盘 | 方向键选择，回车开始 | 同左 |
+| Select a level | Click its icon | Click its icon |
+| Start | Double-click the icon, or "Play this level" in the task pane | Double-click the icon, or "Start" in the Info window |
+| Back to the café | Toolbar "Back" | Toolbar "Back", or "Back" in the Info window |
+| Keyboard | Arrow keys select, Enter starts | Same |
 
-选关时点画面不会被当成节奏输入；空格键也不开始，避免误触。开始一局后，按空格或点画面任意位置照旧是节奏输入。
+Clicks on the level list never count as rhythm input, and Space doesn't start a level, to avoid accidents. Once a round starts, Space or a click anywhere is rhythm input as usual.
 
-## 暂定（第一版，都可以改）
+## Provisional (first version, all adjustable)
 
-- **关卡列表就是这台电脑所属场景的全部谱面**（`public/charts/` 里 `scene` 相同的谱面，按 `index.json` 的顺序）。设计稿里的「？？？」未解锁关卡、「最佳评级」「最高分」是占位：解锁规则和成绩记录还没定（[hub.md](hub.md)「待讨论」），先不显示。
-- 设计稿任务窗格里的「查看最佳成绩」「校准延迟」对应的结算、设置界面还没有，先不放。
-- 关卡的「详细信息」：曲名、用到的动作、速度（BPM）、乐句数、时长。
-- 图标按谱面用到的动作选：只用一种动作就用那种动作的图标，混用多种的用「混音」图标（XP 用程序窗口图标，Mac 用 iTunes）。
-- 一局结束弹出「结算」窗口，可以重试、回选关或直接下一关，见 [results.md](results.md)。
+- **The level list is every chart of the computer's scene** (charts in `public/charts/` with that `scene`, in `index.json` order). The design's locked "???" levels, best rating and high score are placeholders: unlocking and records aren't decided ([hub.md](hub.md) "Open questions"), so they aren't shown.
+- The design's task pane links "View best scores" and "Calibrate latency" wait for the results and settings screens.
+- Level details: song title, actions used, tempo (BPM), phrase count, length.
+- Icons follow the chart's actions: one action's icon when it uses one, a "remix" icon when it mixes several (a program window on XP, iTunes on Mac).
+- A results window follows each round, with retry, back to the list or straight to the next level, see [results.md](results.md).

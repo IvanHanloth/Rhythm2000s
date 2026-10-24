@@ -1,31 +1,31 @@
-# 结算：一局结束后的成绩窗口
+# Results: the score window after a round
 
-> 状态：草稿（2026-10-24）
+> Status: Draft
 
-一局结束后，在这台电脑的系统里弹出一个结算窗口（标题「Results — 曲名」，按钮「Retry」「Levels」「Next Level」）：XP 机器上是 Luna 窗口，Mac 机器上是 Aqua 窗口。外观参照[主要界面设计稿](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB)的「结算」画板，代码在 `src/ui/results-panel.ts`（两边共用的内容）和各场景的 `results-window.ts`。
+After a round, a results window opens in the computer's own system (title "Results — song title", buttons "Retry", "Levels", "Next Level"): a Luna window on XP machines, an Aqua window on Macs. Its look follows the "Results" board of the [main screen designs](https://claude.ai/artifact/UWt5QhiPEBvMN8EsVRvEDB); the code is `src/ui/results-panel.ts` (content shared by both) and each scene's `results-window.ts`.
 
-## 窗口内容
+## Contents
 
-| 区域 | 内容 |
+| Area | Contents |
 | --- | --- |
-| 评级 | 一枚斜着盖上去的大印章：「Superb」「OK」「Try again」，颜色分别用判定色 Perfect / Good / Miss |
-| 评语 | 最多三条，按这一局的数据生成（见下） |
-| 得分 | 五位数得分；超过这首谱面以前的最好成绩时，旁边显示「New record」；这一局正文里开过律动组件时，左上角显示「Beat Guide」标签（[beat-guide.md](beat-guide.md#记成绩)） |
-| 计数 | Perfect! / Good / Miss 三格，各自的次数 |
-| 按键偏差 | 命中的每一下按偏差分到 11 格（拍点前后各 100 毫秒，每格 20 毫秒）的柱状图，中间虚线是拍点；Perfect 范围内的格子用 Perfect 色，其余用 Good 色。右上角写平均偏早 / 偏晚多少毫秒 |
-| 按钮 | 「重试」「选关」「下一关」，「下一关」是默认按钮；已经是列表里最后一关时「下一关」灰掉，默认按钮换成「重试」 |
+| Rating | A large stamp set at an angle: "Superb", "OK" or "Try again", in the Perfect / Good / Miss judgement colours |
+| Comments | Up to three, generated from the round (see below) |
+| Score | A five-digit score; "New record" beside it when it beats the chart's previous best; a "Beat Guide" tag at the top left when the beat guide was on during the chart ([beat-guide.md](beat-guide.md#recording-scores)) |
+| Counts | Perfect! / Good / Miss boxes with their counts |
+| Timing | Every hit sorted by offset into 11 bars (100 ms either side of the beat, 20 ms each), with a dashed line on the beat; bars within Perfect use the Perfect colour, the rest the Good colour. The average early / late offset in ms at the top right |
+| Buttons | "Retry", "Levels", "Next Level"; Next Level is the default. On the last level in the list it is disabled and Retry becomes the default |
 
-键盘：回车 / 空格 = 默认按钮，R = 重试，Esc = 回到关卡列表（[level-select.md](level-select.md)）。
+Keys: Enter / Space press the default button, R retries, Esc returns to the level list ([level-select.md](level-select.md)).
 
-## 暂定规则（第一版，都可以改）
+## Provisional rules (first version, all adjustable)
 
-设计稿只画了样子，没有给规则；下面是第一版的做法，试玩后再调。
+The design only shows the look, not the rules; this is the first version, to be tuned after play-testing.
 
-- **得分**：Perfect 记 1 分、Good 记 0.5 分、Miss 记 0 分，除以总数后乘 10000，取整。
-- **评级**：得分 8000 以上「Superb」，6000 以上「OK」，其余「Try again」（仿《节奏天国》的三档）。
-- **新纪录**：每首谱面的最好得分存在浏览器本地；得分大于 0、并且是第一次玩或高于以前的最好成绩时算新纪录。开着律动组件打出的新纪录会一起记下标记（[beat-guide.md](beat-guide.md#记成绩)）。
-- **评语**：
-  1. 按评级说一句总体评价。
-  2. 有 Miss 时列出是第几乐句（最多列 3 个）；没有 Miss 时说「No mistakes.」。
-  3. 命中的平均偏差超过 20 毫秒（且至少命中 4 次）时，提示整体偏早 / 偏晚，建议重新校准；否则说时机没有明显偏差。
-- 设计稿里的「调整延迟校准…」链接要等设置界面做出来再加，现在校准值仍在开发面板里改。
+- **Score**: Perfect is 1 point, Good 0.5, Miss 0; divided by the total and multiplied by 10000, rounded.
+- **Rating**: "Superb" from 8000, "OK" from 6000, otherwise "Try again" (after Rhythm Heaven's three tiers).
+- **New record**: each chart's best score is saved in the browser; a score above 0 that is the first or beats the previous best is a new record. A new record set with the beat guide on is saved with a flag ([beat-guide.md](beat-guide.md#recording-scores)).
+- **Comments**:
+  1. An overall line for the rating.
+  2. With Misses, the phrases they were in (up to 3); without, "No mistakes.".
+  3. When the average hit offset is over 20 ms (with at least 4 hits), a note that timing runs early / late and a suggestion to recalibrate; otherwise that the timing shows no clear bias.
+- The design's "Adjust latency calibration…" link waits for the settings screen; the calibration is still set in the dev panel.

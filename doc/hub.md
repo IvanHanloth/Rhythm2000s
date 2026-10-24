@@ -1,74 +1,73 @@
-# 开始界面与街区大厅
+# Title screen and street hub
 
-> 状态：草稿
+> Status: Draft
 
-开始界面和关卡选择都在同一个 3D 街区里完成。技术选型见 [ADR 0005](decisions/0005-3d-street-hub-with-threejs.md)。
+The title screen and level select both take place in one 3D street. Technology choice: [ADR 0005](decisions/0005-3d-street-hub-with-threejs.md).
 
-## 已确定（2026-10-24 用户确认）
+## Decided
 
-- 开始界面用街景当背景，叠标题和菜单；点「开始游戏」后镜头落到角色身后，直接可以走动。
-- 第三人称跟随 + 鼠标转视角。
-- 一条 2000 年代风格的街道，有几家可以走进去的店；网吧里的电脑是关卡入口，走到电脑前坐下开始这一关。
-- 场景里（招牌、海报、屏幕、店名）的文字一律用英文；叠在画面上的菜单、提示、对话框仍用中文。
-- 场景是写实的模型和材质，氛围明亮、带梦核感（「原神的明亮和梦核感」）；有年代特征的道具由用户用 Tripo / Blender 制作，规格和清单见 [hub-assets.md](hub-assets.md)。
-- 场景里要有千禧年元素，街景是 2000 年的英国商业街（项目参加英国的黑客松）。
-- 一首谱面就是一关。网吧里每个场景一台入口电脑（XP、Mac 各一台），坐下后的卡片列出这台电脑里的关卡和已有成绩的关数，进去后在资源管理器 / Finder 里选关（2026-10-24 合并远端时用户选定，取代「一关一台电脑」）。
-- 玩家角色是 DeepSeek 鲸鱼娘，用现成的 3D 模型（ai-girls-3d 成年版，CC BY 4.0，来源与修改见 assets/README.md）。模型没有动画，走路、坐下、打字由代码转动骨骼。
+- The title screen overlays the logo and menu on the street; "Start" drops the camera behind the character, who can walk straight away.
+- Third-person follow camera, turned with the mouse.
+- A street of the 2000s with a few shops to walk into; the net café's computers are the level entries.
+- All text in the world (signs, posters, screens, shop names) and all overlays (menus, hints, dialogue) are English.
+- Realistic models and materials, bright with a dreamcore feel; period props are made by the user in Tripo / Blender, spec and list in [hub-assets.md](hub-assets.md).
+- Millennial details on a British high street around 2000 (the project is a UK hackathon entry).
+- One chart is one level. The café has one entry computer per scene (XP and Mac); the card shown when seated lists that computer's levels and how many have scores, and levels are picked inside in Explorer / Finder.
+- The player character is the DeepSeek whale girl, a ready-made model (ai-girls-3d adult version, CC BY 4.0; source and changes in assets/README.md). It has no animations; walking, sitting and typing turn its bones in code.
 
-## 流程
+## Flow
 
 ```
-开始界面 ──「Start」──►   街上自由走动 ──进门──► 网吧
-   ▲                                              │ 走到电脑前按 E
-   │                                              ▼
-   └──── 暂停菜单「Quit to title」         坐下：屏幕上显示关卡信息
-                                                  │ E 开始 / Esc 起身
-                                                  ▼
-                                      镜头推进屏幕 ──► 电脑里的关卡列表 ──► 节奏关卡
-                                                  │ 关卡列表上按 Esc / 点「后退」
-                                                  ▼
-                                            回到这个座位
+Title ──"Start"──► walk the street ──door──► net café
+  ▲                                            │ E at a computer
+  │                                            ▼
+  └── pause menu "Quit to title"        seated: level info on screen
+                                               │ E starts / Esc stands up
+                                               ▼
+                        camera pushes into the screen ──► level list on the computer ──► level
+                                               │ Esc or "Back" on the list
+                                               ▼
+                                         back in the seat
 ```
 
-电脑里的关卡列表（XP 资源管理器 / Mac Finder）见 [level-select.md](level-select.md)。关卡里按 Esc 先回到关卡列表，再按一次才回到座位。
+The level list on the computer (XP Explorer / Mac Finder) is in [level-select.md](level-select.md). Esc in a level first returns to the list, and again to the seat.
 
-在列表里选好一关后，先显示关卡开场页（场景 · 第几关、关卡名、速度、部件、最佳成绩、玩法说明），按空格或点击直接开始。一局结束在场景里弹出结算窗口，见 [results.md](results.md)。网址 `#场景/谱面`（如 `#mac-2000/mac-dock-hop`）直接打开某一关的开场页；只写 `#场景` 时显示这台电脑里的关卡列表。
+Picking a level shows its intro (scene and level number, title, tempo, widgets, best score, how to play); Space or a click starts. A results window follows each round, see [results.md](results.md). The URL `#scene/chart` (e.g. `#mac-2000/mac-dock-hop`) opens a level's intro directly; `#scene` alone shows that computer's level list.
 
-开场页的配色跟场景走：XP 关卡用 Luna，Mac 关卡用 Aqua。
+The intro takes the scene's colours: Luna for XP levels, Aqua for Mac levels.
 
-## 操作
+## Controls
 
-| 按键 | 作用 |
+| Key | Action |
 | --- | --- |
-| W A S D | 移动（相对镜头方向） |
-| Shift | 跑 |
-| 鼠标 | 转镜头（点击画面后锁定鼠标） |
-| E | 进门、坐下、开始、和店员说话 |
-| Esc | 放开鼠标并暂停；坐着时起身；电脑里的关卡列表上回到网吧；关卡里回到关卡列表 |
+| W A S D | Move (relative to the camera) |
+| Shift | Run |
+| Mouse | Turn the camera (click the view to lock the pointer) |
+| E | Enter, sit down, start, talk to the clerk |
+| Esc | Release the pointer and pause; stand up when seated; back to the café from the level list; back to the list from a level |
 
-## 暂定内容（第一版占位，都可以改）
+## Provisional content (first-pass placeholders)
 
-以下店名、布局、文案都是第一版占位，用户尚未确认：
+Shop names, layout and text are placeholders the user hasn't confirmed:
 
-- **街道**：明亮的白天，东西走向的一条双车道马路（英国靠左行驶），两侧人行道。北侧三家可以进的店，南侧是不能进的楼面和街边设施。红砖楼为主；路边双黄线，斑马线两头有黄色闪灯（Belisha beacon），路沿写着 LOOK RIGHT。
-- **CYBERSPACE CAFÉ**（网吧，中间）：三排共 12 台电脑，前排第一台是 XP 机（米色 CRT），中排第一台是 Mac 机（半透明 iMac），分别进 XP、Mac 场景的关卡列表；其余的位子有人占着、维修中或没开机。前台没人，只留了价目表和便签。
-- **MILLENNIUM RECORDS**（唱片行，西侧）：铁货架、柜台上的手提录音机和磁带机。
-- **FUNLAND AMUSEMENTS**（街机厅，东侧）：几台街机、跳舞机、电视加游戏机的试玩台。
-- 唱片行、街机厅以后能不能成为新场景的入口，待定。
-- **英国和千禧年元素**：
-  - 街上：横跨马路的两条横幅（WELCOME TO THE NEW MILLENNIUM · 2000、HIGH STREET MILLENNIUM FESTIVAL）、南侧楼顶的 LED 滚动屏、两块楼顶广告牌（512K 宽带、PC 2000 整机）、电器行门口的 CRT 电视墙、红色电话亭、红色邮筒、报摊、公交站、HIGH STREET 路牌、酒吧 THE MILLENNIUM ARMS 的挂牌。
-  - 南侧店铺：录像出租、手机、一小时冲印、报刊店、炸鱼薯条、电脑卖场、投注站、酒类专卖；卷帘门上贴着装机、话费充值、和弦铃声、Flash 游戏、数码相机、录像出租的小广告，价格用英镑。
-  - 店里：网吧的「OPEN 7 DAYS」霓虹灯牌和 Y2K READY / 宽带海报，街机厅门头「10p A GO」的滚动屏，网吧前台的米色老笔记本。
-- **氛围**：渐变的蓝天，远处淡粉紫色的雾，空中漂浮的光点，画面边缘轻轻泛白。
-- **声音**：坐到 XP 电脑前响 XP 的登录声，坐到 iMac 前响 Mac 的开机和弦。
-- 网吧里暂时没有路人：之前代码拼的人偶不够好看，去掉了，等有合适的模型再加。
+- **Street**: bright daytime, an east–west two-lane road (driving on the left) with pavements. Three shops to enter on the north side; facades and street furniture on the south. Mostly red brick; double yellow lines, Belisha beacons at the zebra crossing, LOOK RIGHT at the kerb.
+- **CYBERSPACE CAFÉ** (net café, centre): 12 computers in three rows. The first in the front row is the XP machine (beige CRT), the first in the middle row the Mac (translucent iMac), opening the XP and Mac level lists; the other seats are taken, out of order or switched off. The front desk is unattended, with a price list and notes.
+- **MILLENNIUM RECORDS** (record shop, west): steel shelving, a boombox and tape deck on the counter.
+- **FUNLAND AMUSEMENTS** (arcade, east): arcade cabinets, a dance machine, a TV-and-console demo stand.
+- Whether the record shop and arcade become entries to new scenes is open.
+- **British and millennial details**:
+  - Street: two banners across the road (WELCOME TO THE NEW MILLENNIUM · 2000, HIGH STREET MILLENNIUM FESTIVAL), an LED ticker on a south rooftop, two rooftop billboards (512K broadband, PC 2000), a CRT TV wall at the electrical shop, a red phone box, a red pillar box, a newsstand, a bus stop, a HIGH STREET sign, the hanging sign of THE MILLENNIUM ARMS pub.
+  - South side shops: video rental, mobiles, one-hour photo, newsagent, fish and chips, computer superstore, bookies, off-licence; flyers on the shutters for PC builds, top-ups, polyphonic ringtones, Flash games, digital cameras and video rental, priced in pounds.
+  - Inside: the café's "OPEN 7 DAYS" neon and Y2K READY / broadband posters, the arcade's "10p A GO" ticker, an old beige laptop on the café desk.
+- **Atmosphere**: a gradient blue sky, pale pink-purple haze in the distance, drifting motes, slightly whitened edges.
+- **Sound**: sitting at the XP computer plays the XP logon sound; at the iMac, the Mac startup chime.
+- No passers-by in the café for now: the code-built figures weren't good enough and were removed until suitable models exist.
 
-## 待讨论
+## Open questions
 
-- [ ] 店名、街道布局
-- [ ] 界面（菜单、提示、对话框、开场页、结算窗口）要不要改成英文：项目参加英国的黑客松
-- [ ] 评级门槛、得分算法
-- [ ] 角色：是否可以换装（模型署名已放在标题菜单的「Credits」里）
-- [ ] 关卡解锁与进度：未解锁的电脑怎么表现
-- [ ] 大厅背景音乐和环境音
-- [ ] 手柄、触屏操作
+- [ ] Shop names and street layout
+- [ ] Rating thresholds and scoring
+- [ ] Character outfits (the model's credit is under "Credits" in the title menu)
+- [ ] Unlocking and progression: how locked computers look
+- [ ] Hub music and ambient sound
+- [ ] Gamepad and touch controls
