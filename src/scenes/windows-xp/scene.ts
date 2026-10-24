@@ -6,9 +6,11 @@ import { Container, FillGradient, Graphics, Text } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../../game/layout.ts';
 import type { FrameInfo, Scene, SceneContext, SceneEntry, TapInfo } from '../../game/scene.ts';
 import type { Chart } from '../../rhythm/chart.ts';
+import { buildTurnCues, turnCueAt, type TurnCue } from '../../rhythm/turn-cue.ts';
 import { BEATS, FONT_FAMILIES, THEMES } from '../../theme/tokens.ts';
 import { clamp01, easeOutBack } from '../../ui/easing.ts';
 import { createJudgementView } from '../../ui/judgement-view.ts';
+import { TurnBanner } from '../../ui/turn-banner.ts';
 import { PopupSession, type JudgementRecord, type PopupWindowState } from './popup-session.ts';
 import { PopupWindow } from './popup-window.ts';
 import { buildPopupChart, createPopupSounds, type PopupSounds } from './song.ts';
@@ -16,6 +18,9 @@ import { buildPopupChart, createPopupSounds, type PopupSounds } from './song.ts'
 const theme = THEMES.xp;
 const TASKBAR_HEIGHT = 40;
 const START_BUTTON_WIDTH = 110;
+
+/** 轮次横幅中心的纵坐标，在最上排窗口之上 */
+const BANNER_Y = 38;
 
 const POPUP_WIDTH = 300;
 const POPUP_HEIGHT = 150;
@@ -57,6 +62,12 @@ class WindowsXpScene implements Scene {
   readonly view = new Container({ label: 'windows-xp' });
   private readonly context: SceneContext;
   private readonly chart: Chart = buildPopupChart();
+  private readonly turnCues: TurnCue[] = buildTurnCues(this.chart);
+  /** Follow me / Your turn 横幅：示范用凸起的按钮色，跟打用强调色 */
+  private readonly turnBanner = new TurnBanner({
+    call: { fill: theme.surfaceRaised, text: theme.ink, line: theme.line },
+    response: { fill: theme.accent, text: theme.onAccent, line: theme.highlight },
+  });
   private readonly sounds: PopupSounds;
   private readonly taskbarFill = new FillGradient({
     end: { x: 0, y: 1 },
@@ -81,10 +92,17 @@ class WindowsXpScene implements Scene {
   constructor(context: SceneContext) {
     this.context = context;
     this.sounds = createPopupSounds(context.clock.context);
-    this.view.addChild(this.drawDesktop(), this.windowLayer, this.judgementLayer, this.dialogLayer);
+    this.turnBanner.view.position.set(DESIGN_WIDTH / 2, BANNER_Y);
+    this.view.addChild(
+      this.drawDesktop(),
+      this.windowLayer,
+      this.judgementLayer,
+      this.turnBanner.view,
+      this.dialogLayer,
+    );
     this.showDialog({
       title: '弹窗大扫除',
-      body: '电脑会先按节奏弹出一串窗口。\n轮到您时，请按同样的节奏把它们逐个关闭。\n\n按空格键或点击画面开始。',
+      body: '电脑会先按节奏弹出一串窗口。\n看到「Your turn」时，请按同样的节奏把它们逐个关闭。\n\n按空格键或点击画面开始。',
       button: '开始',
     });
     document.addEventListener('visibilitychange', this.onVisibilityChange);
@@ -98,6 +116,7 @@ class WindowsXpScene implements Scene {
     const beat = session.beatAt(audioTime);
     this.renderPopups(session, beat);
     this.renderJudgements(session, beat);
+    this.renderTurnBanner(beat);
 
     if (audioTime >= session.endTime) this.finish(session);
   }
@@ -172,6 +191,7 @@ class WindowsXpScene implements Scene {
     for (const popup of this.popups) popup.destroy();
     this.popups = [];
     for (const { view } of this.judgementViews) view.destroy({ children: true });
+    this.turnBanner.show(null);
     this.judgementViews = [];
     this.shownJudgements = 0;
   }
@@ -260,6 +280,16 @@ class WindowsXpScene implements Scene {
       return windows.filter(({ state }) => state.call.beat <= beat).at(-1)?.i ?? -1;
     }
     return windows.find(({ state }) => state.closedAt === null && state.missedAt === null)?.i ?? -1;
+  }
+
+  /** 轮次横幅：切换时挤压回弹一次 */
+  private renderTurnBanner(beat: number): void {
+    const cue = turnCueAt(this.turnCues, beat);
+    if (!cue) {
+      this.turnBanner.show(null);
+      return;
+    }
+    this.turnBanner.show(cue.turn, 1 - clamp01((beat - cue.start) / BEATS.squash));
   }
 
   private renderJudgements(session: PopupSession, beat: number): void {
