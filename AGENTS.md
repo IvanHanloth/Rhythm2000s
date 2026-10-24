@@ -26,7 +26,6 @@
 ```
 .
 ├── AGENTS.md          # 本文件：给 AI 助手和协作者的项目说明
-├── CLAUDE.md          # Claude Code 入口，引用本文件
 ├── README.md
 ├── index.html         # 游戏入口页（目前只列出原型链接）
 ├── prototypes/        # 各原型的页面入口，例如 prototypes/latency/index.html
