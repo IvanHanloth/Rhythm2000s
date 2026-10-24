@@ -112,4 +112,5 @@ XP 场景最早只有「弹出消息框 → 关掉」一种玩法，桌面上已
 | `xp-minimize` | 最小化 | 112 | `window-minimize`、`dialog-warning` | 窗口弹出有一个上扬的声音，后半段混入警告框 |
 | `xp-start-menu` | 开始 | 116 | `start-menu`、`dialog-info` | 练「一下 + 半拍后一下」的两下动作 |
 | `xp-recycle` | 回收站 | 124 | `recycle-bin`、`dialog-question` | 「是否删除？」和扔文件交替 |
+| `xp-download` | Download Complete | 112 | `progress-download`、`volume-mute`、`dialog-info`、`balloon-info` | 按[官方关卡规范](../level-design.md)写的第一首：16 个乐句、约 73 秒。前两句各只练一种新动作；中段加入反拍、在长按和下载之间插消息框；后段两次长按连着来、长按刚松开 0.25 拍就弹下载窗。气泡和音量小窗都在托盘附近，同一乐句里不混用，免得叠在一起 |
 | `xp-remix-1` | XP 混音 1 | 128 | 全部 XP 动作 | 每个乐句换一种组合，最后两句全部混用 |
