@@ -1,0 +1,378 @@
+/* 街区大厅（doc/hub.md）。颜色都是 overlay.ts 从 src/theme 注入的 --hub-* 变量 */
+
+.hub {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: #000;
+}
+
+.hub[hidden] {
+  display: none;
+}
+
+.hub canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hub-ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--hub-font-ui);
+  color: var(--hub-highlight);
+}
+
+.hub-ui [hidden] {
+  display: none !important;
+}
+
+.hub-ui button,
+.hub-ui a {
+  pointer-events: auto;
+}
+
+.hub-ui kbd {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0 0.35em;
+  border: 1px solid var(--hub-line-soft);
+  border-bottom-width: 3px;
+  border-radius: 4px;
+  background: var(--hub-surface-raised);
+  color: var(--hub-ink);
+  font: 700 0.85em/1.5 var(--hub-font-ui);
+  text-align: center;
+}
+
+/* ---------- 按钮 ---------- */
+
+.hub-button {
+  display: inline-block;
+  min-width: 9em;
+  padding: 0.55em 1.2em;
+  border: 1px solid var(--hub-line);
+  border-radius: 4px;
+  background: linear-gradient(var(--hub-surface-raised), var(--hub-surface));
+  color: var(--hub-ink);
+  font: 700 18px/1.2 var(--hub-font-ui);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgb(0 0 0 / 0.35);
+}
+
+.hub-button:hover {
+  filter: brightness(1.06);
+}
+
+.hub-button:focus-visible {
+  outline: 2px solid var(--hub-focus);
+  outline-offset: 2px;
+}
+
+.hub-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.hub-button-primary {
+  border-color: var(--hub-focus);
+  background: linear-gradient(var(--hub-titlebar-hi), var(--hub-titlebar));
+  color: var(--hub-on-titlebar);
+}
+
+/* ---------- 开始界面 ---------- */
+
+.hub-title {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: radial-gradient(ellipse at center, rgb(0 0 0 / 0) 40%, rgb(0 0 0 / 0.45));
+}
+
+.hub-logo {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--hub-font-display);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.hub-logo-word {
+  font-size: clamp(56px, 10vw, 124px);
+  color: var(--hub-highlight);
+  text-shadow: 6px 6px 0 var(--hub-focus);
+}
+
+.hub-logo-badge {
+  padding: 10px 22px 4px;
+  font-size: clamp(42px, 7.5vw, 92px);
+  background: var(--hub-perfect);
+  color: var(--hub-on-perfect);
+  border: 5px solid var(--hub-ink);
+  border-radius: 22px;
+  box-shadow: 7px 7px 0 var(--hub-ink);
+  transform: rotate(-5deg);
+}
+
+.hub-tagline {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  text-shadow: 2px 2px 0 var(--hub-focus);
+}
+
+.hub-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.hub-press {
+  margin: 8px 0 0;
+  font: 16px var(--hub-font-pixel);
+  opacity: 0.85;
+  animation: hub-blink 1.2s steps(2, jump-none) infinite;
+}
+
+@keyframes hub-blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.hub-help {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: 320px;
+  padding: 14px 18px;
+  border: 1px solid var(--hub-line);
+  border-radius: 6px;
+  background: var(--hub-surface);
+  color: var(--hub-ink);
+}
+
+.hub-help-title {
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.hub-keys {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin: 0;
+}
+
+.hub-keys dt {
+  font-weight: 700;
+}
+
+.hub-keys dd {
+  margin: 0;
+  color: var(--hub-ink-muted);
+}
+
+/* ---------- 走动时的提示 ---------- */
+
+.hub-hud {
+  position: absolute;
+  inset: 0;
+}
+
+.hub-objective {
+  position: absolute;
+  left: 20px;
+  top: 18px;
+  padding: 6px 12px;
+  border-left: 4px solid var(--hub-perfect);
+  background: rgb(0 0 0 / 0.55);
+  font-size: 16px;
+}
+
+.hub-place {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 18%;
+  text-align: center;
+  font: 800 44px var(--hub-font-display);
+  text-shadow: 3px 3px 0 var(--hub-focus);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.hub-place.is-visible {
+  opacity: 1;
+}
+
+.hub-prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.65);
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.hub-lock-hint {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.5);
+  font-size: 15px;
+}
+
+/* ---------- 对话框 ---------- */
+
+.hub-dialog {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  width: min(720px, calc(100% - 32px));
+  box-sizing: border-box;
+  padding: 14px 18px 10px;
+  border: 2px solid var(--hub-line);
+  border-radius: 6px;
+  background: var(--hub-surface);
+  color: var(--hub-ink);
+}
+
+.hub-dialog-name {
+  font-weight: 700;
+  color: var(--hub-accent);
+}
+
+.hub-dialog-text {
+  margin-top: 4px;
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+.hub-dialog-next {
+  margin-top: 6px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--hub-ink-muted);
+}
+
+/* ---------- 坐下后的关卡卡片：XP 窗口的样子 ---------- */
+
+.hub-card {
+  position: absolute;
+  right: 6%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 340px;
+  border: 1px solid var(--hub-line);
+  border-radius: 8px 8px 0 0;
+  background: var(--hub-surface);
+  color: var(--hub-ink);
+  box-shadow: 4px 6px 0 rgb(0 0 0 / 0.4);
+}
+
+.hub-card-titlebar {
+  padding: 6px 10px;
+  border-radius: 7px 7px 0 0;
+  background: linear-gradient(var(--hub-titlebar-hi), var(--hub-titlebar));
+  color: var(--hub-on-titlebar);
+  font-weight: 700;
+}
+
+.hub-card-body {
+  padding: 12px 16px 4px;
+}
+
+.hub-card-body p {
+  margin: 0 0 6px;
+}
+
+.hub-card-keys {
+  margin-top: 12px !important;
+  color: var(--hub-ink-muted);
+  font-size: 14px;
+}
+
+.hub-card-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 8px 12px 12px;
+}
+
+.hub-card-actions .hub-button {
+  min-width: 5em;
+  font-size: 15px;
+  padding: 0.4em 1em;
+}
+
+/* ---------- 暂停 ---------- */
+
+.hub-pause {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgb(0 0 0 / 0.55);
+}
+
+.hub-pause-title {
+  margin-bottom: 8px;
+  font: 800 40px var(--hub-font-display);
+}
+
+/* ---------- 黑场 ---------- */
+
+.hub-fade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  transition-property: opacity;
+  transition-timing-function: ease-in-out;
+}
+
+.hub-fade.is-opaque {
+  opacity: 1;
+}
+
+/* 从关卡回到网吧时，左下角的返回提示也属于这一套 */
+.back-hint {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 4;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font:
+    13px/1.4 system-ui,
+    sans-serif;
+  pointer-events: none;
+}
+
+.back-hint[hidden] {
+  display: none;
+}

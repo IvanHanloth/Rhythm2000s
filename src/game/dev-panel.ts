@@ -1,12 +1,12 @@
-// 开发面板：正式菜单做出来之前，用来切换场景、填写输入校准值、打开原型页面（ADR 0002）。
+// 开发面板：用来直接切换到街区或某个场景、填写输入校准值、打开原型页面（ADR 0002）。
 
-import type { SceneEntry } from './scene.ts';
 import { CALIBRATION_LIMIT_MS } from './settings.ts';
 
 const PROTOTYPES = [{ label: '延迟测试', href: '/prototypes/latency/' }];
 
 export interface DevPanelOptions {
-  scenes: readonly SceneEntry[];
+  /** 可以切换到的画面：街区大厅和各个场景 */
+  scenes: readonly { id: string; label: string }[];
   onSelectScene(id: string): void;
   /** 当前校准值（毫秒） */
   calibrationMs: number;
