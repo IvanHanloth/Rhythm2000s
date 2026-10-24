@@ -61,10 +61,14 @@ const panel = createDevPanel({
 });
 document.body.append(panel.element);
 
+const gameHost: HTMLElement = host;
+
 function showSceneFromHash(): void {
   const id = sceneFromHash();
   director.show(id);
   panel.setActive(id);
+  // PixiJS 默认让画布继承容器的指针，所以设在容器上
+  gameHost.style.cursor = director.entries.find((e) => e.id === id)?.cursor ?? '';
 }
 
 window.addEventListener('hashchange', showSceneFromHash);

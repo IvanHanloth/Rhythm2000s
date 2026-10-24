@@ -11,7 +11,7 @@ assets/
     ├── windows-xp/
     │   ├── wallpapers/         # 4K：Bliss、Azul、Autumn、Red moon desert、Ascent、Radiance、Follow、Tulips
     │   ├── sounds/             # 开机、关机、登录、注销、错误、提示、气泡、回收站、tada 等 22 个
-    │   ├── icons/              # 我的电脑、回收站、文件夹、IE、Outlook Express、MSN、扫雷、错误/警告对话框等 47 个
+    │   ├── icons/              # 我的电脑、回收站、文件夹、IE、Outlook Express、MSN、扫雷、错误/警告对话框、托盘小喇叭、开始按钮旗帜等 52 个，另有 2 个鼠标指针（.cur）
     │   └── fonts/              # Tahoma（XP 界面字体）
     ├── mac-os-x/               # Aqua 时代，10.0–10.4
     │   ├── wallpapers/default-6k/  # 10.0/10.1、10.2、10.3、10.4 默认壁纸 6K 版
@@ -24,7 +24,7 @@ assets/
         └── fonts/              # Charcoal（OS 8/9 界面字体）、Monaco
 ```
 
-文件名保留原名；XP 图标是从系统 DLL / EXE 提取后挑出最高分辨率的一张，按用途重命名。
+文件名保留原名；XP 图标是从系统 DLL / EXE 提取后挑出最高分辨率的一张，按用途重命名（RW Designer 补充的几个除外，见下表）。
 
 ## 来源
 
@@ -33,6 +33,7 @@ assets/
 | XP 音效 | [archive.org: windowsxpstartup_201910](https://archive.org/details/windowsxpstartup_201910) |
 | XP 壁纸 4K | [archive.org: windows-xp_202607](https://archive.org/details/windows-xp_202607) |
 | XP 图标 | [archive.org: WindowsXPExtractedIcons](https://archive.org/details/WindowsXPExtractedIcons) |
+| XP 图标补充：`windows-logo.png`（2026-10-24 换成只有旗帜的版本）、`speaker.png`、`user.png`、`global.png`、`network-global.png`、`network-neighborhood.png`；鼠标指针 `default_arrow.cur`、`default_link.cur` | [RW Designer](https://www.rw-designer.com/) |
 | Mac OS X 默认壁纸 6K | [512 Pixels Mac 壁纸合集](https://512pixels.net/projects/default-mac-wallpapers-in-5k/) |
 | Mac OS X Aqua 壁纸 | [archive.org: mac-os-x-10.0-cheetah-desktop-pictures](https://archive.org/details/mac-os-x-10.0-cheetah-desktop-pictures)、[mac-os-x-10.4-desktop-pictures](https://archive.org/details/mac-os-x-10.4-desktop-pictures) |
 | Mac OS X 提示音 | [archive.org: mac-os-old-system-sounds](https://archive.org/details/mac-os-old-system-sounds) |
@@ -42,7 +43,7 @@ assets/
 | 经典 Mac 开机音、Charcoal、Monaco、Tahoma | [archive.org: mac-os-9-linux](https://archive.org/details/mac-os-9-linux) |
 | PP NeueBit / PP Mondwest | [befonts](https://befonts.com/mondwest-neuebit-font.html)，官方出品方 [Pangram Pangram](https://pangrampangram.com/products/neue-bit) |
 
-archive.org 上的条目都是网友上传的，文件是否原样未经逐一核对。
+archive.org 和 RW Designer 上的条目都是网友上传的，文件是否原样未经逐一核对。
 
 ## 授权与用途限制
 

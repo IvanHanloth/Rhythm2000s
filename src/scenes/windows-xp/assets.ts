@@ -16,6 +16,7 @@ import navigateUrl from '../../../assets/reference/windows-xp/sounds/Windows XP 
 import menuCommandUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Menu Command.wav?url';
 import balloonUrl from '../../../assets/reference/windows-xp/sounds/Windows XP Balloon.wav?url';
 import tadaUrl from '../../../assets/reference/windows-xp/sounds/tada.wav?url';
+import arrowCursorUrl from '../../../assets/reference/windows-xp/icons/default_arrow.cur?url';
 import { XP_FONT_FAMILY } from './components/xp-text.ts';
 
 /** 图标文件名（不含 .png） → 地址 */
@@ -28,6 +29,12 @@ const ICON_URLS: Record<string, string> = Object.fromEntries(
     }),
   ).map(([path, url]) => [path.replace(/^.*\/(.+)\.png$/, '$1'), url]),
 );
+
+/**
+ * XP 的标准箭头指针（.cur 文件自带热点，就在箭头尖上）。
+ * 同目录还有手形指针 default_link.cur（原版用在超链接上），场景里暂时没有需要它的地方。
+ */
+export const XP_CURSOR = `url("${arrowCursorUrl}"), default`;
 
 /** 按原版事件命名的音效 */
 const SOUND_FILES = {

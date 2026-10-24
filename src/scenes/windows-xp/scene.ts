@@ -12,7 +12,7 @@ import { clamp01, easeOutBack } from '../../ui/easing.ts';
 import { createJudgementView } from '../../ui/judgement-view.ts';
 import { TurnBanner } from '../../ui/turn-banner.ts';
 import { SCENE_CATALOG } from '../catalog.ts';
-import { preloadXpAssets, xpAssets } from './assets.ts';
+import { preloadXpAssets, XP_CURSOR, xpAssets } from './assets.ts';
 import { XpDesktop } from './components/desktop.ts';
 import { XpMessageBox } from './components/message-box.ts';
 import {
@@ -393,5 +393,6 @@ export const windowsXpScene: SceneEntry = {
   preload: async (audio) => {
     await preloadXpAssets(audio);
   },
+  cursor: XP_CURSOR,
   create: (context) => new WindowsXpScene(context),
 };

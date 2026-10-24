@@ -166,9 +166,6 @@ export const LUNA = {
     textShadow: '#184d18',
   },
 
-  /** Windows 旗帜四格：左上红、右上绿、左下蓝、右下黄 */
-  flag: ['#f35b22', '#7cbc1f', '#1d9be6', '#fdbb12'],
-
   startMenu: {
     header: [
       [0, '#1868ce'],
@@ -240,11 +237,8 @@ export const LUNA = {
     border: '#000000',
   },
 
-  /** 托盘小喇叭图标（本地没有原版图标，矢量绘制） */
+  /** 托盘小喇叭静音时的红色禁止符号 */
   speaker: {
-    body: '#dcdcdc',
-    outline: '#3b3b3b',
-    wave: '#ffffff',
     mute: '#e0301e',
   },
 } as const;

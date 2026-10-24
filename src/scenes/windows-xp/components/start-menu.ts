@@ -45,7 +45,7 @@ const RIGHT: Entry[] = [
   { icon: 'my-music', label: '我的音乐', bold: true },
   { icon: 'my-computer', label: '我的电脑', bold: true },
   'separator',
-  { icon: 'network', label: '网上邻居' },
+  { icon: 'network-global', label: '网上邻居' },
   { icon: 'printer', label: '打印机和传真' },
   'separator',
   { icon: 'help', label: '帮助和支持' },
@@ -127,13 +127,12 @@ export class XpStartMenu {
     const header = new Container({ label: 'header' });
     const pictureSize = 44;
     const top = (HEADER_HEIGHT - pictureSize) / 2;
-    // 本地没有原版的用户头像图片，用「用户」图标代替
     const frame = new Graphics()
       .roundRect(7, top, pictureSize, pictureSize, 3)
       .fill({ color: '#dedede', alpha: 0.85 })
       .roundRect(9, top + 2, pictureSize - 4, pictureSize - 4, 2)
       .fill('#f4f8ff');
-    const picture = new Sprite(xpAssets().icon('users'));
+    const picture = new Sprite(xpAssets().icon('user'));
     picture.setSize(pictureSize - 8);
     picture.position.set(11, top + 4);
     const name = xpText('Administrator', {

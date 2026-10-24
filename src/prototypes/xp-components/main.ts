@@ -10,7 +10,7 @@ import { Container, Rectangle, type FederatedPointerEvent } from 'pixi.js';
 import { AudioClock } from '../../audio/audio-clock.ts';
 import { GameCanvas } from '../../game/game-canvas.ts';
 import { ACTION_LABELS } from '../../rhythm/actions.ts';
-import { preloadXpAssets, type XpSoundName } from '../../scenes/windows-xp/assets.ts';
+import { preloadXpAssets, XP_CURSOR, type XpSoundName } from '../../scenes/windows-xp/assets.ts';
 import { XpBalloon } from '../../scenes/windows-xp/components/balloon.ts';
 import { XpDesktop } from '../../scenes/windows-xp/components/desktop.ts';
 import { XpMessageBox } from '../../scenes/windows-xp/components/message-box.ts';
@@ -33,6 +33,7 @@ const clock = new AudioClock();
 const audio = clock.context;
 const canvas = await GameCanvas.create(host);
 const assets = await preloadXpAssets(audio);
+host.style.cursor = XP_CURSOR;
 
 // 浏览器要求在用户操作里恢复音频
 const resumeAudio = () => void clock.resume();

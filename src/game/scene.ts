@@ -44,5 +44,7 @@ export interface SceneEntry {
   label: string;
   /** 场景素材（图片、字体、音效）的加载；游戏启动时等它完成，之后 create() 可以同步取用 */
   preload?(audio: BaseAudioContext): Promise<void>;
+  /** 显示这个场景时游戏画面上的鼠标指针（CSS cursor 值）；不写时用浏览器默认指针 */
+  cursor?: string;
   create(context: SceneContext): Scene;
 }

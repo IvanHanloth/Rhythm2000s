@@ -16,7 +16,7 @@ const MARGIN_TOP = 8;
 const LEFT_COLUMN = [
   { icon: 'my-documents', label: '我的文档' },
   { icon: 'my-computer', label: '我的电脑' },
-  { icon: 'network', label: '网上邻居' },
+  { icon: 'network-global', label: '网上邻居' },
   { icon: 'internet-explorer', label: 'Internet Explorer' },
 ];
 const RECYCLE_BIN = { icon: 'recycle-bin-empty', label: '回收站' };
