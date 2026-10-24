@@ -37,4 +37,5 @@ What follows from it, its costs, and the work it creates.
 | [0004](0004-authentic-os-look.md) | Look close to the original systems | Accepted |
 | [0005](0005-3d-street-hub-with-threejs.md) | A 3D street built with Three.js for the title screen and level select | Accepted |
 | [0006](0006-actions-named-after-ui-classes.md) | Actions named after UI widget classes | Accepted |
-| [0007](0007-official-level-design-guidelines.md) | Official level design guidelines | Accepted |
+| [0007](0007-official-level-design-guidelines.md) | Official level design guidelines | Accepted (demo timing superseded by 0008) |
+| [0008](0008-demos-before-each-new-action.md) | Demos before the phrase that introduces each action | Accepted |

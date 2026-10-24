@@ -7,35 +7,38 @@ Official levels are the charts shipped in `public/charts/` and listed in `index.
 ## Shape of a round
 
 ```
-Level select ──► intro ──► action demo (generated, unscored, skippable) ──► chart (count-in → phrases → outro) ──► results
+Level select ──► intro ──► ┌─ demos of the actions new in the next phrases (generated, unscored, skippable)
+                           └─ chart from those phrases up to the next new action ─┐ (repeat to the end) ──► results
 ```
 
-The intro ([hub.md](hub.md)) is dismissed by the player's first press, and the scene starts after it, so the demo follows the intro.
+The intro ([hub.md](hub.md)) is dismissed by the player's first press, and the scene starts after it, so the first demo follows the intro. A chart that uses all its actions in the first phrase plays as before: every demo, then the whole chart.
 
-## Rule 1: the system demonstrates every action first
+## Rule 1: the system demonstrates every action before it is used
 
-**The demo is not written in the chart**; the game generates it. Before the chart, every action the chart uses is demonstrated and must be played back successfully before the next.
+**The demo is not written in the chart**; the game generates it ([ADR 0007](decisions/0007-official-level-design-guidelines.md), timing from [ADR 0008](decisions/0008-demos-before-each-new-action.md)). Before the first phrase that uses an action, the chart stops and that action is demonstrated; it must be played back successfully before the next.
 
 | Item | Rule |
 | --- | --- |
 | Which actions | Every action ID in the chart (`call` and `response`), once each |
+| When | Right before the first phrase that uses it: the chart stops after the previous phrase, runs the demos of that phrase's new actions, then resumes from that phrase |
 | How | One call and response round: the computer does it, then the player does it on the same beats |
 | Next action | After the round ends with a successful response |
 | On failure | Repeat that action until it passes |
-| The chart starts | When every action has passed |
-| Scoring | Practice only: **not** counted in the score, results or best score |
-| Skipping | "Skip tutorial" in the settings starts straight from the chart, see [settings.md](settings.md) |
+| The chart resumes | When every new action of that phrase has passed |
+| Scoring | Practice only: **not** counted in the score, results or best score. The chart's pieces count together, as if played in one go |
+| Skipping | Skips every demo. "Skip tutorial" in the settings ([settings.md](settings.md)) plays the chart in one go; **Tab** during a demo ends it and plays the rest of the chart in one go, with no later demo |
 
-For chart authors: the first phrase is real content, so don't write a teaching phrase at the start; and every extra action type adds a demo round before the chart.
+For chart authors: the first phrase is real content, so don't write a teaching phrase at the start; every phrase that brings in a new action type pauses the chart for its demo, so bring new actions in where a pause sits well.
 
 ### Provisional details
 
-- **Order**: actions in order of first appearance.
+- **Order**: within a stop, actions in order of first appearance.
 - **Tempo**: the chart's BPM and metre.
 - **Each round**: a one-phrase chart (one count-in bar, a call bar, a response bar, no outro) with the action on beat 1; two-press actions keep their half-beat spacing.
 - **Pass**: no Miss on any press of the round (Perfect or Good).
-- **Caption**: right of the "Follow me / Your turn" banner, "Practice 2 of 4" (or "Try again") over the action name and how to handle it; texts in `src/rhythm/tutorial.ts`.
-- **When**: entering a level from the list or "Next Level"; "Retry" on the results skips it.
+- **Resuming**: the first piece keeps the chart's count-in; later pieces start with one count-in bar. Only the last piece has the outro.
+- **Caption**: right of the "Follow me / Your turn" banner, "Practice 2 of 4" (or "Try again") over the action name and how to handle it, counted over the whole level, with "Tab: skip" at its top right; texts in `src/rhythm/tutorial.ts`.
+- **When**: entering a level from the list or "Next Level"; "Retry" on the results skips the demos.
 - **Skip toggle**: in the dev panel until the settings page exists, saved in the browser.
 
 ## Rule 2: easy to hard

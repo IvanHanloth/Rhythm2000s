@@ -29,7 +29,7 @@ Call ──► Response ──► Feedback ──► Next phrase (gradually hard
 3. **Feedback**: each action gets instant visual and sound feedback, e.g. a window snaps shut on success, an error dialog pops up on failure.
 4. **Song structure**: difficulty rises step by step, with variations midway and usually a climax at the end.
 
-Official levels open with the system demonstrating each action the chart uses, which the player must play back before the chart starts; the chart goes from easy to hard and lasts at least 1 minute, see [level-design.md](level-design.md).
+Official levels demonstrate each action right before the phrase that first uses it, and the player must play it back before the chart carries on; the chart goes from easy to hard and lasts at least 1 minute, see [level-design.md](level-design.md).
 
 ## Judging (to be refined)
 

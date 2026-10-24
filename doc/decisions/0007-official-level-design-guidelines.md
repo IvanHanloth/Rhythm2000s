@@ -1,6 +1,6 @@
 # 0007 Official level design guidelines
 
-- Status: Accepted
+- Status: Accepted; when the demos run is superseded by [ADR 0008](0008-demos-before-each-new-action.md)
 - Date: 2026-10-24
 
 ## Context
@@ -18,7 +18,7 @@ Length: the user first proposed at least 3 minutes, then settled on at least 1 m
 
 ## Decision
 
-- Option 2: the system runs a call-and-response round per action; each must be played back successfully before the next, a failure repeats it, and the chart starts once all pass. The demo is practice and unscored; a "Skip tutorial" setting turns it off.
+- Option 2: the system runs a call-and-response round per action; each must be played back successfully before the next, a failure repeats it, and the chart starts once all pass (since [ADR 0008](0008-demos-before-each-new-action.md), each action is demonstrated right before the phrase that introduces it). The demo is practice and unscored; a "Skip tutorial" setting turns it off.
 - Charts rise from easy to hard.
 - The chart lasts at least 60 seconds (count-in and outro included, demo excluded).
 
