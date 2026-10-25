@@ -48,6 +48,7 @@ Output latency comes mostly from sound card buffers, the system mixer and Blueto
 | --- | --- | --- |
 | Autoplay policy: no sound before a click | A click is needed before play | "Click to start", which also resumes the `AudioContext` |
 | Background tabs are throttled | Timing breaks in the background | Pause on `visibilitychange` |
+| Chrome parks a silent `AudioContext` on a fake output after about 30 s of silence ([SilentSinkSuspender](https://chromium.googlesource.com/chromium/src.git/+/74.0.3702.1/media/base/silent_sink_suspender.cc)) | The first sounds after a quiet spell (walking the street, the level list) are lost while it switches back to the speakers | `AudioClock` plays an inaudible constant signal (1e-5, about −100 dB) for as long as the page lives, so the output never counts as silent |
 | Some system shortcuts can't be captured | Those keys can't be game keys | Only a few keys are used anyway |
 | Context menu and text selection | Mouse play misfires | Prevent `contextmenu` and `selectstart` |
 | Latency varies by browser and device | Inconsistent feel | Calibration plus testing per platform |

@@ -7,11 +7,30 @@ import {
   type OutputStamp,
 } from './time-mapping.ts';
 
+/**
+ * Level of the keep-awake signal: far below hearing (about −100 dB, under one 16-bit step) but not zero, which is
+ * all Chrome's silence detection checks.
+ */
+const KEEP_AWAKE_LEVEL = 1e-5;
+
 export class AudioClock {
   readonly context: AudioContext;
 
   constructor(context: AudioContext = new AudioContext({ latencyHint: 'interactive' })) {
     this.context = context;
+    this.keepOutputAwake();
+  }
+
+  /**
+   * After about 30 s of exact silence Chrome swaps the speakers for a fake output and only swaps back once sound
+   * appears, losing the first sounds of a level (doc/tech-research.md, 2.5). An inaudible constant signal that runs
+   * for the life of the page means the output is never silent. It starts once the context is resumed.
+   */
+  private keepOutputAwake(): void {
+    const signal = this.context.createConstantSource();
+    signal.offset.value = KEEP_AWAKE_LEVEL;
+    signal.connect(this.context.destination);
+    signal.start();
   }
 
   /** Browsers require this inside a user gesture (click, key press) before any sound plays. */
