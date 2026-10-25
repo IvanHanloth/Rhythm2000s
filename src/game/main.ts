@@ -4,6 +4,9 @@
 import './style.css';
 import { Rectangle } from 'pixi.js';
 import { AudioClock } from '@/audio/audio-clock.ts';
+import { createDanceKit } from '@/dance/backing.ts';
+import { DanceMachine } from '@/dance/dance-machine.ts';
+import { fetchDanceFromSite, loadDanceCharts } from '@/dance/loader.ts';
 import { Hub, type LevelInfo } from '@/hub/hub.ts';
 import { countFinished } from '@/hub/save-menu.ts';
 import { mac2000Scene } from '@/scenes/mac-2000/scene.ts';
@@ -20,6 +23,7 @@ import { LevelIntro } from './level-intro.ts';
 import {
   buildLevels,
   computerOf,
+  DANCE_ROUTE,
   editorRoute,
   formatBestScore,
   parseRoute,
@@ -35,11 +39,13 @@ if (!host) throw new Error('Game container #game not found');
 
 const clock = new AudioClock();
 // Prepare the canvas and charts together; charts are downloaded from public/charts/ at runtime (ADR 0003)
-const [canvas, { charts: builtInCharts, errors: chartErrors }] = await Promise.all([
+const [canvas, { charts: builtInCharts, errors: chartErrors }, dance] = await Promise.all([
   GameCanvas.create(host),
   loadCharts(fetchChartFromSite(import.meta.env.BASE_URL)),
+  // The arcade dance machine's songs (doc/dance-machine.md), apart from the desktop charts
+  loadDanceCharts(fetchDanceFromSite(import.meta.env.BASE_URL)),
 ]);
-for (const error of chartErrors) console.error(error);
+for (const error of [...chartErrors, ...dance.errors]) console.error(error);
 /** Built-in charts plus the player's imported ones (doc/chart-import-export.md) */
 const library = new ChartLibrary(builtInCharts, browserChartStore());
 for (const error of library.loadErrors) console.error(error);
@@ -126,8 +132,21 @@ const resumeAudio = () => void clock.resume();
 window.addEventListener('pointerdown', resumeAudio, { once: true });
 window.addEventListener('keydown', resumeAudio, { once: true });
 
+/** The dance machine's drums and bass, made once */
+const danceKit = createDanceKit(clock.context);
+/** The dance machine while #dance-machine is open; it draws on the game canvas instead of a scene */
+let danceMachine: DanceMachine | null = null;
+function closeDanceMachine(): void {
+  danceMachine?.destroy();
+  danceMachine = null;
+}
+
 listenForTaps(clock, host, (tap) => director.tap(tap));
-canvas.onFrame(() => director.update({ audioTime: clock.heardNow() }));
+canvas.onFrame(() => {
+  const audioTime = clock.heardNow();
+  director.update({ audioTime });
+  danceMachine?.update(audioTime);
+});
 
 const sceneIds = director.entries.map((e) => e.id);
 
@@ -201,6 +220,9 @@ const hub = new Hub({
   onPlay: (computerId) => {
     location.hash = computerId;
   },
+  onPlayDance: () => {
+    location.hash = DANCE_ROUTE;
+  },
 });
 cafe = hub;
 document.body.append(hub.element);
@@ -238,15 +260,19 @@ window.addEventListener('keydown', (event) => {
   if (event.ctrlKey || event.metaKey || event.altKey) return;
   if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)
     return;
-  if (parseRoute(location.hash, sceneIds).kind === 'hub') return;
+  // The dance machine has no beat guide
+  const where = parseRoute(location.hash, sceneIds).kind;
+  if (where === 'hub' || where === 'dance') return;
   settings.setBeatGuide(!settings.values.beatGuide);
 });
 
 window.addEventListener('keydown', (event) => {
   if (event.code !== 'Escape' || parseRoute(location.hash, sceneIds).kind === 'hub') return;
   intro.hide();
-  // Inside a level Esc goes back to the level list first; Esc on the list goes to the street (doc/level-select.md)
-  if (!director.escape()) location.hash = HUB_ROUTE;
+  // Inside a level Esc goes back to the level list first; Esc on the list goes to the street (doc/level-select.md).
+  // The dance machine goes from a song to its song list, then to the street
+  const handled = danceMachine ? danceMachine.onEscape() : director.escape();
+  if (!handled) location.hash = HUB_ROUTE;
 });
 
 const gameHost: HTMLElement = host;
@@ -260,6 +286,7 @@ function showRoute(): void {
     location.hash = HUB_ROUTE;
     return;
   }
+  if (route.kind !== 'dance') closeDanceMachine();
   if (route.kind === 'hub') {
     director.clear();
     canvas.app.ticker.stop();
@@ -269,6 +296,22 @@ function showRoute(): void {
   }
   hub.hide();
   canvas.app.ticker.start();
+  if (route.kind === 'dance') {
+    director.clear();
+    gameHost.style.cursor = '';
+    if (!danceMachine) {
+      danceMachine = new DanceMachine({
+        clock,
+        kit: danceKit,
+        charts: dance.charts,
+        calibration: () => settings.values.calibrationMs / 1000,
+        saves,
+        cheat,
+      });
+      canvas.stage.addChild(danceMachine.view);
+    }
+    return;
+  }
   if (route.kind === 'scene') director.show(route.sceneId, route.chartId);
   else director.show(route.sceneId, undefined, route.kind);
   // PixiJS makes the canvas inherit its container's cursor, so set it on the container

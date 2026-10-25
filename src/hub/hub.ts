@@ -49,6 +49,7 @@ import { HubSounds } from './sounds.ts';
 import { WhaleAvatar } from './whale-model.ts';
 import {
   buildWorld,
+  type GameSpot,
   type HubSpot,
   type LevelSpot,
   type ReadSpot,
@@ -130,6 +131,8 @@ type State =
   | 'sitting'
   | 'seated'
   | 'standing'
+  /** Stepping onto the dance machine's pad, the camera moving in behind (doc/dance-machine.md) */
+  | 'mounting'
   | 'launching';
 
 interface Pose {
@@ -157,6 +160,8 @@ export interface HubOptions {
   levels: readonly LevelInfo[];
   /** "Start" once seated: enter the level */
   onPlay(levelId: string): void;
+  /** E at the arcade's dance machine: open its 2D game (doc/dance-machine.md) */
+  onPlayDance(): void;
   /** The level's best score line; null if never played */
   recordOf(levelId: string): string | null;
   /** Plays the startup sound on sitting down; the hub is silent without it */
@@ -230,6 +235,8 @@ export class Hub {
   private zone: string | null = null;
   private dialogQueue: { name: string; text: string }[] = [];
   private seat: { spot: LevelSpot; from: Point; fromHeading: number; start: number } | null = null;
+  /** On the dance machine: from stepping onto its pad until the street shows again after the game */
+  private dance: { spot: GameSpot; from: Point; fromHeading: number; start: number } | null = null;
   /** True when we release the pointer ourselves, so no pause menu */
   private releasingPointer = false;
   /** chair-swivel's cutaway is drawing the café (doc/cross-dimension.md) */
@@ -309,6 +316,7 @@ export class Hub {
       this.applyPose(this.seatedPose(this.seat.spot));
       this.overlay.showCard(this.levelOf(this.seat.spot), this.recordOf(this.seat.spot));
     }
+    if (this.dance) this.leavePad(this.dance.spot);
     this.overlay.setFade(false, FADE_MS);
     this.lastFrame = performance.now();
     this.frameId = requestAnimationFrame(this.loop);
@@ -469,6 +477,10 @@ export class Hub {
       this.openBooklet();
       return;
     }
+    if (spot.kind === 'game') {
+      this.mountPad(spot);
+      return;
+    }
     this.sit(spot);
   }
 
@@ -537,6 +549,64 @@ export class Hub {
         this.overlay.showCard(this.levelOf(spot), this.recordOf(spot));
       },
     );
+  }
+
+  /**
+   * The dance machine's way in from 3D to 2D (doc/dance-machine.md): the character steps onto the pad facing the
+   * screen while the camera comes round behind, then the camera pushes into the screen as the view fades and the game
+   * opens.
+   */
+  private mountPad(spot: GameSpot): void {
+    this.state = 'mounting';
+    this.overlay.setPrompt(null);
+    this.overlay.setLockHint(false);
+    this.releasePointer();
+    this.dance = { spot, from: { ...this.position }, fromHeading: this.heading, start: this.time };
+    this.tweenCamera(
+      () => this.padPose(spot),
+      SIT_SECONDS,
+      () => {
+        this.state = 'launching';
+        this.overlay.setFade(true, LAUNCH_SECONDS * 1000);
+        this.tweenCamera(
+          () => this.cabinetScreenPose(spot),
+          LAUNCH_SECONDS,
+          () => this.options.onPlayDance(),
+        );
+      },
+    );
+  }
+
+  /** Stepping onto the pad: the character walks from where they stood to its centre and turns to the screen */
+  private stepOntoPad(): void {
+    const dance = this.dance;
+    if (!dance) return;
+    const k = smoothstep((this.time - dance.start) / (SIT_SECONDS * 0.7));
+    const { x, z, heading } = dance.spot.stand;
+    this.position = {
+      x: dance.from.x + (x - dance.from.x) * k,
+      z: dance.from.z + (z - dance.from.z) * k,
+    };
+    this.heading = lerpAngle(dance.fromHeading, heading, k);
+    this.height = 0;
+    this.walkPhase += 0.12 * (1 - k);
+    this.player.pose(this.walkPhase, 0.6 * (1 - k));
+    this.placePlayer();
+  }
+
+  /** Back from the game: standing on the pad, the camera behind, walking again */
+  private leavePad(spot: GameSpot): void {
+    this.dance = null;
+    this.tween = null;
+    this.state = 'roam';
+    this.position = { x: spot.stand.x, z: spot.stand.z };
+    this.heading = spot.stand.heading;
+    this.yaw = this.heading + Math.PI;
+    this.pitch = 0.22;
+    this.placePlayer();
+    this.applyPose(this.followPose(0));
+    // Hiding the street released the pointer
+    this.overlay.setLockHint(document.pointerLockElement !== this.renderer.domElement);
   }
 
   private standUp(): void {
@@ -715,6 +785,9 @@ export class Hub {
       case 'sitting':
         this.settleIntoSeat();
         break;
+      case 'mounting':
+        this.stepOntoPad();
+        break;
       case 'seated':
         this.player.type(this.time);
         break;
@@ -813,6 +886,7 @@ export class Hub {
     }
     if (spot.kind === 'read') return `${spot.verb} · ${spot.name}`;
     if (spot.kind === 'guide') return `Read · ${spot.name}`;
+    if (spot.kind === 'game') return `Play · ${spot.name}`;
     const level = this.levelOf(spot);
     return `Sit down · ${level?.label ?? spot.levelId}`;
   }
@@ -897,6 +971,23 @@ export class Hub {
   /** Right in front of the monitor, where entering a level ends and chair-swivel's cutaway starts and ends */
   private monitorPose(spot: LevelSpot): Pose {
     return { position: spot.screen.clone().add(new Vector3(0, 0, 0.3)), look: spot.screen.clone() };
+  }
+
+  /** On the dance pad: behind and above the character, looking past them at the cabinet's screen */
+  private padPose(spot: GameSpot): Pose {
+    const { x, z } = spot.stand;
+    return {
+      position: new Vector3(x, 1.95, z + 1.7),
+      look: spot.screen.clone().add(new Vector3(0, -0.15, 0)),
+    };
+  }
+
+  /** Right in front of the cabinet's screen, where the dance machine's 2D game takes over */
+  private cabinetScreenPose(spot: GameSpot): Pose {
+    return {
+      position: spot.screen.clone().add(new Vector3(0, 0, 0.35)),
+      look: spot.screen.clone(),
+    };
   }
 
   /** chair-swivel's wide shot: from above and behind, so the whole spin shows */

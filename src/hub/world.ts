@@ -5,6 +5,7 @@
 // placeholder shapes until the user's Tripo / Blender models go into public/models/custom/ (spec: doc/hub-assets.md).
 // Axes: x along the street (west negative), z from north to south, y up, in metres. Road at |z| < 4, pavements out to |z| = 7.
 
+import type { Arrow } from '@/dance/steps.ts';
 import type { SceneId } from '@/scenes/catalog.ts';
 import {
   BoxGeometry,
@@ -34,7 +35,8 @@ import { attachCustom, attachModel, surface, type PropOptions } from './assets.t
 import { SEAT_HEIGHT } from './character.ts';
 import { arrangeMachines } from './cafe-layout.ts';
 import { boxAt, type Box } from './collision.ts';
-import type { Spot } from './motion.ts';
+import { DanceAttractScreen, padArrowTexture } from './dance-attract.ts';
+import { headingOf, type Spot } from './motion.ts';
 import { ledTexture, posterTexture, signTexture } from './textures.ts';
 
 /** Kerb height of the pavement above the road */
@@ -83,7 +85,17 @@ export interface GuideSpot extends Spot {
   name: string;
 }
 
-export type HubSpot = LevelSpot | ReadSpot | GuideSpot;
+/** An arcade game to play: E opens its 2D screen; the dance machine (doc/dance-machine.md) */
+export interface GameSpot extends Spot {
+  kind: 'game';
+  name: string;
+  /** Where the character stands to play, and the heading that faces the screen */
+  stand: { x: number; z: number; heading: number };
+  /** Screen centre (world), where the camera pushes in; updated when a custom model loads */
+  screen: Vector3;
+}
+
+export type HubSpot = LevelSpot | ReadSpot | GuideSpot | GameSpot;
 
 /** A shop's area; entering shows its name */
 export interface Zone extends Box {
@@ -334,6 +346,10 @@ class Builder {
     coinSlot = false,
   ): void {
     this.spots.push({ kind: 'read', name, verb, x, z, reach, lines, coinSlot });
+  }
+
+  game(spot: Omit<GameSpot, 'kind'>): void {
+    this.spots.push({ kind: 'game', ...spot });
   }
 
   /** Windows on a facade: from x0 to x1, `floors` storeys up from y0; z is the wall, facing its direction (+1 south, -1 north) */
@@ -1276,17 +1292,137 @@ function buildArcade(b: Builder, x: number): void {
     1.0,
   );
 
-  const dx = left + 2;
-  const dz = back + 6;
-  b.custom('dance-machine', dx, dz, 0, (p) => {
-    p.add(placeholderBox(1.6, 0.12, 1.6, 0, 0, 0, b.plain(C.metal, 0.4, 0.7)));
-    p.add(placeholderBox(1.6, 2.2, 0.4, 0, 0, -1.0, b.plain(C.plasticDark, 0.5)));
-    const screen = new Mesh(new PlaneGeometry(1.0, 0.75), b.glow(null, '#3a2a8a', 1.2));
-    screen.position.set(0, 1.6, -0.79);
-    p.add(screen);
+  buildDanceMachine(b, left + 2, back + 6);
+}
+
+/** Height of the dance pad's top, where the player stands */
+const PAD_TOP = 0.12;
+
+/**
+ * The dance machine (custom slot dance-machine, doc/dance-machine.md): a pad with four glowing arrow panels and a
+ * safety bar behind the player, facing a cabinet with speakers, a marquee and a screen running the attract loop.
+ * The origin is the pad's centre; the cabinet is towards -Z.
+ */
+function buildDanceMachine(b: Builder, x: number, z: number): void {
+  const attract = new DanceAttractScreen();
+  const screenMaterial = b.glow(attract.texture, '#ffffff', 1.1);
+  const screen = new Vector3(x, 1.42, z - 0.9);
+  const arrowTexture = padArrowTexture();
+  const panels: { key: Arrow; material: MeshStandardMaterial }[] = [];
+
+  b.custom(
+    'dance-machine',
+    x,
+    z,
+    0,
+    (p) => {
+      const metal = b.plain(C.metal, 0.35, 0.8);
+      const body = b.plain(C.plasticDark, 0.45);
+      // Pad: a metal frame, four dark arrow panels with glowing arrows, the centre and corners bare metal
+      p.add(placeholderBox(1.6, PAD_TOP - 0.02, 1.6, 0, 0, 0, metal));
+      const pad: [Arrow, number, number, number, string][] = [
+        ['up', 0, -0.5, 0, C.neonPink],
+        ['down', 0, 0.5, Math.PI, C.neonPink],
+        ['left', -0.5, 0, Math.PI / 2, C.neonCyan],
+        ['right', 0.5, 0, -Math.PI / 2, C.neonCyan],
+      ];
+      for (const [key, px, pz, turn, color] of pad) {
+        p.add(placeholderBox(0.46, 0.02, 0.46, px, PAD_TOP - 0.02, pz, b.plain('#1a1830', 0.3)));
+        const material = b.glow(arrowTexture, color, 0.7);
+        const decal = new Mesh(new PlaneGeometry(0.38, 0.38), material);
+        // Lying flat: the arrow's top points to -Z (towards the screen) before turning for its direction
+        decal.rotation.set(-Math.PI / 2, 0, turn);
+        decal.position.set(px, PAD_TOP + 0.002, pz);
+        p.add(decal);
+        panels.push({ key, material });
+      }
+      p.add(
+        placeholderBox(0.46, 0.012, 0.46, 0, PAD_TOP - 0.02, 0, b.plain(C.metalDark, 0.4, 0.8)),
+      );
+
+      // Safety bar behind the player
+      const bar = b.plain(C.metal, 0.25, 0.9);
+      for (const side of [-1, 1]) {
+        const post = new Mesh(new CylinderGeometry(0.03, 0.03, 1.0, 12), bar);
+        post.position.set(side * 0.78, 0.5 + PAD_TOP, 0.78);
+        p.add(post);
+      }
+      const rail = new Mesh(new CylinderGeometry(0.03, 0.03, 1.56, 12), bar);
+      rail.rotation.z = Math.PI / 2;
+      rail.position.set(0, 1.0 + PAD_TOP, 0.78);
+      p.add(rail);
+
+      // Cabinet: base, screen housing, speaker towers with cones, marquee, light strips
+      p.add(placeholderBox(1.3, 0.95, 0.6, 0, 0, -1.15, body));
+      p.add(placeholderBox(1.2, 0.95, 0.55, 0, 0.95, -1.18, body));
+      const screenMesh = new Mesh(new PlaneGeometry(0.96, 0.72), screenMaterial);
+      screenMesh.position.set(0, 1.42, -0.9);
+      p.add(screenMesh);
+      p.add(placeholderBox(1.0, 0.06, 0.24, 0, 0.9, -0.8, body));
+      for (const side of [-1, 1]) {
+        const button = new Mesh(
+          new CylinderGeometry(0.035, 0.035, 0.03, 16),
+          b.glow(null, side < 0 ? C.signRed : C.signGreen, 1.4),
+        );
+        button.position.set(side * 0.2, 0.975, -0.78);
+        p.add(button);
+      }
+      const rubber = b.plain('#141414', 0.9);
+      for (const side of [-1, 1]) {
+        p.add(placeholderBox(0.3, 1.9, 0.5, side * 0.8, 0, -1.1, body));
+        for (const [cy, radius] of [
+          [0.45, 0.11],
+          [1.15, 0.11],
+          [1.62, 0.05],
+        ] as const) {
+          const cone = new Mesh(new CylinderGeometry(radius, radius * 0.8, 0.03, 24), rubber);
+          cone.rotation.x = Math.PI / 2;
+          cone.position.set(side * 0.8, cy, -0.84);
+          p.add(cone);
+        }
+        p.add(
+          placeholderBox(0.03, 1.8, 0.03, side * 0.63, 0.05, -0.86, b.glow(null, C.neonCyan, 2)),
+        );
+      }
+      const marquee = signTexture({
+        text: 'DANCE MACHINE',
+        sub: 'FUNLAND AMUSEMENTS',
+        background: C.plasticDark,
+        color: C.neonPink,
+        border: C.neonCyan,
+      });
+      // Marquee: a box with the lit sign on its front face only, so the lettering isn't tiled
+      p.add(placeholderBox(1.9, 0.36, 0.55, 0, 1.9, -1.12, body));
+      const sign = new Mesh(new PlaneGeometry(1.84, 0.32), b.glow(marquee, '#ffffff', 1.4));
+      sign.position.set(0, 2.08, -0.843);
+      p.add(sign);
+    },
+    (model) => {
+      // Custom model: its SCREEN mesh shows the attract loop and the camera pushes in on its centre
+      const mesh = model.getObjectByName('SCREEN');
+      if (!(mesh instanceof Mesh)) return;
+      mesh.material = screenMaterial;
+      model.updateWorldMatrix(true, true);
+      mesh.geometry.computeBoundingBox();
+      mesh.geometry.boundingBox!.getCenter(screen);
+      mesh.localToWorld(screen);
+    },
+  );
+  b.colliders.push(boxAt(x, z - 1.12, 1.9, 0.6));
+  b.animations.push((t) => {
+    attract.update(t);
+    const lit = attract.litKeys(t);
+    for (const { key, material } of panels)
+      material.emissiveIntensity = lit.includes(key) ? 3 : 0.7;
   });
-  b.colliders.push(boxAt(dx, dz - 1.0, 1.6, 0.4));
-  b.read('Dance machine', 'Examine', dx, dz, ['A sign stuck on the dance pad: "OUT OF USE".'], 1.0);
+  b.game({
+    name: 'Dance machine',
+    x,
+    z,
+    reach: 1.0,
+    stand: { x, z, heading: headingOf({ x: 0, z: -1 }) },
+    screen,
+  });
 }
 
 // ---------- A millennial British high street ----------
