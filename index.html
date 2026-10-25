@@ -16,6 +16,8 @@
         align-items: center;
         justify-content: center;
         gap: 12px;
+        padding: 0 16px;
+        text-align: center;
         background: #000;
         color: #c8c8c8;
         font:
@@ -44,11 +46,12 @@
   </head>
   <body>
     <div id="game"></div>
-    <!-- Boot screen: main.ts removes it once scene assets and charts are loaded and the street is built -->
+    <!-- Boot screen: main.ts removes it once scene assets and charts are loaded and the street is built;
+         on a phone boot.ts turns it into the "not supported" notice (doc/phone-notice.md) -->
     <div id="boot" class="boot" role="status">
       <span class="boot-title">Rhythm 2000s</span>
       <span class="boot-text">Starting up…</span>
     </div>
-    <script type="module" src="/src/game/main.ts"></script>
+    <script type="module" src="/src/game/boot.ts"></script>
   </body>
 </html>

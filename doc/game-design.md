@@ -46,7 +46,7 @@ Official levels demonstrate each action right before the phrase that first uses 
 
 ## Open questions
 
-- [x] Stack and platforms: web first (TypeScript + PixiJS + Vite+), wrapped with Electron for desktop when needed, see [ADR 0001](decisions/0001-tech-stack.md). Whether mobile is an official target is still open
+- [x] Stack and platforms: web first (TypeScript + PixiJS + Vite+), wrapped with Electron for desktop when needed, see [ADR 0001](decisions/0001-tech-stack.md). Phones are not supported for now and get a notice instead of the game ([phone-notice.md](phone-notice.md)); whether mobile becomes an official target is still open
 - [ ] Input: keyboard or mouse? Does the player need to aim?
 - [ ] Exact judgement windows
 - [ ] Music: the style of the original soundtrack (2000s electronic / pop / collage of system sounds)
