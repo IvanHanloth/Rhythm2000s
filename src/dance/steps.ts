@@ -1,5 +1,5 @@
 // Dance charts (doc/dance-machine.md "Chart format"): pad keys, the eight step directions and validation of the JSON in
-// public/dance/.
+// assets/public/dance/.
 // No PixiJS, so the loader and unit tests can use it directly.
 
 export const DANCE_FORMAT_VERSION = 1;
@@ -137,7 +137,7 @@ export function stepNote(beat: number): StepNote {
   return 'sixteenth';
 }
 
-/** Validates public/dance/index.json */
+/** Validates assets/public/dance/index.json */
 export function parseDanceIndex(data: unknown): DanceParseResult<DanceIndex> {
   if (!isRecord(data)) return { ok: false, errors: ['the index must be an object'] };
   const errors = unknownKeys(data, ['format', 'charts'], '');

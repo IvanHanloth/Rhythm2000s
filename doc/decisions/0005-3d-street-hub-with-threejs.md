@@ -34,7 +34,7 @@ Controls: fixed isometric view with WASD; third-person follow with mouse look; c
 ## Consequences
 
 - New runtime dependency `three` and dev dependency `@types/three`. GLB loading, meshopt decoding and post-processing come from `three/examples`, with no other dependencies.
-- Assets live in `public/models/` and `public/textures/`, with compression and sources in assets/README.md (about 13 MB now, growing with custom models); a loading bar shows under the title.
+- Assets live in `assets/public/models/` and `assets/public/textures/`, with compression and sources in assets/README.md (about 13 MB now, growing with custom models); a loading bar shows under the title.
 - The game opens on the street by default (`#street`); a scene id in the URL (e.g. `#windows-xp`) still opens that scene directly for development.
 - Esc in a level entered from the café returns to the seat.
 - Street layout, shops and level computers are provisional, see [hub.md](../hub.md).

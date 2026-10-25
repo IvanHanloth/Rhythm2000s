@@ -388,7 +388,7 @@ class Mac2000Scene extends LevelScene<MacSession> {
       icon: drawCautionIcon(64),
       message: 'No charts are available.',
       informative:
-        'The charts could not be loaded. See the browser console for details. Chart files belong in the public/charts/ folder.',
+        'The charts could not be loaded. See the browser console for details. Chart files belong in the assets/public/charts/ folder.',
       buttons: [{ label: 'OK', isDefault: true }],
     });
     const button = dialog.buttons[0]!;

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite-plus';
 
 /** Import aliases, mirrored in tsconfig.json `paths` */
-const alias = { '@/': '/src/', '@assets/': '/assets/', '@public/': '/public/' };
+const alias = { '@/': '/src/', '@assets/': '/assets/', '@public/': '/assets/public/' };
 
 /**
  * Kept out of formatting and linting: AI assistant and tool directories, the skills lock file,
@@ -17,6 +17,8 @@ const TOOLING_DIRS = [
 
 export default defineConfig({
   resolve: { alias },
+  // Fetched at runtime by URL and copied to dist as they are (charts, models, textures); the rest of assets/ is imported
+  publicDir: 'assets/public',
   test: {
     include: ['src/**/*.test.ts'],
   },

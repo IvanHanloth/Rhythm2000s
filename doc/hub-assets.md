@@ -9,7 +9,7 @@ The street's ([hub.md](hub.md)) realistic assets come in two kinds:
 
 ## Adding a model
 
-1. Export a GLB named `<slot>.glb` into `public/models/custom/`.
+1. Export a GLB named `<slot>.glb` into `assets/public/models/custom/`.
 2. Add the slot to `manifest.json` in that folder: `{ "slots": ["crt-pc", "office-chair"] }`.
 3. Reload; every use of the slot switches to the model. Slots missing from the manifest keep their placeholder.
 

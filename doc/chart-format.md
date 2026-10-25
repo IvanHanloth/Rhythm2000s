@@ -5,7 +5,7 @@
 ## Files
 
 ```
-public/charts/
+assets/public/charts/
 ├── index.json          # Chart index
 └── xp-first-boot.json  # One file per chart, named <chart id>.json
 ```

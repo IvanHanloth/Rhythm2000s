@@ -1,4 +1,4 @@
-// Levels: one chart is one level, ordered by scene registration and then by the chart index (public/charts/index.json).
+// Levels: one chart is one level, ordered by scene registration and then by the chart index (assets/public/charts/index.json).
 // The net café has one computer per scene; inside, levels are picked in Explorer / Finder (doc/level-select.md). #scene/chart opens a level directly.
 // No DOM, so unit tests can use it directly.
 

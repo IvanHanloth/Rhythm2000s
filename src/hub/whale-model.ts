@@ -1,4 +1,4 @@
-// The player character: the DeepSeek whale girl model (public/models/whale-girl.glb), from ai-girls-3d
+// The player character: the DeepSeek whale girl model (assets/public/models/whale-girl.glb), from ai-girls-3d
 // (Manny / ningfangtianwai-pixel, CC BY 4.0), compressed with glTF-Transform; see assets/README.md.
 // It has no animations: walking, sitting and typing turn its bones in code; blinking uses its own morph targets.
 // The code-built puppet (character.ts) shows until it loads, and stays if loading fails.

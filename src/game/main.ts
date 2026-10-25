@@ -39,7 +39,7 @@ const host = document.querySelector<HTMLElement>('#game');
 if (!host) throw new Error('Game container #game not found');
 
 const clock = new AudioClock();
-// Prepare the canvas and charts together; charts are downloaded from public/charts/ at runtime (ADR 0003)
+// Prepare the canvas and charts together; charts are downloaded from assets/public/charts/ at runtime (ADR 0003)
 const [canvas, { charts: builtInCharts, errors: chartErrors }, dance] = await Promise.all([
   GameCanvas.create(host),
   loadCharts(fetchChartFromSite(import.meta.env.BASE_URL)),

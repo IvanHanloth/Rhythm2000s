@@ -1,4 +1,4 @@
-// Chart library: the built-in charts from public/charts/ plus the player's imported charts, kept in browser storage
+// Chart library: the built-in charts from assets/public/charts/ plus the player's imported charts, kept in browser storage
 // (doc/chart-import-export.md, ADR 0011). Keeps each chart's JSON source so any chart can be exported as loaded.
 // Storage goes through a ChartStore, so unit tests can use a fake one.
 

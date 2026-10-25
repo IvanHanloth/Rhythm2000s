@@ -1,10 +1,10 @@
-// Checks the real chart files in public/charts/: the index lists them all and every chart passes the load-time checks.
+// Checks the real chart files in assets/public/charts/: the index lists them all and every chart passes the load-time checks.
 
 import { describe, expect, it } from 'vite-plus/test';
 import { parseChartIndex } from '@/rhythm/chart-file.ts';
 import { CHART_INDEX_FILE, checkChartData } from './chart-loader.ts';
 
-const files = import.meta.glob<string>('/public/charts/*.json', {
+const files = import.meta.glob<string>('/assets/public/charts/*.json', {
   query: '?raw',
   import: 'default',
   eager: true,
@@ -13,7 +13,7 @@ const byName = Object.fromEntries(
   Object.entries(files).map(([path, text]) => [path.split('/').pop()!, JSON.parse(text)]),
 );
 
-describe('public/charts', () => {
+describe('assets/public/charts', () => {
   const index = parseChartIndex(byName[CHART_INDEX_FILE]);
 
   it('the index is valid and lists every chart file in the folder', () => {

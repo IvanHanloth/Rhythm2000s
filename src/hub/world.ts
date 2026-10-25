@@ -2,7 +2,7 @@
 // (record shop, net café, arcade); the south side has buildings and street furniture only.
 // Layout, shop names and texts are first-pass placeholders (doc/hub.md). Signs and posters are in English.
 // Realistic style: PBR photo textures on walls and ground, stock models for props (assets.ts); bespoke props use simple
-// placeholder shapes until the user's Tripo / Blender models go into public/models/custom/ (spec: doc/hub-assets.md).
+// placeholder shapes until the user's Tripo / Blender models go into assets/public/models/custom/ (spec: doc/hub-assets.md).
 // Axes: x along the street (west negative), z from north to south, y up, in metres. Road at |z| < 4, pavements out to |z| = 7.
 
 import type { Arrow } from '@/dance/steps.ts';
@@ -138,7 +138,7 @@ export interface LevelMachine {
   levelId: string;
   sceneId: SceneId;
   role: CafeRole;
-  /** Wallpaper on its screen (public/textures/screens/) */
+  /** Wallpaper on its screen (assets/public/textures/screens/) */
   screen: ScreenImage;
   /** Translucent all-in-one; otherwise a beige CRT */
   imac?: boolean;
@@ -292,7 +292,7 @@ class Builder {
     this.root.add(light);
   }
 
-  /** Stock model (public/models/props/) at (x, y, z), with an optional collision box */
+  /** Stock model (assets/public/models/props/) at (x, y, z), with an optional collision box */
   prop(
     name: string,
     x: number,

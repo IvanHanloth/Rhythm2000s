@@ -35,7 +35,7 @@ The user chose arrows that travel to fixed targets (2), entered from the arcade'
 ## Consequences
 
 - The dance machine is the first mode that isn't call and response. It is not a `SceneEntry` of the scene director, since those are café computers with level lists, editors and showcases; `main.ts` gives it its own `#dance-machine` route and frame loop on the same game canvas and audio clock.
-- Dance charts get their own format and folder (`public/dance/`), validated at start-up like desktop charts, with their own test that every file passes.
+- Dance charts get their own format and folder (`assets/public/dance/`), validated at start-up like desktop charts, with their own test that every file passes.
 - A new judge handles four keys and two-key diagonals; it keeps the shared Perfect / Good / early-Miss windows and the cheat's invincible mode. Scoring reuses `summarizeResult`, and best scores go in the current save under the dance chart's id.
 - Keyboard input for the arrows is read separately from the Space / click input of the scenes, using the same heard-time conversion.
 - The hub gets a third kind of interactive spot besides computers and read-only props.

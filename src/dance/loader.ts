@@ -1,4 +1,4 @@
-// Loads the dance charts in public/dance/ at start-up (doc/dance-machine.md "Chart format"): the index, then every
+// Loads the dance charts in assets/public/dance/ at start-up (doc/dance-machine.md "Chart format"): the index, then every
 // chart it lists. A chart with errors is skipped and its errors returned for the console.
 
 import { parseDanceChart, parseDanceIndex, type DanceChart } from './steps.ts';

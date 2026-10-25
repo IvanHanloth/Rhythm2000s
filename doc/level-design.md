@@ -2,7 +2,7 @@
 
 > Status: Draft. The three rules are set by the user; details marked provisional and the open questions are not. Decision record: [ADR 0007](decisions/0007-official-level-design-guidelines.md).
 
-Official levels are the charts shipped in `public/charts/` and listed in `index.json`. Every new or changed official level follows the three rules below.
+Official levels are the charts shipped in `assets/public/charts/` and listed in `index.json`. Every new or changed official level follows the three rules below.
 
 ## Shape of a round
 

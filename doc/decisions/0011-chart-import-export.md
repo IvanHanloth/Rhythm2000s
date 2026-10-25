@@ -5,7 +5,7 @@
 
 ## Context
 
-Charts are JSON files in `public/charts/` ([ADR 0003](0003-chart-data-format.md)). Trying a new chart meant adding a file to the project and running the dev server; players of a built copy couldn't add charts at all, and there was no way to get a chart out of the game.
+Charts are JSON files in `assets/public/charts/` ([ADR 0003](0003-chart-data-format.md)). Trying a new chart meant adding a file to the project and running the dev server; players of a built copy couldn't add charts at all, and there was no way to get a chart out of the game.
 
 ## Options
 

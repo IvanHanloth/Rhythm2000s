@@ -462,7 +462,7 @@ class WindowsXpScene extends LevelScene<XpSession> {
     const dialog = new XpMessageBox({
       kind: 'dialog-error',
       title: 'No Charts Available',
-      text: 'The charts could not be loaded. See the browser console for details.\nChart files go in the public/charts/ folder.',
+      text: 'The charts could not be loaded. See the browser console for details.\nChart files go in the assets/public/charts/ folder.',
       buttons: ['OK'],
       maxTextWidth: 320,
     });

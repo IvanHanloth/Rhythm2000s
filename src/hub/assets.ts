@@ -27,7 +27,7 @@ const textureLoader = new TextureLoader();
 
 const modelCache = new Map<string, Promise<Group | null>>();
 
-/** Loads a GLB under public/models/; null on failure (the caller keeps its placeholder) */
+/** Loads a GLB under assets/public/models/; null on failure (the caller keeps its placeholder) */
 export function loadModel(path: string): Promise<Group | null> {
   let promise = modelCache.get(path);
   if (!promise) {
@@ -103,7 +103,7 @@ export function attachModel(
 
 // ---------- PBR textures ----------
 
-/** Texture sets under public/textures/ (Poly Haven, CC0): colour, normal and roughness */
+/** Texture sets under assets/public/textures/ (Poly Haven, CC0): colour, normal and roughness */
 export type SurfaceName =
   | 'asphalt_02'
   | 'square_concrete_pavers'
@@ -160,7 +160,7 @@ export function surface(name: SurfaceName, options: SurfaceOptions): MeshStandar
 
 /**
  * Bespoke models (café computers, arcade cabinets, the newsstand…) are made by the user in Tripo / Blender to the spec in
- * doc/hub-assets.md, saved as public/models/custom/<slot>.glb and listed in that folder's manifest.json;
+ * doc/hub-assets.md, saved as assets/public/models/custom/<slot>.glb and listed in that folder's manifest.json;
  * slots missing from the manifest are never requested and keep their placeholder.
  */
 let customSlots: Promise<Set<string>> | null = null;

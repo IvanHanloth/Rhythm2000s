@@ -1,11 +1,14 @@
 # assets
 
-Assets shared by the game and the promo video (`promo/`): classic wallpapers, sounds, icons and fonts of Windows XP and Mac OS around 2000. `promo/assets` is a symlink to this folder, so videos reference `assets/...`.
+Every asset of the game and the promo video (`promo/`): classic wallpapers, sounds, icons and fonts of Windows XP and Mac OS around 2000, and the charts, models and textures the game fetches at runtime. `promo/assets` is a symlink to this folder, so videos reference `assets/...`.
+
+Files the code imports (through `@assets/`) are bundled only when used; `public/` is Vite's `publicDir`, fetched by URL through `import.meta.env.BASE_URL` and copied to `dist/` whole, so keep large reference files out of it.
 
 ## Layout
 
 ```
 assets/
+├── public/                     # Vite publicDir: charts/, dance/, models/, textures/ (fetched at runtime)
 ├── fonts/pp-neuebit/           # PP NeueBit Bold, PP Mondwest Regular (chosen by the user)
 ├── fonts/baloo-2/              # Baloo 2 ExtraBold (the logo's display face, src/theme/tokens.ts), Latin subset, for the promo
 └── reference/                  # Original system assets, only the most representative
@@ -44,10 +47,10 @@ Original file names are kept; XP icons were extracted from system DLLs / EXEs at
 | Classic Mac startup chime, Charcoal, Monaco, Tahoma | [archive.org: mac-os-9-linux](https://archive.org/details/mac-os-9-linux) |
 | Baloo 2 ExtraBold (`fonts/baloo-2/`) | [Google Fonts](https://fonts.google.com/specimen/Baloo+2), Latin subset woff2; [SIL OFL 1.1](fonts/baloo-2/OFL.txt) |
 | PP NeueBit / PP Mondwest | [befonts](https://befonts.com/mondwest-neuebit-font.html); publisher [Pangram Pangram](https://pangrampangram.com/products/neue-bit) |
-| Whale girl 3D model (`public/models/whale-girl.glb`) | `whale-adult.glb` from [ai-girls-3d](https://github.com/ningfangtianwai-pixel/ai-girls-3d) v1.0.0 by Manny / ningfangtianwai-pixel, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changed: compressed with glTF-Transform 4.5 (`optimize --compress meshopt --texture-compress webp --texture-size 2048 --simplify-ratio 0.5 --simplify-error 0.0005`), 14.1 MB → 1.26 MB |
-| Street PBR textures (`public/textures/<name>/`) | [Poly Haven](https://polyhaven.com/textures), [CC0](https://polyhaven.com/license): asphalt_02, square_concrete_pavers, rectangular_facade_tiles, red_brick_03, painted_plaster_wall, painted_metal_shutter, floor_tiles_06, dirty_carpet. 1K colour / normal (OpenGL) / roughness JPGs converted to WebP with cwebp (colour q78, normal q90, roughness q75) |
-| Street prop models (`public/models/props/`) | [Poly Haven](https://polyhaven.com/models), CC0: street_lamp_01 / 02, metal_trash_can, utility_box_01, power_box_01, water_manhole_cover, plastic_monobloc_chair_01, plastic_crate_01, potted_plant_01, mounted_fluorescent_lights, ceiling_fan, steel_frame_shelves_01, cardboard_box_01, security_camera_01, boombox, cassette_player, portable_cassette_player, television_02, gaming_console, gamepad, classic_laptop. 1K glTF compressed with glTF-Transform 4.5 (`optimize --compress meshopt --texture-compress webp --texture-size 1024`) |
-| Café monitor images (`public/textures/screens/`) | XP wallpapers from reference/ (Bliss, Azul, Autumn, Red moon desert) and Mac OS X 10.0 Aqua Blue, scaled to 512 px with sips and converted to WebP |
+| Whale girl 3D model (`assets/public/models/whale-girl.glb`) | `whale-adult.glb` from [ai-girls-3d](https://github.com/ningfangtianwai-pixel/ai-girls-3d) v1.0.0 by Manny / ningfangtianwai-pixel, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changed: compressed with glTF-Transform 4.5 (`optimize --compress meshopt --texture-compress webp --texture-size 2048 --simplify-ratio 0.5 --simplify-error 0.0005`), 14.1 MB → 1.26 MB |
+| Street PBR textures (`assets/public/textures/<name>/`) | [Poly Haven](https://polyhaven.com/textures), [CC0](https://polyhaven.com/license): asphalt_02, square_concrete_pavers, rectangular_facade_tiles, red_brick_03, painted_plaster_wall, painted_metal_shutter, floor_tiles_06, dirty_carpet. 1K colour / normal (OpenGL) / roughness JPGs converted to WebP with cwebp (colour q78, normal q90, roughness q75) |
+| Street prop models (`assets/public/models/props/`) | [Poly Haven](https://polyhaven.com/models), CC0: street_lamp_01 / 02, metal_trash_can, utility_box_01, power_box_01, water_manhole_cover, plastic_monobloc_chair_01, plastic_crate_01, potted_plant_01, mounted_fluorescent_lights, ceiling_fan, steel_frame_shelves_01, cardboard_box_01, security_camera_01, boombox, cassette_player, portable_cassette_player, television_02, gaming_console, gamepad, classic_laptop. 1K glTF compressed with glTF-Transform 4.5 (`optimize --compress meshopt --texture-compress webp --texture-size 1024`) |
+| Café monitor images (`assets/public/textures/screens/`) | XP wallpapers from reference/ (Bliss, Azul, Autumn, Red moon desert) and Mac OS X 10.0 Aqua Blue, scaled to 512 px with sips and converted to WebP |
 
 archive.org and RW Designer entries are user uploads; the files haven't been checked one by one against the originals.
 

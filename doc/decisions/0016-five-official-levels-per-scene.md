@@ -18,7 +18,7 @@ The user set what an official level set is ([level-design.md](../level-design.md
 
 ## Consequences
 
-- The old charts are deleted from `public/charts/`; best scores saved under their ids are simply no longer shown.
+- The old charts are deleted from `assets/public/charts/`; best scores saved under their ids are simply no longer shown.
 - The unit tests that relied on the MVP chart (`xp-popup-mvp`) load a copy kept next to them as a test fixture, so shipped levels can change freely.
 - `chair-swivel` is still a prototype ([cross-dimension.md](../cross-dimension.md)); it appears only in each scene's last level and can be taken out of those two charts if the prototype is dropped.
 - Each level's charted rhythms are a first draft for the user to play-test.

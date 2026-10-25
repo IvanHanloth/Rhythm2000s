@@ -29,7 +29,7 @@ jobs:
       - name: Format, lint and type check
         run: pnpm exec vp check
 
-      - name: Unit tests (including validation of every chart in public/charts/)
+      - name: Unit tests (including validation of every chart in assets/public/charts/)
         run: pnpm exec vp test
 
       # Gives the sub-path Pages serves the site from: "/Rhythm2000s", or "" with a custom domain
@@ -39,7 +39,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       # The same as `vp run build` (tsc, then vp build), with the Pages sub-path as Vite's base.
-      # Files in public/ are fetched through import.meta.env.BASE_URL, which follows --base.
+      # Files in assets/public/ are fetched through import.meta.env.BASE_URL, which follows --base.
       - name: Type check
         run: pnpm exec tsc
 

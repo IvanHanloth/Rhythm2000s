@@ -1,11 +1,11 @@
-// Checks the real dance charts in public/dance/: the index lists them all, every chart passes validation and lasts
+// Checks the real dance charts in assets/public/dance/: the index lists them all, every chart passes validation and lasts
 // at least a minute (doc/dance-machine.md "First songs").
 
 import { describe, expect, it } from 'vite-plus/test';
 import { DANCE_INDEX_FILE } from './loader.ts';
 import { firstStepBeat, parseDanceChart, parseDanceIndex, songBeats } from './steps.ts';
 
-const files = import.meta.glob<string>('/public/dance/*.json', {
+const files = import.meta.glob<string>('/assets/public/dance/*.json', {
   query: '?raw',
   import: 'default',
   eager: true,
@@ -15,7 +15,7 @@ const byName = Object.fromEntries(
 );
 const chartFiles = Object.keys(byName).filter((name) => name !== DANCE_INDEX_FILE);
 
-describe('public/dance', () => {
+describe('assets/public/dance', () => {
   it('the index is valid and lists every chart file in the folder', () => {
     const index = parseDanceIndex(byName[DANCE_INDEX_FILE]);
     expect(index.ok).toBe(true);

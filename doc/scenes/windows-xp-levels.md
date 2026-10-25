@@ -90,7 +90,7 @@ Texts: the download window reads "37% of setup.exe Completed" → "Download comp
 
 ## Levels (charts)
 
-In `public/charts/index.json` order, written to the [level design guidelines](../level-design.md) (rule 4: ten levels, more widgets and a faster tempo each level, then the slower closing medley). Each level has three or four sections of about six phrases; a section starts with the widgets new to it, so the chart stops for demos only there. Balloons and the volume pop-up never share a phrase, since both sit by the tray.
+In `assets/public/charts/index.json` order, written to the [level design guidelines](../level-design.md) (rule 4: ten levels, more widgets and a faster tempo each level, then the slower closing medley). Each level has three or four sections of about six phrases; a section starts with the widgets new to it, so the chart stops for demos only there. Balloons and the volume pop-up never share a phrase, since both sit by the tray.
 
 | # | Chart | Title | BPM | Length | Presses | Widgets (by section) | Shape |
 | --- | --- | --- | --- | --- | --- | --- | --- |

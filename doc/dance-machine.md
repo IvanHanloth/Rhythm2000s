@@ -55,10 +55,10 @@ Street ──E at the dance machine──► Song list ──Enter──► Song
 
 ## Chart format
 
-Dance charts are their own JSON files in `public/dance/`, apart from the desktop charts, since they have no phrases, calls or responses.
+Dance charts are their own JSON files in `assets/public/dance/`, apart from the desktop charts, since they have no phrases, calls or responses.
 
 ```
-public/dance/
+assets/public/dance/
 ├── index.json          # { "format": 1, "charts": ["dance-byte-step.json", …] }
 └── dance-byte-step.json
 ```

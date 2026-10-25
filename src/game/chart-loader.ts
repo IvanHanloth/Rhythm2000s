@@ -1,4 +1,4 @@
-// Chart loading: downloads the index and chart files in public/charts/ at runtime and validates each (ADR 0003).
+// Chart loading: downloads the index and chart files in assets/public/charts/ at runtime and validates each (ADR 0003).
 // Broken charts are skipped without affecting the others; errors are collected for the caller to show.
 
 import { buildChart, type Chart } from '@/rhythm/chart.ts';
