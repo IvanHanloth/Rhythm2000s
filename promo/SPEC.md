@@ -84,8 +84,9 @@ SHOTS:   (detail-local time t; source = take time)
                  k6 a Miss "Perfect, Good or Miss", k7 Try again "Miss? Try again".
   C  k9-k16      both desktops, two bars each with their own sound: Mac m9 "Same rules on a Mac",
                  XP n12 "It gets harder as you go", Mac m15, XP n14. No title names a level.
-  D  k17-k20     Beat Guide (xp-full 73.76, rings on) "Lost the beat? Press H", "Rings close in on the
-                 beat". PLACEHOLDER: replace with the user's H on/off recording.
+  D  k17-k20     Beat Guide from the user's H takes: XP a bar without the rings (guide-xp 49.621)
+                 "Lost the beat?", then H on the bar line and the rings appear "Press H"; Mac call and
+                 response with the rings on (guide-mac 39.121) "The rings close in on the beat".
   E  k21-k26     every widget: 12 half-bar cuts, XP and Mac alternating, each starting on the bar
                  line its window pops; only widgets that stay on screen for the whole half bar (menus,
                  the context menu, the save sheet and the volume slider flash for a frame and are out)
