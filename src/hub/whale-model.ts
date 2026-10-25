@@ -101,22 +101,31 @@ class BoneRig {
   }
 }
 
-/** What a vertex mostly follows: BODY, or 1 + the index of an arm */
+/** What a vertex mostly follows: BODY, or 1 + the index of a limb */
 const BODY = 0;
 
+/** A part that moves apart from the body, and where it really joins it */
+interface Limb {
+  bones: string[];
+  /** Whether a rest position is where the limb joins the body */
+  joins: (at: Vector3) => boolean;
+}
+
 /**
- * The model is one fused mesh with rough automatic skin weights, and in its rest pose the arms hang against the body:
- * triangles join the hands and forearms to the skirt and pelvis, and the inside of the upper arms and elbows to the
- * sides of the chest. Raised to type or swing, the arms drag those triangles into long strips. So once the model is
- * loaded, at rest:
- * 1. A triangle is cut when one corner mostly follows an arm (clavicle to hand weight ≥ 0.5), another doesn't, and
- *    the whole triangle lies below the shoulder; at the shoulder itself the arm really does join the body.
- * 2. That leaves small loose pieces: fingertips weighted to the pelvis, which would stay behind on the hip, and bits of
- *    skirt weighted to a hand, which would fly about with it. The mesh started as one piece, so a loose piece belongs
- *    to whatever it was cut from: each of its vertices takes the weights of the nearest vertex across the cut, and
- *    step 1 runs again with the corrected weights.
+ * The model is one fused mesh with rough automatic skin weights, and its rest pose has the limbs lying against the
+ * body: triangles join the hands and forearms to the skirt and pelvis, the upper arms to the sides of the chest, the
+ * skirt hem to the socks (and so one leg to the other), and the tail to the side of the skirt and its tip to the hair.
+ * Once the limbs move, those triangles stretch into long strips and sheets. So once the model is loaded, at rest:
+ * 1. A triangle is cut when one corner mostly follows a limb (that limb's bones weigh ≥ 0.5), another doesn't, and
+ *    no corner is where that limb really joins the body: the top fifth of the upper arm or thigh, or within one tail
+ *    segment of the tail's root (where it comes out through the skirt).
+ * 2. That leaves loose pieces: fingertips weighted to the pelvis, which would stay behind on the hip, bits of skirt
+ *    weighted to a hand and locks of hair weighted to the tail, which would fly about with them. The mesh started as
+ *    one piece, so the body and each limb keep only their largest piece, and any other piece belongs to whatever it
+ *    was cut from: each of its vertices takes the weights of the nearest vertex across the cut, and step 1 runs again
+ *    with the corrected weights.
  */
-function freeArms(mesh: SkinnedMesh): void {
+function freeLimbs(mesh: SkinnedMesh): void {
   const { geometry, skeleton } = mesh;
   const index = geometry.index;
   if (!index) throw new Error(`Whale girl mesh ${mesh.name} has no index`);
@@ -130,45 +139,51 @@ function freeArms(mesh: SkinnedMesh): void {
     if (number < 0) throw new Error(`Whale girl mesh ${mesh.name} has no bone ${name}`);
     return number;
   };
-  const heightOf = (name: string) => skeleton.bones[bone(name)]!.getWorldPosition(new Vector3()).y;
+  const at = (name: string) => skeleton.bones[bone(name)]!.getWorldPosition(new Vector3());
 
   // Rest positions in the world
-  const rest = new Float32Array(count * 3);
-  const position = new Vector3();
-  for (let v = 0; v < count; v++) {
-    mesh
-      .getVertexPosition(v, position)
-      .applyMatrix4(mesh.matrixWorld)
-      .toArray(rest, v * 3);
-  }
-  const distance = (a: number, b: number) =>
-    Math.hypot(
-      rest[a * 3]! - rest[b * 3]!,
-      rest[a * 3 + 1]! - rest[b * 3 + 1]!,
-      rest[a * 3 + 2]! - rest[b * 3 + 2]!,
-    );
+  const rest = Array.from({ length: count }, (_, v) =>
+    mesh.getVertexPosition(v, new Vector3()).applyMatrix4(mesh.matrixWorld),
+  );
 
-  const arms = ['L', 'R'].map((side) => {
-    const shoulder = heightOf(`upper_arm.${side}`);
-    // A fifth of the way down the upper arm
-    return { side, below: shoulder - (shoulder - heightOf(`forearm.${side}`)) * 0.2 };
-  });
+  /** The top fifth of a limb's first segment, from `start` down to `next` */
+  const topOf = (start: string, next: string) => {
+    const top = at(start).y;
+    const line = top - (top - at(next).y) * 0.2;
+    return (point: Vector3) => point.y >= line;
+  };
+  const tailRoot = at('tail.01');
+  const tailReach = tailRoot.distanceTo(at('tail.02'));
+  const limbs: Limb[] = [
+    ...['L', 'R'].map((side) => ({
+      bones: ['clavicle', 'upper_arm', 'forearm', 'hand'].map((b) => `${b}.${side}`),
+      joins: topOf(`upper_arm.${side}`, `forearm.${side}`),
+    })),
+    ...['L', 'R'].map((side) => ({
+      bones: ['thigh', 'shin', 'foot'].map((b) => `${b}.${side}`),
+      joins: topOf(`thigh.${side}`, `shin.${side}`),
+    })),
+    {
+      bones: ['tail.01', 'tail.02', 'tail.03'],
+      joins: (point: Vector3) => point.distanceTo(tailRoot) <= tailReach,
+    },
+  ];
   /** Which owner each bone belongs to */
   const boneOwner = skeleton.bones.map(() => BODY);
-  arms.forEach(({ side }, arm) => {
-    for (const name of ['clavicle', 'upper_arm', 'forearm', 'hand']) {
-      boneOwner[bone(`${name}.${side}`)] = arm + 1;
-    }
+  limbs.forEach(({ bones }, limb) => {
+    for (const name of bones) boneOwner[bone(name)] = limb + 1;
   });
+  /** Per vertex and limb, whether the vertex is where the limb joins the body */
+  const joins = limbs.map(({ joins }) => rest.map((point) => joins(point)));
   const owners = () =>
     Uint8Array.from({ length: count }, (_, v) => {
-      const sums = arms.map(() => 0);
+      const sums = limbs.map(() => 0);
       for (let k = 0; k < skinIndex.itemSize; k++) {
         const owner = boneOwner[skinIndex.getComponent(v, k)]!;
         if (owner !== BODY) sums[owner - 1]! += skinWeight.getComponent(v, k);
       }
-      const arm = sums.findIndex((sum) => sum >= 0.5);
-      return arm < 0 ? BODY : arm + 1;
+      const limb = sums.findIndex((sum) => sum >= 0.5);
+      return limb < 0 ? BODY : limb + 1;
     });
 
   /** Step 1: the triangles kept and the ones cut, as flat corner lists */
@@ -177,81 +192,163 @@ function freeArms(mesh: SkinnedMesh): void {
     const bridges: number[] = [];
     for (let i = 0; i < index.count; i += 3) {
       const corners = [index.getX(i), index.getX(i + 1), index.getX(i + 2)];
-      const bridge = arms.some(
-        ({ below }, arm) =>
-          corners.every((v) => rest[v * 3 + 1]! < below) &&
-          corners.some((v) => owner[v] === arm + 1) &&
-          corners.some((v) => owner[v] !== arm + 1),
+      const bridge = limbs.some(
+        (_, limb) =>
+          corners.every((v) => !joins[limb]![v]) &&
+          corners.some((v) => owner[v] === limb + 1) &&
+          corners.some((v) => owner[v] !== limb + 1),
       );
       (bridge ? bridges : kept).push(...corners);
     }
     return { kept, bridges };
   };
 
-  let owner = owners();
-  const { kept, bridges } = cut(owner);
-  // Nothing cut (the eyelids, the mouth): nothing came loose either
-  if (bridges.length === 0) return;
-
-  // Step 2: the connected pieces left; vertices at the same position (UV seams) count as one
+  // Vertices at the same position (UV seams) count as one when finding connected pieces
   const first = new Map<string, number>();
-  const parent = Int32Array.from({ length: count }, (_, v) => {
+  const welded = Int32Array.from({ length: count }, (_, v) => {
     const key = `${positions.getX(v)},${positions.getY(v)},${positions.getZ(v)}`;
     const seen = first.get(key);
     if (seen !== undefined) return seen;
     first.set(key, v);
     return v;
   });
-  const root = (v: number): number => {
-    while (parent[v] !== v) v = parent[v] = parent[parent[v]!]!;
-    return v;
-  };
-  for (let i = 0; i < kept.length; i += 3) {
-    const a = root(kept[i]!);
-    parent[root(kept[i + 1]!)] = a;
-    parent[root(kept[i + 2]!)] = a;
-  }
-  const pieces = new Map<number, { triangles: number; vertices: Set<number>; votes: number[] }>();
-  for (let i = 0; i < kept.length; i++) {
-    const id = root(kept[i]!);
-    let piece = pieces.get(id);
-    if (!piece) {
-      piece = { triangles: 0, vertices: new Set(), votes: [BODY, ...arms].map(() => 0) };
-      pieces.set(id, piece);
-    }
-    if (i % 3 === 0) piece.triangles++;
-    if (!piece.vertices.has(kept[i]!)) {
-      piece.vertices.add(kept[i]!);
-      piece.votes[owner[kept[i]!]!]!++;
-    }
-  }
-  const pieceOwner = (piece: { votes: number[] }) => piece.votes.indexOf(Math.max(...piece.votes));
-  const triangles = [BODY, ...arms].map(() => 0);
-  for (const piece of pieces.values()) triangles[pieceOwner(piece)]! += piece.triangles;
 
-  const across = [...new Set(bridges)];
-  for (const piece of pieces.values()) {
-    const own = pieceOwner(piece);
-    if (piece.triangles >= triangles[own]! * 0.1) continue;
-    const candidates = across.filter((v) => owner[v] !== own && !piece.vertices.has(v));
-    for (const v of piece.vertices) {
-      let nearest = -1;
-      for (const c of candidates) {
-        if (nearest < 0 || distance(v, c) < distance(v, nearest)) nearest = c;
+  /** Step 2: the loose pieces left by a cut, each with its owner */
+  const loosePieces = (kept: number[], owner: Uint8Array) => {
+    const parent = welded.slice();
+    const root = (v: number): number => {
+      while (parent[v] !== v) v = parent[v] = parent[parent[v]!]!;
+      return v;
+    };
+    for (let i = 0; i < kept.length; i += 3) {
+      const a = root(kept[i]!);
+      parent[root(kept[i + 1]!)] = a;
+      parent[root(kept[i + 2]!)] = a;
+    }
+    const pieces = new Map<number, { triangles: number; vertices: Set<number>; own: number }>();
+    const votes = new Map<number, number[]>();
+    for (let i = 0; i < kept.length; i++) {
+      const id = root(kept[i]!);
+      let piece = pieces.get(id);
+      if (!piece) {
+        piece = { triangles: 0, vertices: new Set(), own: BODY };
+        pieces.set(id, piece);
+        votes.set(
+          id,
+          [BODY, ...limbs].map(() => 0),
+        );
       }
-      if (nearest < 0)
+      if (i % 3 === 0) piece.triangles++;
+      if (!piece.vertices.has(kept[i]!)) {
+        piece.vertices.add(kept[i]!);
+        votes.get(id)![owner[kept[i]!]!]!++;
+      }
+    }
+    // The mesh started as one piece, so the body and each limb keep just their largest piece
+    const largest = [BODY, ...limbs].map(() => 0);
+    for (const [id, piece] of pieces) {
+      const tally = votes.get(id)!;
+      piece.own = tally.indexOf(Math.max(...tally));
+      largest[piece.own] = Math.max(largest[piece.own]!, piece.triangles);
+    }
+    return [...pieces.values()].filter((piece) => piece.triangles < largest[piece.own]!);
+  };
+
+  let owner = owners();
+  let { kept, bridges } = cut(owner);
+  // Nothing cut (the eyelids, the mouth): nothing came loose either
+  if (bridges.length === 0) return;
+  // Joining one piece can leave another loose, so repeat until none are
+  for (let round = 0; ; round++) {
+    const loose = loosePieces(kept, owner);
+    if (loose.length === 0) break;
+    if (round === 5)
+      throw new Error(`Whale girl mesh ${mesh.name}: pieces still loose after 5 rounds`);
+    const across = [...new Set(bridges)];
+    for (const piece of loose) {
+      const candidates = across.filter((v) => owner[v] !== piece.own && !piece.vertices.has(v));
+      if (candidates.length === 0) {
         throw new Error(`Whale girl mesh ${mesh.name}: a loose piece has nothing to join`);
-      for (let k = 0; k < skinIndex.itemSize; k++) {
-        skinIndex.setComponent(v, k, skinIndex.getComponent(nearest, k));
-        skinWeight.setComponent(v, k, skinWeight.getComponent(nearest, k));
       }
+      for (const v of piece.vertices) {
+        let nearest = candidates[0]!;
+        for (const c of candidates) {
+          if (rest[v]!.distanceTo(rest[c]!) < rest[v]!.distanceTo(rest[nearest]!)) nearest = c;
+        }
+        for (let k = 0; k < skinIndex.itemSize; k++) {
+          skinIndex.setComponent(v, k, skinIndex.getComponent(nearest, k));
+          skinWeight.setComponent(v, k, skinWeight.getComponent(nearest, k));
+        }
+      }
+    }
+    skinIndex.needsUpdate = true;
+    skinWeight.needsUpdate = true;
+    owner = owners();
+    ({ kept, bridges } = cut(owner));
+  }
+  geometry.setIndex(kept);
+}
+
+/** How far below the hips the skirt takes over from the pelvis (m) */
+const WAIST_BLEND = 0.15;
+/** Width of the band down the middle where the skirt's two halves blend (m) */
+const SEAM_BLEND = 0.14;
+
+/**
+ * The skirt hangs from two bones, one over each leg. Its weights switch from the pelvis to those bones in a single
+ * row of vertices at the waist, and from one half to the other along a hard seam down the middle, so turning the
+ * skirt forward to sit tore it from the waist and swinging the halves against each other to walk tore the seam.
+ * Once loaded, at rest, the skirt's weight fades in over the top of the skirt (the rest stays with the pelvis), and
+ * across the middle the two halves share it, so the cloth bends instead.
+ */
+function smoothSkirt(mesh: SkinnedMesh): void {
+  const { geometry, skeleton } = mesh;
+  const skinIndex = geometry.getAttribute('skinIndex');
+  const skinWeight = geometry.getAttribute('skinWeight');
+  const bone = (name: string) => {
+    const found = PropertyBinding.sanitizeNodeName(name);
+    const number = skeleton.bones.findIndex((b) => b.name === found);
+    if (number < 0) throw new Error(`Whale girl mesh ${mesh.name} has no bone ${name}`);
+    return number;
+  };
+  const left = bone('skirt.L');
+  const right = bone('skirt.R');
+  const pelvis = bone('pelvis');
+  const hip = skeleton.bones[left]!.getWorldPosition(new Vector3()).y;
+  const middle = skeleton.bones[pelvis]!.getWorldPosition(new Vector3()).x;
+  const point = new Vector3();
+  for (let v = 0; v < skinIndex.count; v++) {
+    const influences = new Map<number, number>();
+    const add = (b: number, weight: number) => influences.set(b, (influences.get(b) ?? 0) + weight);
+    let skirt = 0;
+    for (let k = 0; k < skinIndex.itemSize; k++) {
+      const b = skinIndex.getComponent(v, k);
+      const weight = skinWeight.getComponent(v, k);
+      if (b === left || b === right) skirt += weight;
+      else if (weight > 0) add(b, weight);
+    }
+    if (skirt === 0) continue;
+    mesh.getVertexPosition(v, point).applyMatrix4(mesh.matrixWorld);
+    const down = smooth((hip - point.y) / WAIST_BLEND);
+    // The model faces +z, so her left is +x
+    const toLeft = smooth((point.x - middle) / SEAM_BLEND + 0.5);
+    add(pelvis, skirt * (1 - down));
+    add(left, skirt * down * toLeft);
+    add(right, skirt * down * (1 - toLeft));
+    // Back into the vertex's slots: the strongest influences, scaled to sum to 1
+    const strongest = [...influences]
+      .filter(([, weight]) => weight > 0)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, skinIndex.itemSize);
+    const total = strongest.reduce((sum, [, weight]) => sum + weight, 0);
+    for (let k = 0; k < skinIndex.itemSize; k++) {
+      const [b, weight] = strongest[k] ?? [0, 0];
+      skinIndex.setComponent(v, k, b);
+      skinWeight.setComponent(v, k, weight / total);
     }
   }
   skinIndex.needsUpdate = true;
   skinWeight.needsUpdate = true;
-
-  owner = owners();
-  geometry.setIndex(cut(owner).kept);
 }
 
 export class WhaleAvatar implements Figure {
@@ -307,7 +404,9 @@ export class WhaleAvatar implements Figure {
     model.position.y = -box.min.y * scale;
     model.updateMatrixWorld(true);
     model.traverse((node) => {
-      if ((node as SkinnedMesh).isSkinnedMesh) freeArms(node as SkinnedMesh);
+      if (!(node as SkinnedMesh).isSkinnedMesh) return;
+      freeLimbs(node as SkinnedMesh);
+      smoothSkirt(node as SkinnedMesh);
     });
 
     const wrapper = new Group();
@@ -471,9 +570,9 @@ export class WhaleAvatar implements Figure {
 
   /**
    * Seated at a desk, `s` of the way down (0 standing, 1 seated); t moves the typing hands.
-   * The leg weights can't take a 90° bend and tear the socks and skirt hem; turning the skirt forward too covers it.
-   * The model's skin weights near the arms are messy and large upper-arm turns (inwards especially) tear the sleeves,
-   * so the arms stay within the angles here.
+   * The skirt turns forward with the thighs so it drapes over the knees (smoothSkirt lets it bend at the waist).
+   * The skin weights at the shoulders are still rough and large upper-arm turns (inwards especially) tear the
+   * sleeves there, so the arms stay within the angles here.
    */
   private seatedPose(s: number, t: number): void {
     const rig = this.rig!;
