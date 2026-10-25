@@ -7,6 +7,7 @@ Assets shared by the game and the promo video (`promo/`): classic wallpapers, so
 ```
 assets/
 ├── fonts/pp-neuebit/           # PP NeueBit Bold, PP Mondwest Regular (chosen by the user)
+├── fonts/baloo-2/              # Baloo 2 ExtraBold (the logo's display face, src/theme/tokens.ts), Latin subset, for the promo
 └── reference/                  # Original system assets, only the most representative
     ├── windows-xp/
     │   ├── wallpapers/         # 4K: Bliss, Azul, Autumn, Red moon desert, Ascent, Radiance, Follow, Tulips
@@ -41,6 +42,7 @@ Original file names are kept; XP icons were extracted from system DLLs / EXEs at
 | Mac OS 9 wallpapers | [archive.org: mac-os-9.2-desktop-pictures](https://archive.org/details/mac-os-9.2-desktop-pictures) |
 | Classic Mac alert sounds | [archive.org: macos8_error_sounds](https://archive.org/details/macos8_error_sounds) |
 | Classic Mac startup chime, Charcoal, Monaco, Tahoma | [archive.org: mac-os-9-linux](https://archive.org/details/mac-os-9-linux) |
+| Baloo 2 ExtraBold (`fonts/baloo-2/`) | [Google Fonts](https://fonts.google.com/specimen/Baloo+2), Latin subset woff2; [SIL OFL 1.1](fonts/baloo-2/OFL.txt) |
 | PP NeueBit / PP Mondwest | [befonts](https://befonts.com/mondwest-neuebit-font.html); publisher [Pangram Pangram](https://pangrampangram.com/products/neue-bit) |
 | Whale girl 3D model (`public/models/whale-girl.glb`) | `whale-adult.glb` from [ai-girls-3d](https://github.com/ningfangtianwai-pixel/ai-girls-3d) v1.0.0 by Manny / ningfangtianwai-pixel, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changed: compressed with glTF-Transform 4.5 (`optimize --compress meshopt --texture-compress webp --texture-size 2048 --simplify-ratio 0.5 --simplify-error 0.0005`), 14.1 MB → 1.26 MB |
 | Street PBR textures (`public/textures/<name>/`) | [Poly Haven](https://polyhaven.com/textures), [CC0](https://polyhaven.com/license): asphalt_02, square_concrete_pavers, rectangular_facade_tiles, red_brick_03, painted_plaster_wall, painted_metal_shutter, floor_tiles_06, dirty_carpet. 1K colour / normal (OpenGL) / roughness JPGs converted to WebP with cwebp (colour q78, normal q90, roughness q75) |
@@ -52,6 +54,7 @@ archive.org and RW Designer entries are user uploads; the files haven't been che
 ## Licences and limits
 
 - **reference/**: copyright Microsoft and Apple. The project is for academic use only, and the game and promo may use them directly ([ADR 0004](../doc/decisions/0004-authentic-os-look.md)).
+- **Baloo 2**: SIL Open Font License 1.1, free to use, embed and ship, including commercially.
 - **Poly Haven**: CC0, free to use and change, no credit needed.
 - **Whale girl model**: CC BY 4.0, changes and commercial use allowed, but the game must credit the author, project and licence and note the changes. The character is DeepSeek fan art, not officially licensed.
 - **PP NeueBit / PP Mondwest**: marked "Personal Use Only" by befonts. Releasing the game or publishing promo videos is commercial use; buy a licence from Pangram Pangram first.
