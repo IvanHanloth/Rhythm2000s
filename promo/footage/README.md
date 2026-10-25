@@ -1,6 +1,6 @@
 # Footage
 
-The video shows the game itself, recorded from the dev server; these files are not committed (`.gitignore`).
+The video shows the game itself, recorded from the dev server. The `.mp4` files are not committed (`.gitignore`; `xp.mp4` alone is over GitHub's 100 MB limit), so re-record them as below before previewing or rendering; `bed.wav` is committed.
 
 | File | What | How |
 | --- | --- | --- |

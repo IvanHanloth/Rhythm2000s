@@ -3,9 +3,7 @@
 # Rendered videos (large; publish separately)
 renders/
 
-# Recorded game footage and the audio bed (large; rebuild with footage/README.md)
+# Recorded game footage (xp.mp4 is over GitHub's 100 MB limit; rebuild with footage/README.md)
 footage/*.mp4
-footage/*.webm
-footage/*.wav
 # Studio thumbnails
 .thumbnails/
