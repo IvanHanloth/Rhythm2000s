@@ -137,8 +137,6 @@ export class HubOverlay {
     this.loading.append(this.loadingText, track);
     this.loading.hidden = true;
 
-    this.objective.textContent =
-      'Go into the CYBERSPACE CAFÉ and sit at a PC with a yellow marker over it';
     this.hud.append(this.objective, this.place, this.prompt, this.lockHint);
 
     this.dialog.append(
@@ -195,6 +193,12 @@ export class HubOverlay {
     if (text !== null) {
       this.prompt.replaceChildren(el('kbd', '', 'E'), ` ${text}`);
     }
+  }
+
+  /** The current objective in the top left (doc/hub.md#objectives); null hides it */
+  setObjective(text: string | null): void {
+    this.objective.hidden = text === null;
+    if (text !== null) this.objective.textContent = text;
   }
 
   setLockHint(visible: boolean): void {

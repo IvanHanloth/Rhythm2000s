@@ -51,6 +51,11 @@ export class Mailbox {
     this.write(FINISHED_KEY, JSON.stringify([...finished, chartId]));
   }
 
+  /** How many different charts have been finished (the street's objectives, doc/hub.md#objectives) */
+  get finishedCount(): number {
+    return this.finished().length;
+  }
+
   get state(): MailState {
     if (this.finished().length < MAIL_UNLOCK_CHARTS) return 'empty';
     return this.read(READ_KEY) === '1' ? 'read' : 'unread';

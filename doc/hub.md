@@ -61,6 +61,15 @@ A small booklet stands on the café's front desk. E beside it ("Read · Guide bo
 
 The booklet is English, like everything in the world.
 
+## Objectives
+
+The top left of the street shows the player's current objective, one at a time:
+
+1. "Find the guide booklet on the CYBERSPACE CAFÉ front desk": done once the booklet is opened.
+2. "Play a song on one of the two front-row computers": done once any chart has been played to its results window (the same record of finished charts as the Rickroll easter egg, [easter-eggs.md](easter-eggs.md); HackerEditor's tests don't count).
+
+When both are done the objective box goes away for good. Both are saved in the browser; when storage fails, the booklet counts as read until the page is reloaded and the second objective stays.
+
 ## Provisional content (first-pass placeholders)
 
 Shop names, layout and text are placeholders the user hasn't confirmed:

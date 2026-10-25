@@ -16,6 +16,7 @@ import { GameCanvas } from './game-canvas.ts';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from './layout.ts';
 import { listenForTaps } from './input.ts';
 import { LevelIntro } from './level-intro.ts';
+import { Mailbox } from './mailbox.ts';
 import { buildLevels, editorRoute, formatBestScore, parseRoute } from './levels.ts';
 import { loadBestAssisted, loadBestScore } from './records.ts';
 import { SceneDirector } from './scene-director.ts';
@@ -151,6 +152,9 @@ function computerCards(): LevelInfo[] {
   return [...play, ...editors];
 }
 
+/** The charts played to their results window, which the scenes record; the street's second objective reads it */
+const finishedCharts = new Mailbox();
+
 const hub = new Hub({
   levels: computerCards(),
   recordOf: (computerId) => {
@@ -161,6 +165,7 @@ const hub = new Hub({
   audio: clock.context,
   cheat,
   onCoinInserted: () => cheatNotice.playDrop(),
+  playedOnce: () => finishedCharts.finishedCount > 0,
   onPlay: (computerId) => {
     location.hash = computerId;
   },

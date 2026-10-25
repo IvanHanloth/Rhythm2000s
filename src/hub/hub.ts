@@ -35,6 +35,7 @@ import {
   nearestSpot,
   orbitOffset,
 } from './motion.ts';
+import { BookletProgress, currentObjective, OBJECTIVE_TEXT } from './objectives.ts';
 import { HubOverlay, type LevelInfo } from './overlay.ts';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
@@ -161,6 +162,8 @@ export interface HubOptions {
   cheat: CheatMode;
   /** The coin went into an arcade machine (plays its sound) */
   onCoinInserted(): void;
+  /** Some chart has been played to its results window: the second objective is done (doc/hub.md#objectives) */
+  playedOnce(): boolean;
 }
 
 function smoothstep(t: number): number {
@@ -196,6 +199,7 @@ export class Hub {
   private readonly player = new WhaleAvatar();
   private readonly overlay: HubOverlay;
   private readonly sounds: HubSounds | null;
+  private readonly booklet = new BookletProgress();
   private readonly keys = new Set<string>();
 
   private state: State = 'title';
@@ -275,6 +279,7 @@ export class Hub {
     });
     this.element.append(this.overlay.element);
     this.overlay.showTitle(true);
+    this.updateObjective();
     this.sounds = options.audio ? new HubSounds(options.audio) : null;
     this.trackLoading();
 
@@ -288,6 +293,7 @@ export class Hub {
     this.visible = true;
     this.element.hidden = false;
     this.resize();
+    this.updateObjective();
     if (this.state === 'launching' && this.seat) {
       this.state = 'seated';
       this.applyPose(this.seatedPose(this.seat.spot));
@@ -462,6 +468,14 @@ export class Hub {
     this.overlay.setLockHint(false);
     this.releasePointer();
     this.overlay.showBooklet(true);
+    this.booklet.markRead();
+    this.updateObjective();
+  }
+
+  /** The top-left objective: the booklet, then a song, then none (doc/hub.md#objectives) */
+  private updateObjective(): void {
+    const objective = currentObjective(this.booklet.read, this.options.playedOnce());
+    this.overlay.setObjective(objective ? OBJECTIVE_TEXT[objective] : null);
   }
 
   private closeBooklet(): void {
