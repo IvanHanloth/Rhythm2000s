@@ -158,7 +158,7 @@ Official levels also follow [level-design.md](level-design.md): easy to hard, at
 
 ## Timing limits
 
-The "Follow me / Your turn" banner switches half a beat before the call and response bars end ([prototypes/mvp.md](prototypes/mvp.md#turn-cue)), so the last press in either bar must have its Good window closed by then. At 120 BPM with Good ±130 ms (0.26 beat) the last press must come before beat 3.24, so beat 3 fits but 3.25 doesn't; two-press actions start before 2.74, the volume actions before 2.24, `chair-swivel` before 1.24 and `progress-download` before 0.24 (only beat 0). Faster tempos stretch the Good window over more of a beat, so their presses must come earlier; slower tempos allow later ones. Charts that break this fail validation.
+The "Follow me / Your turn" banner switches half a beat before the call and response bars end ([prototypes/mvp.md](prototypes/mvp.md#turn-cue)), so the last press in either bar must have its Good window closed by then. At 120 BPM with Good ±130 ms (0.26 beat) the last press must come before beat 3.24, so beat 3 fits but 3.25 doesn't; two-press actions start before 2.74, the volume actions before 2.24, `chair-swivel` before 1.24 and `progress-download` before 0.24 (only beat 0). Faster tempos stretch the Good window over more of a beat, so their presses must come earlier; slower tempos allow later ones. Since every chart can be played on Hell ([difficulty.md](difficulty.md)), the check runs at the chart's tempo times 1.5: a 120 BPM chart is checked at 180 BPM, where Good is 0.39 beat and the last press must come before beat 3.11. Charts that break this fail validation.
 
 ## Validation
 

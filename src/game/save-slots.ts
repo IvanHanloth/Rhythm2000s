@@ -2,6 +2,7 @@
 // local-storage entry. The save loaded last is the current one; scenes and the street read and write its progress.
 // Settings and imported charts are shared by the device and live elsewhere (settings.ts, chart-library.ts).
 
+import { DEFAULT_DIFFICULTY, isDifficulty, type Difficulty } from '@/rhythm/difficulty.ts';
 import {
   cleanSaveName,
   emptySave,
@@ -24,8 +25,11 @@ const LEGACY_FINISHED_KEY = 'rhythm2000s.finishedCharts';
 const LEGACY_MAIL_READ_KEY = 'rhythm2000s.rickrollMailRead';
 const LEGACY_BOOKLET_KEY = 'rhythm2000s.guideBookletRead';
 
+/** Version 2 added the difficulty (doc/difficulty.md); version 1 files are read as Normal throughout */
+export const SAVE_FILE_VERSION = 2;
+
 export interface SaveFile {
-  version: 1;
+  version: typeof SAVE_FILE_VERSION;
   /** The save loaded last; null when none is (never loaded, or deleted) */
   current: SlotNumber | null;
   slots: [SaveData | null, SaveData | null, SaveData | null];
@@ -67,26 +71,35 @@ export function formatSaveDate(date: string): string {
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 function emptyFile(): SaveFile {
-  return { version: 1, current: null, slots: [null, null, null] };
+  return { version: SAVE_FILE_VERSION, current: null, slots: [null, null, null] };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function parseBest(value: unknown, where: string): BestScore {
+/** A difficulty field; version 1 files have none and were all Normal */
+function parseDifficulty(value: unknown, version: 1 | 2, where: string): Difficulty {
+  if (version === 1) return DEFAULT_DIFFICULTY;
+  if (!isDifficulty(value)) throw new Error(`${where} is not a difficulty`);
+  return value;
+}
+
+function parseBest(value: unknown, version: 1 | 2, where: string): BestScore {
   if (!isRecord(value)) throw new Error(`${where} is not an object`);
   const { score, assisted } = value;
   if (typeof score !== 'number' || !Number.isFinite(score))
     throw new Error(`${where}.score is not a number`);
   if (typeof assisted !== 'boolean') throw new Error(`${where}.assisted is not true or false`);
-  return { score, assisted };
+  const difficulty = parseDifficulty(value.difficulty, version, `${where}.difficulty`);
+  return { score, assisted, difficulty };
 }
 
-function parseSave(value: unknown, where: string): SaveData | null {
+function parseSave(value: unknown, version: 1 | 2, where: string): SaveData | null {
   if (value === null) return null;
   if (!isRecord(value)) throw new Error(`${where} is not an object`);
   const { name, lastPlayed, best, finished, rickrollMailRead, bookletRead } = value;
+  const difficulty = parseDifficulty(value.difficulty, version, `${where}.difficulty`);
   if (typeof name !== 'string' || cleanSaveName(name) !== name)
     throw new Error(`${where}.name is not a save name`);
   if (typeof lastPlayed !== 'string' || !DATE_PATTERN.test(lastPlayed))
@@ -100,11 +113,12 @@ function parseSave(value: unknown, where: string): SaveData | null {
     throw new Error(`${where}.bookletRead is not true or false`);
   const scores: Record<string, BestScore> = {};
   for (const [chartId, entry] of Object.entries(best)) {
-    scores[chartId] = parseBest(entry, `${where}.best.${chartId}`);
+    scores[chartId] = parseBest(entry, version, `${where}.best.${chartId}`);
   }
   return {
     name,
     lastPlayed,
+    difficulty,
     best: scores,
     finished: [...new Set(finished)],
     rickrollMailRead,
@@ -112,18 +126,20 @@ function parseSave(value: unknown, where: string): SaveData | null {
   };
 }
 
-/** Reads the saves entry; throws an Error saying what is wrong */
+/** Reads the saves entry, version 1 or 2, as the current version; throws an Error saying what is wrong */
 export function parseSaveFile(text: string): SaveFile {
   const value: unknown = JSON.parse(text);
   if (!isRecord(value)) throw new Error('the save file is not an object');
-  if (value.version !== 1) throw new Error(`unknown save file version ${String(value.version)}`);
+  const { version } = value;
+  if (version !== 1 && version !== 2)
+    throw new Error(`unknown save file version ${String(version)}`);
   const { current, slots } = value;
   if (!Array.isArray(slots) || slots.length !== SLOT_NUMBERS.length)
     throw new Error(`slots is not a list of ${SLOT_NUMBERS.length}`);
   const parsed: SaveFile['slots'] = [
-    parseSave(slots[0], 'slots[0]'),
-    parseSave(slots[1], 'slots[1]'),
-    parseSave(slots[2], 'slots[2]'),
+    parseSave(slots[0], version, 'slots[0]'),
+    parseSave(slots[1], version, 'slots[1]'),
+    parseSave(slots[2], version, 'slots[2]'),
   ];
   let slot: SlotNumber | null = null;
   if (current !== null) {
@@ -132,7 +148,7 @@ export function parseSaveFile(text: string): SaveFile {
     // A current slot that is empty means no current save
     slot = parsed[found - 1] ? found : null;
   }
-  return { version: 1, current: slot, slots: parsed };
+  return { version: SAVE_FILE_VERSION, current: slot, slots: parsed };
 }
 
 /** Every key in the storage */
@@ -163,7 +179,7 @@ export function migrateLegacy(
   );
   if (keys.length === 0) return null;
 
-  const save = emptySave('Save 1', today);
+  const save = emptySave('Save 1', today, DEFAULT_DIFFICULTY);
   for (const key of keys) {
     if (!key.startsWith(LEGACY_BEST_PREFIX)) continue;
     const chartId = key.slice(LEGACY_BEST_PREFIX.length);
@@ -172,12 +188,13 @@ export function migrateLegacy(
     save.best[chartId] = {
       score,
       assisted: storage.getItem(LEGACY_ASSIST_PREFIX + chartId) === '1',
+      difficulty: DEFAULT_DIFFICULTY,
     };
   }
   save.finished = parseLegacyFinished(storage.getItem(LEGACY_FINISHED_KEY));
   save.rickrollMailRead = storage.getItem(LEGACY_MAIL_READ_KEY) === '1';
   save.bookletRead = storage.getItem(LEGACY_BOOKLET_KEY) === '1';
-  return { file: { version: 1, current: 1, slots: [save, null, null] }, keys };
+  return { file: { version: SAVE_FILE_VERSION, current: 1, slots: [save, null, null] }, keys };
 }
 
 /** The old finished-charts entry: a JSON list of chart ids; anything else counted as none, as it did then */
@@ -238,9 +255,9 @@ export class SaveSlots {
   }
 
   /** Creates a save in an empty slot and makes it current */
-  create(slot: SlotNumber, rawName: string): SaveProgress {
+  create(slot: SlotNumber, rawName: string, difficulty: Difficulty): SaveProgress {
     if (this.slot(slot)) throw new Error(`Save slot ${slot} is not empty`);
-    this.file.slots[slot - 1] = emptySave(this.requireName(rawName), this.today());
+    this.file.slots[slot - 1] = emptySave(this.requireName(rawName), this.today(), difficulty);
     return this.load(slot);
   }
 

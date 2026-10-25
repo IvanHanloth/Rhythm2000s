@@ -75,9 +75,13 @@ describe('parseRoute', () => {
 });
 
 describe('formatBestScore', () => {
-  it('pads to five digits; null with no score', () => {
-    expect(formatBestScore(4250)).toBe('Best score 04250');
+  it('pads to five digits and marks the difficulty and the beat guide; null with no score', () => {
+    expect(formatBestScore({ score: 4250, assisted: false, difficulty: 'normal' })).toBe(
+      'Best score 04250 (Normal)',
+    );
     expect(formatBestScore(null)).toBeNull();
-    expect(formatBestScore(4250, true)).toBe('Best score 04250 (Beat Guide)');
+    expect(formatBestScore({ score: 12750, assisted: true, difficulty: 'hell' })).toBe(
+      'Best score 12750 (Hell, Beat Guide)',
+    );
   });
 });

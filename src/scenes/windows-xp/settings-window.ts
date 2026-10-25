@@ -6,6 +6,7 @@ import type { SettingsWindowOptions } from '@/scenes/shared/level-scene.ts';
 import { createSettingsPanel, type SettingsKit, type SettingsPanel } from '@/ui/settings-panel.ts';
 import { BUTTON_HEIGHT, XpButton } from './components/button.ts';
 import { XpCheckBox } from './components/check-box.ts';
+import { XpRadioButton } from './components/radio-button.ts';
 import { XpTrackbar } from './components/trackbar.ts';
 import { CAPTION_HEIGHT, FRAME_WIDTH, XpWindowFrame } from './components/window-frame.ts';
 import { XP_FONT_SIZE, xpText } from './components/xp-text.ts';
@@ -19,7 +20,8 @@ import {
 } from './panel-kit.ts';
 
 export const SETTINGS_TITLE = 'Rhythm 2000s Settings';
-const WIDTH = 688;
+/** Wide enough for the Difficulty column beside the original two (doc/settings.md "Layout") */
+const WIDTH = 930;
 const HEIGHT = 470;
 const PADDING = 14;
 /** Calibration ticks every 50 ms across ±300 ms */
@@ -30,6 +32,7 @@ const kit: SettingsKit = {
   groupBox: xpGroupBox,
   groupInset: XP_GROUP_INSET,
   checkBox: (label, onToggle) => new XpCheckBox(label, onToggle),
+  radioButton: (label, onSelect) => new XpRadioButton(label, onSelect),
   slider: (width, onChange) => new XpTrackbar(width, TICKS, onChange),
   button: (label, onTap) => {
     const button = xpLabelButton(label);
@@ -48,7 +51,7 @@ export class XpSettingsWindow {
   private readonly panel: SettingsPanel;
   private readonly onClose: () => void;
 
-  constructor({ settings, onClose, onTestLatency }: SettingsWindowOptions) {
+  constructor({ settings, difficulty, onClose, onTestLatency }: SettingsWindowOptions) {
     this.onClose = onClose;
     this.view.pivot.set(WIDTH / 2, HEIGHT / 2);
     this.frame = new XpWindowFrame({ title: SETTINGS_TITLE, width: WIDTH, height: HEIGHT });
@@ -63,6 +66,7 @@ export class XpSettingsWindow {
 
     this.panel = createSettingsPanel({
       settings,
+      difficulty,
       width: clientWidth,
       height: buttonsTop - 12,
       kit,

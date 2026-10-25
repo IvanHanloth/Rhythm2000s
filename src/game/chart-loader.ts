@@ -3,6 +3,7 @@
 
 import { buildChart, type Chart } from '@/rhythm/chart.ts';
 import { parseChartFile, parseChartIndex, type ChartSource } from '@/rhythm/chart-file.ts';
+import { chartAtSpeed, FASTEST_SPEED } from '@/rhythm/difficulty.ts';
 import { JUDGE_WINDOWS } from '@/rhythm/judge.ts';
 import { checkTurnCueSpacing } from '@/rhythm/turn-cue.ts';
 import { sceneActions, SCENE_CATALOG, sceneIcons, type SceneId } from '@/scenes/catalog.ts';
@@ -66,7 +67,7 @@ export async function loadCharts(fetchJson: FetchChartJson): Promise<ChartLoadRe
   return { charts, errors };
 }
 
-/** Validates one chart: format, scene rules, turn-cue timing. */
+/** Validates one chart: format, scene rules, turn-cue timing at the fastest difficulty (doc/difficulty.md). */
 export function checkChartData(
   data: unknown,
   expectedId?: string,
@@ -82,7 +83,9 @@ export function checkChartData(
   const scene = SCENE_CATALOG[chart.scene as SceneId];
   const errors = [
     ...(scene.checkChart?.(chart) ?? []),
-    ...checkTurnCueSpacing(chart, JUDGE_WINDOWS.good),
+    ...checkTurnCueSpacing(chartAtSpeed(chart, FASTEST_SPEED), JUDGE_WINDOWS.good).map(
+      (error) => `${error} (Hell's speed, ×${FASTEST_SPEED}, which every chart must work at)`,
+    ),
   ];
   return errors.length > 0
     ? { loaded: null, errors }

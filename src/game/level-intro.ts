@@ -1,4 +1,4 @@
-// Level intro: shown before a level with "scene · level N", title, tempo, best score and how to play (after the "level loading" design board).
+// Level intro: shown before a level with "scene · level N", title, tempo, difficulty, best score and how to play (after the "level loading" design board).
 // The first Space or click dismisses it; that press still reaches the scene, so it starts the round straight away.
 
 import './screens.css';
@@ -10,7 +10,10 @@ export interface LevelIntroInfo {
   /** e.g. "Windows XP · Level 2" */
   kicker: string;
   title: string;
+  /** The tempo the level plays at: the chart's times the difficulty's speed */
   bpm: number;
+  /** e.g. "Hard (×1.2)" */
+  difficulty: string;
   /** Widgets used in this level, e.g. "Error box, Warning box" */
   actions: string;
   /** Best score line; null if never played */
@@ -62,6 +65,7 @@ export class LevelIntro {
     const facts = el('dl', 'level-intro-facts');
     const rows: [string, string][] = [
       ['Tempo', `${info.bpm} BPM`],
+      ['Difficulty', info.difficulty],
       ['Widgets', info.actions],
       ['Best', info.record ?? 'Not played yet'],
     ];

@@ -32,10 +32,10 @@ describe('SaveSlots', () => {
   it('creates, loads, renames and deletes saves, kept across visits', () => {
     const storage = memoryStorage();
     const saves = new SaveSlots(storage, today);
-    const ivan = saves.create(1, ' Ivan ');
+    const ivan = saves.create(1, ' Ivan ', 'normal');
     expect(ivan.name).toBe('Ivan');
-    ivan.recordScore('xp-dial-up', 800, false);
-    saves.create(2, 'Guest');
+    ivan.recordScore('xp-dial-up', { score: 800, assisted: false, difficulty: 'normal' });
+    saves.create(2, 'Guest', 'normal');
     expect(saves.currentSlot).toBe(2);
     expect(saves.firstEmptySlot).toBe(3);
 
@@ -55,23 +55,33 @@ describe('SaveSlots', () => {
 
   it('refuses bad names and slots that are taken or empty', () => {
     const saves = new SaveSlots(memoryStorage(), today);
-    expect(() => saves.create(1, '  ')).toThrow();
-    saves.create(1, 'Ivan');
-    expect(() => saves.create(1, 'Again')).toThrow();
+    expect(() => saves.create(1, '  ', 'normal')).toThrow();
+    saves.create(1, 'Ivan', 'normal');
+    expect(() => saves.create(1, 'Again', 'normal')).toThrow();
     expect(() => saves.load(2)).toThrow();
     expect(() => saves.rename(1, 'x'.repeat(17))).toThrow();
     expect(() => saves.delete(3)).toThrow();
   });
 
+  it('keeps the difficulty of each save, set in New Game and changed later', () => {
+    const storage = memoryStorage();
+    const saves = new SaveSlots(storage, today);
+    saves.create(1, 'Ivan', 'hell');
+    saves.create(2, 'Guest', 'easy').setDifficulty('heaven');
+    const again = new SaveSlots(storage, today);
+    expect(again.slot(1)?.difficulty).toBe('hell');
+    expect(again.requireCurrent().difficulty).toBe('heaven');
+  });
+
   it('reports full slots', () => {
     const saves = new SaveSlots(memoryStorage(), today);
-    for (const slot of [1, 2, 3] as const) saves.create(slot, `Save ${slot}`);
+    for (const slot of [1, 2, 3] as const) saves.create(slot, `Save ${slot}`, 'normal');
     expect(saves.firstEmptySlot).toBeNull();
   });
 
   it('dates a save when it is loaded', () => {
     const storage = memoryStorage();
-    new SaveSlots(storage, () => '2026-01-01').create(1, 'Ivan');
+    new SaveSlots(storage, () => '2026-01-01').create(1, 'Ivan', 'normal');
     const later = new SaveSlots(storage, today);
     expect(later.slot(1)?.lastPlayed).toBe('2026-01-01');
     later.load(1);
@@ -82,7 +92,7 @@ describe('SaveSlots', () => {
     const saves = new SaveSlots(memoryStorage(), today);
     let calls = 0;
     const stop = saves.onChange(() => calls++);
-    saves.create(1, 'Ivan').markBookletRead();
+    saves.create(1, 'Ivan', 'normal').markBookletRead();
     stop();
     saves.rename(1, 'Other');
     expect(calls).toBe(2);
@@ -91,7 +101,7 @@ describe('SaveSlots', () => {
   it('keeps working in memory when storage is blocked', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const saves = new SaveSlots(brokenStorage(), today);
-    saves.create(1, 'Ivan').markBookletRead();
+    saves.create(1, 'Ivan', 'normal').markBookletRead();
     expect(saves.current?.bookletRead).toBe(true);
     expect(new SaveSlots(null, today).hasSaves).toBe(false);
     warn.mockRestore();
@@ -125,9 +135,10 @@ describe('moving older progress into slot 1', () => {
     const save = saves.requireCurrent();
     expect(save.name).toBe('Save 1');
     expect(save.bestScore('xp-dial-up')).toBe(812);
-    expect(save.bestAssisted('xp-dial-up')).toBe(true);
+    expect(save.best('xp-dial-up')).toEqual({ score: 812, assisted: true, difficulty: 'normal' });
     expect(save.bestScore('mac-beach-ball')).toBe(640);
-    expect(save.bestAssisted('mac-beach-ball')).toBe(false);
+    expect(save.best('mac-beach-ball')?.assisted).toBe(false);
+    expect(save.difficulty).toBe('normal');
     expect(save.finished).toHaveLength(3);
     expect(save.mailState).toBe('read');
     expect(save.bookletRead).toBe(true);
@@ -161,7 +172,8 @@ describe('parseSaveFile', () => {
   const save = {
     name: 'Ivan',
     lastPlayed: '2026-10-25',
-    best: { a: { score: 1, assisted: false } },
+    difficulty: 'hard',
+    best: { a: { score: 1, assisted: false, difficulty: 'hell' } },
     finished: ['a'],
     rickrollMailRead: false,
     bookletRead: true,
@@ -169,15 +181,27 @@ describe('parseSaveFile', () => {
 
   it('reads a valid file and drops a current slot that is empty', () => {
     const file = parseSaveFile(
-      JSON.stringify({ version: 1, current: 2, slots: [save, null, null] }),
+      JSON.stringify({ version: 2, current: 2, slots: [save, null, null] }),
     );
     expect(file.slots[0]?.name).toBe('Ivan');
+    expect(file.slots[0]?.difficulty).toBe('hard');
+    expect(file.slots[0]?.best.a?.difficulty).toBe('hell');
     expect(file.current).toBeNull();
+  });
+
+  it('reads a version 1 file as Normal throughout', () => {
+    const old = { ...save, difficulty: undefined, best: { a: { score: 1, assisted: true } } };
+    const file = parseSaveFile(
+      JSON.stringify({ version: 1, current: 1, slots: [old, null, null] }),
+    );
+    expect(file.version).toBe(2);
+    expect(file.slots[0]?.difficulty).toBe('normal');
+    expect(file.slots[0]?.best.a).toEqual({ score: 1, assisted: true, difficulty: 'normal' });
   });
 
   it('rejects broken files', () => {
     const file = (changes: object) =>
-      JSON.stringify({ version: 1, current: 1, slots: [save, null, null], ...changes });
+      JSON.stringify({ version: 2, current: 1, slots: [save, null, null], ...changes });
     expect(() => parseSaveFile('not json')).toThrow();
     expect(() => parseSaveFile(file({ slots: [save] }))).toThrow();
     expect(() => parseSaveFile(file({ current: 4 }))).toThrow();
@@ -187,6 +211,14 @@ describe('parseSaveFile', () => {
     ).toThrow();
     expect(() =>
       parseSaveFile(file({ slots: [{ ...save, lastPlayed: 'today' }, null, null] })),
+    ).toThrow();
+    expect(() =>
+      parseSaveFile(file({ slots: [{ ...save, difficulty: 'nightmare' }, null, null] })),
+    ).toThrow();
+    expect(() =>
+      parseSaveFile(
+        file({ slots: [{ ...save, best: { a: { score: 1, assisted: false } } }, null, null] }),
+      ),
     ).toThrow();
   });
 });

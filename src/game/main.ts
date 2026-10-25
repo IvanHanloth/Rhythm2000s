@@ -6,6 +6,7 @@ import { Rectangle } from 'pixi.js';
 import { AudioClock } from '@/audio/audio-clock.ts';
 import { Hub, type LevelInfo } from '@/hub/hub.ts';
 import { countFinished } from '@/hub/save-menu.ts';
+import { describeDifficulty, DIFFICULTY_SPEEDS } from '@/rhythm/difficulty.ts';
 import { mac2000Scene } from '@/scenes/mac-2000/scene.ts';
 import { windowsXpScene } from '@/scenes/windows-xp/scene.ts';
 import { browserChartStore, ChartLibrary } from './chart-library.ts';
@@ -219,16 +220,16 @@ document.body.append(intro.element);
 director.setIntroduce((chartId) => {
   const level = levels.find((l) => l.id === chartId);
   if (!level) return;
+  const progress = saves.requireCurrent();
   intro.show({
     sceneId: level.sceneId,
     kicker: `${level.sceneLabel} · Level ${level.number}`,
     title: level.title,
-    bpm: level.bpm,
+    // The tempo the level plays at on the save's difficulty (doc/difficulty.md)
+    bpm: Math.round(level.bpm * DIFFICULTY_SPEEDS[progress.difficulty]),
+    difficulty: describeDifficulty(progress.difficulty),
     actions: level.actions,
-    record: formatBestScore(
-      saves.requireCurrent().bestScore(level.id),
-      saves.requireCurrent().bestAssisted(level.id),
-    ),
+    record: formatBestScore(progress.best(level.id)),
   });
 });
 

@@ -12,7 +12,8 @@ Each save holds one player's progress:
 
 | Progress | Used by |
 | --- | --- |
-| Best score per chart, and whether it was set with the beat guide on | Level intro, results window, the café card's "Played: N / M levels" ([results.md](results.md), [beat-guide.md](beat-guide.md#recording-scores)) |
+| The difficulty ([difficulty.md](difficulty.md)) | Every level's speed and recorded score; the settings window |
+| Best score per chart, the difficulty it was set on, and whether it was set with the beat guide on | Level intro, results window, the café card's "Played: N / M levels" ([results.md](results.md), [beat-guide.md](beat-guide.md#recording-scores)) |
 | The charts played to their results window | Rickroll unlock, the street's second objective ([easter-eggs.md](easter-eggs.md), [hub.md](hub.md#objectives)) |
 | Whether the Rickroll message has been read | The mail program's unread mark ([easter-eggs.md](easter-eggs.md)) |
 | Whether the guide booklet has been opened | The street's first objective ([hub.md](hub.md#objectives)) |
@@ -50,7 +51,7 @@ Enter or Space on the title screen picks the first item that is shown and enable
 - **Rename** turns the name into a text field with **OK** and **Cancel**; Enter confirms, Esc cancels.
 - **Delete** asks "Delete *name*? This can't be undone." with **Delete** and **Cancel** in the slot's row.
 
-**New Game** asks for a name ("Save N" filled in) and goes into the first empty slot. **Start** creates the save, makes it current and starts on the street; **Cancel** goes back to the menu.
+**New Game** asks for a name ("Save N" filled in) and a difficulty (five radio buttons, Heaven to Hell, Normal picked at first; [difficulty.md](difficulty.md#choosing-it)) and goes into the first empty slot. **Start** creates the save, makes it current and starts on the street; **Cancel** goes back to the menu.
 
 "Quit to title" in the pause menu returns here, so the player can switch saves. The character stays where they were on the street: their position is not part of a save.
 
@@ -66,11 +67,11 @@ Enter or Space on the title screen picks the first item that is shown and enable
 
 ### Existing players
 
-Progress saved before save slots existed moves into **slot 1, "Save 1"**, which becomes the current save, with today as its last-played date. This happens once, on the first visit after the update; the old storage entries are removed afterwards. A player with no earlier progress starts with three empty slots.
+Progress saved before save slots existed moves into **slot 1, "Save 1"** on Normal, which becomes the current save, with today as its last-played date. This happens once, on the first visit after the update; the old storage entries are removed afterwards. A player with no earlier progress starts with three empty slots.
 
 ### Storage
 
-All saves live in one local-storage entry, `rhythm2000s.saves`, a versioned JSON object (`version`, the current slot, and the three slots, empty ones as `null`). When the browser refuses storage (private mode etc.) saves work until the page is reloaded. An entry that can't be read is logged, copied to `rhythm2000s.saves.unreadable` so it isn't lost, and the game starts with empty slots.
+All saves live in one local-storage entry, `rhythm2000s.saves`, a versioned JSON object (`version`, the current slot, and the three slots, empty ones as `null`). Version 2 added the save's difficulty and each best score's difficulty; a version 1 entry is read as Normal throughout and written back as version 2. When the browser refuses storage (private mode etc.) saves work until the page is reloaded. An entry that can't be read is logged, copied to `rhythm2000s.saves.unreadable` so it isn't lost, and the game starts with empty slots.
 
 ## Code
 

@@ -28,8 +28,15 @@ import type { AudioClock } from '@/audio/audio-clock.ts';
 import { Sequencer } from '@/audio/sequencer.ts';
 import type { SaveProgress } from '@/game/save-progress.ts';
 import type { PlayerSettings } from '@/game/settings.ts';
+import type { DifficultyControl } from '@/ui/settings-panel.ts';
 import { secondsPerBeat } from '@/rhythm/beat.ts';
 import type { Chart } from '@/rhythm/chart.ts';
+import {
+  chartAtDifficulty,
+  DEFAULT_DIFFICULTY,
+  recordedScore,
+  type Difficulty,
+} from '@/rhythm/difficulty.ts';
 import {
   COMBO_BREAK_MIN,
   COMBO_TIERS,
@@ -145,6 +152,10 @@ interface ShowcaseRun<S> {
  * is skipped), and the chart's judgements so far
  */
 interface LevelRun extends TutorialProgress {
+  /** The difficulty the level is played on (doc/difficulty.md); HackerEditor runs are Normal, the chart's own tempo */
+  difficulty: Difficulty;
+  /** The chosen chart at the difficulty's speed: the demos and pieces are cut from it */
+  played: Chart;
   /** How many demos the level has (for the caption) */
   total: number;
   /** Judgements of the pieces played, with the chart's phrase numbers */
@@ -172,6 +183,8 @@ export interface LevelList {
 export interface ResultsWindowOptions {
   title: string;
   summary: ResultSummary;
+  /** The level's difficulty: the recorded score is the summary's score times its speed (doc/difficulty.md#scores) */
+  difficulty: Difficulty;
   newRecord: boolean;
   /** The beat guide was on during the chart (doc/beat-guide.md) */
   assisted: boolean;
@@ -187,6 +200,8 @@ export interface ResultsWindowOptions {
 /** What a scene's settings window is given */
 export interface SettingsWindowOptions {
   settings: PlayerSettings;
+  /** The current save's difficulty (doc/difficulty.md) */
+  difficulty: DifficultyControl;
   onClose: () => void;
   /** "Test Latency…": swaps the settings window for the latency test window */
   onTestLatency: () => void;
@@ -450,6 +465,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.showModal(
       this.openSettingsWindow({
         settings: this.context.settings,
+        difficulty: this.difficultyControl(),
         onClose: () => this.closeModal(),
         onTestLatency: () => this.openLatencyTest(),
       }),
@@ -459,6 +475,18 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   /** The current save's progress (doc/save-slots.md): best scores, finished charts and the Rickroll message */
   private get progress(): SaveProgress {
     return this.context.saves.requireCurrent();
+  }
+
+  /** The settings window's Difficulty group reads and sets the current save's difficulty */
+  private difficultyControl(): DifficultyControl {
+    const progress = this.progress;
+    return {
+      get value() {
+        return progress.difficulty;
+      },
+      set: (difficulty) => progress.setDifficulty(difficulty),
+      onChange: (listener) => this.context.saves.onChange(listener),
+    };
   }
 
   /** The message waits unread on a level-list computer and no round is on: the desktop shows its unread mark */
@@ -808,7 +836,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
 
     const stops =
       withTutorial && !this.context.settings.values.skipTutorial ? tutorialStops(chart) : [];
+    const difficulty = this.progress.difficulty;
     this.run = {
+      difficulty,
+      played: chartAtDifficulty(chart, difficulty),
       stops,
       demo: null,
       retry: false,
@@ -834,6 +865,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     await this.context.clock.resume();
     if (this.destroyed || this.state !== 'starting') return;
     this.run = {
+      difficulty: DEFAULT_DIFFICULTY,
+      played: chart,
       stops: [],
       demo: null,
       retry: false,
@@ -946,7 +979,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     const bookAt = session.endTime - handOver - BOOK_AHEAD;
     if (this.context.clock.context.currentTime < bookAt) return;
     if (run.demo !== null && session.judgements.length < session.targetCount) return;
-    const next = nextRound(chart, run, this.demoPassed(session), true);
+    const next = nextRound(run.played, run, this.demoPassed(session), true);
     if (!next.chart) return;
     session.handOff();
     this.beatGuide.appendRound(next.chart, session.chart.endBeat);
@@ -972,7 +1005,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     const run = this.run;
     const chart = this.chart;
     if (!run || !chart) return;
-    const next = nextRound(chart, run, demoPassed, false);
+    const next = nextRound(run.played, run, demoPassed, false);
     Object.assign(run, next.progress);
     if (!next.chart) {
       this.finish(run, chart);
@@ -1048,9 +1081,11 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       return;
     }
     const summary = summarizeResult(run.hits);
-    const { assisted, cheat } = run;
+    const { assisted, cheat, difficulty } = run;
+    const score = recordedScore(summary.score, difficulty);
     // A level played with the cheat code on saves nothing and doesn't count toward the Rickroll (doc/cheat-code.md)
-    const newRecord = !cheat && this.progress.recordScore(chart.id, summary.score, assisted);
+    const newRecord =
+      !cheat && this.progress.recordScore(chart.id, { score, assisted, difficulty });
     if (!cheat) this.progress.recordFinished(chart.id);
     const hasNext = this.charts.indexOf(chart) < this.charts.length - 1;
     this.endRound();
@@ -1062,6 +1097,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       this.openResults({
         title: chart.title,
         summary,
+        difficulty,
         newRecord,
         assisted,
         cheat,

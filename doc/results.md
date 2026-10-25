@@ -10,7 +10,7 @@ After a round, a results window opens in the computer's own system (title "Resul
 | --- | --- |
 | Rating | A large stamp set at an angle: "Superb", "OK" or "Try again", in the Perfect / Good / Miss judgement colours; a smaller "Full Combo" stamp beside it when the chart had no Miss ([combo.md](combo.md)) |
 | Comments | Up to three, generated from the round (see below) |
-| Score | A five-digit score; "New record" beside it when it beats the chart's previous best; a "Beat Guide" tag at the top left when the beat guide was on during the chart ([beat-guide.md](beat-guide.md#recording-scores)); a "Cheat" tag there instead, and never "New record", when the cheat code was on ([cheat-code.md](cheat-code.md)) |
+| Score | A five-digit recorded score, the score times the difficulty's speed, with the working in the box's title, e.g. "Score — Hell (8500 × 1.5)" ([difficulty.md](difficulty.md#scores)); "New record" beside it when it beats the chart's previous best; a "Beat Guide" tag at the top left when the beat guide was on during the chart ([beat-guide.md](beat-guide.md#recording-scores)); a "Cheat" tag there instead, and never "New record", when the cheat code was on ([cheat-code.md](cheat-code.md)) |
 | Best combo | The longest run of hits in the chart, at the top left of the score box ([combo.md](combo.md)); it doesn't change the score |
 | Counts | Perfect! / Good / Miss boxes with their counts |
 | Timing | Every hit sorted by offset into 13 bars of 20 ms (the whole Good window, 130 ms either side of the beat), with a dashed line on the beat; bars centred within Perfect use the Perfect colour, the rest the Good colour. The average early / late offset in ms at the top right |
@@ -23,8 +23,9 @@ Keys: Enter / Space press the default button, R retries, Esc returns to the leve
 The design only shows the look, not the rules; this is the first version, to be tuned after play-testing.
 
 - **Score**: Perfect is 1 point, Good 0.5, Miss 0; divided by the total and multiplied by 10000, rounded.
-- **Rating**: "Superb" from 8000, "OK" from 6000, otherwise "Try again" (after Rhythm Heaven's three tiers).
-- **New record**: each chart's best score is kept in the current save ([save-slots.md](save-slots.md)); a score above 0 that is the first or beats the previous best is a new record. A new record set with the beat guide on is saved with a flag ([beat-guide.md](beat-guide.md#recording-scores)).
+- **Recorded score**: the score times the difficulty's speed, rounded ([difficulty.md](difficulty.md#scores)).
+- **Rating**: from the score before the speed is applied: "Superb" from 8000, "OK" from 6000, otherwise "Try again" (after Rhythm Heaven's three tiers).
+- **New record**: each chart's best score is kept in the current save ([save-slots.md](save-slots.md)); a recorded score above 0 that is the first or beats the previous best is a new record, kept with its difficulty. A new record set with the beat guide on is saved with a flag ([beat-guide.md](beat-guide.md#recording-scores)).
 - **Comments**:
   1. An overall line for the rating.
   2. With Misses, the phrases they were in (up to 3); without, "No mistakes.".

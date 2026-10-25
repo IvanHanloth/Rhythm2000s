@@ -7,6 +7,7 @@ import { AQUA } from '@/theme/aqua.ts';
 import type { SettingsWindowOptions } from '@/scenes/shared/level-scene.ts';
 import { createSettingsPanel, type SettingsKit, type SettingsPanel } from '@/ui/settings-panel.ts';
 import { AquaCheckBox } from './components/check-box.ts';
+import { AquaRadioButton } from './components/radio-button.ts';
 import { aquaText } from './components/paint.ts';
 import { PUSH_BUTTON_HEIGHT, PushButton } from './components/push-button.ts';
 import { AquaSlider } from './components/slider.ts';
@@ -14,7 +15,8 @@ import { AquaWindow, TITLE_BAR_HEIGHT } from './components/window.ts';
 import { MAC_GROUP_INSET, macGroupBox, macPanelText, wirePushButton } from './panel-kit.ts';
 
 export const SETTINGS_TITLE = 'Rhythm 2000s Preferences';
-const WIDTH = 688;
+/** Wide enough for the Difficulty column beside the original two (doc/settings.md "Layout") */
+const WIDTH = 930;
 const HEIGHT = 470;
 const PADDING_X = 18;
 const PADDING_Y = 14;
@@ -26,6 +28,7 @@ const kit: SettingsKit = {
   groupBox: macGroupBox,
   groupInset: MAC_GROUP_INSET,
   checkBox: (label, onToggle) => new AquaCheckBox(label, onToggle),
+  radioButton: (label, onSelect) => new AquaRadioButton(label, onSelect),
   slider: (width, onChange) => new AquaSlider(width, onChange),
   button: (label, onTap) => {
     const button = new PushButton({ label });
@@ -45,7 +48,7 @@ export class MacSettingsWindow {
   private readonly ok: PushButton;
   private readonly onClose: () => void;
 
-  constructor({ settings, onClose, onTestLatency }: SettingsWindowOptions) {
+  constructor({ settings, difficulty, onClose, onTestLatency }: SettingsWindowOptions) {
     this.onClose = onClose;
     this.window = new AquaWindow({
       title: SETTINGS_TITLE,
@@ -75,6 +78,7 @@ export class MacSettingsWindow {
 
     this.panel = createSettingsPanel({
       settings,
+      difficulty,
       width: contentWidth,
       height: contentHeight - PUSH_BUTTON_HEIGHT - 14,
       kit,

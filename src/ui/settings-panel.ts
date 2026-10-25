@@ -1,17 +1,31 @@
-// Contents of the settings window (doc/settings.md): calibration, "Skip tutorial" and "Beat Guide" on the left,
-// every keyboard shortcut on the right. Changes go straight to PlayerSettings; the panel also follows changes made
-// elsewhere (H in a level). Check boxes, sliders, group boxes and text come from each scene in its native style,
-// like the results panel (src/ui/results-panel.ts). Top-left at (0, 0).
+// Contents of the settings window (doc/settings.md): the current save's difficulty on the left; calibration,
+// "Skip tutorial" and "Beat Guide" in the middle; every keyboard shortcut on the right. Changes go straight to
+// PlayerSettings and the save; the panel also follows changes made elsewhere (H in a level). Radio buttons, check
+// boxes, sliders, group boxes and text come from each scene in its native style, like the results panel
+// (src/ui/results-panel.ts). Top-left at (0, 0).
 
 import { Container, type Text } from 'pixi.js';
 import { CALIBRATION_LIMIT_MS, type PlayerSettings, type SettingValues } from '@/game/settings.ts';
 import { shortcutGroups } from '@/game/shortcuts.ts';
+import {
+  DIFFICULTIES,
+  DIFFICULTY_LABELS,
+  DIFFICULTY_SPEEDS,
+  formatSpeed,
+  type Difficulty,
+} from '@/rhythm/difficulty.ts';
 import type { PanelTextStyle } from './results-panel.ts';
 
 export interface CheckBoxWidget {
   view: Container;
   height: number;
   setChecked(checked: boolean): void;
+}
+
+export interface RadioButtonWidget {
+  view: Container;
+  height: number;
+  setSelected(selected: boolean): void;
 }
 
 export interface ButtonWidget {
@@ -36,6 +50,8 @@ export interface SettingsKit {
   groupInset: { x: number; y: number };
   /** A labelled check box; onToggle is called on a click */
   checkBox(label: string, onToggle: () => void): CheckBoxWidget;
+  /** A labelled radio button; onSelect is called on a click */
+  radioButton(label: string, onSelect: () => void): RadioButtonWidget;
   /** A horizontal slider `width` wide; onChange gets the new fraction (0–1) while dragging */
   slider(width: number, onChange: (fraction: number) => void): SliderWidget;
   /** A push button sized to its label */
@@ -50,8 +66,17 @@ export interface SettingsKit {
   textSize: number;
 }
 
+/** The current save's difficulty (doc/difficulty.md), which the panel shows and sets */
+export interface DifficultyControl {
+  readonly value: Difficulty;
+  set(difficulty: Difficulty): void;
+  /** Called after any change to the saves; returns a function that stops listening */
+  onChange(listener: () => void): () => void;
+}
+
 export interface SettingsPanelOptions {
   settings: PlayerSettings;
+  difficulty: DifficultyControl;
   width: number;
   height: number;
   kit: SettingsKit;
@@ -67,8 +92,13 @@ export interface SettingsPanel {
   destroy(): void;
 }
 
+/** The Difficulty column */
+const DIFFICULTY_WIDTH = 230;
+/** The calibration, practice and beat guide column */
 const LEFT_WIDTH = 300;
 const GAP = 12;
+/** Rows of the difficulty radio buttons */
+const RADIO_ROW_HEIGHT = 24;
 const CALIBRATION_HEIGHT = 166;
 const CHECK_GROUP_HEIGHT = 84;
 /** Rows of the shortcut table */
@@ -79,6 +109,7 @@ const KEY_COLUMN = 112;
 
 export function createSettingsPanel({
   settings,
+  difficulty,
   width,
   height,
   kit,
@@ -87,6 +118,49 @@ export function createSettingsPanel({
   const panel = new Container({ label: 'settings-panel' });
   const size = kit.textSize;
   const innerLeft = LEFT_WIDTH - kit.groupInset.x;
+
+  // ---- Difficulty ----
+  const difficultyGroup = kit.groupBox('Difficulty', DIFFICULTY_WIDTH, height);
+  const innerDifficulty = DIFFICULTY_WIDTH - kit.groupInset.x;
+  const intro = kit.text('Chart speed for this save:', { size });
+  difficultyGroup.inner.addChild(intro);
+  const radioTop = Math.ceil(intro.height) + 10;
+  const radios = DIFFICULTIES.map((choice, i) => {
+    const radio = kit.radioButton(DIFFICULTY_LABELS[choice], () => difficulty.set(choice));
+    const top = radioTop + i * RADIO_ROW_HEIGHT;
+    radio.view.position.set(4, top);
+    const speed = kit.text(formatSpeed(choice), { size, color: kit.muted });
+    speed.anchor.set(1, 0.5);
+    speed.position.set(innerDifficulty, top + radio.height / 2);
+    difficultyGroup.inner.addChild(radio.view, speed);
+    return radio;
+  });
+  const difficultyNote = kit.text('', {
+    size: size - 1,
+    color: kit.muted,
+    wrapWidth: innerDifficulty,
+    lineHeight: size + 3,
+  });
+  difficultyNote.position.set(0, radioTop + DIFFICULTIES.length * RADIO_ROW_HEIGHT + 8);
+  difficultyGroup.inner.addChild(difficultyNote);
+  panel.addChild(difficultyGroup.view);
+  const renderDifficulty = () => {
+    const current = difficulty.value;
+    DIFFICULTIES.forEach((choice, i) => radios[i]!.setSelected(choice === current));
+    const speed = DIFFICULTY_SPEEDS[current];
+    const pace =
+      speed === 1 ? 'Charts play at their own tempo' : `Charts play at ${speed}× their own tempo`;
+    difficultyNote.text =
+      `${pace}, and the scores you keep are multiplied by ${speed} and marked ${DIFFICULTY_LABELS[current]}. ` +
+      'Other saves keep their own difficulty; a change applies from the next level.';
+  };
+  renderDifficulty();
+  const stopDifficulty = difficulty.onChange(renderDifficulty);
+
+  // ---- The middle column ----
+  const middle = new Container({ label: 'middle' });
+  middle.x = DIFFICULTY_WIDTH + GAP;
+  panel.addChild(middle);
 
   // ---- Calibration ----
   const calibration = kit.groupBox('Input Latency', LEFT_WIDTH, CALIBRATION_HEIGHT);
@@ -117,7 +191,7 @@ export function createSettingsPanel({
   );
   help.position.set(0, sliderTop + slider.height + 20);
   calibration.inner.addChild(label, value, test.view, valueNote, slider.view, ...ends, help);
-  panel.addChild(calibration.view);
+  middle.addChild(calibration.view);
 
   // ---- Check boxes ----
   const checkGroup = (
@@ -138,7 +212,7 @@ export function createSettingsPanel({
     });
     caption.position.set(0, box.height + 6);
     group.inner.addChild(box.view, caption);
-    panel.addChild(group.view);
+    middle.addChild(group.view);
     return box;
   };
   const skipTop = CALIBRATION_HEIGHT + GAP;
@@ -158,7 +232,7 @@ export function createSettingsPanel({
   );
 
   // ---- Shortcuts ----
-  const rightX = LEFT_WIDTH + GAP;
+  const rightX = middle.x + LEFT_WIDTH + GAP;
   const rightWidth = width - rightX;
   const shortcuts = kit.groupBox('Keyboard Shortcuts', rightWidth, height);
   shortcuts.view.x = rightX;
@@ -199,6 +273,9 @@ export function createSettingsPanel({
     nudgeCalibration: (deltaMs) => {
       settings.setCalibrationMs(settings.values.calibrationMs + deltaMs);
     },
-    destroy: unsubscribe,
+    destroy: () => {
+      unsubscribe();
+      stopDifficulty();
+    },
   };
 }
