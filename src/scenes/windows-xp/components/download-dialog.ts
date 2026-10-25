@@ -76,7 +76,8 @@ export class XpDownloadDialog {
 
     const rows: [Container, Container][] = [
       [this.timeLeftLabel, this.timeLeft],
-      [xpText('Download to:'), xpText(`C:\\Documents and Settings\\...\\${options.fileName}`)],
+      // The folder, not the file: with a file name the path runs past the window's right edge
+      [xpText('Download to:'), xpText('C:\\Documents and Settings\\...\\Desktop')],
       [xpText('Transfer rate:'), xpText('48.0 KB/Sec')],
     ];
     const rowViews: Container[] = [];
