@@ -903,8 +903,7 @@ export class Hub {
     };
     this.heading = lerpAngle(seat.fromHeading, heading, k);
     this.height = 0;
-    this.player.sit(k > 0.5);
-    if (k <= 0.5) this.player.pose(this.walkPhase + k * 6, 0.6);
+    this.player.settle(k);
     this.placePlayer();
   }
 

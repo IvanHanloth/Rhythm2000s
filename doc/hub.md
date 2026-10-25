@@ -15,7 +15,7 @@ The title screen and level select both take place in one 3D street. Technology c
 - The dreamcore stays restrained so the street doesn't look generated (user, 2026-10-25): sunlight strong enough to cast clear shadows, no milky haze over the picture, a sparse scatter of motes rather than a cloud of them, and no windows glowing by day. Windows differ house by house: frame colours per building, and behind the glass either the reflected sky or net curtains and blinds.
 - Millennial details on a British high street around 2000 (the project is a UK hackathon entry).
 - One chart is one level. The café has one entry computer per scene (XP and Mac); the card shown when seated lists that computer's levels and how many have scores, and levels are picked inside in Explorer / Finder.
-- The player character is the DeepSeek whale girl, a ready-made model (ai-girls-3d adult version, CC BY 4.0; source and changes in assets/README.md). It has no animations; walking, sitting and typing turn its bones in code.
+- The player character is the DeepSeek whale girl, a ready-made model (ai-girls-3d adult version, CC BY 4.0; source and changes in assets/README.md). It has no animations; walking, sitting and typing turn its bones in code. She never freezes: standing she breathes, shifts her weight and glances around; walking she leans into the stride, her hips and shoulders twist against each other and her arms swing with bent elbows; she blinks at uneven intervals; sitting down blends from the last step into the seat.
 
 ## Flow
 

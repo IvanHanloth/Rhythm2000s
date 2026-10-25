@@ -71,6 +71,8 @@ export interface Figure {
   pose(phase: number, amount: number): void;
   /** Sit down / stand up */
   sit(sitting: boolean): void;
+  /** Lowering into the seat, k from 0 (standing, last step) to 1 (seated) */
+  settle(k: number): void;
   /** Fingers moving on the keyboard while seated; t in seconds */
   type(t: number): void;
   /** Idle touches every frame (blinking etc.); t in seconds */
@@ -440,6 +442,11 @@ export class Character implements Figure {
     this.head.rotation.z = Math.sin(phase) * 0.04 * amount;
     this.restTail(Math.sin(phase * 0.5) * 0.35 * amount);
     this.ahoge.rotation.z = Math.sin(phase) * 0.18 * amount;
+  }
+
+  /** The puppet has no in-between pose: it sits halfway through */
+  settle(k: number): void {
+    this.sit(k > 0.5);
   }
 
   /** Seated: thighs forward, hands on the keyboard */
