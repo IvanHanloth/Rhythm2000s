@@ -49,14 +49,15 @@ The intro takes the scene's colours: Luna for XP levels, Aqua for Mac levels.
 
 ## Guide booklet
 
-A small booklet stands on the café's front desk. E beside it ("Read · Guide booklet") opens it as a printed two-page leaflet over the street, and E, Esc or "Close" puts it back. It walks a new player through the game in six short numbered steps:
+A small booklet stands on the café's front desk. E beside it ("Read · Guide booklet") opens it as a printed two-page leaflet over the street, and E, Esc or "Close" puts it back. The leaflet fits the window without a scroll bar (it only scrolls, with the bar hidden, when the window is too small). It walks a new player through the game in seven short numbered steps:
 
 1. **Watch and listen**: the computer goes first, showing a few things on the beat.
-2. **Your turn**: do the same things in the same rhythm, clicking on the beat; Perfect, Good or Miss.
-3. **Combo bonuses**: hits in a row liven up the computer in three tiers, from 8, 16 and 30 hits ([combo.md](combo.md#tiers)); a round without a Miss earns a Full Combo stamp, and the score is stamped Superb, OK or Try again ([results.md](results.md)).
+2. **Your turn**: do the same things in the same rhythm, with a mouse click or Space on the beat; Perfect, Good or Miss.
+3. **Combo bonuses**: only how many hits in a row start each tier, 8, 16 and 30 ([combo.md](combo.md#tiers)); what the tiers look like is left for the player to find.
 4. **Back to the street**: Start → "Log Off" / "Turn Off Computer" on the XP machine, Apple menu → "Log Out…" / "Shut Down…" on the Mac ([level-select.md](level-select.md)).
 5. **Beat Guide**: H during a song turns it on or off ([beat-guide.md](beat-guide.md)).
-6. **The computers**: the Windows XP PC and the iMac in the front row are for playing. A line about the HackerEditor computers behind them is struck through by hand in red pen, with the note "Please only use the two game machines at the front!", a wink at the editors without pointing new players there.
+6. **Settings**: Start → "Control Panel" on the XP machine, Apple menu → "System Preferences…" on the Mac, for the latency calibration and its test, skipping the tutorial and the Beat Guide ([settings.md](settings.md)).
+7. **The computers**: the Windows XP PC and the iMac in the front row are for playing. A line about the HackerEditor computers behind them is struck through by hand in red pen, with the note "Please only use the two game machines at the front!", a wink at the editors without pointing new players there.
 
 The booklet is English, like everything in the world.
 

@@ -329,7 +329,7 @@ export class HubOverlay {
   }
 
   /**
-   * The guide booklet from the café's front desk (doc/hub.md#guide-booklet): a printed two-page leaflet in six steps.
+   * The guide booklet from the café's front desk (doc/hub.md#guide-booklet): a printed two-page leaflet in seven steps.
    * The line about the HackerEditor computers is struck through by hand, steering new players to the play computers.
    */
   private buildBooklet(onClose: () => void): void {
@@ -348,13 +348,13 @@ export class HubOverlay {
     const key = (label: string) => el('kbd', '', label);
     const strong = (label: string) => el('b', '', label);
     const tiers = el('ul', 'hub-booklet-tiers');
-    for (const [hits, effect] of [
-      ['8 hits', 'Tier 1: the desktop starts to dance'],
-      ['16 hits', 'Tier 2: it lights up. HOT!'],
-      ['30 hits', 'Tier 3: the grand finale'],
+    for (const [tier, hits] of [
+      ['Tier 1', '8 hits'],
+      ['Tier 2', '16 hits'],
+      ['Tier 3', '30 hits'],
     ] as const) {
       const li = el('li', '');
-      li.append(el('span', 'hub-booklet-hits', hits), effect);
+      li.append(el('span', 'hub-booklet-hits', hits), tier);
       tiers.append(li);
     }
     const struck = el(
@@ -380,46 +380,44 @@ export class HubOverlay {
         2,
         'Your turn',
         text(
-          'Now do the same things in the same rhythm. Click each one right on the beat. Every press is graded ',
-          strong('Perfect'),
-          ', ',
-          strong('Good'),
-          ' or ',
-          strong('Miss'),
-          '.',
+          'Now do the same things in the same rhythm: ',
+          strong('click the mouse'),
+          ' or press ',
+          key('Space'),
+          ' right on the beat. Every press is graded Perfect, Good or Miss.',
         ),
       ),
-      step(
-        3,
-        'Combo bonuses',
-        text('Hit in a row and the computer livens up:'),
-        tiers,
-        text(
-          'No Miss all song? ',
-          strong('Full Combo!'),
-          ' Your score is stamped Superb, OK or Try again.',
-        ),
-      ),
-    );
-    const right = el('div', 'hub-booklet-page');
-    right.append(
+      step(3, 'Combo bonuses', text('Hit in a row without a Miss to unlock bonuses:'), tiers),
       step(
         4,
         'Back to the street',
         text(strong('Windows XP: '), 'start → Log Off or Turn Off Computer.'),
         text(strong('Mac: '), 'Apple menu → Log Out… or Shut Down…'),
       ),
+    );
+    const right = el('div', 'hub-booklet-page');
+    right.append(
       step(
         5,
         'Beat Guide',
         text(
           'Lost the beat? Press ',
           key('H'),
-          ' during a song for the Beat Guide: rings close in on a dot and meet it right on the beat.',
+          ' during a song: rings close in on a dot and meet it right on the beat.',
         ),
       ),
       step(
         6,
+        'Settings',
+        text(
+          strong('Windows XP: '),
+          'start → Control Panel. ',
+          strong('Mac: '),
+          'Apple menu → System Preferences… Calibrate latency (with a latency test), skip the tutorial or turn on the Beat Guide.',
+        ),
+      ),
+      step(
+        7,
         'The computers',
         text(
           'Front row, under the yellow markers: the Windows XP PC and the iMac. Sit down and press ',
