@@ -1,0 +1,44 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Baloo 2";
+      font-weight: 800;
+      src: url("assets/fonts/baloo-2/Baloo2-ExtraBold.woff2") format("woff2");
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Baloo 2", sans-serif;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+    }
+    /* As the words in words.html */
+    .w {
+      position: absolute;
+      right: 192px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .w .t {
+      display: inline-block;
+      font-size: 120px;
+      -webkit-text-stroke: 14px #0b2f6e;
+      paint-order: stroke fill;
+      text-shadow: 6px 6px 0 #0b2f6e;
+      transform-origin: 100% 50%;
+    }
+  </style>
+  <div id="root" data-composition-id="egg-title" data-width="1920" data-height="1080">
+    <!-- The easter egg unlocks once three different levels are finished (doc/easter-eggs.md) -->
+    <div id="egg-three" class="w clip" data-start="0.3" data-duration="2.5" style="top: 150px"><span class="t">Finish three levels…</span></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.set("#egg-three .t", { scale: 1.12, opacity: 1, filter: "blur(0px)" }, 0.3);
+    tl.to("#egg-three .t", { scale: 1, duration: 0.2, ease: "expo.out" }, 0.3);
+    tl.to("#egg-three .t", { opacity: 0, filter: "blur(8px)", duration: 0.13, ease: "power2.in" }, 2.8 - 0.13);
+    window.__timelines["egg-title"] = tl;
+  </script>
+</template>

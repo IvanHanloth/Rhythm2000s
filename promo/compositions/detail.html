@@ -1,0 +1,200 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Baloo 2";
+      font-weight: 800;
+      src: url("assets/fonts/baloo-2/Baloo2-ExtraBold.woff2") format("woff2");
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: #0a52c8;
+      font-family: "Baloo 2", sans-serif;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+    }
+    video.clip {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      object-fit: cover;
+    }
+    /* The How to Play booklet, full bleed (1419 x 848 scaled to the frame's width) */
+    #booklet {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 5;
+    }
+    #booklet-img {
+      position: absolute;
+      left: 0;
+      top: -33px;
+      width: 1920px;
+      height: 1147px;
+    }
+    /* Titles as in the quick cut's words.html */
+    .w {
+      position: absolute;
+      right: 192px;
+      text-align: right;
+      white-space: nowrap;
+      z-index: 10;
+    }
+    .w .t {
+      display: inline-block;
+      font-size: 120px;
+      -webkit-text-stroke: 14px #0b2f6e;
+      paint-order: stroke fill;
+      text-shadow: 6px 6px 0 #0b2f6e;
+      transform-origin: 100% 50%;
+    }
+    .w.sm .t {
+      font-size: 80px;
+      -webkit-text-stroke: 10px #0b2f6e;
+      text-shadow: 4px 4px 0 #0b2f6e;
+    }
+    .w.left {
+      right: auto;
+      left: 220px;
+      text-align: left;
+    }
+    .w.left .t {
+      transform-origin: 0% 50%;
+    }
+    .w.huge .t {
+      font-size: 280px;
+      -webkit-text-stroke: 24px #0b2f6e;
+      text-shadow: 10px 10px 0 #0b2f6e;
+    }
+  </style>
+  <div id="root" data-composition-id="detail" data-width="1920" data-height="1080">
+    <!--
+      Part 2 of SPEC.md. Gameplay is cut on the Heaven charts' 110 BPM bar lines (a bar is 2.1818 s):
+      xp-full bars at 10.49 + 2.1818n, mac-full at 9.47 + 2.1818m, detail bars at 13.66 + 2.1818k.
+      Showcase takes are used as footage/xp-110.mp4 and mac-110.mp4: the 120 BPM takes slowed to 110 BPM.
+      footage/detail-bed.wav (scripts/build-bed.py) carries the sound for every shot here.
+    -->
+    <video id="a-street" class="clip" data-start="0.0" data-duration="4.8" data-media-start="14.0" data-track-index="1" data-hf-media-start-basis="local" src="footage/street.mp4" muted playsinline></video>
+    <video id="a-xp-desk" class="clip" data-start="4.8" data-duration="2.0" data-media-start="0.25" data-track-index="2" data-hf-media-start-basis="local" src="footage/xp-full.mp4" muted playsinline></video>
+    <video id="a-mac-desk" class="clip" data-start="6.8" data-duration="1.5" data-media-start="0.45" data-track-index="1" data-hf-media-start-basis="local" src="footage/mac-full.mp4" muted playsinline></video>
+    <video id="a-explorer" class="clip" data-start="8.3" data-duration="1.7" data-media-start="3.5" data-track-index="2" data-hf-media-start-basis="local" src="footage/xp-full.mp4" muted playsinline></video>
+    <video id="a-finder" class="clip" data-start="10.0" data-duration="1.6" data-media-start="3.6" data-track-index="1" data-hf-media-start-basis="local" src="footage/mac-full.mp4" muted playsinline></video>
+    <video id="b-xp-run" class="clip" data-start="11.6" data-duration="12.969" data-media-start="6.25" data-track-index="2" data-hf-media-start-basis="local" src="footage/xp-full.mp4" muted playsinline></video>
+    <video id="b-xp-miss" class="clip" data-start="24.569" data-duration="8.727" data-media-start="54.126" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-full.mp4" muted playsinline></video>
+    <video id="c-mac-1" class="clip" data-start="33.296" data-duration="4.364" data-media-start="29.106" data-track-index="2" data-hf-media-start-basis="local" src="footage/mac-full.mp4" muted playsinline></video>
+    <video id="c-xp-1" class="clip" data-start="37.66" data-duration="4.364" data-media-start="36.672" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-full.mp4" muted playsinline></video>
+    <video id="c-mac-2" class="clip" data-start="42.024" data-duration="4.364" data-media-start="42.197" data-track-index="2" data-hf-media-start-basis="local" src="footage/mac-full.mp4" muted playsinline></video>
+    <video id="c-xp-2" class="clip" data-start="46.387" data-duration="4.364" data-media-start="41.035" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-full.mp4" muted playsinline></video>
+    <video id="d-guide" class="clip" data-start="50.751" data-duration="8.727" data-media-start="73.763" data-track-index="2" data-hf-media-start-basis="local" src="footage/xp-full.mp4" muted playsinline></video>
+    <video id="e-00" class="clip" data-start="59.478" data-duration="1.091" data-media-start="1.637" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-110.mp4" muted playsinline></video>
+    <video id="e-01" class="clip" data-start="60.569" data-duration="1.091" data-media-start="1.285" data-track-index="2" data-hf-media-start-basis="local" src="footage/mac-110.mp4" muted playsinline></video>
+    <video id="e-02" class="clip" data-start="61.66" data-duration="1.091" data-media-start="6.001" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-110.mp4" muted playsinline></video>
+    <video id="e-03" class="clip" data-start="62.751" data-duration="1.091" data-media-start="5.649" data-track-index="2" data-hf-media-start-basis="local" src="footage/mac-110.mp4" muted playsinline></video>
+    <video id="e-04" class="clip" data-start="63.842" data-duration="1.091" data-media-start="10.365" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-110.mp4" muted playsinline></video>
+    <video id="e-05" class="clip" data-start="64.933" data-duration="1.091" data-media-start="10.012" data-track-index="2" data-hf-media-start-basis="local" src="footage/mac-110.mp4" muted playsinline></video>
+    <video id="e-06" class="clip" data-start="66.024" data-duration="1.091" data-media-start="14.728" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-110.mp4" muted playsinline></video>
+    <video id="e-07" class="clip" data-start="67.115" data-duration="1.091" data-media-start="23.103" data-track-index="2" data-hf-media-start-basis="local" src="footage/mac-110.mp4" muted playsinline></video>
+    <video id="e-08" class="clip" data-start="68.205" data-duration="1.091" data-media-start="27.819" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-110.mp4" muted playsinline></video>
+    <video id="e-09" class="clip" data-start="69.296" data-duration="1.091" data-media-start="40.558" data-track-index="2" data-hf-media-start-basis="local" src="footage/mac-110.mp4" muted playsinline></video>
+    <video id="e-10" class="clip" data-start="70.387" data-duration="1.091" data-media-start="23.456" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-110.mp4" muted playsinline></video>
+    <video id="e-11" class="clip" data-start="71.478" data-duration="1.091" data-media-start="40.91" data-track-index="2" data-hf-media-start-basis="local" src="footage/xp-110.mp4" muted playsinline></video>
+    <video id="f-xp-chair" class="clip" data-start="72.569" data-duration="4.364" data-media-start="126.126" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-full.mp4" muted playsinline></video>
+    <video id="f-mac-chair" class="clip" data-start="76.933" data-duration="4.364" data-media-start="98.925" data-track-index="2" data-hf-media-start-basis="local" src="footage/mac-full.mp4" muted playsinline></video>
+    <video id="g-xp-16" class="clip" data-start="81.296" data-duration="2.182" data-media-start="75.819" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-110.mp4" muted playsinline></video>
+    <video id="g-mac-16" class="clip" data-start="83.478" data-duration="2.182" data-media-start="75.467" data-track-index="2" data-hf-media-start-basis="local" src="footage/mac-110.mp4" muted playsinline></video>
+    <video id="g-xp-30" class="clip" data-start="85.66" data-duration="4.364" data-media-start="80.183" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-110.mp4" muted playsinline></video>
+    <video id="g-mac-30" class="clip" data-start="90.024" data-duration="4.364" data-media-start="79.831" data-track-index="2" data-hf-media-start-basis="local" src="footage/mac-110.mp4" muted playsinline></video>
+    <video id="h-xp-results" class="clip" data-start="94.387" data-duration="2.727" data-media-start="171.95" data-track-index="1" data-hf-media-start-basis="local" src="footage/xp-full.mp4" muted playsinline></video>
+    <video id="h-mac-results" class="clip" data-start="97.115" data-duration="2.727" data-media-start="144.7" data-track-index="2" data-hf-media-start-basis="local" src="footage/mac-full.mp4" muted playsinline></video>
+    <video id="i-xp-open" class="clip" data-start="99.842" data-duration="6.4" data-media-start="0.0" data-track-index="1" data-hf-media-start-basis="local" src="footage/editor-xp.mp4" muted playsinline></video>
+    <video id="i-xp-edit" class="clip" data-start="106.242" data-duration="12.0" data-media-start="0.0" data-track-index="2" data-hf-media-start-basis="local" src="footage/editor-xp-edit.mp4" muted playsinline></video>
+    <video id="i-xp-test" class="clip" data-start="118.242" data-duration="4.5" data-media-start="55.5" data-track-index="1" data-hf-media-start-basis="local" src="footage/editor-xp.mp4" muted playsinline></video>
+    <video id="i-mac-edit" class="clip" data-start="122.742" data-duration="3.0" data-media-start="0.0" data-track-index="2" data-hf-media-start-basis="local" src="footage/editor-mac-edit.mp4" muted playsinline></video>
+    <video id="i-mac-save" class="clip" data-start="125.742" data-duration="4.5" data-media-start="100.0" data-track-index="1" data-hf-media-start-basis="local" src="footage/editor-mac.mp4" muted playsinline></video>
+    <video id="i-mac-walk" class="clip" data-start="130.242" data-duration="4.0" data-media-start="0.0" data-track-index="2" data-hf-media-start-basis="local" src="footage/editor-mac-walk.mp4" muted playsinline></video>
+    <video id="i-mac-play" class="clip" data-start="134.242" data-duration="9.5" data-media-start="112.5" data-track-index="1" data-hf-media-start-basis="local" src="footage/editor-mac.mp4" muted playsinline></video>
+    <div id="booklet" class="clip" data-start="13.66" data-duration="2.182" data-track-index="3">
+      <img id="booklet-img" src="footage/how-to-play.png" alt="The How to Play booklet" />
+    </div>
+    <div id="t-how" class="w  clip" data-start="0.4" data-duration="2.05" style="top: 600px"><span class="t">Here’s how it plays</span></div>
+    <div id="t-cafe" class="w  clip" data-start="2.6" data-duration="2.15" style="top: 600px"><span class="t">Into the Cyberspace Café</span></div>
+    <div id="t-sit" class="w left clip" data-start="4.85" data-duration="3.4" style="top: 150px"><span class="t">Sit at the XP PC</span></div>
+    <div id="t-imac" class="w left clip" data-start="6.85" data-duration="1.4" style="top: 280px"><span class="t">or the iMac</span></div>
+    <div id="t-pick" class="w  clip" data-start="8.35" data-duration="3.2" style="top: 300px"><span class="t">Pick a level</span></div>
+    <div id="t-first" class="w  clip" data-start="15.842" data-duration="2.132" style="top: 520px"><span class="t">The computer goes first</span></div>
+    <div id="t-copy" class="w  clip" data-start="18.024" data-duration="2.132" style="top: 520px"><span class="t">You copy it, on the beat</span></div>
+    <div id="t-practice" class="w  clip" data-start="20.205" data-duration="4.314" style="top: 390px"><span class="t">Each new pop-up</span></div>
+    <div id="t-practice2" class="w  clip" data-start="21.296" data-duration="3.223" style="top: 520px"><span class="t">starts with practice</span></div>
+    <div id="t-graded" class="w  clip" data-start="26.751" data-duration="2.132" style="top: 520px"><span class="t">Perfect, Good or Miss</span></div>
+    <div id="t-again" class="w  clip" data-start="28.933" data-duration="2.132" style="top: 520px"><span class="t">Miss? Try again</span></div>
+    <div id="t-mac" class="w  clip" data-start="33.296" data-duration="4.314" style="top: 680px"><span class="t">Same rules on a Mac</span></div>
+    <div id="t-harder" class="w  clip" data-start="37.66" data-duration="4.314" style="top: 520px"><span class="t">It gets harder as you go</span></div>
+    <div id="t-h" class="w  clip" data-start="50.751" data-duration="2.132" style="top: 520px"><span class="t">Lost the beat? Press H</span></div>
+    <div id="t-rings" class="w  clip" data-start="52.933" data-duration="4.314" style="top: 520px"><span class="t">The rings close in on the beat</span></div>
+    <div id="t-widgets" class="w  clip" data-start="59.478" data-duration="4.314" style="top: 390px"><span class="t">Every widget</span></div>
+    <div id="t-widgets2" class="w  clip" data-start="60.569" data-duration="3.223" style="top: 520px"><span class="t">true to the original</span></div>
+    <div id="t-chair" class="w  clip" data-start="72.569" data-duration="4.314" style="top: 520px"><span class="t">The chair spins on the beat</span></div>
+    <div id="t-16" class="w  clip" data-start="81.296" data-duration="4.314" style="top: 300px"><span class="t">16 in a row</span></div>
+    <div id="t-30" class="w left huge clip" data-start="85.66" data-duration="8.677" style="top: 130px"><span class="t">30!</span></div>
+    <div id="t-editor" class="w left clip" data-start="100.042" data-duration="2.4" style="top: 150px"><span class="t">One row back: HackerEditor</span></div>
+    <div id="t-click" class="w sm clip" data-start="106.642" data-duration="5.5" style="top: 790px"><span class="t">Click actions onto the beat</span></div>
+    <div id="t-follows" class="w sm clip" data-start="112.242" data-duration="5.9" style="top: 790px"><span class="t">The response copies the call</span></div>
+    <div id="t-test" class="w sm clip" data-start="118.242" data-duration="4.45" style="top: 520px"><span class="t">Test it right away</span></div>
+    <div id="t-mac-ed" class="w sm clip" data-start="122.742" data-duration="2.95" style="top: 860px"><span class="t">Same on the Mac</span></div>
+    <div id="t-save" class="w sm clip" data-start="125.742" data-duration="4.45" style="top: 860px"><span class="t">Save it…</span></div>
+    <div id="t-level" class="w sm clip" data-start="139.242" data-duration="4.45" style="top: 870px"><span class="t">…and it’s a level</span></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // The booklet pushes in on its first two rules, landing on beat 2 of the count-in
+    tl.fromTo("#booklet-img", { scale: 1, transformOrigin: "0% 0%" }, { scale: 1.45, duration: 0.4, ease: "power3.inOut" }, 13.805);
+    // A title hits on its beat (a 0-frame jump to 1.12, settling over 6 frames) and leaves in 4 frames
+    const hit = (id, at) => {
+      tl.set(`${id} .t`, { scale: 1.12, opacity: 1, filter: "blur(0px)" }, at);
+      tl.to(`${id} .t`, { scale: 1, duration: 0.2, ease: "expo.out" }, at);
+    };
+    const out = (id, end) => {
+      tl.to(`${id} .t`, { opacity: 0, filter: "blur(8px)", duration: 0.13, ease: "power2.in" }, end - 0.13);
+    };
+    const titles = [
+      ["#t-how", 0.4, 2.45],
+      ["#t-cafe", 2.6, 4.75],
+      ["#t-sit", 4.85, 8.25],
+      ["#t-imac", 6.85, 8.25],
+      ["#t-pick", 8.35, 11.55],
+      ["#t-first", 15.842, 17.974],
+      ["#t-copy", 18.024, 20.155],
+      ["#t-practice", 20.205, 24.519],
+      ["#t-practice2", 21.296, 24.519],
+      ["#t-graded", 26.751, 28.883],
+      ["#t-again", 28.933, 31.065],
+      ["#t-mac", 33.296, 37.61],
+      ["#t-harder", 37.66, 41.974],
+      ["#t-h", 50.751, 52.883],
+      ["#t-rings", 52.933, 57.246],
+      ["#t-widgets", 59.478, 63.792],
+      ["#t-widgets2", 60.569, 63.792],
+      ["#t-chair", 72.569, 76.883],
+      ["#t-16", 81.296, 85.61],
+      ["#t-30", 85.66, 94.337],
+      ["#t-editor", 100.042, 102.442],
+      ["#t-click", 106.642, 112.142],
+      ["#t-follows", 112.242, 118.142],
+      ["#t-test", 118.242, 122.692],
+      ["#t-mac-ed", 122.742, 125.692],
+      ["#t-save", 125.742, 130.192],
+      ["#t-level", 139.242, 143.692],
+    ];
+    for (const [id, start, end] of titles) {
+      hit(id, start);
+      out(id, end);
+    }
+    window.__timelines["detail"] = tl;
+  </script>
+</template>

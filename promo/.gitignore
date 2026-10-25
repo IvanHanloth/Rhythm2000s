@@ -7,3 +7,5 @@ renders/
 footage/*.mp4
 # Studio thumbnails
 .thumbnails/
+# Studio waveform cache
+.waveform-cache/

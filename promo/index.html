@@ -25,7 +25,15 @@
         overflow: hidden;
         transform-origin: 0 0;
       }
-      .cam video {
+      /* A quarter of the frame in the four-desktop shot */
+      .panel {
+        position: absolute;
+        width: 956px;
+        height: 536px;
+        overflow: hidden;
+      }
+      .cam video,
+      .panel video {
         position: absolute;
         left: 0;
         top: 0;
@@ -45,7 +53,7 @@
       id="root"
       data-composition-id="main"
       data-start="0"
-      data-duration="41"
+      data-duration="226.242"
       data-width="1920"
       data-height="1080"
       data-motion-blur="on"
@@ -58,21 +66,39 @@
       <div data-hf-id="hf-2liy" class="cam" id="cam-s3" style="z-index: 2">
         <video data-hf-id="hf-pdbb" id="s3" class="clip" data-start="4.1" data-duration="4" data-media-start="9.501" data-track-index="1" src="footage/xp.mp4" muted playsinline></video>
       </div>
-      <!-- 5–6: XP question dialog, call then response -->
+      <!-- 5–6: XP Security Warning, call then response: its OK is clicked on the bar line at 12.1 -->
       <div data-hf-id="hf-zdi5" class="cam" id="cam-s5" style="z-index: 3">
-        <video data-hf-id="hf-e4tm" id="s5" class="clip" data-start="10.1" data-duration="4.1" data-media-start="13.501" data-track-index="1" src="footage/xp.mp4" muted playsinline></video>
+        <video data-hf-id="hf-e4tm" id="s5" class="clip" data-start="10.1" data-duration="3.8" data-media-start="5.501" data-track-index="1" src="footage/xp.mp4" muted playsinline></video>
+        <!-- The take's next dialog pops at 13.93, so the whip carries an empty desktop instead,
+             from just after the next OK, with the pointer in the same place -->
+        <video id="s5b" class="clip" data-start="13.9" data-duration="0.35" data-media-start="11.6" data-track-index="2" src="footage/xp.mp4" muted playsinline></video>
       </div>
-      <!-- 7: Mac iChat message (whips in over the end of 6) -->
+      <!-- 7: Mac "iTunes has unexpectedly quit" alert, call bar, punched in (whips in over the end of 6) -->
       <div data-hf-id="hf-o280" class="cam" id="cam-s7" style="z-index: 4">
-        <video data-hf-id="hf-8cq9" id="s7" class="clip" data-start="13.95" data-duration="2.15" data-media-start="36.528" data-track-index="2" src="footage/mac.mp4" muted playsinline></video>
+        <video data-hf-id="hf-8cq9" id="s7" class="clip" data-start="13.95" data-duration="2.15" data-media-start="9.028" data-track-index="2" src="footage/mac.mp4" muted playsinline></video>
       </div>
-      <!-- 8: Mac Perfect! -->
+      <!-- 8: Mac Perfect!, standing in for the alert's OK on the bar line -->
       <div data-hf-id="hf-lt5g" class="cam" id="cam-s8" style="z-index: 5">
         <video data-hf-id="hf-o00i" id="s8" class="clip" data-start="16.1" data-duration="2" data-media-start="49.178" data-track-index="1" src="footage/mac.mp4" muted playsinline></video>
       </div>
-      <!-- 9: Mac empty-Trash alert, punched in -->
+      <!--
+        9: four desktops, XP and Mac alternating. Each panel shows its take's top-left quarter at 1:1,
+        offset so its window pops one beat after the last (18.1, 18.6, 19.1, 19.6) and closes one beat
+        after the last in the next bar (20.1 … 21.6). The Luna blue ground shows in the gutters.
+      -->
       <div data-hf-id="hf-lt24" class="cam" id="cam-s9" style="z-index: 6">
-        <video data-hf-id="hf-2po5" id="s9" class="clip" data-start="18.1" data-duration="4" data-media-start="5.178" data-track-index="1" src="footage/mac.mp4" muted playsinline></video>
+        <div class="panel" id="p9a" data-layout-allow-overflow style="left: 0; top: 0">
+          <video id="s9a" class="clip" data-start="18.1" data-duration="4" data-media-start="13.501" data-track-index="1" src="footage/xp.mp4" muted playsinline></video>
+        </div>
+        <div class="panel" id="p9b" data-layout-allow-overflow style="left: 964px; top: 0">
+          <video id="s9b" class="clip" data-start="18.1" data-duration="4" data-media-start="4.678" data-track-index="2" src="footage/mac.mp4" muted playsinline></video>
+        </div>
+        <div class="panel" id="p9c" data-layout-allow-overflow style="left: 0; top: 544px">
+          <video id="s9c" class="clip" data-start="18.1" data-duration="3.99" data-media-start="20.178" data-track-index="3" src="footage/mac.mp4" muted playsinline></video>
+        </div>
+        <div class="panel" id="p9d" data-layout-allow-overflow style="left: 964px; top: 544px">
+          <video id="s9d" class="clip" data-start="18.1" data-duration="3.99" data-media-start="24.001" data-track-index="4" src="footage/xp.mp4" muted playsinline></video>
+        </div>
       </div>
       <!-- 10: Mac combo bubbles at 16 -->
       <div data-hf-id="hf-epwn" class="cam" id="cam-s10" style="z-index: 7">
@@ -139,9 +165,60 @@
         style="z-index: 22"
       ></div>
 
+      <!-- Part 2 (SPEC.md): the detailed walkthrough, its own videos and titles in one scene -->
+      <div
+        id="detail"
+        data-composition-id="detail"
+        data-composition-src="compositions/detail.html"
+        data-start="41"
+        data-duration="143.742"
+        data-track-index="3"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+        style="z-index: 30"
+      ></div>
+      <!-- The end card again, over the street, before the easter egg -->
+      <div class="cam" id="cam-s16" style="z-index: 31">
+        <video id="s16" class="clip" data-start="184.742" data-duration="6.9" data-media-start="0" data-track-index="1" src="footage/hub.mp4" muted playsinline></video>
+      </div>
+      <div
+        id="endcard2"
+        data-composition-id="endcard"
+        data-composition-src="compositions/endcard.html"
+        data-start="184.742"
+        data-duration="6.9"
+        data-track-index="3"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+        style="z-index: 32"
+      ></div>
+      <!-- Post-credits: the Rickroll easter egg (doc/easter-eggs.md), always last -->
+      <div class="cam" id="cam-egg" style="z-index: 33">
+        <video id="egg" class="clip" data-start="191.642" data-duration="34.6" data-media-start="0" data-track-index="1" src="footage/egg.mp4" playsinline data-has-audio="true" data-volume="1"></video>
+      </div>
+      <div
+        id="egg-title"
+        data-composition-id="egg-title"
+        data-composition-src="compositions/egg-title.html"
+        data-start="191.642"
+        data-duration="3"
+        data-track-index="3"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+        style="z-index: 34"
+      ></div>
+
       <!-- The game's own sound, cut on the same bar lines as the footage (footage/README.md) -->
       <audio data-hf-id="hf-tsh2" id="bed" class="clip" data-start="0" data-duration="34.1" data-track-index="5" data-volume="1" src="footage/bed.wav"></audio>
-      <audio data-hf-id="hf-grng" id="startup" class="clip" data-start="34.25" data-track-index="6" data-volume="1" src="assets/reference/windows-xp/sounds/Windows%20XP%20Startup.wav"></audio>
+      <audio data-hf-id="hf-grng" id="startup" class="clip" data-start="34.25" data-duration="4.81" data-track-index="6" data-volume="1" src="assets/reference/windows-xp/sounds/Windows%20XP%20Startup.wav"></audio>
+      <!-- Part 2: the detail bed (scripts/build-bed.py), the sit-down sounds and the second end card's chime -->
+      <audio id="detail-bed" class="clip" data-start="41" data-duration="143.742" data-track-index="5" data-volume="1" src="footage/detail-bed.wav"></audio>
+      <audio id="logon" class="clip" data-start="45.85" data-duration="2.15" data-track-index="6" data-volume="1" src="assets/reference/windows-xp/sounds/Windows%20XP%20Logon%20Sound.wav"></audio>
+      <audio id="chime" class="clip" data-start="47.85" data-duration="2.18" data-track-index="7" data-volume="1" src="assets/reference/mac-os-classic/sounds/Startup%20Chime.mp3"></audio>
+      <audio id="chime2" class="clip" data-start="184.892" data-duration="2.18" data-track-index="7" data-volume="1" src="assets/reference/mac-os-classic/sounds/Startup%20Chime.mp3"></audio>
     </div>
     <script>
       const tl = gsap.timeline({ paused: true });
@@ -149,8 +226,8 @@
       // 3: punch in on the error dialog (top left, centre ~384,252), landing on the call's second beat;
       // the origin is the frame's corner, so the dialog ends up left of centre with no edge showing
       tl.fromTo("#cam-s3", { scale: 1 }, { scale: 1.8, duration: 0.4, ease: "power3.inOut" }, 4.6 - 0.4);
-      // 9: the same on the Mac empty-Trash alert (centre ~356,280)
-      tl.fromTo("#cam-s9", { scale: 1 }, { scale: 1.8, duration: 0.4, ease: "power3.inOut" }, 18.6 - 0.4);
+      // 7: the same on the Mac iTunes alert (centre ~356,280), landing on beat 2 of its call bar
+      tl.fromTo("#cam-s7", { scale: 1 }, { scale: 1.8, duration: 0.4, ease: "power3.inOut" }, 14.6 - 0.4);
 
       // 6 → 7: whip from XP to Mac across the bar line at 14.1
       // (both cameras move as one strip, so no ground shows between them)
@@ -163,6 +240,14 @@
         { clipPath: "circle(0% at 88% 6%)" },
         { clipPath: "circle(130% at 88% 6%)", duration: 0.45, ease: "power3.in" },
         34.1,
+      );
+
+      // Part 2 ends the same way: an iris onto the street for the second end card
+      tl.fromTo(
+        "#cam-s16",
+        { clipPath: "circle(0% at 50% 50%)" },
+        { clipPath: "circle(130% at 50% 50%)", duration: 0.45, ease: "power3.in" },
+        184.742,
       );
 
       window.__timelines["main"] = tl;
