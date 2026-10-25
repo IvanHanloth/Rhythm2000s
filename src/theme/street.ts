@@ -12,8 +12,8 @@ export const STREET_COLORS = {
   /** Ambient light: sky side, ground side */
   ambientSky: '#cfe3ff',
   ambientGround: '#f0d9c4',
-  /** Sunlight: warm white */
-  sun: '#fff1dc',
+  /** Sunlight: warm late-morning white */
+  sun: '#ffe9cc',
   /** Dreamcore grade: shadows lift toward this pastel, screen edges fade toward it */
   dreamLift: '#f3d6ea',
   dreamHaze: '#fdf3ff',
@@ -29,8 +29,13 @@ export const STREET_COLORS = {
 
   /** Facades */
   wallCream: '#d9cfb6',
-  windowLit: '#ffd98a',
   windowDark: '#2f3346',
+  /** Window frames, one per building: white uPVC, black, racing green, cream, stained wood */
+  windowFrames: ['#f1efe8', '#1f2124', '#24463a', '#e6dcc2', '#6b4a33'],
+  /** Glass reflecting the sky, slightly different pane to pane */
+  windowGlass: ['#3c4c60', '#475a6e', '#33404f', '#52677a'],
+  /** Behind the glass: net curtains, blinds, drawn curtains */
+  windowCurtains: ['#f3efe4', '#ebe3d2', '#d8c7a6', '#c8d4de', '#b9a2a6'],
   glass: '#9fd2e6',
   metal: '#8c9098',
   metalDark: '#4a4d55',

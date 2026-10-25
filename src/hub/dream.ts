@@ -19,14 +19,17 @@ import {
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { STREET_COLORS as C } from '@/theme/street.ts';
 
-/** Grading parameters (provisional, tuned from screenshots) */
+/**
+ * Grading parameters (provisional, tuned from screenshots). Kept restrained (doc/hub.md): stronger saturation and
+ * haze turned the street milky and plastic, the look of a generated picture.
+ */
 const GRADE = {
   /** Saturation multiplier; 1 is unchanged */
-  saturation: 1.28,
+  saturation: 1.12,
   /** How far the shadows lift towards pastel, so nothing is pure black */
-  lift: 0.03,
+  lift: 0.025,
   /** How much the edges whiten */
-  haze: 0.16,
+  haze: 0.06,
 };
 
 export function createDreamGradePass(): ShaderPass {
@@ -137,7 +140,8 @@ function moteTexture(): CanvasTexture {
   return texture;
 }
 
-const MOTE_COUNT = 260;
+/** A sparse scatter: a cloud of motes reads as decoration, not air */
+const MOTE_COUNT = 70;
 /** Half-size of the box around the character the motes fill (m) */
 const MOTE_RANGE = 14;
 
@@ -160,10 +164,10 @@ export class DreamMotes {
       geometry,
       new PointsMaterial({
         map: moteTexture(),
-        size: 0.18,
+        size: 0.11,
         sizeAttenuation: true,
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.5,
         depthWrite: false,
         blending: AdditiveBlending,
         fog: false,
@@ -192,6 +196,6 @@ export class DreamMotes {
     }
     this.points.geometry.attributes.position!.needsUpdate = true;
     // A gentle overall shimmer
-    (this.points.material as PointsMaterial).opacity = 0.65 + Math.sin(t * 1.3) * 0.2;
+    (this.points.material as PointsMaterial).opacity = 0.42 + Math.sin(t * 0.7) * 0.08;
   }
 }

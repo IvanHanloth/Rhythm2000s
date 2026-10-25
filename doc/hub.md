@@ -12,6 +12,7 @@ The title screen and level select both take place in one 3D street. Technology c
 - A street of the 2000s with a few shops to walk into; the net café's computers are the level entries.
 - All text in the world (signs, posters, screens, shop names) and all overlays (menus, hints, dialogue) are English.
 - Realistic models and materials, bright with a dreamcore feel; period props are made by the user in Tripo / Blender, spec and list in [hub-assets.md](hub-assets.md).
+- The dreamcore stays restrained so the street doesn't look generated (user, 2026-10-25): sunlight strong enough to cast clear shadows, no milky haze over the picture, a sparse scatter of motes rather than a cloud of them, and no windows glowing by day. Windows differ house by house: frame colours per building, and behind the glass either the reflected sky or net curtains and blinds.
 - Millennial details on a British high street around 2000 (the project is a UK hackathon entry).
 - One chart is one level. The café has one entry computer per scene (XP and Mac); the card shown when seated lists that computer's levels and how many have scores, and levels are picked inside in Explorer / Finder.
 - The player character is the DeepSeek whale girl, a ready-made model (ai-girls-3d adult version, CC BY 4.0; source and changes in assets/README.md). It has no animations; walking, sitting and typing turn its bones in code.

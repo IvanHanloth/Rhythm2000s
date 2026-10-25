@@ -203,8 +203,16 @@ class Builder {
   readonly spots: HubSpot[] = [];
   readonly zones: Zone[] = [];
   readonly animations: ((t: number) => void)[] = [];
-  /** Windows on the facades, merged into a few InstancedMeshes at the end */
-  private readonly windows: { matrix: Matrix4; lit: boolean }[] = [];
+  /**
+   * Windows on the facades, merged into a few InstancedMeshes at the end. Each building picks one frame colour;
+   * each pane shows either the reflected sky or a curtain behind it (doc/hub.md).
+   */
+  private readonly windows: {
+    matrix: Matrix4;
+    frame: string;
+    glass: string;
+    curtained: boolean;
+  }[] = [];
   private readonly plainCache = new Map<string, MeshStandardMaterial>();
 
   /** Untextured realistic materials: plastic, metal, paint */
@@ -367,6 +375,8 @@ class Builder {
     const step = (x1 - x0) / columns;
     let s = seed;
     const random = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+    const pick = <T>(list: readonly T[]): T => list[Math.floor(random() * list.length)]!;
+    const frame = pick(C.windowFrames);
     for (let floor = 0; floor < floors; floor++) {
       for (let col = 0; col < columns; col++) {
         const matrix = new Matrix4().makeTranslation(
@@ -375,36 +385,56 @@ class Builder {
           z + facing * 0.03,
         );
         if (facing < 0) matrix.multiply(new Matrix4().makeRotationY(Math.PI));
-        this.windows.push({ matrix, lit: random() < 0.4 });
+        const curtained = random() < 0.35;
+        this.windows.push({
+          matrix,
+          frame,
+          glass: curtained ? pick(C.windowCurtains) : pick(C.windowGlass),
+          curtained,
+        });
       }
     }
   }
 
-  /** Merges every window into three InstancedMeshes: frames, dark glass, lit glass */
+  /** Merges every window into three InstancedMeshes: frames, clear glass, curtained glass */
   flushWindows(): void {
-    const lit = this.windows.filter((w) => w.lit);
-    const dark = this.windows.filter((w) => !w.lit);
+    const clear = this.windows.filter((w) => !w.curtained);
+    const curtained = this.windows.filter((w) => w.curtained);
+    // Instance colours multiply the material colour, so the materials are white
     const frames = new InstancedMesh(
       meterBox(1.3, 1.55, 0.06),
-      this.plain(C.metal, 0.5, 0.6),
+      this.plain('#ffffff', 0.55),
       this.windows.length,
     );
     const glass = new PlaneGeometry(1.15, 1.4);
-    const litGlass = new InstancedMesh(glass, this.glow(null, '#ffffff', 0.75), lit.length);
-    const darkGlass = new InstancedMesh(
+    // Smooth and partly metallic, so the panes mirror the sky and change with the angle
+    const clearGlass = new InstancedMesh(
       glass,
-      new MeshStandardMaterial({ color: C.windowDark, roughness: 0.08, metalness: 0.3 }),
-      dark.length,
+      new MeshStandardMaterial({ color: '#ffffff', roughness: 0.04, metalness: 0.55 }),
+      clear.length,
+    );
+    // Fabric seen through glass: a soft sheen, no mirror
+    const curtainGlass = new InstancedMesh(
+      glass,
+      new MeshStandardMaterial({ color: '#ffffff', roughness: 0.35, metalness: 0.1 }),
+      curtained.length,
     );
     // Glass sits a hair proud of the frame so they don't fight over depth
     const nudge = new Matrix4().makeTranslation(0, 0, 0.035);
-    this.windows.forEach((w, i) => frames.setMatrixAt(i, w.matrix));
-    lit.forEach((w, i) => litGlass.setMatrixAt(i, w.matrix.clone().multiply(nudge)));
-    dark.forEach((w, i) => darkGlass.setMatrixAt(i, w.matrix.clone().multiply(nudge)));
-    // Lit windows vary slightly in colour, like different homes
-    const tints = [C.windowLit, '#ffe7b8', '#fff3d8', '#ffc98a'];
-    lit.forEach((_, i) => litGlass.setColorAt(i, new Color(tints[i % tints.length]!)));
-    for (const mesh of [frames, litGlass, darkGlass]) {
+    this.windows.forEach((w, i) => {
+      frames.setMatrixAt(i, w.matrix);
+      frames.setColorAt(i, new Color(w.frame));
+    });
+    for (const [mesh, list] of [
+      [clearGlass, clear],
+      [curtainGlass, curtained],
+    ] as const) {
+      list.forEach((w, i) => {
+        mesh.setMatrixAt(i, w.matrix.clone().multiply(nudge));
+        mesh.setColorAt(i, new Color(w.glass));
+      });
+    }
+    for (const mesh of [frames, clearGlass, curtainGlass]) {
       mesh.receiveShadow = true;
       this.root.add(mesh);
     }

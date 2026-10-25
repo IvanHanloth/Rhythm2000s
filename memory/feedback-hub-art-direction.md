@@ -12,5 +12,7 @@ After the first version of the 3D street on 2026-10-24 the user asked, in turn:
 - "Stop drawing with SVG": no more code-painted textures or primitive-built geometry as final art; models we can't source are made by the user in Blender or Tripo.
 - No Chinese in the 3D world (signs, posters, screens); all DOM overlays are English too (see [[feedback-english-everywhere]]).
 
+- 2026-10-25: asked to polish the street to "remove the AI feel and the stiffness". The dreamcore stays but restrained: a sun strong enough for clear shadows, no milky haze or oversaturation, a sparse scatter of motes, no windows glowing by day, windows varied per building; the character never freezes (breathing, weight shift, glances, a stride that leans and twists, uneven blinks). Rules recorded in doc/hub.md.
+
 **Why:** the user holds the visuals to a high standard that code-generated shapes can't reach.
 **How to apply:** prefer ready-made assets cleared for commercial use (CC0 / CC BY; ask before downloading and register them in assets/README.md) or models from the user; code only places, animates, wires interaction and sets up rendering. When a custom model is needed, give the user a spec (size, origin, facing, naming) to build it from. Related: [[project-concept]]

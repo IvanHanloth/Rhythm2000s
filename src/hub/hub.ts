@@ -196,7 +196,7 @@ export class Hub {
   private readonly composer: EffectComposer;
   private readonly bloom: UnrealBloomPass;
   /** Sunlight: casts shadows and follows the character every frame */
-  private readonly sun = new DirectionalLight(C.sun, 2.6);
+  private readonly sun = new DirectionalLight(C.sun, 3.4);
   /** Direction of the sun (unit vector), shared by sky and sunlight */
   private readonly sunDirection = new Vector3().setFromSphericalCoords(
     1,
@@ -1024,12 +1024,13 @@ export class Hub {
   private setUpLighting(): void {
     const renderer = this.renderer;
     renderer.toneMapping = ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 1.0;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
 
-    this.scene.fog = new Fog(C.fog, 55, 170);
-    this.scene.add(new HemisphereLight(C.ambientSky, C.ambientGround, 1.3));
+    this.scene.fog = new Fog(C.fog, 70, 190);
+    // Skylight only fills the shadows; stronger, it flattens the sun's and the street looks lit by nothing in particular
+    this.scene.add(new HemisphereLight(C.ambientSky, C.ambientGround, 0.75));
 
     const sun = this.sun;
     sun.castShadow = true;
@@ -1044,7 +1045,7 @@ export class Hub {
     sun.shadow.bias = -0.0004;
     sun.shadow.normalBias = 0.03;
     // Soften shadow edges
-    sun.shadow.radius = 4;
+    sun.shadow.radius = 3;
     this.scene.add(sun, sun.target);
 
     // The stylised sky (dream.ts), rendered once more as the environment map so glass and metal reflect the blue
@@ -1053,7 +1054,7 @@ export class Hub {
     const skyOnly = new Scene();
     skyOnly.add(createDreamSky(this.sunDirection, 180));
     this.scene.environment = pmrem.fromScene(skyOnly, 0.02).texture;
-    this.scene.environmentIntensity = 1.5;
+    this.scene.environmentIntensity = 0.9;
     pmrem.dispose();
   }
 
