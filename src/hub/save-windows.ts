@@ -3,6 +3,13 @@
 
 import { cleanSaveName, SAVE_NAME_MAX_LENGTH, type SaveData } from '@/game/save-progress.ts';
 import { SLOT_NUMBERS, type SaveSlots, type SlotNumber } from '@/game/save-slots.ts';
+import {
+  DEFAULT_DIFFICULTY,
+  DIFFICULTIES,
+  DIFFICULTY_LABELS,
+  formatSpeed,
+  type Difficulty,
+} from '@/rhythm/difficulty.ts';
 import { button, el } from './dom.ts';
 import { slotDetails, SLOTS_FULL_NOTE, titleMenuState, type FinishedLevels } from './save-menu.ts';
 
@@ -33,6 +40,8 @@ export class SaveWindows {
   private readonly list = el('ol', 'hub-save-list');
   private readonly nameField = el('input', 'hub-save-input');
   private readonly newSlotLine = el('p', 'hub-save-hint');
+  /** New Game's difficulty radio buttons (doc/difficulty.md#choosing-it) */
+  private readonly difficultyInputs = new Map<Difficulty, HTMLInputElement>();
   private readonly startButton: HTMLButtonElement;
   private rowMode: RowMode = null;
 
@@ -71,7 +80,7 @@ export class SaveWindows {
       this.startButton,
       button('Cancel', 'hub-button', () => this.close()),
     );
-    form.append(label, this.newSlotLine, newActions);
+    form.append(label, this.newSlotLine, this.difficultyChoice(), newActions);
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       this.createNew();
@@ -80,6 +89,47 @@ export class SaveWindows {
 
     this.close();
     options.saves.onChange(() => this.refresh());
+  }
+
+  /** New Game's five difficulties, slowest first, each with its speed */
+  private difficultyChoice(): HTMLFieldSetElement {
+    const choice = el('fieldset', 'hub-save-difficulty');
+    choice.append(el('legend', 'hub-save-label', 'Difficulty'));
+    const options = el('div', 'hub-save-options');
+    for (const difficulty of DIFFICULTIES) {
+      const option = el('label', 'hub-save-option');
+      const input = el('input', '');
+      input.type = 'radio';
+      input.name = 'new-game-difficulty';
+      input.value = difficulty;
+      input.addEventListener('keydown', (event) => {
+        if (event.code === 'Escape') this.close();
+      });
+      this.difficultyInputs.set(difficulty, input);
+      option.append(
+        input,
+        el('span', 'hub-save-option-name', DIFFICULTY_LABELS[difficulty]),
+        el('span', 'hub-save-option-speed', formatSpeed(difficulty)),
+      );
+      options.append(option);
+    }
+    choice.append(
+      options,
+      el(
+        'p',
+        'hub-save-hint',
+        'How fast charts play. Scores you keep are multiplied by the speed. You can change it later in the settings.',
+      ),
+    );
+    return choice;
+  }
+
+  /** The difficulty picked in New Game */
+  private pickedDifficulty(): Difficulty {
+    for (const [difficulty, input] of this.difficultyInputs) {
+      if (input.checked) return difficulty;
+    }
+    throw new Error('No difficulty is picked in New Game');
   }
 
   /** A Load Game or New Game window is open */
@@ -148,6 +198,9 @@ export class SaveWindows {
     this.nameField.value = `Save ${slot}`;
     this.startButton.disabled = false;
     this.newSlotLine.textContent = `Goes into save slot ${slot}.`;
+    for (const [difficulty, input] of this.difficultyInputs) {
+      input.checked = difficulty === DEFAULT_DIFFICULTY;
+    }
     this.nameField.focus();
     this.nameField.select();
   }
@@ -157,7 +210,7 @@ export class SaveWindows {
     const name = cleanSaveName(this.nameField.value);
     if (slot === null || name === null) return;
     this.nameField.blur();
-    this.options.saves.create(slot, name);
+    this.options.saves.create(slot, name, this.pickedDifficulty());
     this.close();
     this.options.onStart();
   }

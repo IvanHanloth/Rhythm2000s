@@ -28,7 +28,7 @@ A beat cue shown during a round, shaped like `((((O))))`: the centre dot pulses 
 
 - A round counts as assisted if the beat guide was on at any point during the chart (not the demo).
 - The results window shows a "Beat Guide" tag at the top left of the score box ([results.md](results.md)).
-- A new best score set while assisted is saved with a flag, and the intro shows e.g. "Best score 04250 (Beat Guide)"; a higher unassisted score clears the flag.
+- A new best score set while assisted is saved with a flag, and the intro shows it after the difficulty, e.g. "Best score 04250 (Normal, Beat Guide)"; a higher unassisted score clears the flag.
 - Assisted scores can still set the best score (first-version rule; may be kept separately later).
 
 ## Candidates / open questions

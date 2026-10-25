@@ -48,6 +48,7 @@ export class XpResultsWindow {
 
     const panel = createResultsPanel({
       summary: options.summary,
+      difficulty: options.difficulty,
       newRecord: options.newRecord,
       assisted: options.assisted,
       cheat: options.cheat,

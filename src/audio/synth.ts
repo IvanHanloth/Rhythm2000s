@@ -89,3 +89,22 @@ export function createBlip(
     return gain * tail * shaped;
   });
 }
+
+export interface KeystrokeOptions {
+  /** Pitch of the key's low body (Hz); lower sounds like a bigger key such as the space bar */
+  body: number;
+  gain?: number;
+}
+
+/** One key press on a keyboard: a sharp noise tick for the key hitting bottom over a short low body. */
+export function createKeystroke(
+  context: BaseAudioContext,
+  { body, gain = 0.5 }: KeystrokeOptions,
+): AudioBuffer {
+  const noise = highNoise();
+  return renderBuffer(context, 0.06, (t) => {
+    const tick = 0.7 * decay(t, 0.003) * noise();
+    const thock = 0.45 * decay(t, 0.012) * Math.sin(2 * Math.PI * body * t);
+    return gain * (tick + thock);
+  });
+}

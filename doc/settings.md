@@ -2,7 +2,7 @@
 
 > Status: Draft. The window's layout and the calibration step are a first pass, to tune after play-testing.
 
-Player settings live in a settings window on the in-game computer, opened from each system's own menu while the level list is up ([level-select.md](level-select.md)). Values are kept in `src/game/settings.ts` and saved in the browser for the whole device, shared by every save slot ([save-slots.md](save-slots.md)); when reading or writing fails (private mode etc.) they fall back to their defaults.
+Player settings live in a settings window on the in-game computer, opened from each system's own menu while the level list is up ([level-select.md](level-select.md)). Values are kept in `src/game/settings.ts` and saved in the browser for the whole device, shared by every save slot ([save-slots.md](save-slots.md)); when reading or writing fails (private mode etc.) they fall back to their defaults. The one exception is the difficulty, which belongs to the current save ([difficulty.md](difficulty.md)).
 
 ## Opening it
 
@@ -19,9 +19,14 @@ Player settings live in a settings window on the in-game computer, opened from e
 
 | Setting | Default | Effect |
 | --- | --- | --- |
+| Difficulty | Picked in New Game (Normal) | Five radio buttons, Heaven ×0.5, Easy ×0.8, Normal ×1.0, Hard ×1.2, Hell ×1.5: the speed every chart plays at and the factor on the recorded score, see [difficulty.md](difficulty.md). Kept in the current save, not the device; applies from the next level started |
 | Input latency calibration | 0 ms | Offset subtracted when judging, within ±300 ms; positive means the player presses late. A slider, with ← / → for 1 ms steps, and a "Test Latency…" button that opens the system's [latency test](latency-test.md), which can set it |
 | Skip tutorial | Off | Levels play the chart in one go without any action demo; Backspace during a demo skips the rest of that level's demos (demo rules in [level-design.md](level-design.md#rule-1-the-system-demonstrates-every-action-before-it-is-used)) |
 | Beat Guide | Off | Whether levels show the `((((O))))` beat cue, see [beat-guide.md](beat-guide.md). The same saved value H toggles in a level, so the check box and H always agree. Scores set with it on are marked "Beat Guide" |
+
+## Layout
+
+Three columns: Difficulty on the left; Input Latency, Practice and Beat Guide in the middle; the keyboard shortcuts on the right.
 
 ## Keyboard shortcuts
 

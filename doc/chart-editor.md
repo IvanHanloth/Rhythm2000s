@@ -8,7 +8,7 @@ Players and level designers make charts inside the game, on two editor computers
 
 - **Name**: the program is **HackerEditor** on both systems: making a chart feels like writing a hacker program that makes the windows pop up.
 - **Program look**: only the opening is hacker-themed. HackerEditor's window follows the system's own window style, and its timeline is modelled on Windows Movie Maker 2 (Windows XP, 2002) on XP and iMovie 2 (Mac OS X, 2001) in early Aqua on the Mac.
-- **Opening**: sitting down at an editor computer plays an animation: a black screen where "Welcome Back Hacker" is typed out letter by letter in green, then it cuts to the desktop with HackerEditor open.
+- **Opening**: sitting down at an editor computer plays an animation: a black screen where "Welcome Back Hacker" is typed out letter by letter in green, with a key click for each letter, then the black screen fades out to the desktop with HackerEditor open.
 - **Where**: one editor computer per scene in the café, each in the middle-row seat directly behind its scene's play computer ([hub.md](hub.md)). The XP editor makes `windows-xp` charts, the Mac editor `mac-2000` charts.
 - **Look**: a program window on the XP / Mac desktop in the period style, drawn in the game canvas like the level list ([ADR 0004](decisions/0004-authentic-os-look.md)), not a modern web panel.
 - **Timeline by phrase**: a phrase list plus an editor for the selected phrase, with a call lane above a response lane on a beat grid; this mirrors the `phrases` array of the chart file.
@@ -91,7 +91,7 @@ Two-press actions (`desktop-refresh`, `start-menu`, `menu-apple`, `sheet-save`) 
 
 ## Provisional (first version, all adjustable)
 
-- **Opening timing**: a 0.4 s pause on the black screen, 75 ms a letter, then 1.1 s on the finished line with a blinking block cursor; about 3 s in all. It plays every time HackerEditor opens and can't be skipped. The text is in a console font (Lucida Console, else Courier New).
+- **Opening timing**: a 0.4 s pause on the black screen, 75 ms a letter, then 1.1 s on the finished line with a blinking block cursor, then a 0.5 s fade to the desktop; about 3.5 s in all. It plays every time HackerEditor opens and can't be skipped. The text is in a console font (Lucida Console, else Courier New). Each letter's key click is synthesised (a short tick plus a low body, a few slightly different pitches so it doesn't repeat, a deeper one for spaces) and booked on the audio clock; while audio is still waiting for the first click or key press the opening plays silently.
 - **Window title**: on XP "<chart title> - HackerEditor" ("Untitled - HackerEditor" for a new chart), like Notepad; on the Mac just the chart title, as Mac OS X document windows show only the document's name, with "HackerEditor" and File / Edit / Window / Help (decoration) in the menu bar. HackerEditor has a taskbar button on XP but no Dock icon on the Mac, since adding one would move the Dock icons the `dock-bounce` action uses.
 - **New chart**: title "Untitled", empty file name, 120 BPM, 4 beats per bar, 1 count-in bar, 1 outro bar, no gap, one empty phrase.
 - **Snap**: 1/2 and 1/4 beat; 1/2 at the start.

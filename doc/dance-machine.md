@@ -46,6 +46,7 @@ Street ──E at the dance machine──► Song list ──Enter──► Song
 - A press 130–250 ms early on a key that the next step needs makes that step a Miss, as in the desktop scenes, so mashing can't guess. Any other press does nothing.
 - The cheat code ([cheat-code.md](cheat-code.md)) works here too: every step is Perfect and no score is saved.
 - Score and rating use the shared rules of [results.md](results.md) (Perfect 1, Good 0.5, out of 10000; Superb from 8000, OK from 6000). The best score is kept per dance chart in the current save; dance charts don't count toward the Rickroll unlock.
+- Dance songs always play at their own tempo, whatever the save's difficulty ([difficulty.md](difficulty.md)), so their best scores are recorded unscaled, as Normal (×1.0).
 
 ## Sound
 
@@ -111,7 +112,7 @@ Three songs from easy to hard, each at least one minute: Byte Step (100 BPM, lev
 - Freeze (hold) arrows, a life gauge that can end the song early, speed modifiers.
 - Real music instead of the synthesised loop; what the songs and the machine's name should be.
 - A dancer or video background behind the arrows.
-- Whether dance charts should get HackerEditor, import / export and difficulty settings like the desktop charts.
+- Whether dance charts should get HackerEditor, import / export and the save's difficulty speed like the desktop charts.
 - Whether a full combo or score here should count toward anything on the street.
 
 ## Code

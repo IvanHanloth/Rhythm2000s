@@ -3,7 +3,7 @@ import { MAIL_UNLOCK_CHARTS } from './mailbox.ts';
 import { cleanSaveName, emptySave, SaveProgress } from './save-progress.ts';
 
 function progress(today = '2026-10-25') {
-  const data = emptySave('Ivan', '2026-01-01');
+  const data = emptySave('Ivan', '2026-01-01', 'normal');
   let changes = 0;
   const save = new SaveProgress(
     data,
@@ -23,17 +23,29 @@ describe('cleanSaveName', () => {
 });
 
 describe('SaveProgress', () => {
-  it('keeps only better scores above 0, with the beat guide flag', () => {
+  it('keeps only better scores above 0, with the beat guide flag and the difficulty', () => {
     const { save, changes } = progress();
-    expect(save.recordScore('a', 0, false)).toBe(false);
-    expect(save.recordScore('a', 500, true)).toBe(true);
-    expect(save.bestAssisted('a')).toBe(true);
-    expect(save.recordScore('a', 500, false)).toBe(false);
-    expect(save.recordScore('a', 700, false)).toBe(true);
+    const normal = (score: number, assisted: boolean) =>
+      ({ score, assisted, difficulty: 'normal' }) as const;
+    expect(save.recordScore('a', normal(0, false))).toBe(false);
+    expect(save.recordScore('a', normal(500, true))).toBe(true);
+    expect(save.best('a')?.assisted).toBe(true);
+    expect(save.recordScore('a', normal(500, false))).toBe(false);
+    expect(save.recordScore('a', { score: 700, assisted: false, difficulty: 'hell' })).toBe(true);
+    expect(save.best('a')).toEqual({ score: 700, assisted: false, difficulty: 'hell' });
     expect(save.bestScore('a')).toBe(700);
-    expect(save.bestAssisted('a')).toBe(false);
+    expect(save.best('b')).toBeNull();
     expect(save.bestScore('b')).toBeNull();
     expect(changes()).toBe(2);
+  });
+
+  it('changes the difficulty, saving only real changes', () => {
+    const { save, changes } = progress();
+    expect(save.difficulty).toBe('normal');
+    save.setDifficulty('normal');
+    save.setDifficulty('hard');
+    expect(save.difficulty).toBe('hard');
+    expect(changes()).toBe(1);
   });
 
   it('counts each finished chart once and dates the save', () => {

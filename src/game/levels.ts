@@ -4,7 +4,10 @@
 
 import { ACTION_LABELS } from '@/rhythm/actions.ts';
 import type { Chart } from '@/rhythm/chart.ts';
+import { DIFFICULTY_LABELS } from '@/rhythm/difficulty.ts';
+import { formatScore } from '@/rhythm/result-summary.ts';
 import type { SceneId } from '@/scenes/catalog.ts';
+import type { BestScore } from './save-progress.ts';
 
 export interface Level {
   /** Chart id */
@@ -96,10 +99,11 @@ export function parseRoute(hash: string, sceneIds: readonly SceneId[]): Route {
 }
 
 /**
- * Best-score line on the intro, e.g. "Best score 04250"; null with no score (scoring rules: doc/results.md).
- * A best score set with the beat guide on gets " (Beat Guide)" (doc/beat-guide.md).
+ * Best-score line on the intro, e.g. "Best score 12750 (Hell)"; null with no score (scoring rules: doc/results.md).
+ * The difficulty it was set on follows (doc/difficulty.md), then "Beat Guide" when it was on (doc/beat-guide.md).
  */
-export function formatBestScore(score: number | null, assisted = false): string | null {
-  if (score === null) return null;
-  return `Best score ${String(score).padStart(5, '0')}${assisted ? ' (Beat Guide)' : ''}`;
+export function formatBestScore(best: Readonly<BestScore> | null): string | null {
+  if (best === null) return null;
+  const marks = [DIFFICULTY_LABELS[best.difficulty], ...(best.assisted ? ['Beat Guide'] : [])];
+  return `Best score ${formatScore(best.score)} (${marks.join(', ')})`;
 }

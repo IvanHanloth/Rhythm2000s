@@ -9,6 +9,7 @@ import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
 import type { SaveSlots } from '@/game/save-slots.ts';
 import { beatToTime, secondsPerBeat, timeToBeat } from '@/rhythm/beat.ts';
 import { ComboTracker } from '@/rhythm/combo.ts';
+import type { Difficulty } from '@/rhythm/difficulty.ts';
 import {
   formatScore,
   MAX_SCORE,
@@ -75,6 +76,8 @@ function ringPoint(direction: Direction, radius: number): { x: number; y: number
 
 /** Points per grade, as in the results (doc/results.md) */
 const POINTS: Record<StepJudgement['level'], number> = { perfect: 1, good: 0.5, miss: 0 };
+/** The difficulty dance scores are recorded at: songs play at their own tempo (doc/dance-machine.md "Judging") */
+const DANCE_DIFFICULTY: Difficulty = 'normal';
 /** Below this mean offset the timing comment calls it on the beat */
 const DRIFT_HINT_MS = 20;
 
@@ -539,8 +542,15 @@ export class DanceMachine {
   private finish(play: Play): void {
     const summary = summarizeResult(play.hits);
     const save = this.options.saves.current;
+    // Dance songs always play at their own tempo, whatever the save's difficulty, so they count as Normal (×1.0)
     const newBest =
-      !play.cheated && save !== null && save.recordScore(play.chart.id, summary.score, false);
+      !play.cheated &&
+      save !== null &&
+      save.recordScore(play.chart.id, {
+        score: summary.score,
+        assisted: false,
+        difficulty: DANCE_DIFFICULTY,
+      });
     this.leaveState();
     this.state = { kind: 'results', view: this.openResults(play, summary, newBest) };
   }

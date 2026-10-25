@@ -3,6 +3,12 @@
 // Top-left at (0, 0).
 
 import { Container, Graphics, Text } from 'pixi.js';
+import {
+  DIFFICULTY_LABELS,
+  DIFFICULTY_SPEEDS,
+  recordedScore,
+  type Difficulty,
+} from '@/rhythm/difficulty.ts';
 import type { JudgementLevel } from '@/rhythm/judge.ts';
 import {
   formatScore,
@@ -43,6 +49,8 @@ export interface ResultsKit {
 
 export interface ResultsPanelOptions {
   summary: ResultSummary;
+  /** The score shown is the recorded score, the summary's times this difficulty's speed (doc/difficulty.md#scores) */
+  difficulty: Difficulty;
   /** The score beat the previous best */
   newRecord: boolean;
   /** The beat guide was on: a "Beat Guide" tag at the top left of the score box (doc/beat-guide.md) */
@@ -81,6 +89,7 @@ const LEVELS: { level: JudgementLevel; label: string; fill: string; text: string
 
 export function createResultsPanel({
   summary,
+  difficulty,
   newRecord,
   assisted = false,
   cheat = false,
@@ -129,10 +138,16 @@ export function createResultsPanel({
   }
 
   // Right: score and the three tallies
-  const score = kit.groupBox('Score', rightWidth, SCORE_HEIGHT);
+  // The title gives the working: the round's score times the difficulty's speed
+  const working = `${summary.score} × ${DIFFICULTY_SPEEDS[difficulty].toFixed(1)}`;
+  const score = kit.groupBox(
+    `Score — ${DIFFICULTY_LABELS[difficulty]} (${working})`,
+    rightWidth,
+    SCORE_HEIGHT,
+  );
   score.view.x = rightX;
   const innerWidth = rightWidth - kit.groupInset.x;
-  const scoreText = hudText(formatScore(summary.score), 30);
+  const scoreText = hudText(formatScore(recordedScore(summary.score, difficulty)), 30);
   scoreText.anchor.set(1, 0);
   scoreText.position.set(innerWidth, -6);
   score.inner.addChild(scoreText);
