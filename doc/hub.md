@@ -85,7 +85,7 @@ Shop names, layout and text are placeholders the user hasn't confirmed:
   - South side shops: video rental, mobiles, one-hour photo, newsagent, fish and chips, computer superstore, bookies, off-licence; flyers on the shutters for PC builds, top-ups, polyphonic ringtones, Flash games, digital cameras and video rental, priced in pounds.
   - Inside: the café's "OPEN 7 DAYS" neon and Y2K READY / broadband posters, the arcade's "10p A GO" ticker, an old beige laptop on the café desk.
 - **Atmosphere**: a gradient blue sky, pale pink-purple haze in the distance, drifting motes, slightly whitened edges.
-- **Sound**: sitting at the XP computer plays the XP logon sound; at the iMac, the Mac startup chime.
+- **Sound**: sitting at the XP computer plays the XP logon sound; at the iMac, the Mac startup chime. Both load with the street, counted in the title screen's loading bar, so the first sit after a refresh plays them straight away.
 - No passers-by in the café for now: the code-built figures weren't good enough and were removed until suitable models exist.
 
 ## Open questions
