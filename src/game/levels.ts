@@ -42,8 +42,11 @@ export type Route =
   | { kind: 'hub' }
   | { kind: 'scene'; sceneId: SceneId; chartId?: string }
   | { kind: 'editor'; sceneId: SceneId }
-  | { kind: 'showcase'; sceneId: SceneId };
+  | { kind: 'showcase'; sceneId: SceneId }
+  | { kind: 'dance' };
 
+/** URL route of the arcade's dance machine (doc/dance-machine.md) */
+export const DANCE_ROUTE = 'dance-machine';
 /** First part of an editor route, `editor/<scene>` (doc/chart-editor.md) */
 export const EDITOR_ROUTE = 'editor';
 /** First part of a showcase route, `showcase/<scene>` (doc/showcase.md) */
@@ -63,6 +66,7 @@ export function showcaseRoute(sceneId: SceneId): string {
 export function computerOf(route: Route): string | null {
   switch (route.kind) {
     case 'hub':
+    case 'dance':
       return null;
     case 'scene':
       return route.sceneId;
@@ -76,10 +80,11 @@ export function computerOf(route: Route): string | null {
 /**
  * Parses the part of the URL after #: empty or unknown goes back to the street;
  * `scene` opens a scene (it picks the chart), `scene/chart` opens one level, `editor/scene` opens the scene's
- * chart editor, `showcase/scene` its showcase tour.
+ * chart editor, `showcase/scene` its showcase tour, `dance-machine` the arcade's dance machine.
  */
 export function parseRoute(hash: string, sceneIds: readonly SceneId[]): Route {
   const [id, chartId] = decodeURIComponent(hash.replace(/^#/, '')).split('/');
+  if (id === DANCE_ROUTE && chartId === undefined) return { kind: 'dance' };
   if (id === EDITOR_ROUTE || id === SHOWCASE_ROUTE) {
     const sceneId = sceneIds.find((known) => known === chartId);
     if (!sceneId) return { kind: 'hub' };

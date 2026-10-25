@@ -52,6 +52,12 @@ describe('parseRoute', () => {
     expect(parseRoute('#showcase/nope', ids)).toEqual({ kind: 'hub' });
   });
 
+  it('#dance-machine opens the arcade dance machine, which is no café computer', () => {
+    expect(parseRoute('#dance-machine', ids)).toEqual({ kind: 'dance' });
+    expect(parseRoute('#dance-machine/x', ids)).toEqual({ kind: 'hub' });
+    expect(computerOf({ kind: 'dance' })).toBeNull();
+  });
+
   it('names the café computer each route sits at', () => {
     expect(computerOf({ kind: 'hub' })).toBeNull();
     expect(computerOf({ kind: 'scene', sceneId: 'mac-2000', chartId: 'x' })).toBe('mac-2000');
