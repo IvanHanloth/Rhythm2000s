@@ -50,4 +50,5 @@ What follows from it, its costs, and the work it creates.
 | [0017](0017-save-slots.md) | Three save slots picked on the title screen | Accepted |
 | [0018](0018-ten-official-levels-per-scene.md) | Ten official levels per scene | Accepted |
 | [0019](0019-difficulty-sets-chart-speed.md) | A per-save difficulty sets the chart speed and scales the recorded score | Accepted |
+| [0020](0020-heaven-closing-medley.md) | A slow medley, Heaven, closes each scene | Accepted |
 | [0021](0021-dance-machine-scrolling-arrows.md) | A playable dance machine with arrows flying to a ring of targets | Accepted |

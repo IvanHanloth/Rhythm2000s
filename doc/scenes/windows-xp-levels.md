@@ -90,7 +90,7 @@ Texts: the download window reads "37% of setup.exe Completed" → "Download comp
 
 ## Levels (charts)
 
-In `public/charts/index.json` order, written to the [level design guidelines](../level-design.md) (rule 4: ten levels, more widgets and a faster tempo each level). Each level has three or four sections of about six phrases; a section starts with the widgets new to it, so the chart stops for demos only there. Balloons and the volume pop-up never share a phrase, since both sit by the tray.
+In `public/charts/index.json` order, written to the [level design guidelines](../level-design.md) (rule 4: ten levels, more widgets and a faster tempo each level, then the slower closing medley). Each level has three or four sections of about six phrases; a section starts with the widgets new to it, so the chart stops for demos only there. Balloons and the volume pop-up never share a phrase, since both sit by the tray.
 
 | # | Chart | Title | BPM | Length | Presses | Widgets (by section) | Shape |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -104,3 +104,4 @@ In `public/charts/index.json` order, written to the [level design guidelines](..
 | 8 | `xp-blue-screen` | Blue Screen Boogie | 130 | 26 phrases, 100 s | 157 | `desktop-refresh`, `dialog-error`, `dialog-info`; `recycle-bin`, `balloon-info`, `start-menu`; `window-minimize`, `dialog-warning`; `progress-download` | Both two-press widgets side by side; mostly full bars of eighths |
 | 9 | `xp-spin-cycle` | Spin Cycle | 133 | 28 phrases, 105 s | 155 | `chair-swivel`, `dialog-info`, `dialog-warning`; `start-menu`, `recycle-bin`, `dialog-error`, `balloon-info`; `volume-mute`, `desktop-refresh`, `window-minimize` | Built around the swivel chair (a prototype): a spin from the first phrase, then one between each burst |
 | 10 | `xp-system-overload` | System Overload | 136 | 30 phrases, 109 s | 169 | All four boxes; `window-minimize`, `recycle-bin`, `balloon-info`; `volume-mute`, `start-menu`, `desktop-refresh`; `progress-download`; `chair-swivel` | Every XP action, the densest climax |
+| 11 | `xp-heaven` | Heaven | 110 | 28 phrases, 127 s | 141 | All four boxes; `balloon-info`, `window-minimize`, `recycle-bin`; `volume-mute`, `start-menu`, `desktop-refresh`; `progress-download`; `chair-swivel` | The closing medley ([ADR 0020](../decisions/0020-heaven-closing-medley.md)): every XP action at a slower tempo, its sections recalling the earlier levels in order: boxes, desktop, shell, then the chair between bursts of everything |

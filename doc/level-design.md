@@ -72,7 +72,7 @@ In 4/4 with no gap a phrase is 8 beats: at 120 BPM a minute takes 14 phrases plu
 
 ## Rule 4: a full level set (official levels)
 
-Set by the user on 2026-10-25 ([ADR 0016](decisions/0016-five-official-levels-per-scene.md), extended to ten levels by [ADR 0018](decisions/0018-ten-official-levels-per-scene.md)). Each scene ships **ten** official levels, in `index.json` order from first to last.
+Set by the user on 2026-10-25 ([ADR 0016](decisions/0016-five-official-levels-per-scene.md), extended to ten levels by [ADR 0018](decisions/0018-ten-official-levels-per-scene.md)). Each scene ships **ten** official levels, in `index.json` order from first to last, then the closing medley **Heaven** ([ADR 0020](decisions/0020-heaven-closing-medley.md)): the eleventh and last level, using every action of the scene at a slower **110 BPM**. The rules below apply to the ten; Heaven keeps the press, mixing and rhythm rules but stands outside the tempo climb.
 
 | Item | Rule |
 | --- | --- |

@@ -18,7 +18,7 @@ On a press the 2D desktop gives way to the 3D net café ([hub.md](hub.md)): the 
 | Cutaway timing | 0–0.5 beat: out of the monitor, over the shoulder, up behind the chair · 0.5–1.5: one full turn · 1.5–2: back the same way into the monitor |
 | Bar | The event occupies its bar for 2 beats like other multi-press actions; at 120 BPM it starts before beat 1.24 ([chart-format.md](chart-format.md#timing-limits)) |
 | Sounds | XP: press with the usual click (`navigate`), landing on `Windows XP Restore.wav` · Mac: press on `Tink`, landing on `Pop` |
-| Levels | The last two levels of each scene ([ADR 0018](decisions/0018-ten-official-levels-per-scene.md)): built around it in `xp-spin-cycle` (`#windows-xp/xp-spin-cycle`) and `mac-chair-twirl` (`#mac-2000/mac-chair-twirl`), and in the final section of `xp-system-overload` and `mac-jaguar-rush`. The development test levels `xp-chair-spin` and `mac-chair-spin` were removed with the other development charts |
+| Levels | The last three levels of each scene ([ADR 0018](decisions/0018-ten-official-levels-per-scene.md), [ADR 0020](decisions/0020-heaven-closing-medley.md)): built around it in `xp-spin-cycle` (`#windows-xp/xp-spin-cycle`) and `mac-chair-twirl` (`#mac-2000/mac-chair-twirl`), in the final section of `xp-system-overload` and `mac-jaguar-rush`, and in the last section of the closing medleys `xp-heaven` and `mac-heaven`. The development test levels `xp-chair-spin` and `mac-chair-spin` were removed with the other development charts |
 
 ## How it is built
 

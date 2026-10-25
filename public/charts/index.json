@@ -11,6 +11,7 @@
     "xp-blue-screen.json",
     "xp-spin-cycle.json",
     "xp-system-overload.json",
+    "xp-heaven.json",
     "mac-startup-chime.json",
     "mac-hello-again.json",
     "mac-buddy-list.json",
@@ -20,6 +21,7 @@
     "mac-software-update.json",
     "mac-beach-ball.json",
     "mac-chair-twirl.json",
-    "mac-jaguar-rush.json"
+    "mac-jaguar-rush.json",
+    "mac-heaven.json"
   ]
 }

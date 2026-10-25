@@ -1,0 +1,258 @@
+{
+  "format": 1,
+  "id": "mac-heaven",
+  "title": "Heaven",
+  "icon": "iphoto",
+  "scene": "mac-2000",
+  "bpm": 110,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "alert-caution" },
+        { "beat": 2, "action": "alert-stop" },
+        { "beat": 3, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 0.5, "action": "dock-bounce" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 2, "action": "alert-caution" },
+        { "beat": 3, "action": "alert-stop" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-stop" },
+        { "beat": 0.5, "action": "alert-stop" },
+        { "beat": 1, "action": "dock-bounce" },
+        { "beat": 1.5, "action": "dock-bounce" },
+        { "beat": 2, "action": "alert-note" },
+        { "beat": 3, "action": "alert-caution" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-caution" },
+        { "beat": 1.5, "action": "alert-note" },
+        { "beat": 2, "action": "alert-stop" },
+        { "beat": 3, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 0.5, "action": "dock-bounce" },
+        { "beat": 1, "action": "dock-bounce" },
+        { "beat": 2, "action": "alert-note" },
+        { "beat": 2.5, "action": "alert-caution" },
+        { "beat": 3, "action": "alert-stop" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 0.5, "action": "alert-caution" },
+        { "beat": 1, "action": "alert-stop" },
+        { "beat": 2, "action": "dock-bounce" },
+        { "beat": 2.5, "action": "dock-bounce" },
+        { "beat": 3, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "mail-new" },
+        { "beat": 1, "action": "window-miniaturize" },
+        { "beat": 2, "action": "dock-trash" },
+        { "beat": 3, "action": "ichat-message" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-trash" },
+        { "beat": 0.5, "action": "dock-trash" },
+        { "beat": 1, "action": "mail-new" },
+        { "beat": 2, "action": "window-miniaturize" },
+        { "beat": 3, "action": "ichat-message" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "ichat-message" },
+        { "beat": 0.5, "action": "ichat-message" },
+        { "beat": 1, "action": "window-miniaturize" },
+        { "beat": 2, "action": "dock-trash" },
+        { "beat": 2.5, "action": "dock-trash" },
+        { "beat": 3, "action": "mail-new" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-miniaturize" },
+        { "beat": 1.5, "action": "mail-new" },
+        { "beat": 2, "action": "mail-new" },
+        { "beat": 3, "action": "dock-trash" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "mail-new" },
+        { "beat": 0.5, "action": "mail-new" },
+        { "beat": 1, "action": "dock-trash" },
+        { "beat": 1.5, "action": "dock-trash" },
+        { "beat": 2, "action": "window-miniaturize" },
+        { "beat": 2.5, "action": "ichat-message" },
+        { "beat": 3, "action": "dock-bounce" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-stop" },
+        { "beat": 0.5, "action": "ichat-message" },
+        { "beat": 1, "action": "window-miniaturize" },
+        { "beat": 2, "action": "mail-new" },
+        { "beat": 2.5, "action": "dock-trash" },
+        { "beat": 3, "action": "dock-trash" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 1, "action": "sheet-save" },
+        { "beat": 2, "action": "menu-volume" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-volume" },
+        { "beat": 1.5, "action": "menu-apple" },
+        { "beat": 2.5, "action": "dock-trash" },
+        { "beat": 3, "action": "mail-new" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "sheet-save" },
+        { "beat": 1, "action": "dock-bounce" },
+        { "beat": 1.5, "action": "dock-bounce" },
+        { "beat": 2, "action": "menu-apple" },
+        { "beat": 3, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "mail-new" },
+        { "beat": 0.5, "action": "mail-new" },
+        { "beat": 1, "action": "menu-volume" },
+        { "beat": 2.5, "action": "sheet-save" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 1, "action": "window-miniaturize" },
+        { "beat": 1.5, "action": "window-miniaturize" },
+        { "beat": 2, "action": "sheet-save" },
+        { "beat": 3, "action": "alert-caution" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-trash" },
+        { "beat": 0.5, "action": "dock-trash" },
+        { "beat": 1, "action": "menu-apple" },
+        { "beat": 2, "action": "ichat-message" },
+        { "beat": 2.5, "action": "sheet-save" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "chair-swivel" },
+        { "beat": 2.5, "action": "mail-new" },
+        { "beat": 3, "action": "mail-new" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 1, "action": "sheet-save" },
+        { "beat": 2, "action": "menu-apple" },
+        { "beat": 3, "action": "alert-stop" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-volume" },
+        { "beat": 1.5, "action": "dock-bounce" },
+        { "beat": 2, "action": "dock-bounce" },
+        { "beat": 2.5, "action": "dock-bounce" },
+        { "beat": 3, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-caution" },
+        { "beat": 0.5, "action": "alert-caution" },
+        { "beat": 1, "action": "chair-swivel" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-miniaturize" },
+        { "beat": 0.5, "action": "dock-trash" },
+        { "beat": 1, "action": "sheet-save" },
+        { "beat": 2, "action": "mail-new" },
+        { "beat": 2.5, "action": "menu-apple" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 0.5, "action": "dock-bounce" },
+        { "beat": 1, "action": "dock-bounce" },
+        { "beat": 1.5, "action": "dock-bounce" },
+        { "beat": 2, "action": "menu-volume" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 0.5, "action": "ichat-message" },
+        { "beat": 1, "action": "menu-apple" },
+        { "beat": 2, "action": "dock-trash" },
+        { "beat": 2.5, "action": "sheet-save" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "chair-swivel" },
+        { "beat": 2.5, "action": "menu-apple" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-stop" },
+        { "beat": 0.5, "action": "alert-stop" },
+        { "beat": 1, "action": "sheet-save" },
+        { "beat": 2, "action": "window-miniaturize" },
+        { "beat": 2.5, "action": "mail-new" },
+        { "beat": 3, "action": "ichat-message" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-apple" },
+        { "beat": 1, "action": "sheet-save" },
+        { "beat": 2, "action": "dock-bounce" },
+        { "beat": 2.5, "action": "mail-new" },
+        { "beat": 3, "action": "alert-note" }
+      ]
+    }
+  ]
+}
