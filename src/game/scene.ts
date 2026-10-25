@@ -35,8 +35,11 @@ export interface CutawayStage {
   hide(): void;
 }
 
-/** What a scene computer runs: the level list and its levels, or HackerEditor (doc/chart-editor.md) */
-export type SceneMode = 'levels' | 'editor';
+/**
+ * What a scene computer runs: the level list and its levels, HackerEditor (doc/chart-editor.md) or the showcase tour
+ * (doc/showcase.md)
+ */
+export type SceneMode = 'levels' | 'editor' | 'showcase';
 
 /** Shared resources a scene gets when created. */
 export interface SceneContext {
@@ -68,7 +71,7 @@ export interface SceneContext {
   overlay: HTMLElement;
   /** The chart to play (when #scene/chart opens a level directly); without it the scene shows its level list first */
   chartId?: string;
-  /** The level list and levels, or the chart editor (doc/chart-editor.md) */
+  /** The level list and levels, the chart editor (doc/chart-editor.md) or the showcase tour (doc/showcase.md) */
   mode: SceneMode;
   /**
    * Called before a level starts: the shell shows the level intro (title, tempo, widgets, best score, how to play).

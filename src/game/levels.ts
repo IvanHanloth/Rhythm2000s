@@ -41,26 +41,49 @@ export function buildLevels(
 export type Route =
   | { kind: 'hub' }
   | { kind: 'scene'; sceneId: SceneId; chartId?: string }
-  | { kind: 'editor'; sceneId: SceneId };
+  | { kind: 'editor'; sceneId: SceneId }
+  | { kind: 'showcase'; sceneId: SceneId };
 
 /** First part of an editor route, `editor/<scene>` (doc/chart-editor.md) */
 export const EDITOR_ROUTE = 'editor';
+/** First part of a showcase route, `showcase/<scene>` (doc/showcase.md) */
+export const SHOWCASE_ROUTE = 'showcase';
 
 /** The URL route (without #) of a scene's chart editor computer */
 export function editorRoute(sceneId: SceneId): string {
   return `${EDITOR_ROUTE}/${sceneId}`;
 }
 
+/** The URL route (without #) of a scene's showcase computer */
+export function showcaseRoute(sceneId: SceneId): string {
+  return `${SHOWCASE_ROUTE}/${sceneId}`;
+}
+
+/** The café computer a route is sat at: the scene's play computer, its editor or its showcase computer; null on the street */
+export function computerOf(route: Route): string | null {
+  switch (route.kind) {
+    case 'hub':
+      return null;
+    case 'scene':
+      return route.sceneId;
+    case 'editor':
+      return editorRoute(route.sceneId);
+    case 'showcase':
+      return showcaseRoute(route.sceneId);
+  }
+}
+
 /**
  * Parses the part of the URL after #: empty or unknown goes back to the street;
  * `scene` opens a scene (it picks the chart), `scene/chart` opens one level, `editor/scene` opens the scene's
- * chart editor.
+ * chart editor, `showcase/scene` its showcase tour.
  */
 export function parseRoute(hash: string, sceneIds: readonly SceneId[]): Route {
   const [id, chartId] = decodeURIComponent(hash.replace(/^#/, '')).split('/');
-  if (id === EDITOR_ROUTE) {
+  if (id === EDITOR_ROUTE || id === SHOWCASE_ROUTE) {
     const sceneId = sceneIds.find((known) => known === chartId);
-    return sceneId ? { kind: 'editor', sceneId } : { kind: 'hub' };
+    if (!sceneId) return { kind: 'hub' };
+    return id === EDITOR_ROUTE ? { kind: 'editor', sceneId } : { kind: 'showcase', sceneId };
   }
   const sceneId = sceneIds.find((known) => known === id);
   if (!sceneId) return { kind: 'hub' };

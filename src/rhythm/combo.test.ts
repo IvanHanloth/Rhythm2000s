@@ -1,9 +1,20 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { ComboTracker, comboTier } from './combo.ts';
+import { ComboTracker, comboTier, tierEffects } from './combo.ts';
 
 describe('comboTier', () => {
   it('starts each tier at 8, 16 and 30', () => {
     expect([0, 7, 8, 15, 16, 29, 30, 200].map(comboTier)).toEqual([0, 0, 1, 1, 2, 2, 3, 3]);
+  });
+});
+
+describe('tierEffects', () => {
+  it('adds up every tier reached', () => {
+    expect(([0, 1, 2, 3] as const).map((tier) => tierEffects(tier))).toEqual([
+      [],
+      [1],
+      [1, 2],
+      [1, 2, 3],
+    ]);
   });
 });
 

@@ -2,6 +2,7 @@
 // These are menus, so CSS transitions are fine (design system "Motion"); colours come from src/theme as CSS variables.
 
 import type { SceneId } from '@/scenes/catalog.ts';
+import type { CafeRole } from './world.ts';
 import './hub.css';
 import { STREET_COLORS } from '@/theme/street.ts';
 import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS, THEMES } from '@/theme/tokens.ts';
@@ -11,8 +12,8 @@ export interface LevelInfo {
   /** Computer id, passed to onPlay */
   id: string;
   sceneId: SceneId;
-  /** A play computer shows a best-score line; an editor has none */
-  role: 'levels' | 'editor';
+  /** A play computer shows a best-score line; an editor and a showcase computer have none */
+  role: CafeRole;
   /** The card's button and key hint, e.g. "Play" */
   action: string;
   /** Level name (song title), the card's heading */

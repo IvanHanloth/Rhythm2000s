@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { buildChart } from '@/rhythm/chart.ts';
 import type { SceneId } from '@/scenes/catalog.ts';
-import { buildLevels, formatBestScore, parseRoute } from './levels.ts';
+import { buildLevels, computerOf, formatBestScore, parseRoute } from './levels.ts';
 
 function chart(id: string, scene: string, actions: string[]) {
   return buildChart({
@@ -42,6 +42,21 @@ describe('parseRoute', () => {
     expect(parseRoute('', ids)).toEqual({ kind: 'hub' });
     expect(parseRoute('#street', ids)).toEqual({ kind: 'hub' });
     expect(parseRoute('#nope/x1', ids)).toEqual({ kind: 'hub' });
+  });
+
+  it('#showcase/scene opens the scene showcase tour', () => {
+    expect(parseRoute('#showcase/windows-xp', ids)).toEqual({
+      kind: 'showcase',
+      sceneId: 'windows-xp',
+    });
+    expect(parseRoute('#showcase/nope', ids)).toEqual({ kind: 'hub' });
+  });
+
+  it('names the café computer each route sits at', () => {
+    expect(computerOf({ kind: 'hub' })).toBeNull();
+    expect(computerOf({ kind: 'scene', sceneId: 'mac-2000', chartId: 'x' })).toBe('mac-2000');
+    expect(computerOf({ kind: 'editor', sceneId: 'mac-2000' })).toBe('editor/mac-2000');
+    expect(computerOf({ kind: 'showcase', sceneId: 'mac-2000' })).toBe('showcase/mac-2000');
   });
 
   it('#editor/scene opens the scene chart editor', () => {

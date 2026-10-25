@@ -2,10 +2,10 @@
 // the menu bar and the Dock shelf glow on each beat, tier 3 dims the wallpaper for the Flurry screen saver's ribbons.
 // Nothing moves the Dock icons, since that is the dock-bounce action. Everything lies right over the wallpaper, under
 // every window and the Dock, so nothing covers a target. A break of COMBO_BREAK_MIN or more shows the spinning wait
-// cursor for a beat ("Combo break"). Drawn from beats and audio time.
+// cursor for a beat ("Combo break"). Drawn from beats and audio time. The showcase (doc/showcase.md) shows one tier alone.
 
 import { Container, Graphics } from 'pixi.js';
-import type { ComboTier } from '@/rhythm/combo.ts';
+import type { EffectTier } from '@/rhythm/combo.ts';
 import { AQUA } from '@/theme/aqua.ts';
 import { clamp01 } from '@/ui/easing.ts';
 import { bubblesAt, drawBubbles } from './aqua-bubbles.ts';
@@ -56,9 +56,10 @@ export class MacComboEffects {
     this.brokeAt = audioTime;
   }
 
-  update(tier: ComboTier, beat: number, audioTime: number, beatSeconds: number): void {
-    for (let t = 1; t <= 3; t++) {
-      if (tier < t) this.reachedAt[t] = null;
+  /** Draws the effects of `tiers` (in a round, every tier reached: tierEffects) and the beach ball after a break */
+  update(tiers: readonly EffectTier[], beat: number, audioTime: number, beatSeconds: number): void {
+    for (const t of [1, 2, 3] as const) {
+      if (!tiers.includes(t)) this.reachedAt[t] = null;
       else this.reachedAt[t] ??= beat;
     }
     const phase = beat - Math.floor(beat);

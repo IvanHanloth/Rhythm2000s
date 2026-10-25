@@ -110,14 +110,22 @@ export interface World {
 export type ScreenImage = 'xp-bliss' | 'xp-azul' | 'xp-autumn' | 'xp-desert' | 'mac-aqua-blue';
 
 /**
- * Entry computer: per scene one to play, whose level list opens on sitting down, and one running the chart editor
- * (doc/chart-editor.md). Scene ids in src/scenes/catalog.ts
+ * What an entry computer runs, which also picks its row: play computers in the café's front row, editors in the row
+ * behind, showcase computers in the back row (doc/showcase.md)
+ */
+export type CafeRole = 'levels' | 'editor' | 'showcase';
+
+/** The café row of each role, from the front */
+const CAFE_ROW: Record<CafeRole, number> = { levels: 0, editor: 1, showcase: 2 };
+
+/**
+ * Entry computer: per scene one to play, whose level list opens on sitting down, one running the chart editor
+ * (doc/chart-editor.md) and one running the showcase tour (doc/showcase.md). Scene ids in src/scenes/catalog.ts
  */
 export interface LevelMachine {
   levelId: string;
   sceneId: SceneId;
-  /** Play computers sit in the café's front row, editors in the row behind */
-  role: 'levels' | 'editor';
+  role: CafeRole;
   /** Wallpaper on its screen (public/textures/screens/) */
   screen: ScreenImage;
   /** Translucent all-in-one; otherwise a beige CRT */
@@ -871,7 +879,8 @@ function buildFillers(b: Builder): void {
 
 /**
  * Desk centre z of the café's three rows, and the x offsets of their 4 seats: XP and Mac side by side at the start of the
- * front row, their chart editors right behind them in the middle row (allocated by cafe-layout.ts)
+ * front row, their chart editors right behind them in the middle row and their showcase computers behind those in the
+ * back row (allocated by cafe-layout.ts)
  */
 const CAFE_ROWS = [-11.2, -14.2, -17.2];
 const CAFE_COLUMNS = [-5.3, -3.1, -0.9, 1.3];
@@ -905,9 +914,10 @@ function buildInternetCafe(b: Builder, x: number, levels: readonly LevelMachine[
     lightRows: 3,
   });
 
-  // Entry computers (play in front, editors behind); empty seats get occupied, out-of-order or switched-off machines
+  // Entry computers (play in front, editors behind, showcase at the back); empty seats get occupied, out-of-order or
+  // switched-off machines
   const layout = arrangeMachines(
-    levels.map((level) => ({ ...level, row: level.role === 'editor' ? 1 : 0 })),
+    levels.map((level) => ({ ...level, row: CAFE_ROW[level.role] })),
     CAFE_ROWS.length,
     CAFE_COLUMNS.length,
   );
@@ -1077,7 +1087,7 @@ function computerDesk(b: Builder, x: number, z: number, machine: Machine): void 
 
   switch (machine.kind) {
     case 'level': {
-      // Only play computers get a marker; the editors behind them stay unmarked (doc/hub.md)
+      // Only play computers get a marker; the editors and showcase computers behind them stay unmarked (doc/hub.md)
       if (machine.level.role === 'levels') {
         const marker = new Mesh(new OctahedronGeometry(0.12, 0), b.glow(null, C.marker, 6));
         marker.position.set(x, 1.75, z - 0.1);

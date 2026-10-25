@@ -8,7 +8,7 @@
 import { Container, Rectangle } from 'pixi.js';
 import type { SceneContext, SceneEntry } from '@/game/scene.ts';
 import type { Chart } from '@/rhythm/chart.ts';
-import type { ComboTier } from '@/rhythm/combo.ts';
+import type { EffectTier } from '@/rhythm/combo.ts';
 import { BEATS, THEMES } from '@/theme/tokens.ts';
 import { clamp01, easeOutBack } from '@/ui/easing.ts';
 import { createJudgementView } from '@/ui/judgement-view.ts';
@@ -141,12 +141,16 @@ class WindowsXpScene extends LevelScene<XpSession> {
   protected levelList: XpLevelSelect;
   private readonly sounds: XpSongSounds;
   private readonly desktop = new XpDesktop();
+  /** The program on the taskbar: Explorer or HackerEditor; the showcase has none (doc/showcase.md) */
   private readonly taskbar = new XpTaskbar({
-    tasks: [
-      this.context.mode === 'editor'
-        ? { icon: EDITOR_ICON, label: EDITOR_TITLE }
-        : { icon: 'folder-open', label: EXPLORER_TITLE },
-    ],
+    tasks:
+      this.context.mode === 'showcase'
+        ? []
+        : [
+            this.context.mode === 'editor'
+              ? { icon: EDITOR_ICON, label: EDITOR_TITLE }
+              : { icon: 'folder-open', label: EXPLORER_TITLE },
+          ],
   });
   private readonly windowLayer = new Container({ label: 'windows' });
   private readonly dialogLayer = new Container({ label: 'dialogs' });
@@ -246,8 +250,12 @@ class WindowsXpScene extends LevelScene<XpSession> {
     return message;
   }
 
-  protected renderComboEffects(tier: ComboTier, beat: number, audioTime: number): void {
-    this.comboEffects.update(tier, beat, audioTime);
+  protected renderComboEffects(
+    tiers: readonly EffectTier[],
+    beat: number,
+    audioTime: number,
+  ): void {
+    this.comboEffects.update(tiers, beat, audioTime);
   }
 
   /** Hardware Remove: the unplug chime, a short "disconnected" */

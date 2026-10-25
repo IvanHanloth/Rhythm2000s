@@ -15,6 +15,8 @@
 // return to the editor.
 // The Rickroll easter egg (doc/easter-eggs.md): finished charts unlock a message in the mail program, whose link
 // opens the browser; both are modal windows over the level list, drawn by each scene.
+// In showcase mode (doc/showcase.md) there is no level list: the scene plays a looping tour of its widgets, hit
+// effects, rhythm widgets and combo effects one at a time, the computer doing every response; nothing is recorded.
 
 import { Container, Rectangle } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
@@ -25,10 +27,18 @@ import type { FrameInfo, Scene, SceneContext, SceneMode, TapInfo } from '@/game/
 import type { ChartEditor } from '@/editor/chart-editor.ts';
 import type { ActionType } from '@/rhythm/actions.ts';
 import type { AudioClock } from '@/audio/audio-clock.ts';
+import { Sequencer } from '@/audio/sequencer.ts';
 import type { PlayerSettings } from '@/game/settings.ts';
 import { secondsPerBeat } from '@/rhythm/beat.ts';
 import type { Chart } from '@/rhythm/chart.ts';
-import { COMBO_BREAK_MIN, ComboTracker, type ComboBreak, type ComboTier } from '@/rhythm/combo.ts';
+import {
+  COMBO_BREAK_MIN,
+  COMBO_TIERS,
+  ComboTracker,
+  tierEffects,
+  type ComboBreak,
+  type EffectTier,
+} from '@/rhythm/combo.ts';
 import { summarizeResult, type HitResult, type ResultSummary } from '@/rhythm/result-summary.ts';
 import { buildTurnCues, TURN_CUE_LEAD_BEATS, turnCueAt, type TurnCue } from '@/rhythm/turn-cue.ts';
 import {
@@ -43,14 +53,24 @@ import { BEAT_GUIDE_POSITION, BeatGuideView } from '@/ui/beat-guide-view.ts';
 import { clamp01 } from '@/ui/easing.ts';
 import { HackerIntro } from '@/ui/hacker-intro.ts';
 import { HitCounterView } from '@/ui/hit-counter.ts';
+import { createJudgementView } from '@/ui/judgement-view.ts';
 import type { EditorPanelHandlers, HackerEditorPanel } from '@/ui/hacker-editor-panel.ts';
 import { TextEntry } from '@/ui/text-entry.ts';
 import { TurnBanner } from '@/ui/turn-banner.ts';
 import { TutorialCaption } from '@/ui/tutorial-caption.ts';
 import { SCENE_CATALOG, type SceneId } from '@/scenes/catalog.ts';
+import { createDrumKit, type DrumKit } from './backing-track.ts';
 import { cutawayDesktopAlpha, cutawayProgress, hasCutaway } from './cutaway.ts';
 import { EditorDesk } from './editor-desk.ts';
 import { ROUND_LEAD_IN, type RoundSession } from './round-session.ts';
+import {
+  buildShowcase,
+  SHOWCASE_BPM,
+  showcaseActAt,
+  showcaseDrums,
+  type Showcase,
+  type ShowcaseAct,
+} from './showcase.ts';
 
 /** How long after the results appear before Retry / Next accept input (ms), against mashing through */
 const RESULT_INPUT_DELAY_MS = 600;
@@ -77,8 +97,49 @@ const BOOK_AHEAD = 0.3;
  * another follows judged by then (doc/prototypes/mvp.md)
  */
 const HANDOVER_BEATS = TURN_CUE_LEAD_BEATS;
+/** A showcase widget's round keeps playing its last sounds this long after its end (s) before it is stopped */
+const SHOWCASE_TAIL_SECONDS = 2;
+/** Judgement labels fade out over this many beats after their hold, as in a round */
+const JUDGEMENT_FADE_BEATS = 0.25;
+/** The combo each tier starts at, where the showcase's hit counter stands */
+const TIER_COUNTS: Record<EffectTier, number> = {
+  1: COMBO_TIERS[0],
+  2: COMBO_TIERS[1],
+  3: COMBO_TIERS[2],
+};
 
-type State = 'select' | 'ready' | 'starting' | 'playing' | 'result';
+/** showcase: the showcase computer's tour is on (doc/showcase.md) */
+type State = 'select' | 'ready' | 'starting' | 'playing' | 'result' | 'showcase';
+
+/** A showcase act in a given pass of the tour; `key` names it across frames */
+interface ShowcaseSlot {
+  key: string;
+  act: ShowcaseAct;
+  /** Beat of the act's start, counted from the tour's first beat 0 */
+  start: number;
+}
+
+/** The showcase tour in progress (doc/showcase.md) */
+interface ShowcaseRun<S> {
+  plan: Showcase;
+  /** Audio time of the first pass's beat 0; every pass follows on, on one beat grid */
+  startTime: number;
+  kit: DrumKit;
+  /** Drums of each pass booked so far, in pass order */
+  drums: Sequencer[];
+  /** The widget round on screen */
+  round: { key: string; session: S } | null;
+  /** The next widget round, booked ahead so its first beat lands on time */
+  booked: { key: string; session: S } | null;
+  /** Rounds taken off screen whose last sounds still play */
+  outgoing: S[];
+  /** The other act on screen (hit effect, rhythm widget, combo), set up when it begins */
+  act: ShowcaseSlot | null;
+  /** The hit effect's judgement label */
+  label: Container | null;
+  /** The combo standing at the act's count, for the hit counter */
+  combo: ComboTracker | null;
+}
 
 /**
  * A level in progress: the demo stops still ahead and the round that is on (stops are emptied when the tutorial
@@ -273,6 +334,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   private mailState: MailState = this.mailbox.state;
   /** The new-mail notice has shown during this visit */
   private mailNoticed = false;
+  /** The showcase tour, in showcase mode once started */
+  private showcase: ShowcaseRun<S> | null = null;
 
   constructor(context: SceneContext, options: LevelSceneOptions) {
     this.context = context;
@@ -341,9 +404,12 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   protected abstract openMessageWindow(options: MessageWindowOptions): ModalWindow;
   /** Replaces the level list with one built from `this.charts`, in the same place */
   protected abstract rebuildLevelList(): void;
-  /** Draws the scene's combo tier effects behind its windows (doc/combo.md "Tiers"); tier 0 turns them off */
+  /**
+   * Draws the combo effects of `tiers` behind the scene's windows (doc/combo.md "Tiers"): in a round every tier
+   * reached, in the showcase one alone; none turns them off. Also called after a break, for its effect
+   */
   protected abstract renderComboEffects(
-    tier: ComboTier,
+    tiers: readonly EffectTier[],
     beat: number,
     audioTime: number,
     beatSeconds: number,
@@ -566,6 +632,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       this.showMailNotice();
     }
 
+    if (this.state === 'showcase') {
+      this.updateShowcase(audioTime);
+      return;
+    }
     const session = this.session;
     if (this.state !== 'playing' || !session) return;
     if (this.run?.editor?.watch) session.autoplay(audioTime);
@@ -598,6 +668,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
    * with nothing open the shell returns to the street.
    */
   onEscape(): boolean {
+    // The showcase has nothing to go back to: Esc leaves for the street
+    if (this.mode === 'showcase') return false;
     if (this.state === 'select') {
       if (this.closeMenus()) return true;
       if (!this.modal) {
@@ -617,6 +689,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.destroyed = true;
     window.removeEventListener('keydown', this.onKeyDown);
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    this.stopShowcase();
     this.endRound();
     this.closeModal();
     this.desk?.entry.destroy();
@@ -625,12 +698,16 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   }
 
   /**
-   * Opens the level the URL asked for (#scene/chart), skipping the list; in editor mode opens HackerEditor instead.
-   * Subclasses call it once built.
+   * Opens the level the URL asked for (#scene/chart), skipping the list; in editor mode opens HackerEditor instead,
+   * in showcase mode starts the tour. Subclasses call it once built.
    */
   protected openRequestedLevel(): void {
     if (this.mode === 'editor') {
       this.openEditor();
+      return;
+    }
+    if (this.mode === 'showcase') {
+      void this.startShowcase();
       return;
     }
     const index = this.charts.findIndex((chart) => chart.id === this.context.chartId);
@@ -1101,7 +1178,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     this.hitCounter.view.visible = counting;
     const beatSeconds = secondsPerBeat(session.chart.bpm);
     if (!run || !counting) {
-      this.renderComboEffects(0, beat, audioTime, beatSeconds);
+      this.renderComboEffects([], beat, audioTime, beatSeconds);
       return;
     }
     for (const judgement of fresh) {
@@ -1109,6 +1186,245 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
       if (broke && broke.lost >= COMBO_BREAK_MIN) this.onComboBreak(broke);
     }
     this.hitCounter.update(run.combo, audioTime, beat, beatSeconds);
-    this.renderComboEffects(run.combo.tier, beat, audioTime, beatSeconds);
+    this.renderComboEffects(tierEffects(run.combo.tier), beat, audioTime, beatSeconds);
   }
+
+  // ---------- Showcase (doc/showcase.md) ----------
+
+  /** Starts the tour on the empty desktop, beat 0 shortly from now */
+  private async startShowcase(): Promise<void> {
+    this.state = 'starting';
+    this.setListVisible(false);
+    await this.context.clock.resume();
+    if (this.destroyed || this.state !== 'starting') return;
+    const plan = buildShowcase(this.sceneId, SCENE_CATALOG[this.sceneId].actions);
+    if (plan.acts.some((act) => act.kind === 'widget' && hasCutaway(act.chart))) {
+      this.context.cutaway.prepare(this.sceneId);
+    }
+    this.showcase = {
+      plan,
+      startTime: this.leadIn(),
+      kit: createDrumKit(this.context.clock.context),
+      drums: [],
+      round: null,
+      booked: null,
+      outgoing: [],
+      act: null,
+      label: null,
+      combo: null,
+    };
+    // The player's cursor would look like part of the tour
+    this.cursorCover.eventMode = 'static';
+    this.state = 'showcase';
+  }
+
+  /** One frame of the tour: books drums and widget rounds ahead, then draws the act on, all from the audio clock */
+  private updateShowcase(audioTime: number): void {
+    const run = this.showcase;
+    if (!run) return;
+    const now = this.context.clock.context.currentTime;
+    const beatSeconds = secondsPerBeat(SHOWCASE_BPM);
+    const beatOf = (time: number) => (time - run.startTime) / beatSeconds;
+
+    // Each pass's drums, booked shortly before the pass starts
+    const passSeconds = run.plan.passBeats * beatSeconds;
+    while (run.startTime + run.drums.length * passSeconds < now + BOOK_AHEAD) {
+      run.drums.push(
+        new Sequencer(this.context.clock.context, this.output, showcaseDrums(run.plan, run.kit), {
+          startTime: run.startTime + run.drums.length * passSeconds,
+          bpm: SHOWCASE_BPM,
+        }),
+      );
+    }
+    for (const drums of run.drums.slice(-2)) drums.schedule();
+
+    // A widget's round is booked ahead, and is on screen from half a beat before its start to half a beat before its end
+    const ahead = this.showcaseSlot(run, beatOf(now + BOOK_AHEAD) + HANDOVER_BEATS);
+    if (
+      ahead?.act.kind === 'widget' &&
+      run.round?.key !== ahead.key &&
+      run.booked?.key !== ahead.key
+    ) {
+      run.booked?.session.stop();
+      run.booked = { key: ahead.key, session: this.bookShowcaseRound(run, ahead) };
+    }
+    const beat = beatOf(audioTime);
+    const shown = this.showcaseSlot(run, beat + HANDOVER_BEATS);
+    const widget = shown?.act.kind === 'widget' ? shown : null;
+    if (run.round && run.round.key !== widget?.key) this.dropShowcaseRound(run);
+    if (widget && !run.round) {
+      const booked = run.booked?.key === widget.key ? run.booked.session : null;
+      if (booked) run.booked = null;
+      const session = booked ?? this.bookShowcaseRound(run, widget);
+      run.round = { key: widget.key, session };
+      this.session = session;
+      this.buildRound(session);
+    }
+    if (run.round) {
+      // The computer makes every press on its beat; its judgement labels stay hidden
+      const session = run.round.session;
+      session.autoplay(audioTime);
+      session.update(audioTime);
+      const roundBeat = session.beatAt(audioTime);
+      this.renderRound(session, roundBeat, audioTime);
+      this.renderCutaway(session, roundBeat);
+    }
+    run.outgoing = run.outgoing.filter((session) => {
+      if (audioTime < session.endTime + SHOWCASE_TAIL_SECONDS) return true;
+      session.stop();
+      return false;
+    });
+
+    // Every other act, from its first beat to its end
+    const slot = this.showcaseSlot(run, beat);
+    const act = slot && slot.act.kind !== 'widget' ? slot : null;
+    if (run.act?.key !== act?.key) {
+      this.leaveShowcaseAct(run);
+      if (act) this.enterShowcaseAct(run, act, beatSeconds);
+    }
+    this.judgementLayer.visible = act?.act.kind === 'judgement';
+    if (act) this.drawShowcaseAct(run, act, beat, audioTime, beatSeconds);
+  }
+
+  /** The act at `beat` (from the tour's first beat 0) and which pass it is in; null in a count-in */
+  private showcaseSlot(run: ShowcaseRun<S>, beat: number): ShowcaseSlot | null {
+    const { passBeats } = run.plan;
+    const pass = Math.floor(beat / passBeats);
+    const act = showcaseActAt(run.plan, beat - pass * passBeats);
+    if (!act) return null;
+    return { key: `${pass}:${act.start}`, act, start: pass * passBeats + act.start };
+  }
+
+  /** A widget's round with beat 0 on its act's first beat; its closing hit gives way to what follows */
+  private bookShowcaseRound(run: ShowcaseRun<S>, slot: ShowcaseSlot): S {
+    if (slot.act.kind !== 'widget') throw new Error(`Showcase act ${slot.key} is not a widget`);
+    const session = this.createSession(
+      slot.act.chart,
+      run.startTime + slot.start * secondsPerBeat(SHOWCASE_BPM),
+    );
+    session.handOff();
+    return session;
+  }
+
+  /** Takes the widget's round off screen; its last sounds play out */
+  private dropShowcaseRound(run: ShowcaseRun<S>): void {
+    const round = run.round;
+    if (!round) return;
+    this.leaveCutaway();
+    this.clearRound();
+    this.session = null;
+    run.round = null;
+    run.outgoing.push(round.session);
+  }
+
+  private enterShowcaseAct(run: ShowcaseRun<S>, slot: ShowcaseSlot, beatSeconds: number): void {
+    run.act = slot;
+    const { act } = slot;
+    const startTime = run.startTime + slot.start * beatSeconds;
+    switch (act.kind) {
+      case 'judgement': {
+        const label = createJudgementView(act.level);
+        label.position.set(DESIGN_WIDTH / 2, DESIGN_HEIGHT / 2);
+        this.judgementLayer.addChild(label);
+        run.label = label;
+        break;
+      }
+      case 'beat-guide':
+        this.beatGuide.setRound(act.chart, false);
+        this.beatGuide.view.visible = true;
+        break;
+      case 'turn-banner':
+        this.turnCues = buildTurnCues(act.chart);
+        break;
+      case 'combo':
+        // The counter rolls up to the tier's count on the act's first beat; only this tier's effect shows
+        run.combo = comboAt(TIER_COUNTS[act.tier], startTime);
+        this.hitCounter.view.visible = true;
+        this.renderComboEffects([act.tier], slot.start, startTime, beatSeconds);
+        break;
+      case 'combo-break': {
+        // A full combo is lost on the act's first beat: the counter flashes back to 0 and the break effect plays
+        const combo = comboAt(TIER_COUNTS[3], startTime - beatSeconds);
+        const broke = combo.record('miss', startTime);
+        if (broke) this.onComboBreak(broke);
+        run.combo = combo;
+        this.hitCounter.view.visible = true;
+        break;
+      }
+      case 'widget':
+        throw new Error(`Showcase widget ${act.action} is shown as a round`);
+    }
+  }
+
+  private drawShowcaseAct(
+    run: ShowcaseRun<S>,
+    slot: ShowcaseSlot,
+    beat: number,
+    audioTime: number,
+    beatSeconds: number,
+  ): void {
+    const { act } = slot;
+    const since = beat - slot.start;
+    switch (act.kind) {
+      case 'judgement': {
+        const label = run.label;
+        if (!label) throw new Error('The hit effect has no label');
+        // Squash and spring back, hold, fade out, as in a round
+        const squash = 1 - clamp01(since / BEATS.squash);
+        label.scale.set(1 + 0.25 * squash, 1 - 0.25 * squash);
+        label.alpha = 1 - clamp01((since - BEATS.judgementHold) / JUDGEMENT_FADE_BEATS);
+        break;
+      }
+      case 'beat-guide':
+        this.beatGuide.update(since);
+        break;
+      case 'turn-banner':
+        this.renderTurnBanner(since);
+        break;
+      case 'combo':
+      case 'combo-break': {
+        const combo = run.combo;
+        if (!combo) throw new Error('The combo act has no combo');
+        this.hitCounter.update(combo, audioTime, beat, beatSeconds);
+        const tiers = act.kind === 'combo' ? [act.tier] : [];
+        this.renderComboEffects(tiers, beat, audioTime, beatSeconds);
+        break;
+      }
+      case 'widget':
+        throw new Error(`Showcase widget ${act.action} is shown as a round`);
+    }
+  }
+
+  /** Puts away whatever the act on set up */
+  private leaveShowcaseAct(run: ShowcaseRun<S>): void {
+    run.act = null;
+    run.label?.destroy({ children: true });
+    run.label = null;
+    run.combo = null;
+    this.beatGuide.view.visible = false;
+    this.turnCues = [];
+    this.turnBanner.show(null);
+    this.hitCounter.view.visible = false;
+    this.clearComboEffects();
+  }
+
+  /** Stops every sound of the tour and takes it off screen */
+  private stopShowcase(): void {
+    const run = this.showcase;
+    if (!run) return;
+    this.showcase = null;
+    this.dropShowcaseRound(run);
+    this.leaveShowcaseAct(run);
+    run.booked?.session.stop();
+    for (const session of run.outgoing) session.stop();
+    for (const drums of run.drums) drums.stop();
+  }
+}
+
+/** A combo standing at `count`, its last hit heard at `lastHit` (s), so the hit counter rolls up to it then */
+function comboAt(count: number, lastHit: number): ComboTracker {
+  const combo = new ComboTracker();
+  for (let i = 1; i < count; i++) combo.record('perfect', lastHit - 1);
+  combo.record('perfect', lastHit);
+  return combo;
 }

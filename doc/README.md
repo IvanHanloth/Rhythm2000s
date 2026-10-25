@@ -19,6 +19,7 @@
 | [cross-dimension.md](cross-dimension.md) | Cross-dimension action prototype: a press cuts to the 3D café, the character spins on the swivel chair, back to the level | Draft (prototype) |
 | [chart-format.md](chart-format.md) | Chart JSON format: location, fields, action IDs, validation | Draft |
 | [chart-editor.md](chart-editor.md) | Chart editor on its own café computers: period program window, phrase-by-phrase timeline, play and test | Draft |
+| [showcase.md](showcase.md) | Showcase computers in the café's back row: an animated tour of every widget, hit effect, rhythm widget and combo effect, one at a time | Draft |
 | [chart-import-export.md](chart-import-export.md) | Importing charts into the browser and exporting any chart, from the level list | Draft |
 | [phone-notice.md](phone-notice.md) | Phone notice: phones see "not supported yet, please play on a computer" instead of the game | Draft |
 | [tech-research.md](tech-research.md) | Technical research: browser capabilities, stack comparison, risks to verify | Draft |

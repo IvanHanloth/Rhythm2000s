@@ -43,11 +43,11 @@ export function buildDrumTrack(chart: Chart, kit: DrumKit): SequencedSound[] {
   // Call and response bars each restart the pattern on their first beat, so the response stays
   // on the drum grid even when the gap is not a whole number of beats
   for (const phrase of chart.phrases) {
-    pushBar(track, kit, phrase.callStart, phrase.callEnd);
+    drumBars(track, kit, phrase.callStart, phrase.callEnd);
     for (let beat = phrase.callEnd; beat < phrase.responseStart; beat += 0.5) {
       track.push({ beat, buffer: kit.hat, gain: 0.5 });
     }
-    pushBar(track, kit, phrase.responseStart, phrase.end);
+    drumBars(track, kit, phrase.responseStart, phrase.end);
   }
 
   track.push({ beat: lastBodyBeat, buffer: kit.kick }, { beat: lastBodyBeat, buffer: kit.snare });
@@ -55,7 +55,7 @@ export function buildDrumTrack(chart: Chart, kit: DrumKit): SequencedSound[] {
 }
 
 /** Drums from start to end: kick and snare alternate on whole beats (kick first), hi-hat every half beat. */
-function pushBar(track: SequencedSound[], kit: DrumKit, start: number, end: number): void {
+export function drumBars(track: SequencedSound[], kit: DrumKit, start: number, end: number): void {
   for (let half = 0; start + half / 2 < end; half++) {
     const beat = start + half / 2;
     track.push({ beat, buffer: kit.hat, gain: half % 2 === 0 ? 0.8 : 0.5 });

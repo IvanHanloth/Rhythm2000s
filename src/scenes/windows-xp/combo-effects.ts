@@ -1,10 +1,10 @@
 // Combo effects on the XP desktop (doc/combo.md "Tiers"): tier 1 makes the desktop icons hop on each beat, tier 2
 // turns the wallpaper into a Windows Media Player visualization, tier 3 sets off the Solitaire win cascade.
 // It all lies over the wallpaper and under the icons and windows, so nothing covers a target. Drawn from beats and
-// audio time; dropping below a tier stops its effect at once.
+// audio time; dropping below a tier stops its effect at once. The showcase (doc/showcase.md) shows one tier alone.
 
 import { Container } from 'pixi.js';
-import type { ComboTier } from '@/rhythm/combo.ts';
+import type { EffectTier } from '@/rhythm/combo.ts';
 import { clamp01 } from '@/ui/easing.ts';
 import type { XpDesktop } from './components/desktop.ts';
 import { MediaVisualizer } from './media-visualizer.ts';
@@ -30,21 +30,23 @@ export class XpComboEffects {
     desktop.addBackdrop(this.layer);
   }
 
-  update(tier: ComboTier, beat: number, audioTime: number): void {
-    for (let t = 1; t <= 3; t++) {
-      if (tier < t) this.reachedAt[t] = null;
+  /** Draws the effects of `tiers` (in a round, every tier reached: tierEffects) */
+  update(tiers: readonly EffectTier[], beat: number, audioTime: number): void {
+    for (const t of [1, 2, 3] as const) {
+      if (!tiers.includes(t)) this.reachedAt[t] = null;
       else this.reachedAt[t] ??= beat;
     }
     const phase = beat - Math.floor(beat);
 
-    this.desktop.setIconLift(tier >= 1 ? HOP_HEIGHT * Math.sin(Math.PI * phase) : 0);
+    this.desktop.setIconLift(tiers.includes(1) ? HOP_HEIGHT * Math.sin(Math.PI * phase) : 0);
 
     const visualizerStart = this.reachedAt[2] ?? null;
-    this.layer.visible = visualizerStart !== null;
-    if (visualizerStart === null) return;
-    this.visualizer.update(beat, audioTime, clamp01((beat - visualizerStart) / FADE_BEATS));
-
     const cascadeStart = this.reachedAt[3] ?? null;
+    this.layer.visible = visualizerStart !== null || cascadeStart !== null;
+    this.visualizer.view.visible = visualizerStart !== null;
+    if (visualizerStart !== null) {
+      this.visualizer.update(beat, audioTime, clamp01((beat - visualizerStart) / FADE_BEATS));
+    }
     if (cascadeStart === null) {
       this.cascade.clear();
       return;

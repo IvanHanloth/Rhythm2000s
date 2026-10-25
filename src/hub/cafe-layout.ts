@@ -1,6 +1,6 @@
 // Seating in the net café: each entry computer sits in its row (the play computers in the front row, the chart
-// editors in the row behind), side by side from the first seat in order, so each editor sits behind its scene's
-// play computer; empty seats take turns showing an occupied, out-of-order or switched-off machine as decoration.
+// editors in the row behind, the showcase computers at the back), side by side from the first seat in order, so each
+// editor and showcase computer sits behind its scene's play computer; empty seats take turns showing an occupied, out-of-order or switched-off machine as decoration.
 // No three.js, so unit tests can use it.
 
 export type Filler = 'busy' | 'repair' | 'off';

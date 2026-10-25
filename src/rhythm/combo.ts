@@ -10,6 +10,14 @@ export const COMBO_BREAK_MIN = 10;
 /** 0 below the first tier */
 export type ComboTier = 0 | 1 | 2 | 3;
 
+/** A tier with an effect */
+export type EffectTier = Exclude<ComboTier, 0>;
+
+/** The effects a combo at `tier` shows in a round: every tier up to it, as they add up (doc/combo.md "Tiers") */
+export function tierEffects(tier: ComboTier): EffectTier[] {
+  return ([1, 2, 3] as const).filter((t) => t <= tier);
+}
+
 export function comboTier(count: number): ComboTier {
   const [first, second, third] = COMBO_TIERS;
   if (count >= third) return 3;

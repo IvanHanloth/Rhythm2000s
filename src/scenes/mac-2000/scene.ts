@@ -9,7 +9,7 @@ import { Container, Graphics, Rectangle, Sprite, type FederatedPointerEvent } fr
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
 import type { SceneContext, SceneEntry } from '@/game/scene.ts';
 import type { Chart } from '@/rhythm/chart.ts';
-import type { ComboBreak, ComboTier } from '@/rhythm/combo.ts';
+import type { ComboBreak, EffectTier } from '@/rhythm/combo.ts';
 import { AQUA } from '@/theme/aqua.ts';
 import { THEMES } from '@/theme/tokens.ts';
 import { SCENE_CATALOG } from '@/scenes/catalog.ts';
@@ -210,12 +210,12 @@ class Mac2000Scene extends LevelScene<MacSession> {
   }
 
   protected renderComboEffects(
-    tier: ComboTier,
+    tiers: readonly EffectTier[],
     beat: number,
     audioTime: number,
     beatSeconds: number,
   ): void {
-    this.comboEffects.update(tier, beat, audioTime, beatSeconds);
+    this.comboEffects.update(tiers, beat, audioTime, beatSeconds);
   }
 
   protected onComboBreak(lost: ComboBreak): void {

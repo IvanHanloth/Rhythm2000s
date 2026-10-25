@@ -17,7 +17,14 @@ import { DESIGN_HEIGHT, DESIGN_WIDTH } from './layout.ts';
 import { listenForTaps } from './input.ts';
 import { LevelIntro } from './level-intro.ts';
 import { Mailbox } from './mailbox.ts';
-import { buildLevels, editorRoute, formatBestScore, parseRoute } from './levels.ts';
+import {
+  buildLevels,
+  computerOf,
+  editorRoute,
+  formatBestScore,
+  parseRoute,
+  showcaseRoute,
+} from './levels.ts';
 import { loadBestAssisted, loadBestScore } from './records.ts';
 import { SceneDirector } from './scene-director.ts';
 import type { CutawayStage } from './scene.ts';
@@ -53,11 +60,17 @@ const HUB_ROUTE = 'street';
 
 /** The street hub, created below; chair-swivel's cutaway draws its café (doc/cross-dimension.md) */
 let cafe: Hub | null = null;
+/** The café computer the open scene is sat at, where chair-swivel's cutaway seats the character */
+function cutawayComputer(): string {
+  const computer = computerOf(parseRoute(location.hash, sceneIds));
+  if (!computer) throw new Error('The cutaway only runs at a café computer');
+  return computer;
+}
 /** The cutaway is showing: the game canvas sits over the café with its background cleared */
 let inCutaway = false;
 const cutaway: CutawayStage = {
-  prepare: (sceneId) => requireHub().prepareCutaway(sceneId),
-  show: (sceneId, progress, desktop) => {
+  prepare: () => requireHub().prepareCutaway(cutawayComputer()),
+  show: (_sceneId, progress, desktop) => {
     let snapshot: HTMLCanvasElement | null = null;
     if (!inCutaway) {
       inCutaway = true;
@@ -74,7 +87,7 @@ const cutaway: CutawayStage = {
         throw new Error('Desktop capture is not a canvas');
       snapshot = captured;
     }
-    requireHub().renderCutaway(sceneId, progress, snapshot);
+    requireHub().renderCutaway(cutawayComputer(), progress, snapshot);
   },
   hide: () => {
     if (!inCutaway) return;
@@ -119,8 +132,9 @@ const sceneIds = director.entries.map((e) => e.id);
 let levels = buildLevels(director.entries, library.charts);
 
 /**
- * Two computers per scene in the café: one to play, whose card lists that computer's levels, and HackerEditor behind
- * it (doc/chart-editor.md). Their ids are the URL routes they open.
+ * Three computers per scene in the café: one to play, whose card lists that computer's levels, HackerEditor behind
+ * it (doc/chart-editor.md) and the showcase computer behind that, whose card says nothing of what it does
+ * (doc/showcase.md). Their ids are the URL routes they open.
  */
 function computerCards(): LevelInfo[] {
   const play = director.entries.map(({ id, label }): LevelInfo => {
@@ -149,7 +163,16 @@ function computerCards(): LevelInfo[] {
     ],
     playable: true,
   }));
-  return [...play, ...editors];
+  const showcases = director.entries.map(({ id }): LevelInfo => ({
+    id: showcaseRoute(id),
+    sceneId: id,
+    role: 'showcase',
+    action: 'Open',
+    label: 'Computer',
+    details: [],
+    playable: true,
+  }));
+  return [...play, ...editors, ...showcases];
 }
 
 /** The charts played to their results window, which the scenes record; the street's second objective reads it */
@@ -229,8 +252,8 @@ function showRoute(): void {
   }
   hub.hide();
   canvas.app.ticker.start();
-  if (route.kind === 'editor') director.show(route.sceneId, undefined, 'editor');
-  else director.show(route.sceneId, route.chartId);
+  if (route.kind === 'scene') director.show(route.sceneId, route.chartId);
+  else director.show(route.sceneId, undefined, route.kind);
   // PixiJS makes the canvas inherit its container's cursor, so set it on the container
   gameHost.style.cursor = director.entries.find((e) => e.id === route.sceneId)?.cursor ?? '';
 }
