@@ -406,7 +406,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   protected abstract rebuildLevelList(): void;
   /**
    * Draws the combo effects of `tiers` behind the scene's windows (doc/combo.md "Tiers"): in a round every tier
-   * reached, in the showcase one alone; none turns them off. Also called after a break, for its effect
+   * reached (tierEffects); none turns them off. Also called after a break, for its effect
    */
   protected abstract renderComboEffects(
     tiers: readonly EffectTier[],
@@ -1337,10 +1337,10 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
         this.turnCues = buildTurnCues(act.chart);
         break;
       case 'combo':
-        // The counter rolls up to the tier's count on the act's first beat; only this tier's effect shows
+        // The counter rolls up to the tier's count on the act's first beat; the tiers below show too, as in a round
         run.combo = comboAt(TIER_COUNTS[act.tier], startTime);
         this.hitCounter.view.visible = true;
-        this.renderComboEffects([act.tier], slot.start, startTime, beatSeconds);
+        this.renderComboEffects(tierEffects(act.tier), slot.start, startTime, beatSeconds);
         break;
       case 'combo-break': {
         // A full combo is lost on the act's first beat: the counter flashes back to 0 and the break effect plays
@@ -1386,7 +1386,7 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
         const combo = run.combo;
         if (!combo) throw new Error('The combo act has no combo');
         this.hitCounter.update(combo, audioTime, beat, beatSeconds);
-        const tiers = act.kind === 'combo' ? [act.tier] : [];
+        const tiers = act.kind === 'combo' ? tierEffects(act.tier) : [];
         this.renderComboEffects(tiers, beat, audioTime, beatSeconds);
         break;
       }

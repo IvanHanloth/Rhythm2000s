@@ -9,8 +9,8 @@ The café's back row has one showcase computer per scene. Sitting at one plays a
 - **Where**: the back row of the café ([hub.md](hub.md)), first seat Windows XP, second seat Mac, the same columns as the play computers and editors in front of them.
 - **Secret**: nothing in the game says what these computers do. No marker floats over them, the guide booklet and the objectives leave them out, and the prompt and the card only say "Computer" (the card's button reads "Open", with no details and no best score). Walking up and sitting down works like any other entry computer.
 - **Order**: the widgets (every action of the scene), then the hit effects, then the rhythm widgets, then the combo effects.
-- **One thing at a time**: each item shows on its own on the empty desktop, never two at once. The only exception is the hit counter, which shows with the combo effects.
-- **Combo effects alone**: each tier's effect shows without the tiers below it (unlike a round, where they add up, [combo.md](combo.md#tiers)), and the hit counter in the top right stands at that tier's count: 8, 16, 30.
+- **One thing at a time**: each item shows on its own on the empty desktop, never two at once. The exceptions are the combo part: the hit counter shows with the combo effects, and each tier keeps the effects of the tiers below it.
+- **Combo effects add up**: as in a round ([combo.md](combo.md#tiers)), tier 2 shows the tier 1 and 2 effects and tier 3 all three, and the hit counter in the top right stands at that tier's count: 8, 16, 30 (user, 2026-10-25).
 
 ## Flow
 
@@ -30,7 +30,7 @@ The showcase computers open `#showcase/<scene>` (e.g. `#showcase/windows-xp`). T
 | Hit effects | Perfect!, Good, Miss | The judgement label alone in the middle of the screen: it pops with the squash on the bar's first beat, holds and fades as in a round |
 | Rhythm widgets | Beat guide | The `((((O))))` beat guide alone for a one-action phrase, so its press beat lights yellow ([beat-guide.md](beat-guide.md)) |
 | | Turn banner | "Follow me" over the call bar, then "Your turn" over the response bar |
-| Combo | Tier 1, 2, 3 | Each tier's effect alone, the counter rolling up to 8, 16 and 30 on the part's first beat ("HOT!" from 16 on) |
+| Combo | Tier 1, 2, 3 | Each tier's effect with those of the tiers below, the counter rolling up to 8, 16 and 30 on the part's first beat ("HOT!" from 16 on) |
 | | Combo break | The counter goes from 30 back to 0 with its red flash, and the scene's break effect: XP's unplug chime, the Mac's spinning wait cursor |
 
 - The widgets play with their own sounds and backing drums, like a round; the other parts have the shared drum pattern (kick and snare on the beats, a hi-hat every half beat). The first bar of every pass is a count-in with the metronome.

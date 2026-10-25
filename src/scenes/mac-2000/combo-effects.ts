@@ -2,7 +2,7 @@
 // the menu bar and the Dock shelf glow on each beat, tier 3 dims the wallpaper for the Flurry screen saver's ribbons.
 // Nothing moves the Dock icons, since that is the dock-bounce action. Everything lies right over the wallpaper, under
 // every window and the Dock, so nothing covers a target. A break of COMBO_BREAK_MIN or more shows the spinning wait
-// cursor for a beat ("Combo break"). Drawn from beats and audio time. The showcase (doc/showcase.md) shows one tier alone.
+// cursor for a beat ("Combo break"). Drawn from beats and audio time.
 
 import { Container, Graphics } from 'pixi.js';
 import type { EffectTier } from '@/rhythm/combo.ts';

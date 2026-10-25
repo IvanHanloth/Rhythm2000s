@@ -1,7 +1,7 @@
 // Combo effects on the XP desktop (doc/combo.md "Tiers"): tier 1 makes the desktop icons hop on each beat, tier 2
 // turns the wallpaper into a Windows Media Player visualization, tier 3 sets off the Solitaire win cascade.
 // It all lies over the wallpaper and under the icons and windows, so nothing covers a target. Drawn from beats and
-// audio time; dropping below a tier stops its effect at once. The showcase (doc/showcase.md) shows one tier alone.
+// audio time; dropping below a tier stops its effect at once.
 
 import { Container } from 'pixi.js';
 import type { EffectTier } from '@/rhythm/combo.ts';
