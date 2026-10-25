@@ -1,0 +1,132 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Baloo 2";
+      font-weight: 800;
+      src: url("assets/fonts/baloo-2/Baloo2-ExtraBold.woff2") format("woff2");
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Baloo 2", sans-serif;
+      font-weight: 800;
+      line-height: 1;
+      color: #ffffff;
+    }
+    /* The title screen's own shade over the street (src/hub/hub.css .hub-title) */
+    #end-shade {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgb(0 0 0 / 0) 40%, rgb(0 0 0 / 0.45));
+    }
+    #end-column {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 34px;
+    }
+    #end-logo {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    #end-word {
+      font-size: 210px;
+      -webkit-text-stroke: 16px #0b2f6e;
+      paint-order: stroke fill;
+      text-shadow: 10px 10px 0 #0b2f6e;
+    }
+    #end-badge {
+      padding: 18px 40px 4px;
+      font-size: 160px;
+      background: #f2b705;
+      color: #1b1b1b;
+      border: 8px solid #1b1b1b;
+      border-radius: 40px;
+      box-shadow: 11px 11px 0 #1b1b1b;
+    }
+    #end-tagline {
+      font-size: 54px;
+      -webkit-text-stroke: 8px #0b2f6e;
+      paint-order: stroke fill;
+      text-shadow: 4px 4px 0 #0b2f6e;
+    }
+    #end-tagline span {
+      display: inline-block;
+    }
+    #end-cta {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    #end-play {
+      padding: 14px 40px 6px;
+      font-size: 50px;
+      background: #f2b705;
+      color: #1b1b1b;
+      border: 6px solid #1b1b1b;
+      border-radius: 22px;
+      box-shadow: 7px 7px 0 #1b1b1b;
+    }
+    #end-url {
+      font-size: 46px;
+      -webkit-text-stroke: 8px #0b2f6e;
+      paint-order: stroke fill;
+      text-shadow: 3px 3px 0 #0b2f6e;
+    }
+    #end-credit {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 120px;
+      text-align: center;
+      font-size: 34px;
+      -webkit-text-stroke: 6px #0b2f6e;
+      paint-order: stroke fill;
+      text-shadow: 3px 3px 0 #0b2f6e;
+    }
+  </style>
+  <div data-hf-id="hf-32ii" id="root" data-composition-id="endcard" data-width="1920" data-height="1080">
+    <div data-hf-id="hf-a2wo" id="end-shade"></div>
+    <div data-hf-id="hf-47sb" id="end-column">
+      <div data-hf-id="hf-0dsc" id="end-logo">
+        <span data-hf-id="hf-z9ju" id="end-word">Rhythm</span>
+        <span data-hf-id="hf-mofe" id="end-badge">2000s</span>
+      </div>
+      <p data-hf-id="hf-alxq" id="end-tagline">
+        <span data-hf-id="hf-ze4p">Pop-ups,</span> <span data-hf-id="hf-g0rz">close</span> <span data-hf-id="hf-1p7i">boxes,</span> <span data-hf-id="hf-oqkt">new</span> <span data-hf-id="hf-3ysq">mail</span>
+        <span data-hf-id="hf-53zj">—</span> <span data-hf-id="hf-jf5k">all</span> <span data-hf-id="hf-dnos">on</span> <span data-hf-id="hf-3tds">the</span> <span data-hf-id="hf-kszh">beat.</span>
+      </p>
+      <div data-hf-id="hf-cng5" id="end-cta">
+        <span data-hf-id="hf-upbt" id="end-play">Play it in your browser</span>
+        <span data-hf-id="hf-vkr8" id="end-url">ivanhanloth.github.io/Rhythm2000s</span>
+      </div>
+    </div>
+    <p data-hf-id="hf-acqg" id="end-credit">Made at HackNotts 26</p>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // Scene time 0 = film 34.1; the iris opens over 0–0.45
+    tl.fromTo("#end-shade", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 0.3);
+    // The name blurs in, then the badge is stamped on
+    tl.fromTo("#end-word", { opacity: 0, filter: "blur(10px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, 0.6);
+    tl.fromTo("#end-badge", { opacity: 0 }, { opacity: 1, duration: 0.001 }, 1.1);
+    tl.fromTo("#end-badge", { scale: 1.7, rotation: -24 }, { scale: 1, rotation: -5, duration: 0.4, ease: "back.out(1.6)" }, 1.1);
+    // The tagline, word by word from grey to white
+    tl.fromTo(
+      "#end-tagline span",
+      { opacity: 0, color: "#9fb4d8" },
+      { opacity: 1, color: "#ffffff", duration: 0.12, stagger: 0.08, ease: "power1.out" },
+      1.7,
+    );
+    tl.fromTo("#end-play", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.7)" }, 2.7);
+    tl.fromTo("#end-url", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power2.out" }, 2.95);
+    tl.fromTo("#end-credit", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, 3.4);
+    window.__timelines["endcard"] = tl;
+  </script>
+</template>

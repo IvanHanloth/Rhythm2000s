@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=1920, height=1080" />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
     <style>
-      /* Placeholders: replace all three with the film's own palette and display face. */
-      :root {
-        --ground: #6b6b6b;
-        --ink: #ffffff;
-        --font-display: sans-serif;
-      }
       * {
         margin: 0;
         padding: 0;
@@ -22,39 +16,156 @@
         width: 1920px;
         height: 1080px;
         overflow: hidden;
-        background: var(--ground);
+        background: #0a52c8;
       }
-      #root {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--font-display);
+      /* A camera per shot: punch-ins and whips move this untimed wrapper, never the timed video */
+      .cam {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        transform-origin: 0 0;
       }
-      #title {
-        color: var(--ink);
-        font-size: 72px;
-        font-weight: 600;
-        letter-spacing: -0.03em;
+      .cam video {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        object-fit: cover;
       }
     </style>
   </head>
   <body>
-    <div
+    <!--
+      Footage: the game's showcase computers recorded from the dev server (footage/README.md).
+      120 BPM; the film's bar lines sit at 0.1 + 2k s. data-media-start values are bar lines
+      in the recordings (XP 1.501 + 2k, Mac 1.178 + 2k), so every cut lands on the beat.
+    -->
+    <div data-hf-id="hf-413o"
       id="root"
       data-composition-id="main"
       data-start="0"
-      data-duration="10"
+      data-duration="41"
       data-width="1920"
       data-height="1080"
+      data-motion-blur="on"
     >
-      <h1 id="title" class="clip" data-start="0" data-duration="10" data-track-index="0">Title</h1>
+      <!-- 1–2: XP info dialog, call then response -->
+      <div data-hf-id="hf-a4dn" class="cam" id="cam-s1" style="z-index: 1">
+        <video data-hf-id="hf-dosm" id="s1" class="clip" data-start="0" data-duration="4.1" data-media-start="1.401" data-track-index="1" src="footage/xp.mp4" muted playsinline></video>
+      </div>
+      <!-- 3: XP error dialog, punched in -->
+      <div data-hf-id="hf-2liy" class="cam" id="cam-s3" style="z-index: 2">
+        <video data-hf-id="hf-pdbb" id="s3" class="clip" data-start="4.1" data-duration="4" data-media-start="9.501" data-track-index="1" src="footage/xp.mp4" muted playsinline></video>
+      </div>
+      <!-- 5–6: XP question dialog, call then response -->
+      <div data-hf-id="hf-zdi5" class="cam" id="cam-s5" style="z-index: 3">
+        <video data-hf-id="hf-e4tm" id="s5" class="clip" data-start="10.1" data-duration="4.1" data-media-start="13.501" data-track-index="1" src="footage/xp.mp4" muted playsinline></video>
+      </div>
+      <!-- 7: Mac iChat message (whips in over the end of 6) -->
+      <div data-hf-id="hf-o280" class="cam" id="cam-s7" style="z-index: 4">
+        <video data-hf-id="hf-8cq9" id="s7" class="clip" data-start="13.95" data-duration="2.15" data-media-start="36.528" data-track-index="2" src="footage/mac.mp4" muted playsinline></video>
+      </div>
+      <!-- 8: Mac Perfect! -->
+      <div data-hf-id="hf-lt5g" class="cam" id="cam-s8" style="z-index: 5">
+        <video data-hf-id="hf-o00i" id="s8" class="clip" data-start="16.1" data-duration="2" data-media-start="49.178" data-track-index="1" src="footage/mac.mp4" muted playsinline></video>
+      </div>
+      <!-- 9: Mac empty-Trash alert, punched in -->
+      <div data-hf-id="hf-lt24" class="cam" id="cam-s9" style="z-index: 6">
+        <video data-hf-id="hf-2po5" id="s9" class="clip" data-start="18.1" data-duration="4" data-media-start="5.178" data-track-index="1" src="footage/mac.mp4" muted playsinline></video>
+      </div>
+      <!-- 10: Mac combo bubbles at 16 -->
+      <div data-hf-id="hf-epwn" class="cam" id="cam-s10" style="z-index: 7">
+        <video data-hf-id="hf-k5k2" id="s10" class="clip" data-start="22.1" data-duration="2" data-media-start="69.178" data-track-index="1" src="footage/mac.mp4" muted playsinline></video>
+      </div>
+      <!-- 11: XP combo flower at 16 -->
+      <div data-hf-id="hf-08mn" class="cam" id="cam-s11" style="z-index: 8">
+        <video data-hf-id="hf-at3u" id="s11" class="clip" data-start="24.1" data-duration="2" data-media-start="69.501" data-track-index="1" src="footage/xp.mp4" muted playsinline></video>
+      </div>
+      <!-- 12: XP Solitaire cascade at 30, the payoff -->
+      <div data-hf-id="hf-tbl7" class="cam" id="cam-s12" style="z-index: 9">
+        <video data-hf-id="hf-poow" id="s12" class="clip" data-start="26.1" data-duration="4" data-media-start="73.501" data-track-index="1" src="footage/xp.mp4" muted playsinline></video>
+      </div>
+      <!-- 13: Mac ribbons at 30 -->
+      <div data-hf-id="hf-zqt4" class="cam" id="cam-s13" style="z-index: 10">
+        <video data-hf-id="hf-r0qv" id="s13" class="clip" data-start="30.1" data-duration="2" data-media-start="75.178" data-track-index="1" src="footage/mac.mp4" muted playsinline></video>
+      </div>
+      <!-- 14: XP combo break; runs under the iris -->
+      <div data-hf-id="hf-y6h2" class="cam" id="cam-s14" style="z-index: 11">
+        <video data-hf-id="hf-kqy2" id="s14" class="clip" data-start="32.1" data-duration="2.5" data-media-start="80.501" data-track-index="1" src="footage/xp.mp4" muted playsinline></video>
+      </div>
+      <!-- 15: the 3D high street from the title screen, opened by an iris -->
+      <div data-hf-id="hf-pgys" class="cam" id="cam-s15" style="z-index: 12">
+        <video data-hf-id="hf-c8tc" id="s15" class="clip" data-start="34.1" data-duration="6.9" data-media-start="0" data-track-index="1" src="footage/hub.mp4" muted playsinline></video>
+      </div>
+
+      <!-- 4: logo on Luna blue -->
+      <div data-hf-id="hf-xr6z"
+        id="logo"
+        data-composition-id="logo"
+        data-composition-src="compositions/logo.html"
+        data-start="7.8"
+        data-duration="2.3"
+        data-track-index="3"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+        style="z-index: 20"
+      ></div>
+      <!-- Words that land on the beat over the footage -->
+      <div data-hf-id="hf-b38b"
+        id="words"
+        data-composition-id="words"
+        data-composition-src="compositions/words.html"
+        data-start="0"
+        data-duration="34.45"
+        data-track-index="4"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+        style="z-index: 21"
+      ></div>
+      <!-- 15: end card over the street -->
+      <div data-hf-id="hf-70uo"
+        id="endcard"
+        data-composition-id="endcard"
+        data-composition-src="compositions/endcard.html"
+        data-start="34.1"
+        data-duration="6.9"
+        data-track-index="3"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+        style="z-index: 22"
+      ></div>
+
+      <!-- The game's own sound, cut on the same bar lines as the footage (footage/README.md) -->
+      <audio data-hf-id="hf-tsh2" id="bed" class="clip" data-start="0" data-duration="34.1" data-track-index="5" data-volume="1" src="footage/bed.wav"></audio>
+      <audio data-hf-id="hf-grng" id="startup" class="clip" data-start="34.25" data-track-index="6" data-volume="1" src="assets/reference/windows-xp/sounds/Windows%20XP%20Startup.wav"></audio>
     </div>
     <script>
       const tl = gsap.timeline({ paused: true });
-      // Example: tl.fromTo("#title", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 0);
-      window.__timelines['main'] = tl;
+
+      // 3: punch in on the error dialog (top left, centre ~384,252), landing on the call's second beat;
+      // the origin is the frame's corner, so the dialog ends up left of centre with no edge showing
+      tl.fromTo("#cam-s3", { scale: 1 }, { scale: 1.8, duration: 0.4, ease: "power3.inOut" }, 4.6 - 0.4);
+      // 9: the same on the Mac empty-Trash alert (centre ~356,280)
+      tl.fromTo("#cam-s9", { scale: 1 }, { scale: 1.8, duration: 0.4, ease: "power3.inOut" }, 18.6 - 0.4);
+
+      // 6 → 7: whip from XP to Mac across the bar line at 14.1
+      // (both cameras move as one strip, so no ground shows between them)
+      tl.fromTo("#cam-s5", { x: 0 }, { x: -1920, duration: 0.25, ease: "power3.inOut" }, 13.975);
+      tl.fromTo("#cam-s7", { x: 1920 }, { x: 0, duration: 0.25, ease: "power3.inOut" }, 13.975);
+
+      // 14 → 15: iris onto the street from the combo counter (top right) as the round ends
+      tl.fromTo(
+        "#cam-s15",
+        { clipPath: "circle(0% at 88% 6%)" },
+        { clipPath: "circle(130% at 88% 6%)", duration: 0.45, ease: "power3.in" },
+        34.1,
+      );
+
+      window.__timelines["main"] = tl;
       tl.seek(0);
     </script>
   </body>

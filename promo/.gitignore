@@ -2,3 +2,10 @@
 .hyperframes/
 # Rendered videos (large; publish separately)
 renders/
+
+# Recorded game footage and the audio bed (large; rebuild with footage/README.md)
+footage/*.mp4
+footage/*.webm
+footage/*.wav
+# Studio thumbnails
+.thumbnails/
