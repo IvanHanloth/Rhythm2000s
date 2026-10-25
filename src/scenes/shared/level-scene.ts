@@ -908,7 +908,11 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     });
     this.desk = { desk, window: editorWindow, entry };
     this.setListVisible(true);
-    const intro = new HackerIntro(() => this.closeModal());
+    const intro = new HackerIntro({
+      clock: this.context.clock,
+      output: this.output,
+      onDone: () => this.closeModal(),
+    });
     this.view.addChild(intro.view);
     this.showModal({
       update: () => intro.update(),
