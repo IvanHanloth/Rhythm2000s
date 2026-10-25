@@ -48,3 +48,4 @@ What follows from it, its costs, and the work it creates.
 | [0015](0015-cheat-code-invincible-mode.md) | A cheat code for invincible mode, ended by a coin in the arcade | Accepted |
 | [0016](0016-five-official-levels-per-scene.md) | Five official levels per scene, replacing the development charts | Accepted |
 | [0017](0017-save-slots.md) | Three save slots picked on the title screen | Accepted |
+| [0021](0021-dance-machine-scrolling-arrows.md) | A playable dance machine with arrows flying to a ring of targets | Accepted |

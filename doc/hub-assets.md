@@ -43,7 +43,7 @@ Sizes are the placeholder's (width × height × depth, m); models should come cl
 | `shop-counter` | Record shop counter | 3.0 × 1.0 × 0.7 | Back of the record shop | A tape deck and portable player go on top |
 | `cd-rack` | Rack full of CDs, vinyl and tapes | about 0.6 × 2.0 × 2.2 | Record shop (steel shelves and boxes for now) | Not wired up yet; tell me when it exists |
 | `arcade-cabinet` | Upright arcade cabinet | 0.9 × 2.2 × 0.8 | Arcade, 4 | Screen mesh `SCREEN` (for attract mode later) |
-| `dance-machine` | Dance machine (pads and screen cabinet behind) | 1.6 × 2.2 × 2.0 | Arcade | Origin at the pad centre |
+| `dance-machine` | Dance machine: a metal pad with four arrow panels (← ↓ ↑ →) round a centre plate, a safety bar behind the player, and a screen cabinet in front with a marquee and speakers | 1.6 × 2.2 × 2.0 | Arcade | Origin at the pad centre, the cabinet towards −Z; screen mesh `SCREEN` (shows the attract loop, [dance-machine.md](dance-machine.md)) |
 | `tv-stand` | Low TV cabinet | 0.5 × 0.55 × 1.2 (long side along Z) | Arcade demo stand | An old TV and console go on top |
 | `newsstand` | British newsstand (papers and magazines, a headline board) | 2.2 × 2.4 × 1.4 | South pavement | Front +Z; turned 180° in game to face the road |
 | `phone-box` | Red K6 phone box (TELEPHONE on top) | 1.0 × 2.5 × 1.0 | South pavement | As above |

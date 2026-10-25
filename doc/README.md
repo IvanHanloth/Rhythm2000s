@@ -17,6 +17,7 @@
 | [settings.md](settings.md) | Settings window in the XP / Mac system menus: latency calibration, skip tutorial, Beat Guide, keyboard shortcuts | Draft |
 | [easter-eggs.md](easter-eggs.md) | Easter eggs: the GTA IV trailer mirror Rickroll unlocked by finishing 3 charts (mail, 4chan thread, YouTube) | Draft |
 | [cheat-code.md](cheat-code.md) | Cheat code `IvanHanloth`: invincible mode, scores not saved, ended by putting the 10p coin in an arcade machine | Draft |
+| [dance-machine.md](dance-machine.md) | Dance machine in the arcade: eight directions (diagonals from two keys) flying to a pad ring, arrow keys / WASD, its own chart format, the cabinet's attract screen | Draft (prototype) |
 | [cross-dimension.md](cross-dimension.md) | Cross-dimension action prototype: a press cuts to the 3D café, the character spins on the swivel chair, back to the level | Draft (prototype) |
 | [chart-format.md](chart-format.md) | Chart JSON format: location, fields, action IDs, validation | Draft |
 | [chart-editor.md](chart-editor.md) | Chart editor on its own café computers: period program window, phrase-by-phrase timeline, play and test | Draft |
