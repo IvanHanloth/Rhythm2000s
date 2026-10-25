@@ -70,12 +70,24 @@ seconds     = total beats × 60 ÷ bpm
 
 In 4/4 with no gap a phrase is 8 beats: at 120 BPM a minute takes 14 phrases plus one bar each of count-in and outro.
 
-During development new charts may be shorter; all charts are rewritten to this rule in the polish phase.
+## Rule 4: a full level set (official levels)
+
+Set by the user on 2026-10-25 ([ADR 0016](decisions/0016-five-official-levels-per-scene.md)). Each scene ships **five** official levels, in `index.json` order from first to last.
+
+| Item | Rule |
+| --- | --- |
+| Presses | At least **100** judged presses in the responses (a two-press action counts 2; automatic releases and landings don't count) |
+| Widgets per level | Many widgets per level, **more from level to level**: the first level uses a few, the last uses every action of the scene |
+| Easy and hard widgets | Every level mixes easy one-press widgets with harder ones (two-press, holds, waits); a level is never only easy or only hard widgets |
+| Tempo | The BPM **rises from level to level**, in small steps (about 6–8 BPM), never extreme |
+| Rhythm | Presses sit on the drum grid (whole beats and off-beats `x.5`) and build on repeated patterns with variations, so phrases feel like music, not random taps |
+| New widgets | A level brings its new widgets in at section starts, several in one phrase where they fit, so the chart stops for demos only a few times |
+
+The current set and its tempos are listed in [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md#levels-charts) and [scenes/mac-2000.md](scenes/mac-2000.md#charts).
 
 ## Candidates / open questions
 
 - Checking "at least 60 seconds" at load time so `vp test` fails short official charts. Rule 2 can't be checked automatically.
 - A limit on demo failures (e.g. a stronger hint after 3), and skipping a demo midway.
 - How the demo is presented: where the caption sits, and which system widget shows it (XP balloon tip / Mac help tag…).
-- Ordering levels easy to hard within a scene, remix last (roughly how `index.json` is ordered now).
 - Whether player-made charts, if ever supported, follow these rules.

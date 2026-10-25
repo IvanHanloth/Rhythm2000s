@@ -73,7 +73,7 @@ Durations come from the design system's `beat-*` tokens and are computed from th
 | 7 | 0, 0.5, 1, 1.5, 2 |
 | 8 | 0, 0.5, 1, 2, 3 |
 
-No gap; one count-in bar, 8 phrases of 2 bars and one outro bar make 72 beats, about 36 seconds. Every action is `dialog-info` ([ADR 0006](../decisions/0006-actions-named-after-ui-classes.md)), with the response the same as the call. The chart is `public/charts/xp-popup-mvp.json` ([chart-format.md](../chart-format.md)).
+No gap; one count-in bar, 8 phrases of 2 bars and one outro bar make 72 beats, about 36 seconds. Every action is `dialog-info` ([ADR 0006](../decisions/0006-actions-named-after-ui-classes.md)), with the response the same as the call. The chart was `public/charts/xp-popup-mvp.json` ([chart-format.md](../chart-format.md)); since the official levels replaced it ([ADR 0016](../decisions/0016-five-official-levels-per-scene.md)) it is kept only as a unit-test fixture, `src/scenes/windows-xp/test-mvp-chart.json`.
 
 ## Things to watch in play-testing
 

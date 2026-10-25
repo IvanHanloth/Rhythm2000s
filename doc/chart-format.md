@@ -7,7 +7,7 @@
 ```
 public/charts/
 ├── index.json          # Chart index
-└── xp-popup-mvp.json   # One file per chart, named <chart id>.json
+└── xp-first-boot.json  # One file per chart, named <chart id>.json
 ```
 
 The game downloads `index.json` at start-up, then every chart it lists, and validates them. Edited charts take effect on reload, without a rebuild. Players can also import chart files into their browser and export any chart from the level list ([chart-import-export.md](chart-import-export.md)).
@@ -17,7 +17,7 @@ The game downloads `index.json` at start-up, then every chart it lists, and vali
 ```json
 {
   "format": 1,
-  "charts": ["xp-popup-mvp.json"]
+  "charts": ["xp-first-boot.json"]
 }
 ```
 
@@ -26,8 +26,8 @@ The game downloads `index.json` at start-up, then every chart it lists, and vali
 ```json
 {
   "format": 1,
-  "id": "xp-popup-mvp",
-  "title": "Pop-up Sweep",
+  "id": "xp-first-boot",
+  "title": "First Boot",
   "scene": "windows-xp",
   "bpm": 120,
   "beatsPerBar": 4,
@@ -158,12 +158,12 @@ Official levels also follow [level-design.md](level-design.md): easy to hard, at
 
 ## Timing limits
 
-The "Follow me / Your turn" banner switches half a beat before the call and response bars end ([prototypes/mvp.md](prototypes/mvp.md#turn-cue)), so the last press in either bar must have its Good window closed by then. At 120 BPM with Good ±130 ms (0.26 beat) the last press must come before beat 3.24, so beat 3 fits but 3.25 doesn't; two-press actions start before 2.74, the volume actions before 2.24, `chair-swivel` before 1.24 and `progress-download` before 0.24 (only beat 0). Faster tempos allow later presses. Charts that break this fail validation.
+The "Follow me / Your turn" banner switches half a beat before the call and response bars end ([prototypes/mvp.md](prototypes/mvp.md#turn-cue)), so the last press in either bar must have its Good window closed by then. At 120 BPM with Good ±130 ms (0.26 beat) the last press must come before beat 3.24, so beat 3 fits but 3.25 doesn't; two-press actions start before 2.74, the volume actions before 2.24, `chair-swivel` before 1.24 and `progress-download` before 0.24 (only beat 0). Faster tempos stretch the Good window over more of a beat, so their presses must come earlier; slower tempos allow later ones. Charts that break this fail validation.
 
 ## Validation
 
 Charts are validated at start-up; a chart with errors is skipped and its errors are printed to the browser console with field paths, e.g.
 
 ```
-Chart xp-popup-mvp.json: phrases[2].call[1].beat must be greater than the previous event's beat
+Chart xp-first-boot.json: phrases[2].call[1].beat must be greater than the previous event's beat
 ```

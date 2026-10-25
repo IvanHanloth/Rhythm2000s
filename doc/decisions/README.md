@@ -46,3 +46,4 @@ What follows from it, its costs, and the work it creates.
 | [0013](0013-combo-feedback-in-the-scene.md) | Combo feedback inside the scene, with no effect on the score | Accepted |
 | [0014](0014-rickroll-embeds-youtube.md) | The Rickroll easter egg embeds the official YouTube video | Accepted |
 | [0015](0015-cheat-code-invincible-mode.md) | A cheat code for invincible mode, ended by a coin in the arcade | Accepted |
+| [0016](0016-five-official-levels-per-scene.md) | Five official levels per scene, replacing the development charts | Accepted |

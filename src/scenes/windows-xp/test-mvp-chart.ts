@@ -1,6 +1,6 @@
-// Unit tests only: loads the real MVP chart file through every load-time check.
+// Unit tests only: loads the MVP chart (kept here as a fixture, no longer a shipped level) through every load-time check.
 
-import mvpText from '@public/charts/xp-popup-mvp.json?raw';
+import mvpText from './test-mvp-chart.json?raw';
 import { checkChartData } from '@/game/chart-loader.ts';
 import type { Chart } from '@/rhythm/chart.ts';
 

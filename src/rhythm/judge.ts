@@ -17,7 +17,7 @@ export interface JudgeWindows {
 
 /**
  * Provisional windows, see doc/prototypes/mvp.md. Widened on 2026-10-24 from 0.045 / 0.1 / 0.2 after play-testing.
- * Good can't grow past 0.13 without breaking xp-download.json's turn-cue timing (doc/chart-format.md "Timing limits").
+ * Good can't grow past 0.13 without breaking the turn-cue timing of a progress-download on beat 0 (doc/chart-format.md "Timing limits").
  */
 export const JUDGE_WINDOWS: JudgeWindows = { perfect: 0.06, good: 0.13, early: 0.25 };
 

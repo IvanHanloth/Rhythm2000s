@@ -33,7 +33,7 @@ Title ──"Start"──► walk the street ──door──► net café
 
 The level list on the computer (XP Explorer / Mac Finder) is in [level-select.md](level-select.md). Esc in a level first returns to the list, and again to the seat.
 
-Picking a level shows its intro (scene and level number, title, tempo, widgets, best score, how to play); Space or a click starts. A results window follows each round, see [results.md](results.md). The URL `#scene/chart` (e.g. `#mac-2000/mac-dock-hop`) opens a level's intro directly; `#scene` alone shows that computer's level list.
+Picking a level shows its intro (scene and level number, title, tempo, widgets, best score, how to play); Space or a click starts. A results window follows each round, see [results.md](results.md). The URL `#scene/chart` (e.g. `#mac-2000/mac-dock-party`) opens a level's intro directly; `#scene` alone shows that computer's level list.
 
 The intro takes the scene's colours: Luna for XP levels, Aqua for Mac levels.
 

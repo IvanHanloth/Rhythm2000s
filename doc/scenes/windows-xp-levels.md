@@ -90,18 +90,12 @@ Texts: the download window reads "37% of setup.exe Completed" → "Download comp
 
 ## Levels (charts)
 
-In `public/charts/index.json` order:
+In `public/charts/index.json` order, written to the [level design guidelines](../level-design.md) (rule 4: five levels, more widgets and a faster tempo each level). Each level has four sections of about six phrases; a section starts with the widgets new to it, so the chart stops for demos only there. Balloons and the volume pop-up never share a phrase, since both sit by the tray.
 
-| Chart | Title | BPM | Actions | Intent |
-| --- | --- | --- | --- | --- |
-| `xp-popup-mvp` | Pop-up Sweep | 120 | `dialog-info` | The MVP, rhythm only |
-| `xp-error-storm` | Error Storm | 128 | Error, warning, question boxes | Mixed, with off-beats |
-| `xp-yes-no` | Yes or No? | 104 | Mostly question boxes | Syncopation and off-beats |
-| `xp-crash` | Before the Blue Screen | 138 | All four boxes | Fast, up to 6 boxes in a phrase |
-| `xp-desktop-refresh` | Right-Click Refresh | 120 | `desktop-refresh`, boxes | The right-click refresh level ([windows-xp.md](windows-xp.md#desktop-context-menu-and-refresh)) |
-| `xp-tray` | Tray Balloons | 120 | `balloon-info`, `dialog-info` | Short balloon sounds for crisp clicks; alternating with boxes later |
-| `xp-minimize` | Minimize All | 112 | `window-minimize`, `dialog-warning` | A rising window sound; warning boxes join later |
-| `xp-start-menu` | Start Me Up | 116 | `start-menu`, `dialog-info` | Practises the press, half-beat, press action |
-| `xp-recycle` | Empty the Bin | 124 | `recycle-bin`, `dialog-question` | Question boxes and files alternate |
-| `xp-download` | Download Complete | 112 | `progress-download`, `volume-mute`, `dialog-info`, `balloon-info` | The first chart written to the [level design guidelines](../level-design.md): 16 phrases, about 73 s. The first two phrases each practise one new action; the middle adds off-beats and boxes around the holds; the end chains two holds and moves the download to beat 0.25. Download phrases hold only the download, alternating with dense phrases as rests; balloons and the volume pop-up never share a phrase since both sit by the tray |
-| `xp-remix-1` | XP Remix 1 | 128 | Every XP action | A new combination each phrase, everything mixed in the last two |
+| Chart | Title | BPM | Length | Presses | Widgets (in order of first use) | Shape |
+| --- | --- | --- | --- | --- | --- | --- |
+| `xp-first-boot` | First Boot | 112 | 24 phrases, 107 s | 104 | `dialog-info`, `dialog-warning`; `recycle-bin`; `progress-download` | Whole beats first, then pairs of eighths; downloads as waits between busier phrases; ends simply |
+| `xp-dial-up` | Dial-Up Groove | 118 | 24 phrases, 102 s | 112 | `dialog-question`, `dialog-info`, `balloon-info`; `window-minimize`, `dialog-error`; `progress-download` | Off-beats from the start; the second half alternates two dense phrases with a download |
+| `xp-taskbar-shuffle` | Taskbar Shuffle | 124 | 24 phrases, 97 s | 134 | `start-menu`, `dialog-warning`, `recycle-bin`; `volume-mute`, `dialog-question`; `balloon-info`, `window-minimize` | The first two-press widget; Start menus chained into runs of eighths; the volume hold as a breath |
+| `xp-blue-screen` | Blue Screen Boogie | 130 | 26 phrases, 100 s | 157 | `desktop-refresh`, `dialog-error`, `dialog-info`; `recycle-bin`, `balloon-info`, `start-menu`; `window-minimize`, `dialog-warning`; `progress-download` | Both two-press widgets side by side; mostly full bars of eighths, with downloads and a dotted phrase as rests |
+| `xp-system-overload` | System Overload | 136 | 28 phrases, 102 s | 155 | All four boxes; `window-minimize`, `recycle-bin`, `balloon-info`; `volume-mute`, `start-menu`, `desktop-refresh`; `progress-download`; `chair-swivel` | Every XP action. The swivel chair (a prototype) lands in the last section between the densest phrases |

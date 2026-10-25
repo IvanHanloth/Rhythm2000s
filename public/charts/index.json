@@ -1,28 +1,15 @@
 {
   "format": 1,
   "charts": [
-    "xp-popup-mvp.json",
-    "xp-error-storm.json",
-    "xp-yes-no.json",
-    "xp-crash.json",
-    "xp-desktop-refresh.json",
-    "xp-tray.json",
-    "xp-minimize.json",
-    "xp-start-menu.json",
-    "xp-recycle.json",
-    "xp-download.json",
-    "xp-remix-1.json",
-    "xp-chair-spin.json",
-    "mac-alert-basics.json",
-    "mac-dock-hop.json",
-    "mac-mail-rush.json",
-    "mac-minimize.json",
-    "mac-apple-menu.json",
-    "mac-trash.json",
-    "mac-save-sheet.json",
-    "mac-ichat.json",
-    "mac-volume.json",
-    "mac-remix-1.json",
-    "mac-chair-spin.json"
+    "xp-first-boot.json",
+    "xp-dial-up.json",
+    "xp-taskbar-shuffle.json",
+    "xp-blue-screen.json",
+    "xp-system-overload.json",
+    "mac-hello-again.json",
+    "mac-dock-party.json",
+    "mac-rip-mix-burn.json",
+    "mac-beach-ball.json",
+    "mac-jaguar-rush.json"
   ]
 }

@@ -17,7 +17,7 @@ The Finder toolbar's "Computer" and "Home" items made room for these three; they
 ## Import
 
 - Opens the browser's file picker for one `.json` file.
-- The file is validated exactly like a chart in `public/charts/` ([chart-format.md](chart-format.md#validation)): format, scene rules and timing limits. One difference: the `id` doesn't have to match the file name, since browsers rename repeated downloads (`xp-crash (1).json`).
+- The file is validated exactly like a chart in `public/charts/` ([chart-format.md](chart-format.md#validation)): format, scene rules and timing limits. One difference: the `id` doesn't have to match the file name, since browsers rename repeated downloads (`xp-blue-screen (1).json`).
 - A chart that fails shows an error message (XP error box "Import Failed", Mac stop alert) with up to 5 of its errors; every error is printed to the browser console.
 - **Same id**: a chart whose `id` matches a built-in chart is refused. One that matches an earlier import replaces it in place, so a chart can be edited and re-imported.
 - **Other scene**: a chart for the other computer's scene (e.g. a Mac chart imported on the XP machine) is added to that computer; the message says where it went.

@@ -101,7 +101,7 @@ vp preview     # Preview the build locally
 vp add <pkg>   # Add a dependency
 ```
 
-- Game: with the dev server running, open `http://localhost:5173/` for the 3D street (title screen and level select). Append `#scene` (e.g. `#mac-2000`) to open a scene, `#scene/chart` (e.g. `#windows-xp/xp-error-storm`) to open one level, or `#editor/scene` (e.g. `#editor/mac-2000`) to open HackerEditor; Esc in a level returns to the street. There is no dev panel ([ADR 0009](doc/decisions/0009-settings-in-system-menus.md)); player settings open from the in-game Start menu / Apple menu ([doc/settings.md](doc/settings.md)).
+- Game: with the dev server running, open `http://localhost:5173/` for the 3D street (title screen and level select). Append `#scene` (e.g. `#mac-2000`) to open a scene, `#scene/chart` (e.g. `#windows-xp/xp-dial-up`) to open one level, or `#editor/scene` (e.g. `#editor/mac-2000`) to open HackerEditor; Esc in a level returns to the street. There is no dev panel ([ADR 0009](doc/decisions/0009-settings-in-system-menus.md)); player settings open from the in-game Start menu / Apple menu ([doc/settings.md](doc/settings.md)).
 - Built-in commands like `dev`, `build` and `test` don't read `package.json` scripts. `vp build` only builds; use `vp run build` to include `tsc`.
 - Without a global `vp` (installation in the [Vite+ docs](https://viteplus.dev/guide)), prefix commands with `pnpm exec`, e.g. `pnpm exec vp dev`.
 - Run `vp check` and `vp test` before every commit. GitHub Actions (`.github/workflows/ci.yml`) runs check, test and build again on push.

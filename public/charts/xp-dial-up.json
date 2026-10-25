@@ -1,0 +1,214 @@
+{
+  "format": 1,
+  "id": "xp-dial-up",
+  "title": "Dial-Up Groove",
+  "icon": "internet-explorer",
+  "scene": "windows-xp",
+  "bpm": 118,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "balloon-info" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-question" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 0.5, "action": "dialog-question" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "balloon-info" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "balloon-info" },
+        { "beat": 1.5, "action": "balloon-info" },
+        { "beat": 2, "action": "dialog-question" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 1.5, "action": "dialog-info" },
+        { "beat": 2, "action": "balloon-info" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 0.5, "action": "dialog-question" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "balloon-info" },
+        { "beat": 2.5, "action": "balloon-info" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 3, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 1, "action": "dialog-question" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 2.5, "action": "dialog-error" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-error" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 2, "action": "balloon-info" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "window-minimize" },
+        { "beat": 1.5, "action": "dialog-error" },
+        { "beat": 2, "action": "balloon-info" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "dialog-error" },
+        { "beat": 2.5, "action": "balloon-info" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "window-minimize" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "balloon-info" },
+        { "beat": 2.5, "action": "balloon-info" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [{ "beat": 0, "action": "progress-download" }]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 1.5, "action": "dialog-error" },
+        { "beat": 2, "action": "dialog-question" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 2.5, "action": "window-minimize" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [{ "beat": 0, "action": "progress-download" }]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-error" },
+        { "beat": 1, "action": "balloon-info" },
+        { "beat": 1.5, "action": "dialog-question" },
+        { "beat": 2, "action": "dialog-error" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 0.5, "action": "balloon-info" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 1.5, "action": "balloon-info" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 2.5, "action": "dialog-info" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [{ "beat": 0, "action": "progress-download" }]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "window-minimize" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 1.5, "action": "dialog-error" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 2.5, "action": "dialog-question" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "balloon-info" },
+        { "beat": 0.5, "action": "balloon-info" },
+        { "beat": 1.5, "action": "dialog-error" },
+        { "beat": 2, "action": "dialog-question" },
+        { "beat": 3, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [{ "beat": 0, "action": "progress-download" }]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-error" },
+        { "beat": 1, "action": "dialog-question" },
+        { "beat": 1.5, "action": "dialog-question" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 2.5, "action": "window-minimize" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-error" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    }
+  ]
+}

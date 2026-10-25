@@ -8,5 +8,4 @@
 - [Hub art direction](feedback-hub-art-direction.md) — no blocky or code-built figures, realistic and bright, English only in the world, the DeepSeek whale girl GLB as lead
 - [Vitest chart glob cache](project-vitest-glob-cache.md) — after adding a chart, a stale node_modules/.vitest-cache makes chart-files report a mismatched index
 - [UK hackathon](project-uk-hackathon.md) — a UK hackathon entry; the street uses a British high street around 2000
-- [Chart length during development](project-dev-phase-chart-length.md) — new charts needn't reach 1 minute until the polish phase rewrites them all
 - [English everywhere](feedback-english-everywhere.md) — code, comments, docs, memory and commit messages are all in English

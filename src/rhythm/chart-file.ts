@@ -220,7 +220,7 @@ function checkEvents(
 
 export interface ChartIndex {
   format: typeof CHART_FORMAT_VERSION;
-  /** Chart file names, e.g. "xp-popup-mvp.json" */
+  /** Chart file names, e.g. "xp-first-boot.json" */
   charts: string[];
 }
 
