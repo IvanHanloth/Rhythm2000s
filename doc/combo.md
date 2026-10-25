@@ -23,8 +23,8 @@ A GeoCities-style hit counter: black digit cells with white digits and the capti
 
 | Tier | From | Windows XP | Mac |
 | --- | --- | --- | --- |
-| 1 | 8 | Desktop icons hop on each beat | Glassy Aqua bubbles rise up the wallpaper from the Dock; on each beat a new row starts and the oldest row pops |
-| 2 | 16 | The wallpaper turns into a Windows Media Player visualization: Bliss dims behind it, glowing swirls turn slowly with a ring pulsing out on each beat, and spectrum bars along the bottom jump on each beat; "HOT!" beside the counter | The menu bar and the Dock shelf glow on each beat; "HOT!" beside the counter |
+| 1 | 8 | Desktop icons hop on each beat | The menu bar and the Dock shelf glow on each beat |
+| 2 | 16 | The wallpaper turns into a Windows Media Player visualization: Bliss dims behind it, glowing swirls turn slowly with a ring pulsing out on each beat, and spectrum bars along the bottom jump on each beat; "HOT!" beside the counter | Glassy Aqua bubbles rise up the wallpaper from the Dock; on each beat a new row starts and the oldest row pops; "HOT!" beside the counter |
 | 3 | 30 | The Solitaire win cascade: cards fly off the four foundation piles at the top right one by one, every other beat, and bounce across the desktop, landing on each beat and leaving a trail of copies | The Flurry screen saver (Mac OS X 10.2's default): the wallpaper dims and glowing ribbons stream and curl out of the middle of the screen, flaring on each beat |
 
 - Effects add up: tier 3 keeps the tier 1 and 2 effects.

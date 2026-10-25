@@ -1,5 +1,5 @@
-// Combo effects on the Mac desktop (doc/combo.md "Tiers"): tier 1 sends Aqua bubbles up the wallpaper, tier 2 makes
-// the menu bar and the Dock shelf glow on each beat, tier 3 dims the wallpaper for the Flurry screen saver's ribbons.
+// Combo effects on the Mac desktop (doc/combo.md "Tiers"): tier 1 makes the menu bar and the Dock shelf glow on each
+// beat, tier 2 sends Aqua bubbles up the wallpaper, tier 3 dims the wallpaper for the Flurry screen saver's ribbons.
 // Nothing moves the Dock icons, since that is the dock-bounce action. Everything lies right over the wallpaper, under
 // every window and the Dock, so nothing covers a target. A break of COMBO_BREAK_MIN or more shows the spinning wait
 // cursor for a beat ("Combo break"). Drawn from beats and audio time.
@@ -66,7 +66,7 @@ export class MacComboEffects {
     const { screenWidth, screenHeight } = this.options;
 
     this.bubbles.clear();
-    const bubbleStart = this.reachedAt[1] ?? null;
+    const bubbleStart = this.reachedAt[2] ?? null;
     if (bubbleStart !== null) {
       const area = {
         width: screenWidth,
@@ -77,7 +77,7 @@ export class MacComboEffects {
       drawBubbles(this.bubbles, bubblesAt(bubbleStart, beat, area), fade);
     }
 
-    const glowStart = this.reachedAt[2] ?? null;
+    const glowStart = this.reachedAt[1] ?? null;
     this.glow.visible = glowStart !== null;
     if (glowStart !== null) {
       const pulse = (1 - phase) ** 2;

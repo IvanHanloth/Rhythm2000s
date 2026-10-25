@@ -1,4 +1,4 @@
-// Combo tier 1 on the Mac desktop (doc/combo.md "Mac details"): glassy Aqua bubbles. On each beat a row starts just
+// Combo tier 2 on the Mac desktop (doc/combo.md "Mac details"): glassy Aqua bubbles. On each beat a row starts just
 // above the Dock; each bubble rises to just under the menu bar over RISE_BEATS, swaying a little, and pops on the beat
 // it arrives, so every beat one row starts and one pops. Positions come from the beat alone.
 
