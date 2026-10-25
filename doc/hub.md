@@ -82,7 +82,7 @@ Shop names, layout and text are placeholders the user hasn't confirmed:
 - **Street ends**: a yellow roadworks barrier closes each end, "ROAD CLOSED" on the street side; the east one has "Cheat Code: IvanHanloth" on the back ([cheat-code.md](cheat-code.md)).
 - Whether the record shop and arcade become entries to new scenes is open.
 - **British and millennial details**:
-  - Street: two banners across the road (WELCOME TO THE NEW MILLENNIUM · 2000, HIGH STREET MILLENNIUM FESTIVAL), an LED ticker on a south rooftop, two rooftop billboards (512K broadband, PC 2000), a CRT TV wall at the electrical shop, a red phone box, a red pillar box, a newsstand, a bus stop, a HIGH STREET sign, the hanging sign of THE MILLENNIUM ARMS pub.
+  - Street: two banners across the road (WELCOME TO THE NEW MILLENNIUM · 2000, HIGH STREET MILLENNIUM FESTIVAL), an LED ticker on a south rooftop, two rooftop billboards (512K broadband, PC 2000), a CRT TV wall at the electrical shop, a red phone box, a red pillar box, a newsstand, a kerbside bus shelter (glass back to the road, open to the pavement, so it never blocks a shopfront) with its stop flag on a pole at the kerb, a HIGH STREET sign, the hanging sign of THE MILLENNIUM ARMS pub.
   - South side shops: video rental, mobiles, one-hour photo, newsagent, fish and chips, computer superstore, bookies, off-licence; flyers on the shutters for PC builds, top-ups, polyphonic ringtones, Flash games, digital cameras and video rental, priced in pounds.
   - Inside: the café's "OPEN 7 DAYS" neon and Y2K READY / broadband posters, the arcade's "10p A GO" ticker, an old beige laptop on the café desk.
 - **Atmosphere**: a gradient blue sky, pale pink-purple haze in the distance, drifting motes, slightly whitened edges.

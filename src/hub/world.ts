@@ -755,10 +755,11 @@ function buildSouthSide(b: Builder): void {
     "A red pillar box. Last collection today: 5:30 pm. You've missed it.",
   ]);
 
-  // Bus stop (custom slot bus-stop)
+  // Bus stop (custom slot bus-stop): a kerbside shelter, glass back to the road and open to the pavement, so it
+  // leaves the shopfronts clear and a walkway behind it; the stop flag stands on its own pole at the kerb
   const bx = 19;
-  const bz = 6.3;
-  b.custom('bus-stop', bx, bz, Math.PI, (p) => {
+  const bz = 5.05;
+  b.custom('bus-stop', bx, bz, 0, (p) => {
     const metal = b.plain(C.metal, 0.35, 0.7);
     p.add(placeholderBox(4, 0.1, 1.4, 0, 2.5, 0, metal));
     for (const dx of [-1.8, 1.8]) p.add(placeholderBox(0.1, 2.5, 0.1, dx, 0, -0.5, metal));
@@ -780,7 +781,7 @@ function buildSouthSide(b: Builder): void {
     );
     p.add(placeholderBox(2.4, 0.45, 0.4, 0, 0, -0.25, metal));
   });
-  b.colliders.push(boxAt(bx, bz + 0.6, 3.8, 0.1), boxAt(bx, bz + 0.25, 2.4, 0.4));
+  b.colliders.push(boxAt(bx, bz - 0.6, 3.8, 0.1), boxAt(bx, bz - 0.25, 2.4, 0.4));
   const busSign = signTexture({
     text: 'BUS STOP',
     sub: '24 · CITY CENTRE — UNIVERSITY',
@@ -788,8 +789,23 @@ function buildSouthSide(b: Builder): void {
     width: 256,
     height: 96,
   });
-  b.panel(1.4, 0.5, bx - 1.2, 2.9, bz - 0.2, Math.PI, b.glow(busSign, '#ffffff', 1.3));
-  b.read('Bus stop', 'Examine', bx, bz - 0.7, [
+  // The flag sticks out at right angles to the kerb, readable from both directions along the street
+  const flagX = bx + 2.7;
+  const flagZ = ROAD_HALF_WIDTH + 0.35;
+  b.box(0.08, 3.1, 0.08, flagX, 0, flagZ, b.plain(C.metal, 0.35, 0.7));
+  for (const side of [-1, 1]) {
+    b.panel(
+      0.9,
+      0.34,
+      flagX + side * 0.045,
+      2.75,
+      flagZ + 0.5,
+      (side * Math.PI) / 2,
+      b.glow(busSign, '#ffffff', 1.1),
+    );
+  }
+  b.colliders.push(boxAt(flagX, flagZ, 0.2, 0.2));
+  b.read('Bus stop', 'Examine', bx, bz + 1.0, [
     'Route 24 to the city centre and the university. Someone has scribbled over the next bus time: "EVENTUALLY".',
   ]);
 }

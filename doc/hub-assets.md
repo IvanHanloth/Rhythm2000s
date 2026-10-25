@@ -49,7 +49,7 @@ Sizes are the placeholder's (width × height × depth, m); models should come cl
 | `phone-box` | Red K6 phone box (TELEPHONE on top) | 1.0 × 2.5 × 1.0 | South pavement | As above |
 | `pillar-box` | Red cylindrical pillar box | 0.6 × 1.5 × 0.6 | South pavement | As above |
 | `belisha-beacon` | Belisha beacon (striped pole, yellow globe) | 0.2 × 2.7 × 0.2 | Both ends of the zebra crossing, 4 | Make the globe a mesh named `BEACON` (flashing not wired up yet; tell me when it exists) |
-| `bus-stop` | British bus shelter (glass back, roof, stop sign) | 4.0 × 2.6 × 1.4 | South pavement | As above |
+| `bus-stop` | British bus shelter (glass back, roof, bench) | 4.0 × 2.6 × 1.4 | South pavement at the kerb | Front +Z; stands with its glass back to the road and its open side to the shops (not turned). The stop flag is a separate pole |
 
 ## Possibly later
 
