@@ -9,3 +9,4 @@
 - [Vitest chart glob cache](project-vitest-glob-cache.md) — after adding a chart, a stale node_modules/.vitest-cache makes chart-files report a mismatched index
 - [UK hackathon](project-uk-hackathon.md) — a UK hackathon entry; the street uses a British high street around 2000
 - [English everywhere](feedback-english-everywhere.md) — code, comments, docs, memory and commit messages are all in English
+- [Promo assets junction on Windows](project-promo-assets-junction-windows.md) — promo/assets checks out as a text file without symlink rights; use a junction + skip-worktree
