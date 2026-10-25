@@ -1,0 +1,208 @@
+{
+  "format": 1,
+  "id": "xp-f5-fever",
+  "title": "F5 Fever",
+  "icon": "my-documents",
+  "scene": "windows-xp",
+  "bpm": 118,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "desktop-refresh" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 2, "action": "desktop-refresh" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "recycle-bin" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 2, "action": "desktop-refresh" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "desktop-refresh" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 1.5, "action": "recycle-bin" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 1, "action": "desktop-refresh" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "desktop-refresh" },
+        { "beat": 1, "action": "desktop-refresh" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 2.5, "action": "recycle-bin" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-warning" },
+        { "beat": 1, "action": "balloon-info" },
+        { "beat": 2, "action": "dialog-error" },
+        { "beat": 2.5, "action": "desktop-refresh" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 1.5, "action": "balloon-info" },
+        { "beat": 2, "action": "desktop-refresh" },
+        { "beat": 3, "action": "dialog-warning" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "desktop-refresh" },
+        { "beat": 1, "action": "dialog-warning" },
+        { "beat": 1.5, "action": "dialog-warning" },
+        { "beat": 2, "action": "dialog-error" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "balloon-info" },
+        { "beat": 0.5, "action": "balloon-info" },
+        { "beat": 1.5, "action": "dialog-info" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-warning" },
+        { "beat": 0.5, "action": "dialog-warning" },
+        { "beat": 1, "action": "desktop-refresh" },
+        { "beat": 2, "action": "dialog-error" },
+        { "beat": 2.5, "action": "dialog-error" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "desktop-refresh" },
+        { "beat": 1, "action": "balloon-info" },
+        { "beat": 2, "action": "desktop-refresh" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [{ "beat": 0, "action": "progress-download" }]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-error" },
+        { "beat": 1, "action": "dialog-warning" },
+        { "beat": 2, "action": "desktop-refresh" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "recycle-bin" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 1.5, "action": "desktop-refresh" },
+        { "beat": 2.5, "action": "balloon-info" },
+        { "beat": 3, "action": "dialog-warning" }
+      ]
+    },
+    {
+      "call": [{ "beat": 0, "action": "progress-download" }]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 0.5, "action": "dialog-warning" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 1.5, "action": "balloon-info" },
+        { "beat": 2, "action": "desktop-refresh" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "desktop-refresh" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 1.5, "action": "recycle-bin" },
+        { "beat": 2, "action": "dialog-error" },
+        { "beat": 2.5, "action": "dialog-error" },
+        { "beat": 3, "action": "dialog-warning" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-warning" },
+        { "beat": 1.5, "action": "dialog-error" },
+        { "beat": 2, "action": "desktop-refresh" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "desktop-refresh" },
+        { "beat": 1, "action": "desktop-refresh" },
+        { "beat": 2, "action": "desktop-refresh" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [{ "beat": 0, "action": "progress-download" }]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 1.5, "action": "recycle-bin" },
+        { "beat": 2, "action": "desktop-refresh" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "balloon-info" },
+        { "beat": 0.5, "action": "balloon-info" },
+        { "beat": 1, "action": "dialog-warning" },
+        { "beat": 1.5, "action": "desktop-refresh" },
+        { "beat": 2.5, "action": "dialog-error" },
+        { "beat": 3, "action": "dialog-warning" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "desktop-refresh" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 1.5, "action": "dialog-error" },
+        { "beat": 2, "action": "dialog-warning" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # 0016 Five official levels per scene, replacing the development charts
 
-- Status: Accepted
+- Status: Accepted; extended to ten levels per scene by [ADR 0018](0018-ten-official-levels-per-scene.md)
 - Date: 2026-10-25
 
 ## Context

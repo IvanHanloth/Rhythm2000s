@@ -1,0 +1,252 @@
+{
+  "format": 1,
+  "id": "xp-spin-cycle",
+  "title": "Spin Cycle",
+  "icon": "pinball",
+  "scene": "windows-xp",
+  "bpm": 133,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "chair-swivel" },
+        { "beat": 2.5, "action": "dialog-info" },
+        { "beat": 3, "action": "dialog-warning" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 0.5, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-warning" },
+        { "beat": 2, "action": "dialog-warning" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-warning" },
+        { "beat": 0.5, "action": "dialog-info" },
+        { "beat": 1, "action": "chair-swivel" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-warning" },
+        { "beat": 0.5, "action": "dialog-warning" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 1.5, "action": "dialog-warning" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-warning" },
+        { "beat": 0.5, "action": "dialog-info" },
+        { "beat": 1, "action": "dialog-warning" },
+        { "beat": 2, "action": "dialog-info" },
+        { "beat": 2.5, "action": "dialog-info" },
+        { "beat": 3, "action": "dialog-warning" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 0.5, "action": "dialog-warning" },
+        { "beat": 1, "action": "dialog-info" },
+        { "beat": 1.5, "action": "dialog-info" },
+        { "beat": 2, "action": "dialog-warning" },
+        { "beat": 3, "action": "dialog-warning" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "start-menu" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 1.5, "action": "dialog-error" },
+        { "beat": 2, "action": "balloon-info" },
+        { "beat": 3, "action": "balloon-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "recycle-bin" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "start-menu" },
+        { "beat": 2, "action": "dialog-error" },
+        { "beat": 2.5, "action": "dialog-warning" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "start-menu" },
+        { "beat": 1, "action": "balloon-info" },
+        { "beat": 1.5, "action": "balloon-info" },
+        { "beat": 2, "action": "start-menu" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "balloon-info" },
+        { "beat": 0.5, "action": "balloon-info" },
+        { "beat": 1, "action": "start-menu" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 2.5, "action": "recycle-bin" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-warning" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "start-menu" },
+        { "beat": 2, "action": "start-menu" },
+        { "beat": 3, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 0.5, "action": "dialog-info" },
+        { "beat": 1, "action": "chair-swivel" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "volume-mute" },
+        { "beat": 1.5, "action": "desktop-refresh" },
+        { "beat": 2.5, "action": "window-minimize" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "desktop-refresh" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "start-menu" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 1, "action": "desktop-refresh" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 2.5, "action": "desktop-refresh" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "window-minimize" },
+        { "beat": 1, "action": "volume-mute" },
+        { "beat": 2.5, "action": "desktop-refresh" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "desktop-refresh" },
+        { "beat": 1, "action": "start-menu" },
+        { "beat": 2, "action": "desktop-refresh" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-warning" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "volume-mute" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "chair-swivel" },
+        { "beat": 2.5, "action": "recycle-bin" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "start-menu" },
+        { "beat": 1, "action": "desktop-refresh" },
+        { "beat": 2, "action": "start-menu" },
+        { "beat": 3, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "volume-mute" },
+        { "beat": 1.5, "action": "recycle-bin" },
+        { "beat": 2, "action": "start-menu" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "dialog-info" },
+        { "beat": 1, "action": "chair-swivel" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "balloon-info" },
+        { "beat": 0.5, "action": "balloon-info" },
+        { "beat": 1, "action": "desktop-refresh" },
+        { "beat": 2, "action": "start-menu" },
+        { "beat": 3, "action": "dialog-warning" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "desktop-refresh" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 1.5, "action": "recycle-bin" },
+        { "beat": 2, "action": "volume-mute" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-info" },
+        { "beat": 0.5, "action": "dialog-warning" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "start-menu" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "chair-swivel" },
+        { "beat": 2.5, "action": "start-menu" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-warning" },
+        { "beat": 0.5, "action": "dialog-warning" },
+        { "beat": 1, "action": "desktop-refresh" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 2.5, "action": "desktop-refresh" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-error" },
+        { "beat": 1, "action": "start-menu" },
+        { "beat": 2, "action": "desktop-refresh" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    }
+  ]
+}

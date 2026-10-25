@@ -224,6 +224,24 @@
       ]
     },
     {
+      "call": [
+        { "beat": 0, "action": "balloon-info" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "start-menu" },
+        { "beat": 2, "action": "desktop-refresh" },
+        { "beat": 3, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "window-minimize" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 1.5, "action": "start-menu" },
+        { "beat": 2.5, "action": "desktop-refresh" }
+      ]
+    },
+    {
       "call": [{ "beat": 0, "action": "progress-download" }]
     },
     {

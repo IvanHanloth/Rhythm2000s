@@ -90,12 +90,17 @@ Texts: the download window reads "37% of setup.exe Completed" → "Download comp
 
 ## Levels (charts)
 
-In `public/charts/index.json` order, written to the [level design guidelines](../level-design.md) (rule 4: five levels, more widgets and a faster tempo each level). Each level has four sections of about six phrases; a section starts with the widgets new to it, so the chart stops for demos only there. Balloons and the volume pop-up never share a phrase, since both sit by the tray.
+In `public/charts/index.json` order, written to the [level design guidelines](../level-design.md) (rule 4: ten levels, more widgets and a faster tempo each level). Each level has three or four sections of about six phrases; a section starts with the widgets new to it, so the chart stops for demos only there. Balloons and the volume pop-up never share a phrase, since both sit by the tray.
 
-| Chart | Title | BPM | Length | Presses | Widgets (in order of first use) | Shape |
-| --- | --- | --- | --- | --- | --- | --- |
-| `xp-first-boot` | First Boot | 112 | 24 phrases, 107 s | 104 | `dialog-info`, `dialog-warning`; `recycle-bin`; `progress-download` | Whole beats first, then pairs of eighths; downloads as waits between busier phrases; ends simply |
-| `xp-dial-up` | Dial-Up Groove | 118 | 24 phrases, 102 s | 112 | `dialog-question`, `dialog-info`, `balloon-info`; `window-minimize`, `dialog-error`; `progress-download` | Off-beats from the start; the second half alternates two dense phrases with a download |
-| `xp-taskbar-shuffle` | Taskbar Shuffle | 124 | 24 phrases, 97 s | 134 | `start-menu`, `dialog-warning`, `recycle-bin`; `volume-mute`, `dialog-question`; `balloon-info`, `window-minimize` | The first two-press widget; Start menus chained into runs of eighths; the volume hold as a breath |
-| `xp-blue-screen` | Blue Screen Boogie | 130 | 26 phrases, 100 s | 157 | `desktop-refresh`, `dialog-error`, `dialog-info`; `recycle-bin`, `balloon-info`, `start-menu`; `window-minimize`, `dialog-warning`; `progress-download` | Both two-press widgets side by side; mostly full bars of eighths, with downloads and a dotted phrase as rests |
-| `xp-system-overload` | System Overload | 136 | 28 phrases, 102 s | 155 | All four boxes; `window-minimize`, `recycle-bin`, `balloon-info`; `volume-mute`, `start-menu`, `desktop-refresh`; `progress-download`; `chair-swivel` | Every XP action. The swivel chair (a prototype) lands in the last section between the densest phrases |
+| # | Chart | Title | BPM | Length | Presses | Widgets (by section) | Shape |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `xp-power-on` | Power On | 100 | 20 phrases, 101 s | 72 | `dialog-info`, `balloon-info`; `progress-download` | The gentle opener: whole beats, a few pairs of eighths, downloads as waits |
+| 2 | `xp-first-boot` | First Boot | 106 | 24 phrases, 113 s | 104 | `dialog-info`, `dialog-warning`; `recycle-bin`; `progress-download` | Whole beats first, then pairs of eighths; ends simply |
+| 3 | `xp-popup-blocker` | Pop-up Blocker | 110 | 24 phrases, 109 s | 117 | `window-minimize`, `dialog-error`; `dialog-question`, `recycle-bin`; `volume-mute` | Browser windows and errors; the first hold (the volume slider) as a breath |
+| 4 | `xp-dial-up` | Dial-Up Groove | 114 | 24 phrases, 105 s | 118 | `dialog-question`, `dialog-info`, `balloon-info`; `window-minimize`, `dialog-error`; `progress-download` | Off-beats from the start; downloads between dense phrases |
+| 5 | `xp-f5-fever` | F5 Fever | 118 | 24 phrases, 102 s | 128 | `desktop-refresh`, `dialog-info`, `recycle-bin`; `dialog-warning`, `balloon-info`, `dialog-error`; `progress-download` | The first two-press widget, right-click refresh, chained into runs of eighths |
+| 6 | `xp-taskbar-shuffle` | Taskbar Shuffle | 122 | 24 phrases, 98 s | 134 | `start-menu`, `dialog-warning`, `recycle-bin`; `volume-mute`, `dialog-question`; `balloon-info`, `window-minimize` | Start menus chained into runs of eighths; the volume hold as a breath |
+| 7 | `xp-lan-party` | LAN Party | 126 | 26 phrases, 103 s | 151 | `start-menu`, `window-minimize`, `dialog-error`; `balloon-info`, `dialog-question`, `recycle-bin`; `volume-mute`, `dialog-warning` | Start menus between every other widget; a longer climax |
+| 8 | `xp-blue-screen` | Blue Screen Boogie | 130 | 26 phrases, 100 s | 157 | `desktop-refresh`, `dialog-error`, `dialog-info`; `recycle-bin`, `balloon-info`, `start-menu`; `window-minimize`, `dialog-warning`; `progress-download` | Both two-press widgets side by side; mostly full bars of eighths |
+| 9 | `xp-spin-cycle` | Spin Cycle | 133 | 28 phrases, 105 s | 155 | `chair-swivel`, `dialog-info`, `dialog-warning`; `start-menu`, `recycle-bin`, `dialog-error`, `balloon-info`; `volume-mute`, `desktop-refresh`, `window-minimize` | Built around the swivel chair (a prototype): a spin from the first phrase, then one between each burst |
+| 10 | `xp-system-overload` | System Overload | 136 | 30 phrases, 109 s | 169 | All four boxes; `window-minimize`, `recycle-bin`, `balloon-info`; `volume-mute`, `start-menu`, `desktop-refresh`; `progress-download`; `chair-swivel` | Every XP action, the densest climax |

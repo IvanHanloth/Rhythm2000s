@@ -1,0 +1,227 @@
+{
+  "format": 1,
+  "id": "xp-popup-blocker",
+  "title": "Pop-up Blocker",
+  "icon": "internet",
+  "scene": "windows-xp",
+  "bpm": 110,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 2, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 2, "action": "dialog-error" },
+        { "beat": 3, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-error" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 2, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 2.5, "action": "dialog-error" },
+        { "beat": 3, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 3, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "window-minimize" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "dialog-error" },
+        { "beat": 3, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 3, "action": "dialog-question" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "recycle-bin" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 2, "action": "dialog-question" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 0.5, "action": "dialog-question" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 1.5, "action": "recycle-bin" },
+        { "beat": 2, "action": "dialog-question" },
+        { "beat": 3, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "recycle-bin" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 1.5, "action": "recycle-bin" },
+        { "beat": 2, "action": "dialog-question" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-question" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 2.5, "action": "recycle-bin" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "volume-mute" },
+        { "beat": 1.5, "action": "dialog-error" },
+        { "beat": 2, "action": "dialog-error" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 0.5, "action": "dialog-question" },
+        { "beat": 1, "action": "recycle-bin" },
+        { "beat": 2, "action": "volume-mute" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "volume-mute" },
+        { "beat": 1.5, "action": "recycle-bin" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 2.5, "action": "recycle-bin" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "window-minimize" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 2, "action": "volume-mute" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-error" },
+        { "beat": 1, "action": "dialog-question" },
+        { "beat": 1.5, "action": "dialog-question" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "volume-mute" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 2.5, "action": "dialog-question" },
+        { "beat": 3, "action": "dialog-error" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "recycle-bin" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 1.5, "action": "dialog-error" },
+        { "beat": 2, "action": "dialog-question" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "volume-mute" },
+        { "beat": 1.5, "action": "dialog-question" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 3, "action": "recycle-bin" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-minimize" },
+        { "beat": 0.5, "action": "window-minimize" },
+        { "beat": 1, "action": "dialog-error" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 2.5, "action": "recycle-bin" },
+        { "beat": 3, "action": "dialog-question" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "dialog-error" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "volume-mute" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-question" },
+        { "beat": 0.5, "action": "recycle-bin" },
+        { "beat": 1, "action": "dialog-question" },
+        { "beat": 2, "action": "window-minimize" },
+        { "beat": 2.5, "action": "dialog-error" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dialog-error" },
+        { "beat": 0.5, "action": "window-minimize" },
+        { "beat": 1, "action": "dialog-question" },
+        { "beat": 2, "action": "recycle-bin" },
+        { "beat": 2.5, "action": "recycle-bin" },
+        { "beat": 3, "action": "window-minimize" }
+      ]
+    }
+  ]
+}

@@ -4,7 +4,7 @@
   "title": "Rip. Mix. Burn.",
   "icon": "itunes",
   "scene": "mac-2000",
-  "bpm": 120,
+  "bpm": 118,
   "beatsPerBar": 4,
   "countInBars": 1,
   "outroBars": 1,
@@ -111,6 +111,7 @@
     {
       "call": [
         { "beat": 0, "action": "window-miniaturize" },
+        { "beat": 0.5, "action": "window-miniaturize" },
         { "beat": 1, "action": "window-miniaturize" },
         { "beat": 2, "action": "dock-trash" },
         { "beat": 2.5, "action": "dock-trash" },
@@ -185,6 +186,7 @@
     {
       "call": [
         { "beat": 0, "action": "ichat-message" },
+        { "beat": 0.5, "action": "ichat-message" },
         { "beat": 1, "action": "dock-bounce" },
         { "beat": 1.5, "action": "dock-bounce" },
         { "beat": 2, "action": "menu-volume" }

@@ -1,15 +1,25 @@
 {
   "format": 1,
   "charts": [
+    "xp-power-on.json",
     "xp-first-boot.json",
+    "xp-popup-blocker.json",
     "xp-dial-up.json",
+    "xp-f5-fever.json",
     "xp-taskbar-shuffle.json",
+    "xp-lan-party.json",
     "xp-blue-screen.json",
+    "xp-spin-cycle.json",
     "xp-system-overload.json",
+    "mac-startup-chime.json",
     "mac-hello-again.json",
+    "mac-buddy-list.json",
     "mac-dock-party.json",
+    "mac-save-changes.json",
     "mac-rip-mix-burn.json",
+    "mac-software-update.json",
     "mac-beach-ball.json",
+    "mac-chair-twirl.json",
     "mac-jaguar-rush.json"
   ]
 }

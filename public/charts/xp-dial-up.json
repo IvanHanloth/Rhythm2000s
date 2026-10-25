@@ -4,7 +4,7 @@
   "title": "Dial-Up Groove",
   "icon": "internet-explorer",
   "scene": "windows-xp",
-  "bpm": 118,
+  "bpm": 114,
   "beatsPerBar": 4,
   "countInBars": 1,
   "outroBars": 1,
@@ -188,7 +188,14 @@
       ]
     },
     {
-      "call": [{ "beat": 0, "action": "progress-download" }]
+      "call": [
+        { "beat": 0, "action": "balloon-info" },
+        { "beat": 0.5, "action": "dialog-error" },
+        { "beat": 1, "action": "window-minimize" },
+        { "beat": 1.5, "action": "window-minimize" },
+        { "beat": 2, "action": "dialog-question" },
+        { "beat": 3, "action": "dialog-info" }
+      ]
     },
     {
       "call": [
@@ -207,6 +214,7 @@
         { "beat": 0.5, "action": "dialog-error" },
         { "beat": 1, "action": "dialog-error" },
         { "beat": 2, "action": "window-minimize" },
+        { "beat": 2.5, "action": "balloon-info" },
         { "beat": 3, "action": "balloon-info" }
       ]
     }

@@ -72,14 +72,15 @@ In 4/4 with no gap a phrase is 8 beats: at 120 BPM a minute takes 14 phrases plu
 
 ## Rule 4: a full level set (official levels)
 
-Set by the user on 2026-10-25 ([ADR 0016](decisions/0016-five-official-levels-per-scene.md)). Each scene ships **five** official levels, in `index.json` order from first to last.
+Set by the user on 2026-10-25 ([ADR 0016](decisions/0016-five-official-levels-per-scene.md), extended to ten levels by [ADR 0018](decisions/0018-ten-official-levels-per-scene.md)). Each scene ships **ten** official levels, in `index.json` order from first to last.
 
 | Item | Rule |
 | --- | --- |
-| Presses | At least **100** judged presses in the responses (a two-press action counts 2; automatic releases and landings don't count) |
+| Presses | At least **100** judged presses in the responses (a two-press action counts 2; automatic releases and landings don't count). **The first level may have fewer** |
 | Widgets per level | Many widgets per level, **more from level to level**: the first level uses a few, the last uses every action of the scene |
 | Easy and hard widgets | Every level mixes easy one-press widgets with harder ones (two-press, holds, waits); a level is never only easy or only hard widgets |
-| Tempo | The BPM **rises from level to level**, in small steps (about 6–8 BPM), never extreme |
+| Tempo | The BPM **rises from level to level**, in small steps (about 3–6 BPM), never extreme; the first level is the slowest, around 100 BPM |
+| Swivel chair | The second-to-last level is built around `chair-swivel` |
 | Rhythm | Presses sit on the drum grid (whole beats and off-beats `x.5`) and build on repeated patterns with variations, so phrases feel like music, not random taps |
 | New widgets | A level brings its new widgets in at section starts, several in one phrase where they fit, so the chart stops for demos only a few times |
 

@@ -4,7 +4,7 @@
   "title": "First Boot",
   "icon": "windows-logo",
   "scene": "windows-xp",
-  "bpm": 112,
+  "bpm": 106,
   "beatsPerBar": 4,
   "countInBars": 1,
   "outroBars": 1,

@@ -1,0 +1,176 @@
+{
+  "format": 1,
+  "id": "mac-startup-chime",
+  "title": "Startup Chime",
+  "icon": "finder",
+  "scene": "mac-2000",
+  "bpm": 96,
+  "beatsPerBar": 4,
+  "countInBars": 1,
+  "outroBars": 1,
+  "responseGapBeats": 0,
+  "phrases": [
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 2, "action": "window-miniaturize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-miniaturize" },
+        { "beat": 1, "action": "window-miniaturize" },
+        { "beat": 2, "action": "alert-note" },
+        { "beat": 3, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "window-miniaturize" },
+        { "beat": 2, "action": "window-miniaturize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-miniaturize" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 2, "action": "window-miniaturize" },
+        { "beat": 3, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 2, "action": "alert-note" },
+        { "beat": 3, "action": "window-miniaturize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-miniaturize" },
+        { "beat": 1, "action": "window-miniaturize" },
+        { "beat": 2, "action": "alert-note" },
+        { "beat": 2.5, "action": "alert-note" },
+        { "beat": 3, "action": "window-miniaturize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-volume" },
+        { "beat": 1.5, "action": "alert-note" },
+        { "beat": 2, "action": "alert-note" },
+        { "beat": 3, "action": "window-miniaturize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "window-miniaturize" },
+        { "beat": 2, "action": "menu-volume" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-volume" },
+        { "beat": 1.5, "action": "window-miniaturize" },
+        { "beat": 2, "action": "window-miniaturize" },
+        { "beat": 3, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-miniaturize" },
+        { "beat": 0.5, "action": "window-miniaturize" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 2, "action": "menu-volume" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 1.5, "action": "menu-volume" },
+        { "beat": 3, "action": "window-miniaturize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-volume" },
+        { "beat": 1.5, "action": "alert-note" },
+        { "beat": 2, "action": "window-miniaturize" },
+        { "beat": 2.5, "action": "window-miniaturize" },
+        { "beat": 3, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 0.5, "action": "alert-note" },
+        { "beat": 1, "action": "window-miniaturize" },
+        { "beat": 2, "action": "window-miniaturize" },
+        { "beat": 3, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-volume" },
+        { "beat": 1.5, "action": "window-miniaturize" },
+        { "beat": 2, "action": "alert-note" },
+        { "beat": 3, "action": "alert-note" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-miniaturize" },
+        { "beat": 0.5, "action": "window-miniaturize" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 1.5, "action": "alert-note" },
+        { "beat": 2, "action": "window-miniaturize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "menu-volume" },
+        { "beat": 2.5, "action": "window-miniaturize" },
+        { "beat": 3, "action": "window-miniaturize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "window-miniaturize" },
+        { "beat": 1, "action": "alert-note" },
+        { "beat": 1.5, "action": "alert-note" },
+        { "beat": 2, "action": "menu-volume" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 0.5, "action": "alert-note" },
+        { "beat": 1, "action": "window-miniaturize" },
+        { "beat": 1.5, "action": "window-miniaturize" },
+        { "beat": 2, "action": "alert-note" },
+        { "beat": 3, "action": "window-miniaturize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "menu-volume" },
+        { "beat": 1.5, "action": "alert-note" },
+        { "beat": 2, "action": "alert-note" },
+        { "beat": 2.5, "action": "window-miniaturize" },
+        { "beat": 3, "action": "window-miniaturize" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "alert-note" },
+        { "beat": 1, "action": "window-miniaturize" },
+        { "beat": 2, "action": "menu-volume" }
+      ]
+    }
+  ]
+}

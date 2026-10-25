@@ -231,6 +231,15 @@
     },
     {
       "call": [
+        { "beat": 0, "action": "alert-stop" },
+        { "beat": 0.5, "action": "alert-stop" },
+        { "beat": 1, "action": "menu-apple" },
+        { "beat": 2, "action": "sheet-save" },
+        { "beat": 3, "action": "mail-new" }
+      ]
+    },
+    {
+      "call": [
         { "beat": 0, "action": "chair-swivel" },
         { "beat": 2.5, "action": "dock-trash" },
         { "beat": 3, "action": "dock-trash" }
@@ -241,6 +250,15 @@
         { "beat": 0, "action": "menu-volume" },
         { "beat": 1.5, "action": "menu-apple" },
         { "beat": 2.5, "action": "sheet-save" }
+      ]
+    },
+    {
+      "call": [
+        { "beat": 0, "action": "dock-bounce" },
+        { "beat": 0.5, "action": "dock-trash" },
+        { "beat": 1, "action": "sheet-save" },
+        { "beat": 2, "action": "menu-apple" },
+        { "beat": 3, "action": "ichat-message" }
       ]
     },
     {
