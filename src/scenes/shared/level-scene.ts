@@ -21,13 +21,12 @@
 import { Container, Rectangle } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '@/game/layout.ts';
 import { listErrors } from '@/game/chart-library.ts';
-import { Mailbox, type MailState } from '@/game/mailbox.ts';
-import { recordScore } from '@/game/records.ts';
 import type { FrameInfo, Scene, SceneContext, SceneMode, TapInfo } from '@/game/scene.ts';
 import type { ChartEditor } from '@/editor/chart-editor.ts';
 import type { ActionType } from '@/rhythm/actions.ts';
 import type { AudioClock } from '@/audio/audio-clock.ts';
 import { Sequencer } from '@/audio/sequencer.ts';
+import type { SaveProgress } from '@/game/save-progress.ts';
 import type { PlayerSettings } from '@/game/settings.ts';
 import { secondsPerBeat } from '@/rhythm/beat.ts';
 import type { Chart } from '@/rhythm/chart.ts';
@@ -328,10 +327,6 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
   private comboSeen = 0;
   /** HackerEditor, in editor mode once opened */
   private desk: { desk: EditorDesk; window: EditorWindow; entry: TextEntry } | null = null;
-  /** Finished charts and the easter egg's message (doc/easter-eggs.md) */
-  private readonly mailbox = new Mailbox();
-  /** The mailbox's state, read again only when it can change */
-  private mailState: MailState = this.mailbox.state;
   /** The new-mail notice has shown during this visit */
   private mailNoticed = false;
   /** The showcase tour, in showcase mode once started */
@@ -461,22 +456,25 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     );
   }
 
+  /** The current save's progress (doc/save-slots.md): best scores, finished charts and the Rickroll message */
+  private get progress(): SaveProgress {
+    return this.context.saves.requireCurrent();
+  }
+
   /** The message waits unread on a level-list computer and no round is on: the desktop shows its unread mark */
   protected get mailWaiting(): boolean {
-    return this.mode === 'levels' && this.mailState === 'unread' && this.session === null;
+    return this.mode === 'levels' && this.progress.mailState === 'unread' && this.session === null;
   }
 
   /** The desktop's mail program (XP's "E-mail", the Mac's Mail): its inbox over the level list */
   protected openMail(): void {
     this.closeMenus();
     if (this.mode !== 'levels' || !this.desktopIdle) return;
+    const mail = this.progress.mailState;
     this.showModal(
       this.openMailWindow({
-        message: this.mailState === 'empty' ? null : { read: this.mailState === 'read' },
-        onRead: () => {
-          this.mailbox.markRead();
-          this.mailState = this.mailbox.state;
-        },
+        message: mail === 'empty' ? null : { read: mail === 'read' },
+        onRead: () => this.progress.markMailRead(),
         onOpenLink: () => this.openBrowser(),
         onClose: () => this.closeModal(),
       }),
@@ -1052,11 +1050,8 @@ export abstract class LevelScene<S extends RoundSession> implements Scene {
     const summary = summarizeResult(run.hits);
     const { assisted, cheat } = run;
     // A level played with the cheat code on saves nothing and doesn't count toward the Rickroll (doc/cheat-code.md)
-    const newRecord = !cheat && recordScore(chart.id, summary.score, assisted);
-    if (!cheat) {
-      this.mailbox.recordFinished(chart.id);
-      this.mailState = this.mailbox.state;
-    }
+    const newRecord = !cheat && this.progress.recordScore(chart.id, summary.score, assisted);
+    if (!cheat) this.progress.recordFinished(chart.id);
     const hasNext = this.charts.indexOf(chart) < this.charts.length - 1;
     this.endRound();
     this.closeModal();

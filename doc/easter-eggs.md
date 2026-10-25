@@ -13,7 +13,7 @@ In the game the player gets the same bait by e-mail and follows it through a per
 ### Decided
 
 - **Both computers** have it: the XP machine with Outlook Express and Internet Explorer, the Mac with Mail and Safari.
-- **Unlock**: after the player has finished **3 different charts** (played to the results window, any score), counted together across both computers and kept in browser storage. Imported charts count; HackerEditor's play and test don't. Nor do levels finished with the cheat code on ([cheat-code.md](cheat-code.md)).
+- **Unlock**: after the player has finished **3 different charts** (played to the results window, any score), counted together across both computers and kept in the current save ([save-slots.md](save-slots.md)). Imported charts count; HackerEditor's play and test don't. Nor do levels finished with the cheat code on ([cheat-code.md](cheat-code.md)).
 - **Before the unlock** the mail program opens to an empty inbox.
 - **The message stays** in the inbox once it has arrived, so it can be opened again. Whether it has been read is saved.
 - **The song** is the official music video embedded from YouTube inside the in-game browser ([ADR 0014](decisions/0014-rickroll-embeds-youtube.md)). The game ships none of the song's audio, video or lyrics.
@@ -59,7 +59,7 @@ click the mirror ──► same browser window goes to YouTube: "Never Gonna Giv
 
 ### Code
 
-- `src/game/mailbox.ts`: finished charts and the message's read state in browser storage, and the unlock rule.
+- `src/game/mailbox.ts`: the unlock rule; finished charts and the message's read state are in the current save (`src/game/save-progress.ts`).
 - `src/scenes/shared/rickroll.ts`: the mail, thread and addresses.
 - `src/ui/rickroll-pages.ts` draws the thread and switches to the video page; `src/ui/video-embed.ts` places the YouTube player (a DOM iframe) over the canvas; `src/theme/web-2007.ts` holds the page colours.
 - Each scene draws its own mail and browser windows: `src/scenes/windows-xp/outlook-express-window.ts`, `internet-explorer-window.ts`; `src/scenes/mac-2000/mail-window.ts`, `safari-window.ts`.

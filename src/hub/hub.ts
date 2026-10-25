@@ -3,6 +3,8 @@
 // The hub judges no rhythm, so it moves by requestAnimationFrame time (with a capped step), not the audio clock (ADR 0005).
 
 import type { CheatMode } from '@/game/cheat.ts';
+import type { SaveData } from '@/game/save-progress.ts';
+import type { SaveSlots } from '@/game/save-slots.ts';
 import type { SceneId } from '@/scenes/catalog.ts';
 import {
   ACESFilmicToneMapping,
@@ -35,8 +37,9 @@ import {
   nearestSpot,
   orbitOffset,
 } from './motion.ts';
-import { BookletProgress, currentObjective, OBJECTIVE_TEXT } from './objectives.ts';
+import { currentObjective, OBJECTIVE_TEXT } from './objectives.ts';
 import { HubOverlay, type LevelInfo } from './overlay.ts';
+import type { FinishedLevels } from './save-menu.ts';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -162,8 +165,13 @@ export interface HubOptions {
   cheat: CheatMode;
   /** The coin went into an arcade machine (plays its sound) */
   onCoinInserted(): void;
-  /** Some chart has been played to its results window: the second objective is done (doc/hub.md#objectives) */
-  playedOnce(): boolean;
+  /**
+   * The save slots (doc/save-slots.md), picked on the title screen. The current save holds the objectives' progress
+   * (doc/hub.md#objectives)
+   */
+  saves: SaveSlots;
+  /** How many of the device's levels a save has finished, for the Load Game list */
+  finishedLevels(save: Readonly<SaveData>): FinishedLevels;
 }
 
 function smoothstep(t: number): number {
@@ -199,7 +207,6 @@ export class Hub {
   private readonly player = new WhaleAvatar();
   private readonly overlay: HubOverlay;
   private readonly sounds: HubSounds | null;
-  private readonly booklet = new BookletProgress();
   private readonly keys = new Set<string>();
 
   private state: State = 'title';
@@ -269,14 +276,17 @@ export class Hub {
     this.yaw = spawn.heading + Math.PI;
     this.placePlayer();
 
-    this.overlay = new HubOverlay({
-      onStart: () => this.start(),
-      onResume: () => this.resume(),
-      onQuitToTitle: () => this.quitToTitle(),
-      onPlayLevel: () => this.launch(),
-      onStandUp: () => this.standUp(),
-      onCloseBooklet: () => this.closeBooklet(),
-    });
+    this.overlay = new HubOverlay(
+      {
+        onStart: () => this.start(),
+        onResume: () => this.resume(),
+        onQuitToTitle: () => this.quitToTitle(),
+        onPlayLevel: () => this.launch(),
+        onStandUp: () => this.standUp(),
+        onCloseBooklet: () => this.closeBooklet(),
+      },
+      { saves: options.saves, finishedLevels: (save) => options.finishedLevels(save) },
+    );
     this.element.append(this.overlay.element);
     this.overlay.showTitle(true);
     this.updateObjective();
@@ -417,6 +427,7 @@ export class Hub {
     if (this.state !== 'title') return;
     this.state = 'intro';
     this.overlay.showTitle(false);
+    this.updateObjective();
     this.overlay.showHud(true);
     this.overlay.setPrompt(null);
     this.yaw = this.heading + Math.PI;
@@ -468,13 +479,19 @@ export class Hub {
     this.overlay.setLockHint(false);
     this.releasePointer();
     this.overlay.showBooklet(true);
-    this.booklet.markRead();
+    this.options.saves.requireCurrent().markBookletRead();
     this.updateObjective();
   }
 
   /** The top-left objective: the booklet, then a song, then none (doc/hub.md#objectives) */
   private updateObjective(): void {
-    const objective = currentObjective(this.booklet.read, this.options.playedOnce());
+    // On the title screen there may be no save yet; the objectives only show once one is loaded
+    const save = this.options.saves.current;
+    if (!save) {
+      this.overlay.setObjective(null);
+      return;
+    }
+    const objective = currentObjective(save.bookletRead, save.finished.length > 0);
     this.overlay.setObjective(objective ? OBJECTIVE_TEXT[objective] : null);
   }
 
@@ -590,14 +607,18 @@ export class Hub {
 
     window.addEventListener('keydown', (event) => {
       if (!this.visible) return;
+      // Typing a save name isn't walking or a menu key
+      if (event.target instanceof HTMLInputElement) return;
       this.keys.add(event.code);
       if (event.repeat) return;
       switch (event.code) {
         case 'Enter':
         case 'Space':
-          if (this.state === 'title') {
+          // A focused button already takes Enter and Space itself
+          if (event.target instanceof HTMLButtonElement) break;
+          if (this.state === 'title' && !this.overlay.titleWindowOpen) {
             event.preventDefault();
-            this.start();
+            this.overlay.pickTitleDefault();
           }
           break;
         case 'KeyE':
@@ -607,7 +628,8 @@ export class Hub {
           else if (this.state === 'seated') this.launch();
           break;
         case 'Escape':
-          if (this.state === 'seated') this.standUp();
+          if (this.state === 'title') this.overlay.closeTitleWindow();
+          else if (this.state === 'seated') this.standUp();
           else if (this.state === 'booklet') this.closeBooklet();
           else if (this.state === 'dialog') {
             this.dialogQueue = [];

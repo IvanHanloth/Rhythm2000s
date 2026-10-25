@@ -24,7 +24,7 @@ The design only shows the look, not the rules; this is the first version, to be 
 
 - **Score**: Perfect is 1 point, Good 0.5, Miss 0; divided by the total and multiplied by 10000, rounded.
 - **Rating**: "Superb" from 8000, "OK" from 6000, otherwise "Try again" (after Rhythm Heaven's three tiers).
-- **New record**: each chart's best score is saved in the browser; a score above 0 that is the first or beats the previous best is a new record. A new record set with the beat guide on is saved with a flag ([beat-guide.md](beat-guide.md#recording-scores)).
+- **New record**: each chart's best score is kept in the current save ([save-slots.md](save-slots.md)); a score above 0 that is the first or beats the previous best is a new record. A new record set with the beat guide on is saved with a flag ([beat-guide.md](beat-guide.md#recording-scores)).
 - **Comments**:
   1. An overall line for the rating.
   2. With Misses, the phrases they were in (up to 3); without, "No mistakes.".

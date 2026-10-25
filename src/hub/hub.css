@@ -204,6 +204,160 @@
   pointer-events: auto;
 }
 
+/* ---------- Save slots on the title screen: XP windows (doc/save-slots.md) ---------- */
+
+.hub-menu-note {
+  max-width: 18em;
+  margin: 0;
+  font-size: 14px;
+  text-align: center;
+  text-shadow: 1px 1px 0 var(--hub-focus);
+}
+
+.hub-window {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(520px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  border: 1px solid var(--hub-line);
+  border-radius: 8px 8px 0 0;
+  background: var(--hub-surface);
+  color: var(--hub-ink);
+  box-shadow: 4px 6px 0 rgb(0 0 0 / 0.4);
+  pointer-events: auto;
+}
+
+.hub-new-save {
+  width: min(380px, calc(100% - 32px));
+}
+
+.hub-save-list {
+  margin: 0;
+  padding: 10px 12px 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hub-save-slot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 8px 10px;
+  border: 1px solid var(--hub-line-soft);
+  border-radius: 4px;
+  background: var(--hub-surface-raised);
+}
+
+.hub-save-slot.is-empty {
+  color: var(--hub-ink-muted);
+  font-style: italic;
+}
+
+.hub-save-number {
+  flex: none;
+  width: 1.8em;
+  font: 800 26px var(--hub-font-display);
+  color: var(--hub-accent);
+  text-align: center;
+  font-style: normal;
+}
+
+.hub-save-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hub-save-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hub-save-line {
+  font-size: 13px;
+  color: var(--hub-ink-muted);
+}
+
+.hub-save-confirm {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--hub-ctl-close);
+}
+
+.hub-save-actions {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hub-save-rename {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.hub-save-rename .hub-save-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.hub-save-form {
+  padding: 14px 16px 0;
+}
+
+.hub-save-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.hub-save-input {
+  box-sizing: border-box;
+  padding: 5px 7px;
+  border: 1px solid var(--hub-line);
+  border-radius: 2px;
+  background: var(--hub-surface-raised);
+  color: var(--hub-ink);
+  font: 16px var(--hub-font-ui);
+  pointer-events: auto;
+}
+
+.hub-save-input:focus-visible {
+  outline: 2px solid var(--hub-focus);
+  outline-offset: 1px;
+}
+
+.hub-save-hint {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--hub-ink-muted);
+}
+
+.hub-button.hub-button-small {
+  min-width: 5.5em;
+  padding: 0.3em 0.8em;
+  font-size: 14px;
+}
+
+.hub-button-danger {
+  border-color: var(--hub-ctl-close);
+  background: var(--hub-ctl-close);
+  color: var(--hub-on-titlebar);
+}
+
 /* ---------- Loading: the small blue blocks of the XP boot screen ---------- */
 
 .hub-loading {

@@ -2,7 +2,7 @@
 
 > Status: Draft. The window's layout and the calibration step are a first pass, to tune after play-testing.
 
-Player settings live in a settings window on the in-game computer, opened from each system's own menu while the level list is up ([level-select.md](level-select.md)). Values are kept in `src/game/settings.ts` and saved in the browser; when reading or writing fails (private mode etc.) they fall back to their defaults.
+Player settings live in a settings window on the in-game computer, opened from each system's own menu while the level list is up ([level-select.md](level-select.md)). Values are kept in `src/game/settings.ts` and saved in the browser for the whole device, shared by every save slot ([save-slots.md](save-slots.md)); when reading or writing fails (private mode etc.) they fall back to their defaults.
 
 ## Opening it
 

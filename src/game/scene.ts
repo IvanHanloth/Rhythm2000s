@@ -6,6 +6,7 @@ import type { SceneId } from '@/scenes/catalog.ts';
 import type { ChartLibrary } from './chart-library.ts';
 import type { ChartFiles } from './chart-transfer.ts';
 import type { CheatMode } from './cheat.ts';
+import type { SaveSlots } from './save-slots.ts';
 import type { PlayerSettings } from './settings.ts';
 
 export interface FrameInfo {
@@ -51,6 +52,11 @@ export interface SceneContext {
    * window changes them. Calibration is read through calibration() above.
    */
   settings: PlayerSettings;
+  /**
+   * The save slots (doc/save-slots.md). A scene only opens with a current save, whose best scores, finished charts and
+   * Rickroll message it reads and records
+   */
+  saves: SaveSlots;
   /** The cheat code (doc/cheat-code.md): while it is on, rounds judge every press Perfect and scores aren't saved */
   cheat: CheatMode;
   /**

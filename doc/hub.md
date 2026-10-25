@@ -6,7 +6,7 @@ The title screen and level select both take place in one 3D street. Technology c
 
 ## Decided
 
-- The title screen overlays the logo and menu on the street. The menu is "Start" and "Credits"; "Start" drops the camera behind the character, who can walk straight away. Keys are listed in the in-game settings window ([settings.md](settings.md#keyboard-shortcuts)), and the latency test lives there too ([latency-test.md](latency-test.md)).
+- The title screen overlays the logo and menu on the street. The menu is "Continue", "Load Game", "New Game" and "Credits"; the first three pick a save slot ([save-slots.md](save-slots.md)) and drop the camera behind the character, who can walk straight away. Keys are listed in the in-game settings window ([settings.md](settings.md#keyboard-shortcuts)), and the latency test lives there too ([latency-test.md](latency-test.md)).
 - "Credits" opens a panel listing, in order: the makers ([@IvanHanloth](https://github.com/IvanHanloth) and [@Pleasurecruise](https://github.com/Pleasurecruise), linked to their GitHub profiles), that the game was made during the HackNotts 26 hackathon, the repository link, the asset attributions, and a legal notice on the Microsoft, Apple and Nintendo trademarks and materials. The README carries the same credits and notice.
 - Third-person follow camera, turned with the mouse.
 - A street of the 2000s with a few shops to walk into; the net café's computers are the level entries.
@@ -19,7 +19,7 @@ The title screen and level select both take place in one 3D street. Technology c
 ## Flow
 
 ```
-Title ──"Start"──► walk the street ──door──► net café
+Title ──Continue / Load / New──► walk the street ──door──► net café
   ▲                                            │ E at a computer
   │                                            ▼
   └── pause menu "Quit to title"        seated: level info on screen
@@ -68,7 +68,7 @@ The top left of the street shows the player's current objective, one at a time:
 1. "Find the guide booklet on the CYBERSPACE CAFÉ front desk": done once the booklet is opened.
 2. "Play a song on one of the two front-row computers": done once any chart has been played to its results window (the same record of finished charts as the Rickroll easter egg, [easter-eggs.md](easter-eggs.md); HackerEditor's tests don't count).
 
-When both are done the objective box goes away for good. Both are saved in the browser; when storage fails, the booklet counts as read until the page is reloaded and the second objective stays.
+When both are done the objective box goes away for good. Both are part of the current save ([save-slots.md](save-slots.md)), so a new save starts with both objectives again; when storage fails, they last until the page is reloaded.
 
 ## Provisional content (first-pass placeholders)
 

@@ -5,6 +5,7 @@ import './style.css';
 import { Rectangle } from 'pixi.js';
 import { AudioClock } from '@/audio/audio-clock.ts';
 import { Hub, type LevelInfo } from '@/hub/hub.ts';
+import { countFinished } from '@/hub/save-menu.ts';
 import { mac2000Scene } from '@/scenes/mac-2000/scene.ts';
 import { windowsXpScene } from '@/scenes/windows-xp/scene.ts';
 import { browserChartStore, ChartLibrary } from './chart-library.ts';
@@ -16,7 +17,6 @@ import { GameCanvas } from './game-canvas.ts';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from './layout.ts';
 import { listenForTaps } from './input.ts';
 import { LevelIntro } from './level-intro.ts';
-import { Mailbox } from './mailbox.ts';
 import {
   buildLevels,
   computerOf,
@@ -25,7 +25,7 @@ import {
   parseRoute,
   showcaseRoute,
 } from './levels.ts';
-import { loadBestAssisted, loadBestScore } from './records.ts';
+import { SaveSlots } from './save-slots.ts';
 import { SceneDirector } from './scene-director.ts';
 import type { CutawayStage } from './scene.ts';
 import { PlayerSettings } from './settings.ts';
@@ -45,6 +45,11 @@ const library = new ChartLibrary(builtInCharts, browserChartStore());
 for (const error of library.loadErrors) console.error(error);
 /** Calibration, "Skip tutorial" and the beat guide (doc/settings.md); the in-game settings window and H change them */
 const settings = new PlayerSettings();
+/**
+ * The three save slots (doc/save-slots.md, ADR 0017): picked on the title screen; the current one holds best scores,
+ * finished charts and the street's objectives. Settings and imported charts are shared by the device
+ */
+const saves = new SaveSlots();
 /** The cheat code (doc/cheat-code.md): in memory only, so a refresh ends it */
 const cheat = new CheatMode();
 const cheatNotice = new CheatNotice(clock.context);
@@ -105,6 +110,7 @@ const director = new SceneDirector(canvas.stage, scenes, {
   clock,
   calibration: () => settings.values.calibrationMs / 1000,
   settings,
+  saves,
   cheat,
   library,
   chartFiles: browserChartFiles,
@@ -175,20 +181,23 @@ function computerCards(): LevelInfo[] {
   return [...play, ...editors, ...showcases];
 }
 
-/** The charts played to their results window, which the scenes record; the street's second objective reads it */
-const finishedCharts = new Mailbox();
-
 const hub = new Hub({
   levels: computerCards(),
   recordOf: (computerId) => {
     const own = levels.filter((level) => level.sceneId === computerId);
-    const played = own.filter((level) => loadBestScore(level.id) !== null).length;
+    const progress = saves.requireCurrent();
+    const played = own.filter((level) => progress.bestScore(level.id) !== null).length;
     return own.length > 0 ? `Played: ${played} / ${own.length} levels` : null;
   },
   audio: clock.context,
   cheat,
   onCoinInserted: () => cheatNotice.playDrop(),
-  playedOnce: () => finishedCharts.finishedCount > 0,
+  saves,
+  finishedLevels: (save) =>
+    countFinished(
+      save,
+      levels.map((level) => level.id),
+    ),
   onPlay: (computerId) => {
     location.hash = computerId;
   },
@@ -216,7 +225,10 @@ director.setIntroduce((chartId) => {
     title: level.title,
     bpm: level.bpm,
     actions: level.actions,
-    record: formatBestScore(loadBestScore(level.id), loadBestAssisted(level.id)),
+    record: formatBestScore(
+      saves.requireCurrent().bestScore(level.id),
+      saves.requireCurrent().bestAssisted(level.id),
+    ),
   });
 });
 
@@ -243,6 +255,11 @@ const gameHost: HTMLElement = host;
 function showRoute(): void {
   const route = parseRoute(location.hash, sceneIds);
   intro.hide();
+  // A scene or level plays on the current save; without one, the title screen picks it first (doc/save-slots.md)
+  if (route.kind !== 'hub' && !saves.current) {
+    location.hash = HUB_ROUTE;
+    return;
+  }
   if (route.kind === 'hub') {
     director.clear();
     canvas.app.ticker.stop();

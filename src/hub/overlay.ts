@@ -4,6 +4,8 @@
 import type { SceneId } from '@/scenes/catalog.ts';
 import type { CafeRole } from './world.ts';
 import './hub.css';
+import { button, el } from './dom.ts';
+import { SaveWindows, type SaveWindowOptions } from './save-windows.ts';
 import { STREET_COLORS } from '@/theme/street.ts';
 import { cssFontFamily, FONT_FAMILIES, JUDGEMENT_COLORS, THEMES } from '@/theme/tokens.ts';
 
@@ -25,34 +27,13 @@ export interface LevelInfo {
 }
 
 export interface OverlayHandlers {
+  /** A save was continued, loaded or created on the title screen (doc/save-slots.md) */
   onStart: () => void;
   onResume: () => void;
   onQuitToTitle: () => void;
   onPlayLevel: () => void;
   onStandUp: () => void;
   onCloseBooklet: () => void;
-}
-
-function el<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  className: string,
-  text?: string,
-): HTMLElementTagNameMap[K] {
-  const node = document.createElement(tag);
-  node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
-function button(label: string, className: string, onClick: () => void): HTMLButtonElement {
-  const node = el('button', className, label);
-  node.type = 'button';
-  node.addEventListener('click', (event) => {
-    event.stopPropagation();
-    node.blur();
-    onClick();
-  });
-  return node;
 }
 
 function setThemeVariables(root: HTMLElement): void {
@@ -110,10 +91,22 @@ export class HubOverlay {
   private readonly loadingBar = el('span', 'hub-loading-fill');
   private readonly loadingText = el('span', 'hub-loading-text');
   private readonly fade = el('div', 'hub-fade');
+  /** The title screen's save slot menu items and windows */
+  private readonly saves: SaveWindows;
   private placeTimer = 0;
 
-  constructor(handlers: OverlayHandlers) {
+  constructor(
+    handlers: OverlayHandlers,
+    saves: Omit<SaveWindowOptions, 'onStart' | 'onOpenWindow'>,
+  ) {
     setThemeVariables(this.element);
+    this.saves = new SaveWindows({
+      ...saves,
+      onStart: handlers.onStart,
+      onOpenWindow: () => {
+        this.credits.hidden = true;
+      },
+    });
 
     // Title screen: logo and menu
     const logo = el('h1', 'hub-logo');
@@ -121,8 +114,9 @@ export class HubOverlay {
     const menu = el('nav', 'hub-menu');
     menu.setAttribute('aria-label', 'Main menu');
     menu.append(
-      button('Start', 'hub-button hub-button-primary', handlers.onStart),
+      ...this.saves.menuItems,
       button('Credits', 'hub-button', () => this.toggleCredits()),
+      this.saves.fullNote,
     );
     this.title.append(
       logo,
@@ -162,6 +156,8 @@ export class HubOverlay {
     this.element.append(
       this.title,
       this.credits,
+      this.saves.loadWindow,
+      this.saves.newWindow,
       this.loading,
       this.hud,
       this.dialog,
@@ -180,9 +176,25 @@ export class HubOverlay {
 
   showTitle(visible: boolean): void {
     this.title.hidden = !visible;
-    if (!visible) {
-      this.credits.hidden = true;
-    }
+    this.credits.hidden = true;
+    this.saves.close();
+  }
+
+  /** Enter or Space on the title screen: Continue, else New Game, else Load Game (doc/save-slots.md#title-screen) */
+  pickTitleDefault(): void {
+    this.saves.pickDefault();
+  }
+
+  /** Esc on the title screen: closes the credits or a save window; false when neither was open */
+  closeTitleWindow(): boolean {
+    const credits = !this.credits.hidden;
+    this.credits.hidden = true;
+    return this.saves.close() || credits;
+  }
+
+  /** The credits or a save window is open over the title menu */
+  get titleWindowOpen(): boolean {
+    return !this.credits.hidden || this.saves.windowOpen;
   }
 
   showHud(visible: boolean): void {
@@ -254,6 +266,7 @@ export class HubOverlay {
   }
 
   toggleCredits(): void {
+    this.saves.close();
     this.credits.hidden = !this.credits.hidden;
   }
 

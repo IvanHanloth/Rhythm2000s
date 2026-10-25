@@ -7,6 +7,7 @@
 | [scenes/windows-xp-levels.md](scenes/windows-xp-levels.md) | The later XP actions (tray balloon, minimise, Start menu, Recycle Bin, download, volume) and every XP level | Draft |
 | [scenes/mac-2000.md](scenes/mac-2000.md) | Scene: a Mac desktop from around 2000 | Draft |
 | [hub.md](hub.md) | Title screen and street hub: flow, controls, the provisional street and shops | Draft |
+| [save-slots.md](save-slots.md) | Save slots: three named saves picked on the title screen (Continue / Load Game / New Game), what is per save and what is shared | Draft |
 | [results.md](results.md) | Results: the score window after a round, provisional scoring, ratings and comments | Draft |
 | [level-select.md](level-select.md) | Level select: the level list on the in-game computer (XP Explorer, Mac Finder), mouse control and going back | Draft |
 | [hub-assets.md](hub-assets.md) | Custom models for the street: spec (size, facing, origin, SCREEN mesh) and slot list | Draft |
