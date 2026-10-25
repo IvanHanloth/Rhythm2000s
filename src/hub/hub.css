@@ -128,7 +128,13 @@
   margin: 0;
   font-size: 22px;
   font-weight: 700;
+  text-align: center;
   text-shadow: 2px 2px 0 var(--hub-focus);
+}
+
+.hub-tagline-part {
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .hub-menu {

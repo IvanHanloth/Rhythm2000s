@@ -118,12 +118,14 @@ export class HubOverlay {
       button('Credits', 'hub-button', () => this.toggleCredits()),
       this.saves.fullNote,
     );
-    this.title.append(
-      logo,
-      el('p', 'hub-tagline', 'Pop-ups, close boxes, new mail — all on the beat.'),
-      menu,
-      el('p', 'hub-press', 'Press Enter to start'),
+    // The tagline is two sentences (the call, then the beat); each stays whole when it wraps
+    const tagline = el('p', 'hub-tagline');
+    tagline.append(
+      el('span', 'hub-tagline-part', 'Simon says: click OK.'),
+      ' ',
+      el('span', 'hub-tagline-part', 'On the beat.'),
     );
+    this.title.append(logo, tagline, menu, el('p', 'hub-press', 'Press Enter to start'));
 
     this.buildCredits();
     this.buildBooklet(handlers.onCloseBooklet);
